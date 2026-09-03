@@ -179,8 +179,22 @@ defmodule Teiserver.Helper.StringHelper do
   end
 
   @doc """
+  Calls String.to_integer/1 but with a wrapper to catch nil and "" values (returns nil)
+  """
+  def maybe_to_integer(nil), do: nil
+  def maybe_to_integer(""), do: nil
+  def maybe_to_integer(v), do: String.to_integer(v)
+
+  @doc """
   Returns the first 8 digits of a UUID
   """
   def uuid_part(nil), do: nil
   def uuid_part(str), do: String.slice(str, 0..7)
+
+  @doc """
+  Used to parse booleans from a form with the caveat that an empty string is a nil value
+  """
+  def boolean_from_form("true"), do: true
+  def boolean_from_form("false"), do: false
+  def boolean_from_form(_any), do: nil
 end

@@ -5,16 +5,16 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   It will submit the ID value of the selected user but will display the ID and name of the user.
 
   <.live_component
-      module={TeiserverWeb.LiveComponents.UserPicker}
-      id="user-picker"
-      field={@form[:smurf_user_id]}
-      label="User to link to:"
-    />
+    module={TeiserverWeb.LiveComponents.UserPicker}
+    id="user-picker"
+    field={@form[:smurf_user_id]}
+    label="User to link to:"
+  />
   """
+  alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.Repo
-  alias TeiserverWeb.CoreComponents
 
   use TeiserverWeb, :live_component
 
@@ -38,11 +38,13 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   def render(assigns) do
     ~H"""
     <div>
-      <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
+      <label :if={@label} for={@id}>
+        <span class="label">{@label}</span>
+      </label>
       <div>
         <div class="join">
           <div
-            class="btn btn-success join-item user-picker-search-button"
+            class="btn btn-primary join-item user-picker-search-button"
             phx-click={
               JS.push("show-picker")
               |> JS.toggle(to: "##{@uniq_id}-picker-form")
@@ -55,7 +57,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
           <label class="input validator join-item">
             <input
               type="text"
-              class="input w-full min-w-lg"
+              class="input w-full min-w-xs"
               placeholder=""
               disabled
               name="none"
@@ -89,6 +91,16 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   end
 
   def update(assigns, socket) do
+    # If we are given a user_id for the component but no user then we need to go
+    # get that user so we can render the component correct at first load
+    assigns =
+      if assigns.field.value != nil and assigns.field.value != "" and assigns[:value] == nil do
+        user = Account.get_user_by_id!(assigns.field.value)
+        Map.put(assigns, :value, user)
+      else
+        assigns
+      end
+
     socket
     |> assign(assigns)
     |> update_input_values()

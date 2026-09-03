@@ -19,6 +19,44 @@ defmodule Teiserver.Moderation.AntiAbuseRecordQueries do
       where: anti_abuse_records.id == ^id
   end
 
+  @spec where_user_id(t(), User.id()) :: t()
+  def where_user_id(query, nil), do: query
+
+  def where_user_id(query, user_id) do
+    from anti_abuse_records in query,
+      where: anti_abuse_records.user_id == ^user_id
+  end
+
+  @spec where_clean(t(), nil | boolean()) :: t()
+  def where_clean(query, nil), do: query
+
+  def where_clean(query, clean?) do
+    from anti_abuse_records in query,
+      where: anti_abuse_records.clean == ^clean?
+  end
+
+  @spec where_restored(t(), nil | boolean()) :: t()
+  def where_restored(query, nil), do: query
+
+  def where_restored(query, true) do
+    from anti_abuse_records in query,
+      where: not is_nil(anti_abuse_records.restored_by_id)
+  end
+
+  def where_restored(query, false) do
+    from anti_abuse_records in query,
+      where: is_nil(anti_abuse_records.restored_by_id)
+  end
+
+  @spec where_restored_by_id(t(), nil | boolean()) :: t()
+  def where_restored_by_id(query, nil), do: query
+  def where_restored_by_id(query, ""), do: query
+
+  def where_restored_by_id(query, id) do
+    from anti_abuse_records in query,
+      where: anti_abuse_records.restored_by_id == ^id
+  end
+
   @spec load_user(t()) :: t()
   def load_user(query) do
     from anti_abuse_records in query,
