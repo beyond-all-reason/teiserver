@@ -473,14 +473,14 @@ defmodule TeiserverWeb.PaginationComponents do
     ~H"""
     <div class="join">
       <button
-        class={["join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
+        class={["paginate-first join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
         phx-value-page="0"
         phx-click="set-page"
       >
         <Fontawesome.icon icon="angles-left" style="regular" />
       </button>
       <button
-        class={["join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
+        class={["paginate-prev join-item btn btn-#{@size}", @page <= 0 && "btn-disabled"]}
         phx-value-page={@page - 1}
         phx-click="set-page"
       >
@@ -490,14 +490,20 @@ defmodule TeiserverWeb.PaginationComponents do
         Page {@page + 1} of {@page_count}
       </button>
       <button
-        class={["join-item btn btn-#{@size}", @page >= @page_count - 1 && "btn-disabled"]}
+        class={[
+          "paginate-next join-item btn btn-#{@size}",
+          @page >= @page_count - 1 && "btn-disabled"
+        ]}
         phx-value-page={@page + 1}
         phx-click="set-page"
       >
         <Fontawesome.icon icon="angle-right" style="regular" />
       </button>
       <button
-        class={["join-item btn btn-#{@size}", @page >= @page_count - 1 && "btn-disabled"]}
+        class={[
+          "paginate-last join-item btn btn-#{@size}",
+          @page >= @page_count - 1 && "btn-disabled"
+        ]}
         phx-value-page={@page_count - 1}
         phx-click="set-page"
       >

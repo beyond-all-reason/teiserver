@@ -13,6 +13,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
   import Teiserver.Config, only: [get_user_config_cache: 2, set_user_config: 3]
 
   @page_size_config_key "last_used.anti_abuse_search_page_size"
+  @max_page_size 100
 
   @impl Phoenix.LiveView
   def mount(params, _session, %Socket{assigns: %{scope: scope}} = socket)
@@ -86,7 +87,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
   defp convert_search_params(params) do
     %{
       "user_id" => maybe_to_integer(params["user_id"]),
-      "page_size" => maybe_to_integer(params["page_size"]),
+      "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size),
       "clean?" => boolean_from_form(params["clean?"]),
       "restored?" => boolean_from_form(params["restored?"]),
       "restored_by_id" => params["restored_by_id"]

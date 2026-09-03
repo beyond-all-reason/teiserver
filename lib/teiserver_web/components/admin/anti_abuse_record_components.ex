@@ -28,7 +28,12 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
       |> assign(form: form)
 
     ~H"""
-    <.simple_form for={@form} phx-change="validate-search" phx-submit="update-search">
+    <.simple_form
+      for={@form}
+      id="anti-abuse-record-search-form"
+      phx-change="validate-search"
+      phx-submit="update-search"
+    >
       <div class="grid grid-flow-row-dense grid-cols-3">
         <div class="m-2">
           <div class="fieldset">
