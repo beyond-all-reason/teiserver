@@ -222,7 +222,7 @@ defmodule Teiserver.EmailHelper do
     message_id = "<#{UUID.uuid4()}@#{host()}>"
     date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
 
-    old_email = hd(user.previous_emails)
+    old_email = hd(user.previous_emails || [])
 
     Email.new()
     |> Email.to({user.name, old_email})
