@@ -160,5 +160,6 @@
   {"lib/teiserver_web/live/moderation/action_live/smurf_link.ex", :call},
   {"lib/teiserver/account/tasks/merge_accounts_task.ex", :no_return},
   {"test/support/fixtures/moderation_fixtures.ex"},
-  {"lib/teiserver/moderation.ex"}
+  {"lib/teiserver/moderation.ex"},
+  {"lib/teiserver_web/live/battles/match/show.ex"}
 ]

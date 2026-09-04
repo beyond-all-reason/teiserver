@@ -424,38 +424,42 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   defp get_match_rating_status(match) do
     # Expecting to return an error explaining current match rating status
     # Unprocessed matches and matches with existing rating logs won't be rated again
-    {_result, rating_status} = MatchRatingLib.rate_match(match)
-
-    case rating_status do
-      :invalid_game_type ->
-        {"success", "Unrated game type"}
-
-      :not_processed ->
-        {"danger", "Match not processed!"}
-
-      :no_winning_team ->
-        {"warning", "Match not rated due to no winning team!"}
-
-      :uneven_team_size ->
-        {"warning", "Match not rated due to uneven team size!"}
-
-      :not_enough_teams ->
-        {"primary", "Match not rated due to not enough teams!"}
-
-      :too_short ->
-        {"warning", "Match too short to be rated!"}
-
-      :unranked_tag ->
-        {"info", "Match not rated due to unrated modoption!"}
-
-      :already_rated ->
+    case MatchRatingLib.rate_match(match) do
+      :ok ->
         {"success", "Match rated successfully"}
 
-      :cheating_enabled ->
+      {:error, :invalid_game_type} ->
+        {"success", "Unrated game type"}
+
+      {:error, :not_processed} ->
+        {"danger", "Match not processed!"}
+
+      {:error, :no_winning_team} ->
+        {"warning", "Match not rated due to no winning team!"}
+
+      {:error, :uneven_team_size} ->
+        {"warning", "Match not rated due to uneven team size!"}
+
+      {:error, :not_enough_teams} ->
+        {"primary", "Match not rated due to not enough teams!"}
+
+      {:error, :too_short} ->
+        {"warning", "Match too short to be rated!"}
+
+      {:error, :unranked_tag} ->
+        {"info", "Match not rated due to unrated modoption!"}
+
+      {:error, :already_rated} ->
+        {"success", "Match rated successfully"}
+
+      {:error, :cheating_enabled} ->
         {"warning", "Match not rated due to cheating enabled!"}
 
-      :no_match ->
+      {:error, :no_match} ->
         {"danger", "No match!"}
+
+      _other ->
+        {"danger", "Unexpected result, match may or may not have been rated."}
     end
   end
 

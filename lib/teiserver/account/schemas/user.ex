@@ -169,7 +169,7 @@ defmodule Teiserver.Account.User do
   def changeset(%User{email: old_email} = user, attrs, :email) do
     attrs = remove_whitespace(attrs, [:email])
 
-    new_previous_emails = [old_email | user.previous_emails]
+    new_previous_emails = [old_email | user.previous_emails || []]
 
     if Account.verify_plain_password(attrs["password"] || "", user.password) do
       user
