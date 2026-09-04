@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Tachyon.UserTest do
   alias Teiserver.Account
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Player
   alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 
@@ -55,6 +56,17 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert userdata["username"] == user.name
       assert userdata["displayName"] == user.name
       assert userdata["status"] == "menu"
+      assert userdata["matchmaking"] == %{"state" => "no_matchmaking"}
+    end
+
+    test "sent when roles are updated", %{user: user, client: client} do
+      :ok = Player.update_user_roles(user.id, ["Contributor"])
+
+      assert %{"commandId" => "user/self", "data" => %{"user" => userdata}} =
+               Tachyon.recv_message!(client)
+
+      assert userdata["roles"] == ["contributor"]
+      assert userdata["matchmaking"] == %{"state" => "no_matchmaking"}
     end
 
     test "filters out unmappable roles in tachyon messages" do

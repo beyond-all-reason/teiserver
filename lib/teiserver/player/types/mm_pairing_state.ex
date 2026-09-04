@@ -6,14 +6,15 @@ defmodule Teiserver.Player.Types.MmPairingState do
 
   alias Teiserver.Matchmaking
 
-  @enforce_keys [:paired_queue, :room, :frozen_queues, :readied?]
-  defstruct [:paired_queue, :room, :frozen_queues, :readied?]
+  @enforce_keys [:paired_queue, :room, :frozen_queues, :readied?, :timeout_at]
+  defstruct [:paired_queue, :room, :frozen_queues, :readied?, :timeout_at]
 
   @type t :: %__MODULE__{
-          paired_queue: {Matchmaking.queue_id(), version :: String.t()},
+          paired_queue: Matchmaking.queue_ref(),
           room: pid(),
           # a list of the other queues to rejoin in case the pairing fails
-          frozen_queues: [{Matchmaking.queue_id(), version :: String.t()}],
-          readied?: boolean()
+          frozen_queues: [Matchmaking.queue_ref()],
+          readied?: boolean(),
+          timeout_at: DateTime.t()
         }
 end

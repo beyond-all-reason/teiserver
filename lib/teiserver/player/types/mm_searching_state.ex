@@ -9,6 +9,6 @@ defmodule Teiserver.Player.Types.MmSearchingState do
   defstruct [:joined_queues]
 
   @type t :: %__MODULE__{
-          joined_queues: nonempty_list(Matchmaking.queue_id())
+          joined_queues: nonempty_list(Matchmaking.queue_ref())
         }
 end

@@ -38,6 +38,17 @@ defmodule Teiserver.Player.Session do
 
   @type conn_state :: :connected | :reconnecting | :disconnected
 
+  @typedoc """
+  the parts of the session state that go into a `user/self` event
+  """
+  @type self_state :: %{
+          party: PartyTypes.Overview.t() | nil,
+          invited_to_parties: [PartyTypes.Overview.t()],
+          current_lobby: TachyonLobby.id() | nil,
+          current_battle: PT.BattleState.t() | nil,
+          matchmaking: PT.Data.matchmaking_state()
+        }
+
   @connection_timeout :timer.seconds(30)
 
   def start_link({user_id, arg}) do
@@ -140,7 +151,7 @@ defmodule Teiserver.Player.Session do
   @doc false
   def trigger_connection_timeout(pid), do: send(pid, :connection_timeout)
 
-  @spec join_queues(User.id(), [{Matchmaking.queue_id(), version :: String.t()}]) ::
+  @spec join_queues(User.id(), [Matchmaking.queue_ref()]) ::
           :ok | Matchmaking.join_error()
   def join_queues(user_id, queue_ids) do
     user_id |> via_tuple() |> GenServer.call({:matchmaking, {:join_queues, queue_ids}})
@@ -321,7 +332,7 @@ defmodule Teiserver.Player.Session do
   connections.
   """
   @spec replace_connection(pid(), pid()) ::
-          {:ok, old_conn_pid :: pid() | nil, session_state :: %{party: PT.PartyState.t()}} | :died
+          {:ok, old_conn_pid :: pid() | nil, self_state()} | :died
   def replace_connection(sess_pid, new_conn_pid) do
     GenServer.call(sess_pid, {:replace, new_conn_pid})
   catch
@@ -422,7 +433,7 @@ defmodule Teiserver.Player.Session do
 
   @spec party_notify_join_queues(
           User.id(),
-          [{Matchmaking.queue_id(), version :: String.t()}],
+          [Matchmaking.queue_ref()],
           PartyTypes.Overview.t()
         ) :: :ok
   def party_notify_join_queues(user_id, queues, %PartyTypes.Overview{} = party_state) do
@@ -688,13 +699,7 @@ defmodule Teiserver.Player.Session do
 
     new_state = %{state | conn_pid: new_conn_pid, monitors: monitors, party: party_state}
 
-    # used to create the first user/self event
-    self_state = %{
-      party: current_party,
-      invited_to_parties: invited_to,
-      current_lobby: get_in(state.lobby.id),
-      current_battle: state.battle
-    }
+    self_state = build_self_state(state)
 
     {:reply, {:ok, original_conn_pid, self_state}, new_state}
   end
@@ -1351,7 +1356,8 @@ defmodule Teiserver.Player.Session do
            paired_queue: paired_queue,
            room: room_pid,
            frozen_queues: other_queues,
-           readied?: false
+           readied?: false,
+           timeout_at: DateTime.utc_now() |> DateTime.shift(microsecond: {timeout_ms * 1000, 6})
          }}
 
       new_state =
@@ -1545,7 +1551,7 @@ defmodule Teiserver.Player.Session do
   end
 
   def handle_cast({:user, {:role_updated, roles}}, %PT.Data{} = state) do
-    send_to_player!({:user, {:role_updated, roles}}, state)
+    send_to_player!({:user, {:role_updated, roles, build_self_state(state)}}, state)
     new_state = %{state | user: %{state.user | roles: roles}}
     {:noreply, new_state}
   end
@@ -1901,6 +1907,19 @@ defmodule Teiserver.Player.Session do
     SessionRegistry.via_tuple(user_id)
   end
 
+  @spec build_self_state(PT.Data.t()) :: self_state()
+  defp build_self_state(%PT.Data{} = state) do
+    {current_party, invited_to} = get_party_states(state.party)
+
+    %{
+      party: current_party,
+      invited_to_parties: invited_to,
+      current_lobby: get_in(state.lobby.id),
+      current_battle: state.battle,
+      matchmaking: state.matchmaking
+    }
+  end
+
   # assume all checks have been done, and make the current player join
   # the specified queues, modifying the state accordingly and returning it
   defp join_matchmaking(queues, %PT.Data{} = state) do
@@ -1924,10 +1943,10 @@ defmodule Teiserver.Player.Session do
           User.id(),
           Party.id() | nil,
           MC.t(),
-          [{Matchmaking.queue_id(), version :: String.t()}],
-          [{Matchmaking.queue_id(), version :: String.t()}]
+          [Matchmaking.queue_ref()],
+          [Matchmaking.queue_ref()]
         ) ::
-          {:ok, MC.t(), [Matchmaking.queue_id()]} | Matchmaking.join_error()
+          {:ok, MC.t(), [Matchmaking.queue_ref()]} | Matchmaking.join_error()
   defp join_all_queues(_user_id, _party_id, monitors, [], joined), do: {:ok, monitors, joined}
 
   defp join_all_queues(user_id, party_id, monitors, [to_join | rest], joined) do
