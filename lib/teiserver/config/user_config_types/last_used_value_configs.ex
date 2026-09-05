@@ -10,7 +10,7 @@ defmodule Teiserver.Config.UserConfigTypes.LastUsedValueConfigs do
     add_user_config_type(%{
       key: "last_used.anti_abuse_search_page_size",
       type: "integer",
-      default: 5,
+      default: 25,
       visible: false
     })
   end

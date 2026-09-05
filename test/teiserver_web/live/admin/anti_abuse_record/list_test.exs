@@ -118,5 +118,93 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
       assert audit_log.details == %{"action" => "list", "id" => nil}
       assert audit_log.ip == "127.0.0.1"
     end
+
+    test "search" do
+      {:ok, kw} = GeneralTestLib.conn_setup(["Senior moderator"])
+      {:ok, conn} = Keyword.fetch(kw, :conn)
+
+      user = kw[:user]
+      scope = GeneralTestLib.scope_fixture(user)
+
+      for _i <- 1..20 do
+        ModerationFixtures.anti_abuse_record_fixture(scope)
+      end
+
+      for _i <- 1..20 do
+        ModerationFixtures.anti_abuse_record_fixture(%{
+          scope: scope,
+          clean: true,
+          expires_at: DateTime.utc_now()
+        })
+      end
+
+      ModerationFixtures.anti_abuse_record_fixture(%{
+        scope: scope,
+        restored_by_id: user.id,
+        restored_at: DateTime.utc_now() |> DateTime.shift(day: 1)
+      })
+
+      {:ok, live, html} = live(conn, ~p"/admin/anti-abuse-records/list")
+
+      # 20 + 20 + 1 = 41 records
+      assert html =~ "41 records found"
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      # By default we show 25 (set by the user config)
+      assert Enum.count(table.rows) == 25
+
+      # What if we update the search to show more results?
+      live
+      |> form("#anti-abuse-record-search-form")
+      |> render_submit(%{"page_size" => "50"})
+
+      # Should now be 41
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      # By default we show 25 (set by the user config)
+      assert Enum.count(table.rows) == 41
+
+      # But then we limit what we're searching for
+      live
+      |> form("#anti-abuse-record-search-form")
+      |> render_submit(%{"clean?" => "true"})
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      # Only 20 clean results
+      assert Enum.count(table.rows) == 20
+
+      # Remove that filter
+      live
+      |> form("#anti-abuse-record-search-form")
+      |> render_submit(%{"clean?" => "", "page_size" => "25"})
+
+      # Next page of results
+      live
+      |> element(".paginate-next")
+      |> render_click()
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      # Only 20 clean results
+      assert Enum.count(table.rows) == 16
+    end
   end
 end

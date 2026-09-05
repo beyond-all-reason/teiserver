@@ -1,6 +1,7 @@
 <h1 class="text-2xl font-bold">
   Anti-abuse records
 </h1>
+<div class="text-sm leading-6 text-neutral">{@record_count} records found</div>
 
 <TeiserverWeb.Admin.AntiAbuseRecordComponents.search_form params={@search} />
 
@@ -8,7 +9,6 @@
   id="anti-abuse-records-table"
   rows={@records}
   table_class="table-sm table-zebra mt-4"
-  minimum_rows={min(@search["page_size"], @record_count)}
 >
   <:col :let={record} label="ID">{uuid_part(record.id)}</:col>
   <:col :let={record} label="User ID">{record.user.id}</:col>
