@@ -52,6 +52,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # key=value pairs) and so get a 1024-char allowance instead of the default 256.
   @long_battle_command_prefixes [
     "$welcome-message",
+    "!aiProfile",
     "!welcome-message",
     "!mode ",
     "!bset mapmetadata"
