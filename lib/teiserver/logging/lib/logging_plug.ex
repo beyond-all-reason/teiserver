@@ -88,11 +88,9 @@ defmodule Teiserver.Logging.LoggingPlug do
         convert_from_x_real_ip(ip)
 
       nil ->
-        # If it's the tuple then that's local development
-        # and we want to represent it using 127.0.0.1
-        case conn.remote_ip do
-          {0, 0, 0, 0, 0, 65535, 32512, 1} -> {127, 0, 0, 1}
-          ip -> ip
+        case conn do
+          %{remote_ip: ip} -> ip
+          _other -> nil
         end
 
       _other ->
