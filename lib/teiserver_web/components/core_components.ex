@@ -135,19 +135,6 @@ defmodule TeiserverWeb.CoreComponents do
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
   def flash(assigns) do
-    text_colour =
-      case assigns[:kind] do
-        :info -> "info"
-        :success -> "success"
-        :warning -> "warning"
-        :error -> "danger"
-        _other -> ""
-      end
-
-    assigns =
-      assigns
-      |> assign(:text_colour, text_colour)
-
     ~H"""
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
@@ -157,19 +144,22 @@ defmodule TeiserverWeb.CoreComponents do
       aria-live="assertive"
       aria-atomic="true"
       class={[
-        "toast align-items-center",
+        "alert",
         @kind == :info && "alert-info",
         @kind == :success && "alert-success",
         @kind == :warning && "alert-warning",
-        @kind == :error && "alert-danger"
+        @kind == :error && "alert-error"
       ]}
       {@rest}
     >
-      <div class={"toast-header border-#{@text_colour}"}>
-        <Fontawesome.icon icon="stop" style="solid" class={"text-#{@text_colour}"} /> &nbsp;
-        <small class="text-body-secondary">just now</small>
-
-        <button :if={@close} type="button" class="btn btn-close" aria-label={gettext("close")}>
+      <div class="toast-header">
+        <button
+          :if={@close}
+          type="button"
+          class={"btn btn-xs btn-soft btn-close btn-#{@kind}"}
+          aria-label={gettext("close")}
+        >
+          <Fontawesome.icon icon="times" style="regular" />
         </button>
       </div>
       <div class="toast-body">
@@ -187,6 +177,28 @@ defmodule TeiserverWeb.CoreComponents do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   def flash_group(assigns) do
+    ~H"""
+    <div class="toast toast-top toast-end mt-25">
+      <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
+      <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
+      <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
+      <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
+
+      <.flash
+        id="client-error"
+        kind={:error}
+        title={gettext("We can't find the internet")}
+        phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
+        phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
+        hidden
+      >
+        {gettext("Attempting to reconnect")}
+      </.flash>
+    </div>
+    """
+  end
+
+  def oldflash_group(assigns) do
     ~H"""
     <div aria-live="polite" aria-atomic="true" class="position-relative h-1">
       <div class="toast-container top-0 end-0 p-3">
@@ -712,7 +724,7 @@ defmodule TeiserverWeb.CoreComponents do
         <thead class="">
           <tr>
             <th :for={col <- @col} class="">{col[:label]}</th>
-            <th class="visually-hidden"><span>{gettext("Actions")}</span></th>
+            <th :if={@action != []} class="visually-hidden"><span>{gettext("Actions")}</span></th>
           </tr>
         </thead>
         <tbody
@@ -760,8 +772,12 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
-          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500">{item.title}</dt>
-          <dd class="text-sm leading-6 text-zinc-700">{render_slot(item)}</dd>
+          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-neutral dark:text-neutral-content">
+            {item.title}
+          </dt>
+          <dd class="text-sm leading-6 text-neutral/80 dark:text-neutral-content/80">
+            {render_slot(item)}
+          </dd>
         </div>
       </dl>
     </div>
@@ -781,7 +797,7 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-16">
       <.link
         navigate={@navigate}
-        class="btn btn-secondary text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+        class="btn btn-secondary btn-soft text-sm font-semibold leading-6"
       >
         <i class="fa-fw fa-solid fa-arrow-left" />
         {render_slot(@inner_block)}

@@ -1,0 +1,30 @@
+<UserComponents.section_menu active="action" scope={@scope} user={@user} />
+
+<div :if={@user} class="bg-base-200 min-h-screen p-4">
+  <div class="text-center text-neutral my-20">
+    <div class="">
+      <h1 class="text-5xl font-bold">Confirm clearing GDPR forget</h1>
+      <div class="p-6 m-4 text-lg text-left"></div>
+
+      <form method="POST">
+        <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+
+        <div class="flex">
+          <div class="flex-1">
+            <a href={~p"/moderation/users/#{@user.id}"} class="btn btn-lg btn-secondary min-w-100">
+              Cancel
+            </a>
+          </div>
+          <div class="flex-1">
+            <span class="btn btn-warning btn-lg min-w-100" phx-click="perform-clear">
+              Confirm clearing GDPR forget for {@user.name}
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<.back :if={@user} navigate={~p"/moderation/users/#{@user.id}"}>Back to #{@user.name}</.back>
+<.back :if={is_nil(@user)} navigate={~p"/moderation/users"}>Back to users</.back>

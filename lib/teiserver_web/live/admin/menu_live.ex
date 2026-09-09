@@ -41,7 +41,15 @@ defmodule TeiserverWeb.Admin.MenuLive do
         icon={Teiserver.Account.UserLib.icon()}
         url={~p"/teiserver/admin/user"}
       >
-        Users
+        Users (Admin)
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@current_user, ~w(Moderator))}
+        icon="users"
+        url={~p"/moderation/users"}
+      >
+        Users (Moderation)
       </.menu_page_link>
 
       <.menu_page_link

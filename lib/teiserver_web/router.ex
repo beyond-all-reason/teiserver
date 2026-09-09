@@ -540,6 +540,22 @@ defmodule TeiserverWeb.Router do
       live "/", Menu, :menu
     end
 
+    live_session :account_moderation,
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug,
+         {:set, %{site_menu_active: "moderation", sensitive_data: true}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      live "/users", User.List, :list
+
+      live "/users/:id", User.Show, :show
+      live "/users/:id/edit", User.Edit, :edit
+      live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
+      live "/users/:id/set_gdpr_forget", User.SetGDPRForget
+    end
+
     live_session :actions,
       layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
@@ -618,9 +634,6 @@ defmodule TeiserverWeb.Router do
     resources("/discord_channels", DiscordChannelController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]
     )
-
-    # User stuff
-    put("/users/gdpr_forget/:id", UserController, :gdpr_forget)
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

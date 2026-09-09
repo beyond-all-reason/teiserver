@@ -1,0 +1,65 @@
+<UserComponents.section_menu active="show" user={@user} scope={@scope} />
+
+<.header :if={@user}>
+  User: {@user.name}
+  <:actions>
+    <.link
+      navigate={~p"/teiserver/admin/user/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Old UI</.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}/edit"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Edit User</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div style="clear: both;"></div>
+<div class="alert alert-info alert-soft my-4">
+  This page is intended to be a moderation specific list of users, this means it can be tweaked to the needs of the moderation team without needing to worry about admin requirements. Please speak to Teifion (probably in #mod-utils) regarding requests and ideas.
+</div>
+
+<div :if={not Enum.empty?(@alerts)} class="my-2">
+  <div :for={{type, text} <- @alerts} class={"alert #{type}"}>
+    {text}
+  </div>
+</div>
+
+<div class="flex">
+  <div class="flex-1">
+    <h3 class="font-bold text-xl">Details</h3>
+    <.list :if={@user}>
+      <:item title="Name">{@user.name}</:item>
+      <:item title="Email">{@user.email}</:item>
+      <:item title="Registered">
+        {Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+    </.list>
+  </div>
+  <div :if={@user} class="flex-1">
+    <h3 class="font-bold text-xl">Actions</h3>
+
+    <.link
+      :if={not is_nil(@user.gdpr_forget_after)}
+      navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Clear GDPR forget</.button>
+    </.link>
+
+    <.link
+      :if={is_nil(@user.gdpr_forget_after)}
+      navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Set GDPR forget</.button>
+    </.link>
+  </div>
+</div>
+
+<.back navigate={~p"/moderation/users"}>Back to Users</.back>

@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.BannedIP.Show do
   @moduledoc false
   alias Teiserver.Moderation
   alias TeiserverWeb.ModerationLive.BannedIP.FormComponent
+  alias TeiserverWeb.ModerationLive.BannedIPComponents
 
   use TeiserverWeb, :live_view
 

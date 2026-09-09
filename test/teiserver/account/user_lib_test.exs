@@ -5,6 +5,7 @@ defmodule Teiserver.Account.UserLibTest do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.AccountFixtures
+  alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
 
   use Teiserver.DataCase, async: false
@@ -388,14 +389,16 @@ defmodule Teiserver.Account.UserLibTest do
       user = AccountFixtures.user_fixture()
       now = DateTime.utc_now(:second)
 
+      scope = GeneralTestLib.scope_fixture(user)
+
       assert is_nil(user.gdpr_forget_after)
 
       # First we set it
-      {:ok, user} = UserLib.set_gdpr_forget(user, now)
+      {:ok, user} = UserLib.set_gdpr_forget(user, scope, now)
       assert user.gdpr_forget_after == now
 
       # Now un-set it
-      {:ok, user} = UserLib.clear_gdpr_forget(user)
+      {:ok, user} = UserLib.clear_gdpr_forget(user, scope)
       assert is_nil(user.gdpr_forget_after)
     end
   end

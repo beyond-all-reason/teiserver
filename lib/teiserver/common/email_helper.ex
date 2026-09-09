@@ -277,4 +277,92 @@ defmodule Teiserver.EmailHelper do
     |> Email.text_body(text_body)
     |> Mailer.deliver(response: true)
   end
+
+  def gdpr_forget_set(%User{} = user) do
+    now = DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d %H:%M:%S UTC")
+    deleted_at = user.gdpr_forget_after |> Calendar.strftime("%Y-%m-%d %H:%M:%S UTC")
+    website_url = Application.get_env(:teiserver, Teiserver)[:main_website]
+
+    html_body = """
+    Hello,
+
+    A request to delete the Beyond All Reason account #{user.name} was confirmed on #{now}. The account has been deactivated and will be permanently deleted on #{deleted_at}.
+
+    <strong>**If this was you**</strong>, no action is needed. You can cancel at any time before that date by logging in, which will reactivate your account.
+
+    <strong>**If this was not you**</strong>, log in now to cancel the deletion, and open a ticket at <a href="mailto:#{privacy_email()}">#{privacy_email()}</a> so we can help you secure your account.
+
+    A reminder of what deletion does: your email address, profile and settings are erased and your username is anonymised in replays, leaderboards and chat records. A minimal, non-public anti-abuse record is retained, containing hashed technical identifiers, your moderation and sanction history, your matchmaking rating, and the links needed to honour other players' ignore and avoid lists. It is kept for 2 years, or 5 years if your account has moderation actions, or until an active sanction expires if that is later. Deletion does not reset your rating, your moderation history, or other players' ignore and avoid choices. Section 6 of our Privacy Policy explains this in full: <a href="#{website_url}privacy">privacy policy</a>
+
+    Beyond All Reason
+    delete@beyondallreason.info
+    """
+
+    text_body = """
+    Hello,
+
+    A request to delete the Beyond All Reason account #{user.name} was confirmed on #{now}. The account has been deactivated and will be permanently deleted on #{deleted_at}.
+
+    **If this was you**, no action is needed. You can cancel at any time before that date by logging in, which will reactivate your account.
+
+    **If this was not you**, log in now to cancel the deletion, and open a ticket at #{privacy_email()} so we can help you secure your account.
+
+    A reminder of what deletion does: your email address, profile and settings are erased and your username is anonymised in replays, leaderboards and chat records. A minimal, non-public anti-abuse record is retained, containing hashed technical identifiers, your moderation and sanction history, your matchmaking rating, and the links needed to honour other players' ignore and avoid lists. It is kept for 2 years, or 5 years if your account has moderation actions, or until an active sanction expires if that is later. Deletion does not reset your rating, your moderation history, or other players' ignore and avoid choices. Section 6 of our Privacy Policy explains this in full: #{website_url}privacy
+
+    Beyond All Reason
+    delete@beyondallreason.info
+    """
+
+    message_id = "<#{UUID.uuid4()}@#{host()}>"
+    date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
+
+    Email.new()
+    |> Email.to({user.name, user.email})
+    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.subject("BAR - Your Beyond All Reason account is scheduled for deletion")
+    |> Email.header("Date", date)
+    |> Email.header("Message-Id", message_id)
+    |> Email.html_body(html_body)
+    |> Email.text_body(text_body)
+    |> Mailer.deliver(response: true)
+  end
+
+  def gdpr_forget_cleared(%User{} = user) do
+    now = DateTime.utc_now() |> Calendar.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    html_body = """
+    Hello,
+
+    The scheduled deletion of the Beyond All Reason account #{user.name} was cancelled on #{now} and your account is active again. Nothing was erased.
+
+    If you did not do this, open a ticket at <a href="mailto:#{privacy_email()}">#{privacy_email()}</a>.
+
+    Beyond All Reason
+    delete@beyondallreason.info
+    """
+
+    text_body = """
+    Hello,
+
+    The scheduled deletion of the Beyond All Reason account #{user.name} was cancelled on #{now} and your account is active again. Nothing was erased.
+
+    If you did not do this, open a ticket at #{privacy_email()}.
+
+    Beyond All Reason
+    delete@beyondallreason.info
+    """
+
+    message_id = "<#{UUID.uuid4()}@#{host()}>"
+    date = DateHelper.date_to_str(DateTime.utc_now(), format: :email_date)
+
+    Email.new()
+    |> Email.to({user.name, user.email})
+    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.subject("BAR - Your Beyond All Reason account deletion was cancelled")
+    |> Email.header("Date", date)
+    |> Email.header("Message-Id", message_id)
+    |> Email.html_body(html_body)
+    |> Email.text_body(text_body)
+    |> Mailer.deliver(response: true)
+  end
 end

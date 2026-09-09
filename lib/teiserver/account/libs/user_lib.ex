@@ -6,6 +6,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserQueries
@@ -15,6 +16,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.EmailHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
+  alias Teiserver.Logging.AuditLog
   alias Teiserver.Repo
 
   use TeiserverWeb, :library_newform
@@ -23,7 +25,9 @@ defmodule Teiserver.Account.UserLib do
     only: [cache_get_or_store: 3, cache_put_on_ok: 2, cache_delete_on_ok: 2]
 
   import Teiserver.Helper.NumberHelper, only: [int_parse!: 1]
-  import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 3, add_audit_log: 4]
+
+  @gdpr_forget_cooldown_days 30
 
   # Functions
   @spec icon :: String.t()
@@ -383,22 +387,49 @@ defmodule Teiserver.Account.UserLib do
     |> UserCacheLib.decache_user_on_ok()
   end
 
-  def set_gdpr_forget(%User{} = user, timestamp) do
-    user
-    |> User.set_gdpr_forget_changeset(%{gdpr_forget_after: timestamp})
-    |> Repo.update()
-    |> broadcast_update_user()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+  @doc """
+  We take a given timestamp so we can identify if the default timestamp was used or one manually set
+  """
+  def set_gdpr_forget(%User{} = user, %Scope{} = scope, given_timestamp \\ nil) do
+    actual_timestamp =
+      given_timestamp || DateTime.utc_now() |> DateTime.shift(day: @gdpr_forget_cooldown_days)
+
+    changeset =
+      user
+      |> User.set_gdpr_forget_changeset(%{gdpr_forget_after: actual_timestamp})
+
+    Repo.transact(fn ->
+      with {:ok, updated_user} <- Repo.update(changeset),
+           {:ok, _any} <- EmailHelper.gdpr_forget_set(updated_user),
+           %AuditLog{} <-
+             add_audit_log(scope, "Set GDPR forget", %{
+               target_id: updated_user.id,
+               given_timestamp: given_timestamp,
+               actual_timestamp: actual_timestamp
+             }) do
+        {:ok, updated_user}
+        |> broadcast_update_user()
+        |> cache_put_on_ok(:users_by_id)
+        |> UserCacheLib.decache_user_on_ok()
+      end
+    end)
   end
 
-  def clear_gdpr_forget(%User{} = user) do
-    user
-    |> User.clear_gdpr_forget_changeset()
-    |> Repo.update()
-    |> broadcast_update_user()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+  def clear_gdpr_forget(%User{} = user, %Scope{} = scope) do
+    changeset =
+      user
+      |> User.clear_gdpr_forget_changeset()
+
+    Repo.transact(fn ->
+      with {:ok, updated_user} <- Repo.update(changeset),
+           {:ok, _any} <- EmailHelper.gdpr_forget_cleared(updated_user),
+           %AuditLog{} <- add_audit_log(scope, "Clear GDPR forget", %{target_id: updated_user.id}) do
+        {:ok, updated_user}
+        |> broadcast_update_user()
+        |> cache_put_on_ok(:users_by_id)
+        |> UserCacheLib.decache_user_on_ok()
+      end
+    end)
   end
 
   @doc """

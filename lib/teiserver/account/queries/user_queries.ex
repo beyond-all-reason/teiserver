@@ -2,6 +2,7 @@ defmodule Teiserver.Account.UserQueries do
   @moduledoc false
   alias Ecto.Query
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserStat
 
   use TeiserverWeb, :queries
 
@@ -409,6 +410,8 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   @spec where_name_like(t(), String.t()) :: t()
+  def where_name_like(query, ""), do: query
+
   def where_name_like(query, search_term) do
     uname = "%" <> search_term <> "%"
 
@@ -428,6 +431,15 @@ defmodule Teiserver.Account.UserQueries do
       where: users.smurf_of_id == ^user_id
   end
 
+  @spec load_user_stat(t()) :: t()
+  def load_user_stat(query) do
+    from users in query,
+      left_join: user_stats in UserStat,
+      as: :user_stats,
+      on: user_stats.user_id == users.id,
+      preload: [user_stat: user_stats]
+  end
+
   @spec order_by_name(t(), :asc | :desc) :: t()
   def order_by_name(query, direction \\ :asc) do
     if direction == :asc do
@@ -436,4 +448,19 @@ defmodule Teiserver.Account.UserQueries do
       from(users in query, order_by: [desc: users.name])
     end
   end
+
+  @spec order_by_inserted_at(t(), :asc | :desc) :: t()
+  def order_by_inserted_at(query, direction \\ :asc) do
+    if direction == :asc do
+      from(users in query, order_by: [asc: users.inserted_at])
+    else
+      from(users in query, order_by: [desc: users.inserted_at])
+    end
+  end
+
+  @spec order_by_from_string(t(), String.t()) :: t()
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
+  def order_by_from_string(query, "Alphabetical (A-Z)"), do: order_by_name(query, :asc)
+  def order_by_from_string(query, "Alphabetical (Z-A)"), do: order_by_name(query, :desc)
 end

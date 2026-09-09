@@ -11,6 +11,7 @@ defmodule Teiserver.Config.UserConfigTypes.LastUsedValueConfigs do
     add_last_used("last_used.banned_phrase_search_page_size")
     add_last_used("last_used.banned_ip_search_page_size")
     add_last_used("last_used.banned_domain_search_page_size")
+    add_last_used("last_used.users_search_page_size")
   end
 
   defp add_last_used(key, default \\ 50) do

@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Config
@@ -400,7 +401,12 @@ defmodule TeiserverWeb.Account.SessionController do
       conn
       |> assign(:current_user, user)
 
-    with {:ok, %User{gdpr_forget_after: nil}} <- UserLib.clear_gdpr_forget(user),
+    scope = %Scope{
+      user: user,
+      ip: conn.remote_ip
+    }
+
+    with {:ok, %User{gdpr_forget_after: nil}} <- UserLib.clear_gdpr_forget(user, scope),
          %AuditLog{} <- LoggingHelpers.add_audit_log(conn, "Self-cleared GDPR forget", %{}) do
       conn
       |> put_flash(:success, "GDPR forget process cancelled, you can login normally again.")

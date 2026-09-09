@@ -7,7 +7,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
-  alias Teiserver.Account.Tasks.GdprForgetTask
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
@@ -1125,26 +1124,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
   defp should_show_exact_match?(page, users, search_term) do
     page == 0 && Enum.count(users) > 20 && search_term != ""
-  end
-
-  @doc """
-  Removes all PII from a user in accordance with GDPR.
-  """
-  @spec gdpr_forget(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def gdpr_forget(conn, %{"id" => id}) do
-    user = Account.get_user(id)
-
-    case GdprForgetTask.forget_user(conn, user) do
-      :ok ->
-        conn
-        |> put_flash(:success, "User GDPR forgotten")
-        |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
-
-      {:error, reason} ->
-        conn
-        |> put_flash(:danger, "Error: #{reason}")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
   end
 
   @spec shadowban(Plug.Conn.t(), map()) :: Plug.Conn.t()
