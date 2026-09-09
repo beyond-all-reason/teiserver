@@ -354,11 +354,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
           {:ok, Map.put(base, :update, update)}
 
         "engine_warning" ->
-          {:engine_warning, %{message: update["message"]}}
+          update = {:engine_warning, %{message: update["message"]}}
           {:ok, Map.put(base, :update, update)}
 
         "engine_crash" ->
-          {:engine_warning, %{details: Map.get(update, "details")}}
+          update = {:engine_crash, %{details: Map.get(update, "details")}}
           {:ok, Map.put(base, :update, update)}
 
         "engine_quit" ->
@@ -380,7 +380,9 @@ defmodule Teiserver.Autohost.TachyonHandler do
               "spectators" -> :spectators
             end
 
-          {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
+          update =
+            {:luamsg, %{user_id: user_id, script: script, ui_mode: ui_mode, data: update["data"]}}
+
           {:ok, Map.put(base, :update, update)}
       end
     end

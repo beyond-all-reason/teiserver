@@ -220,6 +220,15 @@ defmodule Teiserver.Player.Session do
   end
 
   @doc """
+  Let players and spectators know a battle has ended
+  """
+  def notify_battle_ended(user_id, battle_id, battle_ended_data) do
+    user_id
+    |> via_tuple()
+    |> GenServer.cast({:battle, {:ended, battle_id, battle_ended_data}})
+  end
+
+  @doc """
   Let the player know that the lobby they are in as just started a battle
   """
   @spec lobby_join_battle(
@@ -1515,6 +1524,23 @@ defmodule Teiserver.Player.Session do
     end
   end
 
+  def handle_cast(
+        {:battle, {:ended, battle_id, battle_ended_data}},
+        %PT.Data{} = state
+      ) do
+    case state.battle do
+      %{id: ^battle_id} ->
+        send_to_player!({:battle_ended, battle_ended_data}, state)
+        broadcast_user_update!(state.user, :menu)
+        monitors = MC.demonitor_by_val(state.monitors, {:battle, battle_id}, [:flush])
+
+        {:noreply, %{state | battle: nil, monitors: monitors}}
+
+      _other ->
+        {:noreply, state}
+    end
+  end
+
   def handle_cast({:messaging, {:dm, message}}, %PT.Data{} = state) do
     state =
       if state.messaging_state.store_messages? do
@@ -1767,6 +1793,17 @@ defmodule Teiserver.Player.Session do
 
       {:battle, battle_id} ->
         Logger.info("battle #{battle_id} went down because #{inspect(reason)}")
+
+        # TODO We don't have the battle state at this point so sending just sending
+        # a placeholder event for now
+        battle_ended_data = %{
+          battle_id: battle_id,
+          players: [],
+          spectators: [],
+          winning_ally_team_ids: []
+        }
+
+        send_to_player!({:battle_ended, battle_ended_data}, state)
         broadcast_user_update!(state.user, :menu)
         new_state = %{state | battle: nil}
 
