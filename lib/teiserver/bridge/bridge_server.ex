@@ -4,19 +4,14 @@ defmodule Teiserver.Bridge.BridgeServer do
   """
 
   alias Nostrum.Api.Channel
-  alias Nostrum.Api.Thread
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Bridge.CommandLib
-  alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.CacheUser
-  alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
-  alias Teiserver.Room
   use GenServer
   require Logger
 
@@ -48,18 +43,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     send(bridge_pid, message)
   end
 
-  @spec send_direct_message(User.id(), String.t()) :: :ok | nil
-  def send_direct_message(userid, message) do
-    user = Account.deprecated_get_user_by_id(userid)
-
-    if user.discord_dm_channel && user.discord_dm_channel_id == nil do
-      nil
-    else
-      channel_id = user.discord_dm_channel_id || user.discord_dm_channel
-      Communication.new_discord_message(channel_id, message)
-    end
-  end
-
   @spec server_update_channel() :: integer() | nil
   def server_update_channel,
     do: Config.get_site_config_cache("teiserver.Discord channel #server-updates")
@@ -67,10 +50,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   @impl GenServer
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
-  end
-
-  def handle_call({:lookup_room_from_channel, channel_id}, _from, state) do
-    {:reply, state.room_lookup[channel_id], state}
   end
 
   @impl GenServer
@@ -126,76 +105,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  # Direct/Room messaging
-  def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
-  def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
-
-  def handle_info({:new_message, _from_id, _room_name, "!" <> _message}, state),
-    do: {:noreply, state}
-
-  def handle_info({:new_message, _from_id, _room_name, "$" <> _message}, state),
-    do: {:noreply, state}
-
-  def handle_info({:new_message, from_id, room_name, message}, state) do
-    user = Account.get_user(from_id)
-
-    cond do
-      from_id == state.userid ->
-        # It's us, ignore it
-        nil
-
-      message_contains?(message, "http:") ->
-        nil
-
-      message_contains?(message, "https:") ->
-        nil
-
-      message_starts_with?(message, "/") ->
-        nil
-
-      Account.restricted?(user, ["Bridging"]) ->
-        # Non-bridged user, ignore it
-        nil
-
-      Config.get_site_config_cache("teiserver.Bridge from server") == false ->
-        nil
-
-      WordLib.flagged_words(message) > 0 ->
-        # In theory we should catch this at the general chat level but it's possible the user
-        # won't have updated by the time the execution gets here so we need to be certain
-        nil
-
-      Map.has_key?(state.channel_lookup, room_name) ->
-        message = if is_list(message), do: Enum.join(message, "\n"), else: message
-        message = clean_message(message)
-
-        room_name =
-          if promo?(message) do
-            "promote"
-          else
-            room_name
-          end
-
-        # If they are a bot they're only allowed to post to the promotion channel
-        if Auth.is_bot?(user) do
-          if room_name == "promote" do
-            forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
-          end
-        else
-          forward_to_discord(from_id, state.channel_lookup[room_name], message, state)
-        end
-
-      true ->
-        nil
-    end
-
-    {:noreply, state}
-  end
-
-  def handle_info({:new_message_ex, from_id, room_name, message}, state) do
-    handle_info({:new_message, from_id, room_name, message}, state)
-  end
-
   def handle_info(
         %{channel: "teiserver_client_messages:" <> _userid, event: :received_direct_message} =
           data,
@@ -216,7 +125,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     do: {:noreply, state}
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
-    if Config.get_site_config_cache("teiserver.Bridge from server") do
+    if Communication.use_discord?() do
       # Main
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
 
@@ -242,7 +151,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
-    if Config.get_site_config_cache("teiserver.Bridge from server") do
+    if Communication.use_discord?() do
       channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
       if channel_id do
@@ -258,34 +167,10 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
 
-  def handle_info(:gdt_check, state) do
-    Thread.list(Application.get_env(:teiserver, DiscordBridgeBot)[:guild_id])
-
-    {:noreply, state}
-  end
-
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.error("BridgeServer handle_info error. No handler for msg of #{Kernel.inspect(msg)}")
     {:noreply, state}
-  end
-
-  defp promo?(message) do
-    regexes =
-      [
-        Regex.run(~r/\+\d+( more|needed)?$/, message),
-        Regex.run(~r/\d+ more needed$/, message),
-        Regex.run(~r/\d+\+? (more )?for \d(v|vs)\d/, message),
-        Regex.run(~r/(more|needed) for \d(v|vs)\d/, message),
-        Regex.run(~r/\d needed/, message)
-      ]
-      |> Enum.reject(&(&1 == nil))
-
-    cond do
-      String.contains?(message, " player(s) needed for battle") -> true
-      not Enum.empty?(regexes) -> true
-      true -> false
-    end
   end
 
   defp do_begin do
@@ -335,60 +220,14 @@ defmodule Teiserver.Bridge.BridgeServer do
       |> Enum.reject(&(&1 == nil))
       |> Map.new()
 
-    room_lookup =
-      [
-        "teiserver.Discord channel #main",
-        "teiserver.Discord channel #newbies",
-        "teiserver.Discord channel #promote"
-      ]
-      |> Enum.map(fn key ->
-        channel_id = Config.get_site_config_cache(key)
-
-        if channel_id do
-          [_prefix, room] = String.split(key, "#")
-
-          {channel_id, room}
-        end
-      end)
-      |> Enum.reject(&(&1 == nil))
-      |> Map.new()
-
-    Map.values(room_lookup)
-    |> Enum.each(fn room_name ->
-      Room.get_or_make_room(room_name, state.user.id)
-      Room.add_user_to_room(state.user.id, room_name)
-
-      :ok = PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
-      :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
-    end)
-
-    Teiserver.store_put(:application_metadata_cache, :discord_room_lookup, room_lookup)
     Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
 
     CommandLib.cache_discord_commands()
     Communication.pre_cache_discord_channels()
 
     Map.merge(state, %{
-      channel_lookup: channel_lookup,
-      room_lookup: room_lookup
+      channel_lookup: channel_lookup
     })
-  end
-
-  defp forward_to_discord(from_id, channel, message, _state) do
-    author = CacheUser.get_username(from_id)
-
-    new_message =
-      message
-      |> convert_emoticons()
-
-    Communication.new_discord_message(channel, "**#{author}**: #{new_message}")
-  end
-
-  defp convert_emoticons(message) do
-    emoticon_map = DiscordBridgeBot.get_text_to_emoticon_map()
-
-    message
-    |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
   end
 
   @spec get_bridge_account() :: Teiserver.CacheUser.t() | map()
@@ -442,27 +281,6 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     false
   end
-
-  defp clean_message(message) do
-    message
-    |> String.replace("@", " at ")
-  end
-
-  defp message_contains?(messages, contains) when is_list(messages) do
-    messages
-    |> Enum.filter(fn m -> String.contains?(m, contains) end)
-    |> Enum.any?()
-  end
-
-  defp message_contains?(message, contains), do: String.contains?(message, contains)
-
-  defp message_starts_with?(messages, text) when is_list(messages) do
-    messages
-    |> Enum.filter(fn m -> String.starts_with?(m, text) end)
-    |> Enum.any?()
-  end
-
-  defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
   @impl GenServer
   @spec init(map()) :: {:ok, term(), {:continue, term()}}

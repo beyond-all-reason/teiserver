@@ -18,7 +18,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   @spec cmd_definition() :: map()
   def cmd_definition do
     %{
-      name: "findreports",
+      name: name(),
       description: "Find reports by the action message id",
       options: [
         %{

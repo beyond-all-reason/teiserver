@@ -41,7 +41,6 @@ defmodule Teiserver.Account.User do
     field :gdpr_forget_after, :utc_datetime
 
     field :discord_id, :integer
-    field :discord_dm_channel_id, :integer
     field :steam_id, :integer
 
     field :rank, :integer, default: 0
@@ -51,7 +50,6 @@ defmodule Teiserver.Account.User do
     field :lobby_hash, :string
     field :chobby_hash, :string
     field :lobby_client, :string
-    field :discord_dm_channel, :integer
 
     has_many :user_configs, Teiserver.Config.UserConfig
 
@@ -76,8 +74,6 @@ defmodule Teiserver.Account.User do
       lobby_hash: nil,
       chobby_hash: nil,
       discord_id: nil,
-      discord_dm_channel: nil,
-      discord_dm_channel_id: nil,
       steam_id: nil
     }
   end
@@ -92,10 +88,11 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id country bot email_change_code lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id country bot email_change_code lobby_hash chobby_hash lobby_client)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_name_change()
     |> put_md5_password_hash()
   end
@@ -109,10 +106,11 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client discord_dm_channel)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
       case CacheUser.valid_email?(email) do
         :ok -> []
@@ -183,6 +181,7 @@ defmodule Teiserver.Account.User do
       )
       |> validate_required([:email, :previous_emails])
       |> unique_constraint(:email)
+      |> unique_constraint(:discord_id)
       |> validate_change(:email, fn :email, email ->
         case CacheUser.valid_email?(email) do
           :ok -> []
@@ -254,10 +253,11 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
       case CacheUser.valid_email?(email) do
         :ok -> []
@@ -293,6 +293,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(attrs, [:name, :email, :password, :icon, :colour, :data])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_required([:name, :email, :password])
     |> validate_confirmation(:password, required: true, message: "Passwords do not match")
     |> validate_name_change()

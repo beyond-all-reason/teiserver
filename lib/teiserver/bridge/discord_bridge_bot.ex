@@ -5,93 +5,17 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   alias Nostrum.Api
   alias Nostrum.Api.ApplicationCommand
-  alias Nostrum.Api.Thread
+  alias Nostrum.Api.Message
   alias Teiserver.Bridge.BridgeServer
-  alias Teiserver.Bridge.ChatCommands
   alias Teiserver.Bridge.CommandLib
-  alias Teiserver.Bridge.MessageCommands
   alias Teiserver.Communication
   alias Teiserver.Config
   alias Teiserver.Moderation
-  alias Teiserver.Room
 
   use Nostrum.Consumer
 
   require Logger
 
-  @emoticon_map %{
-    "🙂" => ":)",
-    "😒" => ":s",
-    "😦" => ":(",
-    "😛" => ":p",
-    "😄" => ":D"
-  }
-
-  @extra_text_emoticons %{
-    ":S" => "😒",
-    ":P" => "😛"
-  }
-
-  @text_to_emoticon_map @emoticon_map
-                        |> Map.new(fn {k, v} -> {v, k} end)
-                        |> Map.merge(@extra_text_emoticons)
-
-  @max_message_length 100
-
-  # GuildId of nil = DM
-  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd, guild_id: nil} = message, _ws}) do
-    MessageCommands.handle(message)
-  end
-
-  # So this is a public message
-  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _cmd} = message, _ws}) do
-    ChatCommands.handle(message)
-  end
-
-  def handle_event(
-        {:MESSAGE_CREATE,
-         %{author: author, channel_id: channel_id, attachments: [], content: content} = message,
-         _ws}
-      ) do
-    room = bridge_channel_to_room(channel_id)
-    dm_sender = Teiserver.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
-
-    discord_bot_user_id = Teiserver.cache_get(:application_metadata_cache, "discord_bot_user_id")
-
-    cond do
-      author.id == discord_bot_user_id ->
-        nil
-
-      dm_sender != nil ->
-        MessageCommands.handle(message)
-
-      room == "moderation-reports" ->
-        nil
-
-      room == "moderation-actions" ->
-        nil
-
-      String.contains?(content, "http:") ->
-        nil
-
-      String.contains?(content, "https:") ->
-        nil
-
-      String.length(content) > @max_message_length ->
-        nil
-
-      Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
-        nil
-
-      room != nil ->
-        do_reply(message)
-
-      true ->
-        nil
-    end
-  end
-
-  # Stuff we might want to use
   def handle_event({:MESSAGE_CREATE, _message, _ws}) do
     :ignore
   end
@@ -143,14 +67,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     response = CommandLib.handle_command(interaction, options_map)
 
-    # response = case data.name do
-    #   "textcb" ->
-    #     Teiserver.Bridge.TextcbCommand.execute(interaction, options_map)
-
-    #   _ ->
-    #     nil
-    # end
-
     if response do
       Api.create_interaction_response(interaction, response)
     else
@@ -163,9 +79,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     Teiserver.cache_put(:application_metadata_cache, "discord_bot_user_id", discord_bot_user_id)
 
     BridgeServer.cast_bridge(:READY)
-    add_command(:textcb)
-    add_command(:findreport)
-    add_command(:post)
+    CommandLib.register_discord_commands()
+
     :ignore
   end
 
@@ -178,128 +93,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     # IO.puts ""
 
     :noop
-  end
-
-  # Teiserver.Bridge.DiscordBridgeBot.add_command(:findreport)
-  @spec add_command(atom) :: any
-  def add_command(:findreport) do
-    command = %{
-      name: "findreports",
-      description: "Find reports by the action message id",
-      options: [
-        %{
-          # type3 = String
-          type: 3,
-          name: "id",
-          description: "Message ID of the actions discord message",
-          required: true
-        },
-        %{
-          # type3 = String
-          type: 3,
-          name: "mode",
-          description: "Mode to search with by id",
-          required: false,
-          choices: [
-            %{name: "Message ID", value: "message_id"},
-            %{name: "Report ID", value: "report_id"}
-          ],
-          default_value: "message_id"
-        }
-      ],
-      nsfw: false
-    }
-
-    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
-  end
-
-  # Teiserver.Bridge.DiscordBridgeBot.add_command(:post)
-  @spec add_command(atom) :: any
-  def add_command(:post) do
-    command = %{
-      name: "post",
-      description: "Post something into the current channel",
-      options: [
-        %{
-          # type  = sub_command
-          type: 1,
-          name: "report",
-          description: "Post a report",
-          options: [
-            %{
-              name: "id",
-              description: "ID of the report",
-              type: 4,
-              required: true
-            }
-          ]
-        },
-        %{
-          type: 1,
-          name: "action",
-          description: "Post an Action",
-          options: [
-            %{
-              name: "id",
-              description: "ID of the action",
-              type: 4,
-              required: true
-            }
-          ]
-        },
-        %{
-          type: 1,
-          name: "profile",
-          description: "Post the link of a moderation profile",
-          options: [
-            %{
-              name: "name",
-              description: "Name of the Account",
-              type: 3,
-              required: true
-            }
-          ]
-        }
-      ],
-      nsfw: false
-    }
-
-    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
-  end
-
-  # Teiserver.Bridge.DiscordBridgeBot.add_command(:textcb)
-  @spec add_command(atom) :: any
-  def add_command(:textcb) do
-    callbacks = Communication.list_text_callbacks()
-
-    choices =
-      callbacks
-      |> Enum.map(fn cb ->
-        %{
-          name: cb.name,
-          value: hd(cb.triggers)
-        }
-      end)
-      # 25 is the Discord limit of choices per / command
-      |> Enum.take(25)
-
-    command = %{
-      name: "textcb",
-      description: "CopyPasta some text",
-      options: [
-        %{
-          # Type3 = String
-          type: 3,
-          name: "reference",
-          description: "The name of the reference",
-          required: true,
-          choices: choices
-        }
-      ],
-      nsfw: false
-    }
-
-    ApplicationCommand.create_guild_command(Communication.get_guild_id(), command)
   end
 
   # Meant to be used manually
@@ -315,9 +108,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     {:ok, %{id: cmd_id}} = ApplicationCommand.create_guild_command(guild_id, command)
     ApplicationCommand.delete_guild_command(guild_id, cmd_id)
   end
-
-  @spec get_text_to_emoticon_map() :: map()
-  def get_text_to_emoticon_map, do: @text_to_emoticon_map
 
   @spec new_dm_channel(atom | %{:recipients => any, optional(any) => any}) :: :ok
   def new_dm_channel(dm_channel) do
@@ -358,7 +148,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
         |> Enum.join("\n")
 
-      Api.Message.create(channel_id, message)
+      Message.create(channel_id, message)
     end
   end
 
@@ -560,85 +350,9 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     end
   end
 
-  def gdt_check do
-    channel_id = 0
-    name = ""
-    content = ""
-
-    Thread.create(channel_id, %{
-      name: name,
-      message: %{
-        content: content
-      },
-      type: 11
-    })
-  end
-
-  defp do_reply(%Nostrum.Struct.Message{
-         author: author,
-         content: content,
-         channel_id: channel_id,
-         mentions: mentions,
-         member: %{nick: nick}
-       }) do
-    # Mentions come through encoded in a way we don't want to preserve, this substitutes them
-    new_content =
-      mentions
-      |> Enum.reduce(content, fn m, acc ->
-        String.replace(acc, "<@!#{m.id}>", m.username)
-      end)
-      |> String.replace(~r/<#[0-9]+> ?/, "")
-      |> convert_emoticons()
-      |> String.split("\n")
-
-    bridge_user_id = BridgeServer.get_bridge_userid()
-    from_id = bridge_user_id
-
-    # Temporarily disabled as the bridge echos itself
-    # from_id = case User.get_userid_by_discord_id(author.id) do
-    #   nil ->
-    #     bridge_user_id
-    #   userid ->
-    #     case Client.get_client_by_id(userid) do
-    #       nil ->
-    #         bridge_user_id
-    #       _ ->
-    #         userid
-    #     end
-    # end
-
-    name = nick || author.global_name
-
-    message =
-      if from_id == bridge_user_id do
-        new_content
-        |> Enum.map(fn row ->
-          "#{name}: #{row}"
-        end)
-      else
-        new_content
-      end
-
-    room = bridge_channel_to_room(channel_id)
-    Room.send_message(from_id, room, message)
-  end
-
-  defp convert_emoticons(msg) do
-    msg
-    |> String.replace(Map.keys(@emoticon_map), fn emoji -> @emoticon_map[emoji] end)
-  end
-
-  defp bridge_channel_to_room(channel_id) do
-    lookup_table = Teiserver.store_get(:application_metadata_cache, :discord_room_lookup)
-    lookup_table[channel_id]
-  end
-
-  # @spec start_link :: :ignore | {:error, any} | {:ok, pid}
-  # def start_link do
-  #   Consumer.start_link(__MODULE__)
-  # end
-
   # Surrounds links with <> to disable link preview in Discord
+  defp format_link(nil), do: ""
+
   defp format_link(link) do
     ~r/(https?:\/\/[^\s]+)/
     |> Regex.replace(link, "<\\1>")

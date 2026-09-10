@@ -32,8 +32,7 @@ defmodule Teiserver.Account.CacheUserTest do
         email_change_code: "123",
         lobby_hash: "some-hash",
         chobby_hash: "c-hash",
-        lobby_client: "client-name",
-        discord_dm_channel: 456
+        lobby_client: "client-name"
       })
 
     cache_user = CacheUser.deprecated_update_user(cache_user, persist: true)
@@ -48,7 +47,6 @@ defmodule Teiserver.Account.CacheUserTest do
     assert {cache_user.lobby_hash, user.lobby_hash} == {"some-hash", "some-hash"}
     assert {cache_user.chobby_hash, user.chobby_hash} == {"c-hash", "c-hash"}
     assert {cache_user.lobby_client, user.lobby_client} == {"client-name", "client-name"}
-    assert {cache_user.discord_dm_channel, user.discord_dm_channel} == {456, 456}
   end
 
   describe "transfer checks" do
@@ -115,7 +113,6 @@ defmodule Teiserver.Account.CacheUserTest do
       assert db_user.last_played == cache_user.last_played
       assert db_user.last_logout == cache_user.last_logout
       assert db_user.discord_id == cache_user.discord_id
-      assert db_user.discord_dm_channel_id == cache_user.discord_dm_channel_id
       assert db_user.steam_id == cache_user.steam_id
       assert db_user.smurf_of_id == cache_user.smurf_of_id
       assert db_user.inserted_at == cache_user.inserted_at
@@ -126,7 +123,6 @@ defmodule Teiserver.Account.CacheUserTest do
       assert db_user.lobby_hash == cache_user.lobby_hash
       assert db_user.chobby_hash == cache_user.chobby_hash
       assert db_user.lobby_client == cache_user.lobby_client
-      assert db_user.discord_dm_channel == cache_user.discord_dm_channel
     end
   end
 end

@@ -10,7 +10,6 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"help", [], "Displays this help text.", :everybody},
       {"whoami", [], "Sends back information about who you are.", :everybody},
       {"whois", ["user"], "Sends back information about the user specified.", :everybody},
-      {"discord", [], "Allows linking of your discord account to your BAR account.", :everybody},
       {"mute", ["username"], "Mutes that user and prevents you seeing their messages.",
        :everybody},
       {"unmute", ["username"], "Un-mutes that user and allows you to see their messages.",

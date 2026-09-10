@@ -20,6 +20,12 @@
     </div>
 
     <div class="col-lg-6 my-2">
+      {label(f, :category, class: "control-label")}
+      {text_input(f, :category, class: "form-control", placeholder: "default")}
+      {error_tag(f, :category)}
+    </div>
+
+    <div class="col-lg-6 my-2">
       {input_with_type(f, :colour, "color")}
     </div>
 
@@ -44,16 +50,10 @@
   </div>
 
   <div class="row">
-    <div class="col-md-8 my-2">
+    <div class="col-md-12 my-2">
       {label(f, :response, class: "control-label")}
       {textarea(f, :response, class: "form-control monospace", rows: 16)}
       {error_tag(f, :response)}
-    </div>
-
-    <div class="col-md-4 my-2">
-      {label(f, :triggers, class: "control-label")}
-      {textarea_array(f, :triggers, class: "form-control", rows: 8)}
-      {error_tag(f, :triggers)}
     </div>
   </div>
 

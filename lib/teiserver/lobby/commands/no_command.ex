@@ -1,15 +1,10 @@
 defmodule Teiserver.Lobby.Commands.NoCommand do
   @moduledoc """
-  Documentation for explain command here
+  Default no command
   """
 
   alias Teiserver.Data.Types, as: T
   @behaviour Teiserver.Lobby.LobbyCommandBehaviour
-  # alias Teiserver.{Account, Battle, Coordinator}
-  # alias Teiserver.Lobby.LobbyCommandBehaviour
-  # import Teiserver.Helper.NumberHelper, only: [round: 2]
-
-  # @splitter "---------------------------"
 
   @impl Teiserver.Lobby.LobbyCommandBehaviour
   @spec name() :: String.t()

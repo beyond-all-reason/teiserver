@@ -27,8 +27,7 @@ defmodule Teiserver.Lobby.CommandLib do
 
   @spec get_command_module(String.t()) :: module
   def get_command_module(name) do
-    Teiserver.store_get(:lobby_command_cache, name) ||
-      Teiserver.store_get(:lobby_command_cache, "no_command")
+    Teiserver.store_get(:lobby_command_cache, name)
   end
 
   @spec cache_lobby_commands() :: :ok
@@ -65,10 +64,6 @@ defmodule Teiserver.Lobby.CommandLib do
     |> Enum.each(fn {key, func} ->
       Teiserver.store_put(:lobby_command_cache, key, func)
     end)
-
-    # Special case
-    no_command_module = Teiserver.Lobby.Commands.NoCommand
-    Teiserver.store_put(:lobby_command_cache, "no_command", no_command_module)
 
     # Delete out-dated keys
     old

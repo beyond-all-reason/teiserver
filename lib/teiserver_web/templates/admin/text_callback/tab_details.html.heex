@@ -1,9 +1,8 @@
 <div class="row">
   <div class="col-md-12">
-    <h4>Triggers:</h4>
-    <textarea rows="8" class="form-control"><%= @text_callback.triggers |> Enum.join("\n") %></textarea>
+    <h4>Category:</h4>
+    <p>{@text_callback.category}</p>
 
-    <br />
     <h4>Response:</h4>
     <textarea rows="8" class="form-control"><%= @text_callback.response %></textarea>
 

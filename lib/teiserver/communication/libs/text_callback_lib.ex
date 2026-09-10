@@ -5,6 +5,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
   alias Teiserver.Communication
   alias Teiserver.Communication.TextCallback
   use TeiserverWeb, :library
+  require Logger
 
   # Functions
   @spec icon :: String.t()
@@ -69,6 +70,11 @@ defmodule Teiserver.Communication.TextCallbackLib do
       where: ilike(text_callbacks.name, ^ref_like)
   end
 
+  def _search(query, :category, category) do
+    from text_callbacks in query,
+      where: text_callbacks.category == ^category
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
@@ -111,11 +117,6 @@ defmodule Teiserver.Communication.TextCallbackLib do
     Communication.list_text_callbacks(limit: :infinity)
     |> Enum.each(fn text_callback ->
       Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
-
-      text_callback.triggers
-      |> Enum.each(fn trigger_text ->
-        Teiserver.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
-      end)
     end)
   end
 
@@ -123,34 +124,28 @@ defmodule Teiserver.Communication.TextCallbackLib do
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def update_text_callback_cache({:ok, text_callback} = args) do
     Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
-    CommandLib.re_cache_discord_command("textcb")
-
-    text_callback.triggers
-    |> Enum.each(fn trigger_text ->
-      Teiserver.store_put(:text_callback_trigger_lookup, trigger_text, text_callback.id)
-    end)
+    CommandLib.re_cache_discord_command("text")
+    refresh_discord_text_command()
 
     args
   end
 
   def update_text_callback_cache(args), do: args
 
-  @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
-  def lookup_text_callback_from_trigger(trigger) do
-    trigger =
-      trigger
-      |> String.trim()
-      |> String.downcase()
+  @spec delete_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
+          {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
+  def delete_text_callback_cache({:ok, text_callback} = args) do
+    Teiserver.store_delete(:text_callback_store, text_callback.id)
+    refresh_discord_text_command()
 
-    case Teiserver.store_get(:text_callback_trigger_lookup, trigger) do
-      nil ->
-        nil
+    args
+  end
 
-      id ->
-        case Teiserver.store_get(:text_callback_store, id) do
-          nil -> nil
-          text_callback -> text_callback
-        end
+  def delete_text_callback_cache(args), do: args
+
+  defp refresh_discord_text_command do
+    if Communication.use_discord?() do
+      CommandLib.register_discord_commands()
     end
   end
 
@@ -159,8 +154,9 @@ defmodule Teiserver.Communication.TextCallbackLib do
   def can_trigger_callback?(nil, _channel_id), do: false
   def can_trigger_callback?(_tc_id, nil), do: false
 
-  def can_trigger_callback?(tc_id, channel_id) when is_integer(tc_id) do
-    text_callback = Communication.get_text_callback(tc_id)
+  def can_trigger_callback?(tc_name_or_id, channel_id)
+      when is_binary(tc_name_or_id) or is_integer(tc_name_or_id) do
+    text_callback = Communication.get_text_callback(tc_name_or_id)
     can_trigger_callback?(text_callback, channel_id)
   end
 
