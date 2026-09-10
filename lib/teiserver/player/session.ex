@@ -84,6 +84,17 @@ defmodule Teiserver.Player.Session do
     :no_matchmaking
   end
 
+  # Arms a fresh connection_timeout, tagged with a unique reference stored in
+  # the state. `:connection_timeout` handling only acts on a message that
+  # carries the currently armed reference, so a timer left over from an
+  # earlier disconnect can't stop a session that has since reconnected and
+  # disconnected again with its own, still-pending, timer.
+  defp arm_connection_timeout(state) do
+    ref = make_ref()
+    Process.send_after(self(), {:connection_timeout, ref}, @connection_timeout)
+    %{state | connection_timeout_ref: ref}
+  end
+
   defp initial_empty_state(user) do
     %PT.Data{
       user: user,
@@ -149,7 +160,10 @@ defmodule Teiserver.Player.Session do
 
   # Used only for tests
   @doc false
-  def trigger_connection_timeout(pid), do: send(pid, :connection_timeout)
+  def trigger_connection_timeout(pid) do
+    ref = :sys.get_state(pid).connection_timeout_ref
+    send(pid, {:connection_timeout, ref})
+  end
 
   @spec join_queues(User.id(), [Matchmaking.queue_ref()]) ::
           :ok | Matchmaking.join_error()
@@ -592,7 +606,7 @@ defmodule Teiserver.Player.Session do
 
       Logger.debug("session restored from snapshot")
 
-      {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
+      state = arm_connection_timeout(state)
       {:noreply, state}
     else
       {:error, err} ->
@@ -1673,9 +1687,12 @@ defmodule Teiserver.Player.Session do
           |> Map.put(:conn_pid, nil)
           |> put_in([Access.key!(:messaging_state), Access.key!(:subscribed?)], false)
 
-        if is_nil(state.battle) do
-          {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
-        end
+        state =
+          if is_nil(state.battle) do
+            arm_connection_timeout(state)
+          else
+            state
+          end
 
         :telemetry.execute([:tachyon, :abrupt_disconnect], %{count: 1})
         {:noreply, state}
@@ -1770,9 +1787,12 @@ defmodule Teiserver.Player.Session do
         broadcast_user_update!(state.user, :menu)
         new_state = %{state | battle: nil}
 
-        if is_nil(new_state.conn_pid) do
-          {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
-        end
+        new_state =
+          if is_nil(new_state.conn_pid) do
+            arm_connection_timeout(new_state)
+          else
+            new_state
+          end
 
         {:noreply, new_state}
     end
@@ -1787,8 +1807,8 @@ defmodule Teiserver.Player.Session do
 
   def handle_info({:EXIT, _from_pid, reason}, %PT.Data{} = state), do: {:stop, reason, state}
 
-  def handle_info(:connection_timeout, %PT.Data{} = state) do
-    if is_nil(state.conn_pid) and is_nil(state.battle) do
+  def handle_info({:connection_timeout, ref}, %PT.Data{} = state) do
+    if ref == state.connection_timeout_ref and is_nil(state.conn_pid) and is_nil(state.battle) do
       Logger.debug("Player timed out, stopping session")
       {:stop, :normal, state}
     else

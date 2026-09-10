@@ -177,6 +177,31 @@ defmodule Teiserver.Player.SessionTest do
       Session.trigger_connection_timeout(sess_pid)
       refute_receive {:DOWN, ^ref, :process, _, _}
     end
+
+    test "reconnecting then disconnecting again outside of a battle is not killed by the first, stale, timeout",
+         %{sess_pid: sess_pid, fake_conn: fake_conn} do
+      ref = Process.monitor(sess_pid)
+
+      # first abrupt disconnect arms a connection_timeout
+      disconnect(fake_conn)
+      stale_ref = :sys.get_state(sess_pid).connection_timeout_ref
+
+      {:ok, second_conn} = Task.start(:timer, :sleep, [:infinity])
+      Session.replace_connection(sess_pid, second_conn)
+
+      # reconnecting then disconnecting again arms a fresh connection_timeout,
+      # which still has plenty of time left on it
+      disconnect(second_conn)
+
+      # the timer armed by the first disconnect must not stop a session that
+      # has since reconnected and disconnected again on its own timer
+      send(sess_pid, {:connection_timeout, stale_ref})
+      refute_receive {:DOWN, ^ref, :process, _, _}
+
+      # the current, still-armed, timeout does stop the session once it fires
+      Session.trigger_connection_timeout(sess_pid)
+      assert_receive {:DOWN, ^ref, :process, _, _}
+    end
   end
 
   describe "lobby and matchmaking" do
