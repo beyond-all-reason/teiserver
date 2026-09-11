@@ -81,7 +81,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           User.id(),
           name :: String.t(),
           password :: String.t()
-        ) :: {:ok, connection_info()} | {:error, term()}
+        ) :: {:ok, %{ips: [String.t()], port: integer(), password: String.t()}} | {:error, term()}
   def add_player(battle_id, user_id, name, password) do
     via_tuple(battle_id) |> GenServer.call({:add_player, user_id, name, password})
   catch
@@ -213,7 +213,10 @@ defmodule Teiserver.TachyonBattle.Battle do
         {:reply, {:error, :no_autohost}, state}
 
       {_pid, participant} when not is_nil(participant) ->
-        {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
+        # This participant and their password is already known by the autohost
+        # returning the existing password as the new one wouldn't be recognised
+        resp = state |> Map.take([:ips, :port]) |> Map.put(:password, participant.password)
+        {:reply, {:ok, resp}, state}
 
       # The engine cannot deal with a total of more than 254 players
       # https://github.com/beyond-all-reason/RecoilEngine/issues/2850
@@ -225,9 +228,9 @@ defmodule Teiserver.TachyonBattle.Battle do
 
         case Autohost.add_player(pid, data) do
           :ok ->
-            resp = {:ok, Map.take(state, [:ips, :port])}
+            resp = state |> Map.take([:ips, :port]) |> Map.put(:password, password)
             state = put_in(state, [:participants, user_id], %{name: name, password: password})
-            {:reply, resp, state}
+            {:reply, {:ok, resp}, state}
 
           {:error, err} ->
             {:reply, {:error, err}, state}

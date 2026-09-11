@@ -672,7 +672,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
     resp = TachyonBattle.add_player(data.current_battle.id, user_id, name, password)
 
     case resp do
-      {:ok, %{ips: ips, port: port}} ->
+      # Using the returned password in case the user was already a battle participant
+      # and has an existing password
+      {:ok, %{ips: ips, port: port, password: password}} ->
         join_data = %{
           ips: ips,
           port: port,

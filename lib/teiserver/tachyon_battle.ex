@@ -73,7 +73,7 @@ defmodule Teiserver.TachyonBattle do
           User.id(),
           name :: String.t(),
           password :: String.t()
-        ) :: {:ok, connection_info()} | {:error, term()}
+        ) :: {:ok, %{ips: [String.t()], port: integer(), password: String.t()}} | {:error, term()}
   defdelegate add_player(battle_id, user_id, name, password), to: TachyonBattle.Battle
 
   @spec get_match_id(T.id()) :: term() | nil

@@ -53,7 +53,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
 
     re_add = Task.async(fn -> Battle.add_player(battle_id, 12345, "playername", "hunter2") end)
     # battle should remember players added after the start as well
-    {:ok, %{port: _port, ips: _ips}} = Task.await(re_add, 100)
+    {:ok, %{port: _port, ips: _ips, password: "hunter2"}} = Task.await(re_add, 100)
   end
 
   test "remember players from start script" do
