@@ -46,7 +46,7 @@
   <a
     :if={allow?(@conn, "Moderator")}
     class="dropdown-item"
-    href={~p"/moderation/actions/smurf_link/#{@user.id}"}
+    href={~p"/moderation/users/#{@user.id}/smurf_link"}
   >
     <Fontawesome.icon icon="fa-link" style="solid" /> &nbsp;
     Mark as smurf of

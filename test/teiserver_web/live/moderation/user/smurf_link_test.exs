@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Live.ModerationLive.Action.SmurfLinkTest do
+defmodule TeiserverWeb.Live.ModerationLive.User.SmurfLinkTest do
   alias Teiserver.Account
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Live.ModerationLive.Action.SmurfLinkTest do
       origin = GeneralTestLib.make_user(%{"name" => "origin_user_testname"})
       smurf = GeneralTestLib.make_user(%{"name" => "smurf_user_testname"})
 
-      {:ok, view, html} = live(conn, ~p"/moderation/actions/smurf_link/#{smurf.id}")
+      {:ok, view, html} = live(conn, ~p"/moderation/users/#{smurf.id}/smurf_link")
 
       assert html =~ "Marking <strong>#{smurf.name}</strong> as a smurf of:"
       assert_no_results(view)
