@@ -152,8 +152,6 @@
   {"lib/teiserver_web/router.ex", :no_return},
   {"lib/teiserver_web/templates/admin/lobby/lobby_chat.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
-  {"lib/teiserver_web/live/moderation/action/smurf_link.ex", :callback_arg_type_mismatch},
-  {"lib/teiserver_web/live/moderation/action/smurf_link.ex", :call},
   {"lib/teiserver/account/tasks/merge_accounts_task.ex", :no_return},
   {"test/support/fixtures/moderation_fixtures.ex"},
   {"lib/teiserver/moderation.ex"},
@@ -164,6 +162,7 @@
   {"lib/teiserver_web/live/moderation/user/set_gdpr_forget.ex"},
   {"lib/teiserver_web/live/moderation/user/clear_gdpr_forget.ex"},
   {"lib/teiserver/account/libs/user_lib.ex"},
+  {"lib/teiserver_web/live/moderation/user/smurf_link.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"},
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"}
 ]

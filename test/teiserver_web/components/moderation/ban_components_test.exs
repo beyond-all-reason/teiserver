@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Components.Moderation.BanComponentsTest do
-  alias TeiserverWeb.Components.Moderation.BanComponents
+defmodule TeiserverWeb.ModerationLive.BanComponentsTest do
+  alias TeiserverWeb.ModerationLive.BanComponents
 
   use TeiserverWeb.ConnCase, async: true
 

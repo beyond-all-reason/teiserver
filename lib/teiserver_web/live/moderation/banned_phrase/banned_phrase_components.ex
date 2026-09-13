@@ -104,6 +104,13 @@ defmodule TeiserverWeb.ModerationLive.BannedPhraseComponents do
     <div class="section-menu-bar">
       <ul class="menu menu-horizontal">
         <.section_menu_link
+          icon="fa-arrow-left"
+          url={~p"/moderation"}
+        >
+          Moderation
+        </.section_menu_link>
+
+        <.section_menu_link
           icon={StylingHelper.icon(:list)}
           url={~p"/moderation/banned_phrases"}
           active={@active == "list"}

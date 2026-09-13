@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Components.Moderation.BanComponents do
+defmodule TeiserverWeb.ModerationLive.BanComponents do
   @moduledoc """
   Components for Ban pages
   """
@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Components.Moderation.BanComponents do
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Components.Moderation.BanComponents.section_menu active={active} colour={} />
+  <TeiserverWeb.ModerationLive.BanComponents.section_menu active={active} colour={} />
   """
   attr :colour, :string, required: true
   attr :active, :string, required: true

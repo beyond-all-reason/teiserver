@@ -554,16 +554,7 @@ defmodule TeiserverWeb.Router do
       live "/users/:id/edit", User.Edit, :edit
       live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
       live "/users/:id/set_gdpr_forget", User.SetGDPRForget
-    end
-
-    live_session :actions,
-      layout: {TeiserverWeb.Layouts, :moderation_tw},
-      on_mount: [
-        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "moderation"}}},
-        {UserAuthentication, :ensure_authenticated},
-        {UserAuthentication, {:authorise, "Moderator"}}
-      ] do
-      live "/actions/smurf_link/:user_id", Action.SmurfLink, :show
+      live "/users/:id/smurf_link", User.SmurfLink, :show
     end
 
     live_session :banned_ips,

@@ -45,11 +45,22 @@
     <h3 class="font-bold text-xl">Actions</h3>
 
     <.link
+      navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>
+        <Fontawesome.icon icon="fa-link" style="solid" /> Mark as smurf of
+      </.button>
+    </.link>
+
+    <.link
       :if={not is_nil(@user.gdpr_forget_after)}
       navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
       phx-click={JS.push_focus()}
     >
-      <.button>Clear GDPR forget</.button>
+      <.button>
+        <Fontawesome.icon icon="circle-question" /> Clear GDPR forget
+      </.button>
     </.link>
 
     <.link
@@ -57,7 +68,9 @@
       navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
       phx-click={JS.push_focus()}
     >
-      <.button>Set GDPR forget</.button>
+      <.button>
+        <Fontawesome.icon icon="question" /> Set GDPR forget
+      </.button>
     </.link>
   </div>
 </div>

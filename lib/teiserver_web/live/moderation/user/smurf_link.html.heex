@@ -1,5 +1,6 @@
-<TeiserverWeb.Components.Moderation.ActionComponents.tw_section_menu
-  active="smurf-link"
+<TeiserverWeb.ModerationLive.UserComponents.section_menu
+  active="action"
+  user={@user}
   scope={@scope}
 />
 
@@ -39,4 +40,4 @@
   </.simple_form>
 </div>
 
-<.back navigate={~p"/teiserver/admin/user/#{@user.id}"}>Back to {@user.name}</.back>
+<.back navigate={~p"/moderation/users/#{@user.id}"}>Back to {@user.name}</.back>

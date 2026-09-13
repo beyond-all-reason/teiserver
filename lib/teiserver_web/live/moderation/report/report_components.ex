@@ -1,23 +1,23 @@
-defmodule TeiserverWeb.Components.Moderation.ReportComponents do
+defmodule TeiserverWeb.ModerationLive.ReportComponents do
   @moduledoc false
   use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
 
   @doc """
-  <TeiserverWeb.Components.Moderation.ReportComponents.section_menu
+  <TeiserverWeb.ModerationLive.ReportComponents.section_menu
     active={active}
     view_colour={@view_colour}
     current_user={@current_user} />
 
   or
 
-  <TeiserverWeb.Components.Moderation.ReportComponents.section_menu
+  <TeiserverWeb.ModerationLive.ReportComponents.section_menu
     active={active}
     view_colour={@view_colour}
     current_user={@current_user}
   >
     Content here
-  </TeiserverWeb.Components.Moderation.ReportComponents.section_menu>
+  </TeiserverWeb.ModerationLive.ReportComponents.section_menu>
   """
   attr :view_colour, :string, required: true
   attr :active, :string, required: true

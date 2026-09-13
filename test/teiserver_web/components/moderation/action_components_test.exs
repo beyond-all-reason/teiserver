@@ -1,5 +1,5 @@
-defmodule TeiserverWeb.Components.Moderation.ActionComponentsTest do
-  alias TeiserverWeb.Components.Moderation.ActionComponents
+defmodule TeiserverWeb.ModerationLive.ActionComponentsTest do
+  alias TeiserverWeb.ModerationLive.ActionComponents
 
   use TeiserverWeb.ConnCase, async: true
 

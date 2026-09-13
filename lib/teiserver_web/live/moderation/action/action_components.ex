@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Components.Moderation.ActionComponents do
+defmodule TeiserverWeb.ModerationLive.ActionComponents do
   @moduledoc """
   Components for Action pages
   """
@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
   import TeiserverWeb.NavComponents, only: [section_menu_button: 1, section_menu_link: 1]
 
   @doc """
-  <TeiserverWeb.Components.Moderation.ActionComponents.section_menu active={active} colour={} />
+  <TeiserverWeb.ModerationLive.ActionComponents.section_menu active={active} colour={} />
   """
   attr :colour, :string, required: true
   attr :active, :string, required: true
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
   end
 
   @doc """
-  <TeiserverWeb.Components.Moderation.ActionComponents.section_menu
+  <TeiserverWeb.ModerationLive.ActionComponents.section_menu
     active="some-link"
     scope={@scope}
   />
@@ -71,6 +71,13 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
     ~H"""
     <div class="section-menu-bar">
       <ul class="menu menu-horizontal">
+        <.section_menu_link
+          icon="fa-arrow-left"
+          url={~p"/moderation"}
+        >
+          Moderation
+        </.section_menu_link>
+
         <.section_menu_link
           icon={StylingHelper.icon(:list)}
           url={~p"/moderation/action"}
@@ -103,15 +110,6 @@ defmodule TeiserverWeb.Components.Moderation.ActionComponents do
           active={true}
         >
           Edit
-        </.section_menu_link>
-
-        <.section_menu_link
-          :if={@active == "smurf-link"}
-          active={true}
-          icon="fa-solid fa-code-compare"
-          url="#"
-        >
-          Smurf link
         </.section_menu_link>
       </ul>
     </div>
