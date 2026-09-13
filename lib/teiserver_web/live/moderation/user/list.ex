@@ -66,10 +66,33 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> noreply()
   end
 
-  def handle_event("validate-search", _params, %Socket{} = socket) do
-    socket
-    |> assign(search_changed?: true)
-    |> noreply()
+  def handle_event("validate-search", params, %Socket{assigns: %{search: search}} = socket) do
+    new_search = convert_search_params(params)
+
+    diff_keys =
+      Map.keys(new_search)
+      |> Enum.filter(fn key ->
+        new_value = new_search[key]
+        existing_value = search[key]
+
+        new_value != existing_value
+      end)
+      |> MapSet.new()
+
+    contains_update_keys? =
+      MapSet.new(["order_by", "page_size", "restriction"])
+      |> MapSet.intersection(diff_keys)
+      |> Enum.empty?()
+      |> Kernel.not()
+
+    # Certain keys are things where we'll want to update the results as they type/update
+    if contains_update_keys? do
+      handle_event("update-search", params, socket)
+    else
+      socket
+      |> assign(search_changed?: true)
+      |> noreply()
+    end
   end
 
   def handle_event("update-search", params, %Socket{assigns: assigns} = socket) do
@@ -112,6 +135,9 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   defp convert_search_params(params) do
     %{
       "name" => params["name"],
+      "email" => params["email"],
+      "role" => params["role"],
+      "restriction" => params["restriction"],
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
     }
@@ -120,18 +146,50 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   defp user_query(%Socket{assigns: %{search: search}} = _socket) do
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
+    |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_has_role(search["role"] || "")
+    |> UserQueries.where_has_restriction(search["restriction"] || "")
+
+    # TODO: Possible extra filters to add
+    # IP
+    # PreviousNames
   end
 
   defp get_users(%Socket{assigns: %{page: page, search: search}} = socket) do
+    # If they have searched for a name, we want to put that name
+    # at the top of the table
+    try_exact_search? =
+      Enum.any?([
+        search["name"] && search["name"] != "",
+        search["email"] && search["email"] != ""
+      ])
+
+    exact_user =
+      if try_exact_search? do
+        UserQueries.users()
+        |> UserQueries.where_name_lower(search["name"])
+        |> UserQueries.where_email_lower(search["email"])
+        |> UserQueries.load_user_stat()
+        |> QueryHelpers.limit_query(1)
+        |> Repo.one()
+      end
+
     users =
       user_query(socket)
       |> UserQueries.load_user_stat()
       |> UserQueries.order_by_from_string(search["order_by"])
       |> QueryHelpers.paginate(page, search["page_size"])
       |> Repo.all()
-
-    users =
-      users
+      |> then(fn results ->
+        # This puts our exact match at the top of the list, we have to remove
+        # the other instance of that user or it will not appear at the top of
+        # the list
+        if exact_user do
+          [exact_user | Enum.reject(results, fn %{id: id} -> id == exact_user.id end)]
+        else
+          results
+        end
+      end)
       |> Enum.map(fn %User{} = user ->
         # If a user has not logged in yet they will
         # not have a user stat so we need a default value for that
@@ -160,9 +218,19 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   end
 
   defp get_user_count(%Socket{assigns: assigns} = socket) do
+    # If we don't have any search values we know the number of users will be very high
+    # at least 500k at time of writing so getting a count of users is a bit pointless
+    search_values =
+      assigns.search
+      |> Map.drop(["_random", "order_by", "page_size"])
+
     user_count =
-      user_query(socket)
-      |> QueryHelpers.count()
+      if Enum.empty?(search_values) do
+        500_000
+      else
+        user_query(socket)
+        |> QueryHelpers.count()
+      end
 
     page_count = :math.ceil(user_count / assigns.search["page_size"]) |> round()
 

@@ -397,16 +397,34 @@ defmodule Teiserver.Account.UserQueries do
     from(users in User, as: :users)
   end
 
+  # Where id
   @spec where_id(t(), pos_integer() | String.t()) :: t()
   def where_id(query, id) do
     from users in query,
       where: users.id == ^id
   end
 
+  @spec where_id_not_in(t(), [User.id()]) :: t()
+  def where_id_not_in(query, ids) do
+    from users in query,
+      where: users.id not in ^ids
+  end
+
+  # Where name
   @spec where_name(t(), String.t()) :: t()
+  def where_name(query, ""), do: query
+
   def where_name(query, search_term) do
     from users in query,
       where: users.name == ^search_term
+  end
+
+  @spec where_name_lower(t(), String.t()) :: t()
+  def where_name_lower(query, ""), do: query
+
+  def where_name_lower(query, search_term) do
+    from users in query,
+      where: lower(users.name) == ^String.downcase(search_term)
   end
 
   @spec where_name_like(t(), String.t()) :: t()
@@ -419,18 +437,71 @@ defmodule Teiserver.Account.UserQueries do
       where: ilike(users.name, ^uname)
   end
 
-  @spec where_id_not_in(t(), [User.id()]) :: t()
-  def where_id_not_in(query, ids) do
+  # Where email
+  @spec where_email(t(), String.t()) :: t()
+  def where_email(query, ""), do: query
+
+  def where_email(query, search_term) do
     from users in query,
-      where: users.id not in ^ids
+      where: users.email == ^search_term
   end
 
+  @spec where_email_lower(t(), String.t()) :: t()
+  def where_email_lower(query, ""), do: query
+
+  def where_email_lower(query, search_term) do
+    from users in query,
+      where: lower(users.email) == ^String.downcase(search_term)
+  end
+
+  @spec where_email_like(t(), String.t()) :: t()
+  def where_email_like(query, ""), do: query
+
+  def where_email_like(query, search_term) do
+    uemail = "%" <> search_term <> "%"
+
+    from users in query,
+      where: ilike(users.email, ^uemail)
+  end
+
+  # Where role
+  def where_has_role(query, ""), do: query
+
+  def where_has_role(query, role_name) do
+    from users in query,
+      where: ^role_name in users.roles
+  end
+
+  def where_not_has_role(query, ""), do: query
+
+  def where_not_has_role(query, role_name) do
+    from users in query,
+      where: ^role_name not in users.roles
+  end
+
+  # Where restriction
+  def where_has_restriction(query, ""), do: query
+
+  def where_has_restriction(query, restriction_name) do
+    from users in query,
+      where: ^restriction_name in users.restrictions
+  end
+
+  def where_not_has_restriction(query, ""), do: query
+
+  def where_not_has_restriction(query, restriction_name) do
+    from users in query,
+      where: ^restriction_name not in users.restrictions
+  end
+
+  # Where -other-
   @spec where_smurf_of(t(), User.id()) :: t()
   def where_smurf_of(query, user_id) do
     from users in query,
       where: users.smurf_of_id == ^user_id
   end
 
+  # Joins
   @spec load_user_stat(t()) :: t()
   def load_user_stat(query) do
     from users in query,
@@ -440,6 +511,7 @@ defmodule Teiserver.Account.UserQueries do
       preload: [user_stat: user_stats]
   end
 
+  # Ordering
   @spec order_by_name(t(), :asc | :desc) :: t()
   def order_by_name(query, direction \\ :asc) do
     if direction == :asc do

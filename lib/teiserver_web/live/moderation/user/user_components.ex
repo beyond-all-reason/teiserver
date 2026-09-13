@@ -39,12 +39,47 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       phx-submit="update-search"
       id="user-search-form"
     >
-      <div class="grid grid-flow-row-dense grid-cols-3">
+      <div class="form-input-grid">
         <div class="m-2">
           <.input_tw
             type="text"
             field={@form[:name]}
             label="Name"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:email]}
+            label="Email"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:role]}
+            label="Role"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
+            type="select"
+            field={@form[:restriction]}
+            label="Has restriction"
+            options={[
+              {"Any user", ""},
+              {"Warned", "Warning reminder"},
+              {"Boss mode", "Boss"},
+              {"Reporting", "Reporting"},
+              {"Bridging", "Bridging"},
+              {"Renaming", "Renaming"},
+              {"Muted", "All chat"},
+              {"Playing", "All lobbies"},
+              {"Banned", "Login"}
+            ]}
           />
         </div>
 
