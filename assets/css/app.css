@@ -129,6 +129,10 @@
     hover:text-primary-content hover:bg-primary bg-base-300 transition duration-300 ease-in-out;
 }
 
+.form-input-grid {
+  @apply grid grid-flow-row-dense sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10
+}
+
 .admin-sensitive-topbar, .moderation-sensitive-topbar {
   @apply bg-warning text-warning-content p-2;
   
