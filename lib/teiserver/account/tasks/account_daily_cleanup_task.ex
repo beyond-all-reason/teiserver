@@ -1,25 +1,27 @@
 defmodule Teiserver.Account.Tasks.DailyCleanupTask do
-  @moduledoc false
-  alias Teiserver.Account
+  @moduledoc """
+  Removes "previous_emails" from all users with them who have not
+  changed their email in the last 14 days.
+  """
+
+  alias Ecto.Adapters.SQL
+  alias Teiserver.Repo
   use Oban.Worker, queue: :cleanup
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_job) do
-    days = Application.get_env(:teiserver, Teiserver)[:retention][:account_unverified]
+    timestamp = DateTime.utc_now() |> DateTime.shift(day: -14)
 
-    # Find all unverified users who registered over 14 days ago
-    _id_list =
-      Account.list_users(
-        search: [
-          not_has_role: "Verified",
-          inserted_before: DateTime.shift(DateTime.utc_now(), day: -days)
-        ],
-        select: [:id],
-        limit: :infinity
-      )
-      |> Enum.map(fn %{id: userid} -> userid end)
+    query = """
+      UPDATE account_users
+      SET previous_emails = '{}'
+      WHERE
+        email_last_changed_at IS NOT NULL
+        AND email_last_changed_at < $1
+        AND cardinality(previous_emails) > 0
+    """
 
-    :ok
+    SQL.query(Repo, query, [timestamp])
   end
 end
