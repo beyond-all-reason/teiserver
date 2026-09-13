@@ -158,6 +158,11 @@
   {"test/support/fixtures/moderation_fixtures.ex"},
   {"lib/teiserver/moderation.ex"},
   {"lib/teiserver_web/live/battles/match/show.ex"},
+  {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"},
+  {"lib/teiserver_web/live/moderation/user/show.ex"},
+  {"lib/teiserver_web/live/moderation/user/edit.ex"},
+  {"lib/teiserver_web/live/moderation/user/set_gdpr_forget.ex"},
+  {"lib/teiserver_web/live/moderation/user/clear_gdpr_forget.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"},
-  {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"}
+  {"lib/teiserver/account/libs/user_lib.ex"}
 ]

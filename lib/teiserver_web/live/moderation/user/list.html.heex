@@ -1,0 +1,65 @@
+<UserComponents.section_menu active="list" scope={@scope} />
+
+<.header>
+  Listing Users
+  <:actions>
+    <.link patch={~p"/moderation/users/new"}></.link>
+  </:actions>
+</.header>
+<div class="heading-subtitle">{format_number(@user_count)} users found</div>
+
+<UserComponents.search_form params={@search} changed?={@search_changed?} />
+
+<div style="clear: both;"></div>
+<div class="alert alert-info alert-soft my-4">
+  This page is intended to be a moderation specific list of users, this means it can be tweaked to the needs of the moderation team without needing to worry about admin requirements. Please speak to Teifion (probably in #mod-utils) regarding requests and ideas.
+</div>
+
+<.table
+  id="users-table"
+  rows={@streams.users}
+  table_class="table-sm table-zebra mt-4"
+  row_click={fn {_id, user} -> JS.navigate(~p"/moderation/users/#{user}") end}
+>
+  <:col :let={{_id, user}} label="User">{user.name}</:col>
+  <:col :let={{_id, user}} :if={@is_moderator?} label="Email">{user.email}</:col>
+  <:col :let={{_id, user}} label="Client">{user.client}</:col>
+  <:col :let={{_id, user}} label="Status">
+    <UserComponents.status_icon user={user} />
+  </:col>
+  <:col :let={{_id, user}} :if={@is_moderator?} label="HW">{user.hw_string}</:col>
+  <:col :let={{_id, user}} :if={@is_moderator?} label="IP">{user.last_ip}</:col>
+  <:col :let={{_id, user}} label="Roles">
+    {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
+    {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
+    {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
+  </:col>
+  <:col :let={{_id, user}} label="Registered">
+    {Calendar.strftime(user.inserted_at, "%Y-%m-%d")}
+  </:col>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="user-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@user.id || :new}
+    title={@page_title}
+    action={@live_action}
+    user={@user}
+    patch={~p"/moderation/users"}
+  />
+</.modal>

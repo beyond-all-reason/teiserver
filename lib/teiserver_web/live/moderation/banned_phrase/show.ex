@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.BannedPhrase.Show do
   @moduledoc false
   alias Teiserver.Moderation
   alias TeiserverWeb.ModerationLive.BannedPhrase.FormComponent
+  alias TeiserverWeb.ModerationLive.BannedPhraseComponents
 
   use TeiserverWeb, :live_view
 

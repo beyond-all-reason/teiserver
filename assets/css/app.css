@@ -145,6 +145,7 @@
 }
 
 .section-menu-bar .menu li a {
+  @apply mx-1;
   height: 2.2rem;
 }
 

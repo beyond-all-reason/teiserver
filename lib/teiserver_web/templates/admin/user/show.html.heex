@@ -37,6 +37,15 @@
             {render("actions.html", assigns)}
           </div>
 
+          <a
+            href={~p"/moderation/users/#{@user.id}"}
+            class={"btn btn-outline-#{bsname}"}
+            id="section-menu-new"
+          >
+            <i class="fa-solid fa-star"></i> &nbsp;
+            New UI
+          </a>
+
           <%= if @user.smurf_of_id do %>
             <a
               href={~p"/teiserver/admin/user/#{@user.smurf_of_id}"}

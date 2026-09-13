@@ -82,17 +82,6 @@
   </.link>
 
   <.link
-    :if={allow?(@current_user, "Moderator")}
-    href={~p"/admin/users/gdpr_forget/#{@user.id}"}
-    data-confirm="Are you sure?"
-    method="put"
-    class="dropdown-item bg-danger_transparent"
-  >
-    <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
-    GDPR clean
-  </.link>
-
-  <.link
     :if={allow?(@current_user, "Moderator") && @client_totp == :active}
     href={~p"/teiserver/admin/users/#{@user.id}/disable_totp"}
     data-confirm="Are you sure?"

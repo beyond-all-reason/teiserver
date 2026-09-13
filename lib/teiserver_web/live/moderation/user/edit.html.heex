@@ -1,0 +1,11 @@
+<UserComponents.section_menu active="edit" scope={@scope} />
+
+<div class="mt-8">
+  <div class="alert alert-warning alert-soft">
+    Page under construction
+  </div>
+</div>
+
+<.back :if={@user} navigate={~p"/moderation/users/#{@user.id}"}>
+  Back to {@user.name} details
+</.back>

@@ -20,21 +20,30 @@ defmodule TeiserverWeb.Components.Admin.UserComponents do
     <div class="row">
       <div class="col-md-9">
         <.section_menu_button
+          active={@active == "index"}
+          icon={Teiserver.Helper.StylingHelper.icon(:list)}
+          bsname={@colour}
+          url={~p"/teiserver/admin/user"}
+        >
+          List
+        </.section_menu_button>
+
+        <.section_menu_button
+          active={false}
+          icon="fa-solid fa-star"
+          bsname={@colour}
+          url={~p"/moderation/users"}
+        >
+          New list
+        </.section_menu_button>
+
+        <.section_menu_button
           active={@active == "client_admin"}
           icon={Teiserver.Account.ClientLib.icon()}
           bsname={@colour}
           url={~p"/teiserver/admin/client"}
         >
           Client admin
-        </.section_menu_button>
-
-        <.section_menu_button
-          active={@active == "list"}
-          icon={Teiserver.Helper.StylingHelper.icon(:list)}
-          bsname={@colour}
-          url={~p"/teiserver/admin/user"}
-        >
-          List
         </.section_menu_button>
 
         <.section_menu_button

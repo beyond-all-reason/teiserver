@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.BannedDomain.Show do
   @moduledoc false
   alias Teiserver.Moderation
   alias TeiserverWeb.ModerationLive.BannedDomain.FormComponent
+  alias TeiserverWeb.ModerationLive.BannedDomainComponents
 
   use TeiserverWeb, :live_view
 

@@ -38,6 +38,14 @@ defmodule TeiserverWeb.ModerationLive.Menu do
 
       <.menu_page_link
         :if={allow?(@scope, "Moderator")}
+        icon="users"
+        url={~p"/moderation/users"}
+      >
+        Users
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow?(@scope, "Moderator")}
         icon="text-slash"
         url={~p"/moderation/banned_phrases"}
       >
