@@ -711,4 +711,18 @@ CLIENTS test_room #{user.name}\n"
   #   reply = _recv_binary(socket1)
   #   assert reply == "SAIDPRIVATE #{user2.name} 😄\n"
   # end
+
+  test "CREATEBOTACCOUNT", %{user: user, socket: socket} do
+    Auth.add_roles(user.id, ["Moderator"])
+    :timer.sleep(500)
+    _recv_until(socket)
+
+    # There was an issue where we validated _all_ names and that caused SPADS to be
+    # unable to create a bot account, this ensures that does not regres
+    _send_raw(socket, "CREATEBOTACCOUNT Host[EU4][000] OwnerName\n")
+    reply = _recv_raw(socket)
+
+    assert reply ==
+             "SERVERMSG A new bot account Host[EU4][000] has been created, with the same password as #{user.name}\n"
+  end
 end
