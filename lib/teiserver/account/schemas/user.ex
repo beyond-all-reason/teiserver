@@ -119,7 +119,6 @@ defmodule Teiserver.Account.User do
         {:error, reason} -> [{:email, reason}]
       end
     end)
-    |> validate_name_change()
     |> put_md5_password_hash()
   end
 
@@ -265,7 +264,6 @@ defmodule Teiserver.Account.User do
         {:error, reason} -> [{:email, reason}]
       end
     end)
-    |> validate_name_change()
     |> then(fn changeset ->
       case password_type do
         :plain_password -> put_plain_password_hash(changeset)

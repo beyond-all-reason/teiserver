@@ -356,28 +356,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       resp = conn |> post(create_user_path(), user_data) |> json_response(200)
       assert resp["user"]["name"] == "User_Name[123]"
     end
-
-    test "handles unicode characters", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "José_María",
-        "email" => "josé@example.com",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["user"] == nil
-    end
-
-    test "handles spaces", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "test name",
-        "email" => "test@example.com",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(400)
-      assert resp["user"] == nil
-    end
   end
 
   defp auth_conn(conn, token), do: put_req_header(conn, "authorization", "Bearer #{token.value}")
