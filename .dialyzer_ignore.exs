@@ -161,5 +161,6 @@
   {"lib/teiserver/account/libs/user_lib.ex"},
   {"lib/teiserver_web/live/moderation/user/smurf_link.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"},
+  {"lib/teiserver/account/tasks/gdpr_anonymise_task.ex"},
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"}
 ]

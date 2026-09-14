@@ -238,7 +238,7 @@ config :teiserver, Oban,
        {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask}
      ]}
   ],
-  queues: [logging: 1, cleanup: 1, teiserver: 10]
+  queues: [logging: 1, cleanup: 1, processing: 5, teiserver: 10]
 
 config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 

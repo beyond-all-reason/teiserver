@@ -15,9 +15,14 @@ defmodule Teiserver.Moderation.CreateAntiAbuseRecordTask do
   """
   alias Teiserver.Account
   alias Teiserver.Account.Scope
+  alias Teiserver.Account.SmurfKeyQueries
   alias Teiserver.Account.User
+  alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Microblog.PostQueries
+  alias Teiserver.Microblog.UploadQueries
   alias Teiserver.Moderation
   alias Teiserver.Moderation.AntiAbuseRecord
+  alias Teiserver.Repo
 
   @aad "teiserver-anti-abuse"
 
@@ -91,12 +96,35 @@ defmodule Teiserver.Moderation.CreateAntiAbuseRecordTask do
     Moderation.create_anti_abuse_record(attrs, scope)
   end
 
-  def get_restore_data(%User{} = _user) do
+  def get_restore_data(%User{id: id} = _user) do
+    smurf_key_ids =
+      SmurfKeyQueries.smurf_keys()
+      |> SmurfKeyQueries.where_user_id(id)
+      |> QueryHelpers.query_select([:id])
+      |> Repo.all()
+      |> Enum.map(& &1.id)
+      |> Enum.sort()
+
+    post_ids =
+      PostQueries.posts()
+      |> PostQueries.where_poster_id(id)
+      |> QueryHelpers.query_select([:id])
+      |> Repo.all()
+      |> Enum.map(& &1.id)
+      |> Enum.sort()
+
+    upload_ids =
+      UploadQueries.uploads()
+      |> UploadQueries.where_uploader_id(id)
+      |> QueryHelpers.query_select([:id])
+      |> Repo.all()
+      |> Enum.map(& &1.id)
+      |> Enum.sort()
+
     %{
-      avoided_by: [],
-      blocked_by: [],
-      ignored_by: [],
-      smurf_keys: []
+      smurf_key_ids: smurf_key_ids,
+      post_ids: post_ids,
+      upload_ids: upload_ids
     }
   end
 

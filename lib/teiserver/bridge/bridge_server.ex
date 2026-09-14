@@ -249,7 +249,7 @@ defmodule Teiserver.Bridge.BridgeServer do
             icon: "fa-brands fa-discord",
             colour: "#0066AA",
             password: Account.make_bot_password(),
-            roles: ["Bot", "Verified"],
+            roles: ["Bot", "Verified", "Server"],
             data: %{
               bot: true,
               moderator: false,

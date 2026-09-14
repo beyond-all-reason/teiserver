@@ -1,7 +1,7 @@
-defmodule Teiserver.Moderation.RestoreForgottenUserTask do
+defmodule Teiserver.Moderation.RestoreAnonymisedUserTask do
   @moduledoc """
   The flip side of CreateAntiAbuseRecordTask, given an anti-abuse record
-  restore the user using the decryption key.
+  restore soome of the user details using the decryption key.
 
   We use an identifier (email, discord_id, steam_id) and look for a record with the
   hashed value of said identifier. With said identifier we can then retrieve the `encryption_key` which allows us to then decrypt the data used to restore the User.
