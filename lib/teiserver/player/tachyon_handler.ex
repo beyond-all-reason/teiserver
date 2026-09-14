@@ -170,6 +170,10 @@ defmodule Teiserver.Player.TachyonHandler do
     {:request, "battle/start", data, [], state}
   end
 
+  def handle_info({:battle_ended, battle_ended_data}, state) do
+    {:event, "battle/ended", battle_ended_to_tachyon(battle_ended_data), state}
+  end
+
   def handle_info({:messaging, {:received, message}}, state) do
     {:event, "messaging/received", message_to_tachyon(message), state}
   end
@@ -1269,6 +1273,23 @@ defmodule Teiserver.Player.TachyonHandler do
       engine: %{version: battle.engine.version},
       game: %{springName: battle.game.spring_name},
       map: %{springName: battle.map.spring_name}
+    }
+  end
+
+  defp battle_ended_to_tachyon(data) do
+    %{
+      battleId: data.battle_id,
+      players:
+        Enum.map(data.players, fn p ->
+          %{
+            userId: to_string(p.user_id),
+            allyTeam: to_string(p.ally_team),
+            team: to_string(p.team),
+            player: to_string(p.player)
+          }
+        end),
+      spectators: Enum.map(data.spectators, fn s -> %{userId: to_string(s.user_id)} end),
+      winningAllyTeamIds: Enum.map(data.winning_ally_team_ids, &to_string/1)
     }
   end
 
