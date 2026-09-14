@@ -156,13 +156,6 @@ defmodule Teiserver.Account.UserLibTest do
       assert match?({:error, %Changeset{errors: [name: _error]}}, UserLib.create_user(user_vars))
     end
 
-    test "script_create_user/2" do
-      user_vars = %{name: @disallowed_name, email: "test@test.test", password: "password"}
-
-      assert {:error, %{errors: [name: _error]}} =
-               UserLib.script_create_user(user_vars, :md5_password)
-    end
-
     test "register_user/2" do
       user_vars = %{
         "name" => @disallowed_name,
@@ -239,13 +232,6 @@ defmodule Teiserver.Account.UserLibTest do
 
       assert {:error, %{errors: [name: _error]}} =
                UserLib.server_update_user(user, %{name: @disallowed_name})
-    end
-
-    test "script_update_user/2 - error" do
-      user = AccountFixtures.user_fixture()
-
-      assert {:error, %{errors: [name: _error]}} =
-               UserLib.script_update_user(user, %{name: @disallowed_name})
     end
 
     test "password_reset_update_user/2" do
