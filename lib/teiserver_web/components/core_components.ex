@@ -779,10 +779,10 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
-          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-neutral dark:text-neutral-content">
+          <dt class="list-title-item">
             {item.title}
           </dt>
-          <dd class="text-sm leading-6 text-neutral/80 dark:text-neutral-content/80">
+          <dd class="list-content-item">
             {render_slot(item)}
           </dd>
         </div>

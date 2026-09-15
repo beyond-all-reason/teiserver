@@ -173,6 +173,13 @@
   @apply w-full max-w-4xl px-4 mx-auto mt-15 rounded-md;
 }
 
+.list-title-item {
+  @apply w-1/4 flex-none text-[0.8125rem] leading-6 text-neutral dark:text-neutral-content
+}
+
+.list-content-item {
+  @apply text-sm leading-6 text-neutral/80 dark:text-neutral-content/80
+}
 
 /* Apex charts dark mode */
 .apexcharts-text, .apexcharts-menu-item, .apexcharts-legend-text {

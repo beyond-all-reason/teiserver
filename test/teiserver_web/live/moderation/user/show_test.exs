@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
     # the newer version of phoenix solves it and we're trying to do things
     # across two different versions
     @tag :needs_attention
-    test "redirect on no ip", %{conn: conn} do
+    test "redirect on no ID", %{conn: conn} do
       {:error,
        {:redirect,
         %{
@@ -53,12 +53,15 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
         live(conn, ~p"/moderation/users/123456789")
     end
 
-    test "render ip", %{conn: conn} do
+    test "render with ID", %{conn: conn} do
       user = AccountFixtures.user_fixture()
 
       {:ok, _live, html} = live(conn, ~p"/moderation/users/#{user.id}")
 
-      assert html =~ ~s(User: #{user.name})
+      # Strip out whitespace so it's on one line and easier to match correctly
+      html = String.replace(html, ~r/\s+/, " ")
+
+      assert html =~ ~s(<dd class="list-content-item"> #{user.name} </dd>)
     end
   end
 
