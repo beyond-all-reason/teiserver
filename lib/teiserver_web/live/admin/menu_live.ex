@@ -167,6 +167,16 @@ defmodule TeiserverWeb.Admin.MenuLive do
     </div>
 
     <div class="menu-grid">
+      <.menu_page_link
+        :if={allow_any?(@scope, ~w(Admin))}
+        icon="key"
+        url={~p"/admin/tools/mfa_usage"}
+      >
+        MFA Usage
+      </.menu_page_link>
+    </div>
+
+    <div class="menu-grid">
       <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"} size={:small}>
         Back
       </.menu_page_link>

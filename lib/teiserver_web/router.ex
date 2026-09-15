@@ -722,6 +722,20 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  scope "/admin", TeiserverWeb.AdminLive do
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
+
+    live_session :admin_tools,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "admin"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/tools/mfa_usage", Tools.MFAUsage, :show
+    end
+  end
+
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
     pipe_through([:browser, :app_layout, :protected])
 
