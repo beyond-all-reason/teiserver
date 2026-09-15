@@ -28,13 +28,12 @@ defmodule Teiserver.Moderation.BannedPhraseQueries do
       where: ilike(banned_phrases.phrase, ^phrase)
   end
 
-  @spec order_by_severity(t(), :asc | :desc) :: t()
-  def order_by_severity(query, direction \\ :asc) do
-    if direction == :asc do
-      from(banned_phrases in query, order_by: [asc: banned_phrases.severity])
-    else
-      from(banned_phrases in query, order_by: [desc: banned_phrases.severity])
-    end
+  @spec where_use_case(t(), nil | String.t()) :: t()
+  def where_use_case(query, nil), do: query
+
+  def where_use_case(query, use_case) do
+    from banned_phrases in query,
+      where: ^use_case in banned_phrases.use_cases
   end
 
   @spec order_by_inserted_at(t(), :asc | :desc) :: t()

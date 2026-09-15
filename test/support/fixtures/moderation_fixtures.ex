@@ -50,7 +50,6 @@ defmodule Teiserver.ModerationFixtures do
         %{
           phrase: "some phrase",
           score_threshold: 42,
-          severity: :low,
           type: :raw
         },
         attrs

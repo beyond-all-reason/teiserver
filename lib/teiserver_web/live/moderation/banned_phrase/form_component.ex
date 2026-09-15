@@ -16,6 +16,9 @@ defmodule TeiserverWeb.ModerationLive.BannedPhrase.FormComponent do
       <.header>
         {@title}
       </.header>
+      <div class="mb-2 text-sm leading-6 text-base-content/70">
+        For phrases of type "raw" you can use comma separated values to match on a selection of phrases.
+      </div>
 
       <.simple_form
         for={@form}
@@ -28,10 +31,11 @@ defmodule TeiserverWeb.ModerationLive.BannedPhrase.FormComponent do
         <.input_tw field={@form[:score_threshold]} type="number" label="Score threshold" />
         <.input_tw field={@form[:type]} type="select" label="Type" options={BannedPhrase.types()} />
         <.input_tw
-          field={@form[:severity]}
+          field={@form[:use_cases]}
           type="select"
-          label="Severity"
-          options={BannedPhrase.severities()}
+          label="Use cases"
+          multiple
+          options={BannedPhrase.use_cases()}
         />
 
         <div class="my-2">
