@@ -98,7 +98,8 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
 
       assert code.user_id == user.id
 
-      # Attempting to generate a new code while an unexpired one exists already will not create a new one
+      # Attempting to generate a new code while
+      # an unexpired one exists already will not create a new one
       conn = post(conn, ~p"/teiserver/account/security/discord/generate_code")
       assert redirected_to(conn) == ~p"/teiserver/account/security"
 
