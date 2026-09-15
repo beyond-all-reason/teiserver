@@ -19,7 +19,6 @@ defmodule Teiserver.Moderation.BannedPhrase do
 
   use TeiserverWeb, :schema
 
-  @type severity :: :low | :medium | :high
   @type search_type :: :raw | :fuzzy | :regex
 
   @type id :: non_neg_integer()
@@ -28,7 +27,8 @@ defmodule Teiserver.Moderation.BannedPhrase do
     field :phrase, :string
     field :score_threshold, :integer
     field :type, Ecto.Enum, values: [:raw, :fuzzy, :regex]
-    field :severity, Ecto.Enum, values: [:low, :medium, :high]
+
+    field :use_cases, {:array, :string}, default: []
 
     # The version of the phrase after being loaded into memory,
     # for example a regex would be compiled as a regex so it can be processed
@@ -38,13 +38,14 @@ defmodule Teiserver.Moderation.BannedPhrase do
   end
 
   def types, do: [:raw, :fuzzy, :regex]
-  def severities, do: [:low, :medium, :high]
+  def use_cases, do: ["username", "chat", "lobby name"]
 
   @doc false
   def changeset(banned_phrase, attrs) do
+    # We purposefully allow length 0 use_cases
     banned_phrase
-    |> cast(attrs, [:phrase, :score_threshold, :type, :severity])
-    |> validate_required([:phrase, :score_threshold, :type, :severity])
+    |> cast(attrs, [:phrase, :score_threshold, :type, :use_cases])
+    |> validate_required([:phrase, :score_threshold, :type, :use_cases])
     |> unique_constraint([:phrase])
     |> validate_phrase()
   end
@@ -114,42 +115,38 @@ defmodule Teiserver.Moderation.BannedPhrase do
   end
 
   @doc """
-  Runs through a filtered list of banned phrases and returns the highest severity
-  matched by the message.
+  Runs through a filtered list of banned phrases and says if any match
   """
-  @spec message_severity(String.t(), severity(), [search_type()]) :: nil | BannedPhrase.severity()
-  def message_severity(message, min_severity \\ :high, types \\ [:raw, :fuzzy, :regex]) do
+  @spec message_is_banned?(String.t(), String.t() | nil, [search_type()]) :: boolean()
+  def message_is_banned?(
+        message,
+        use_case \\ nil,
+        types \\ [:raw, :fuzzy, :regex]
+      ) do
     found_phrase =
       :telemetry.span(
-        [:teiserver, :moderation, :message_severity],
-        %{min_severity: min_severity},
+        [:teiserver, :moderation, :message_is_banned?],
+        %{use_case: use_case},
         fn ->
           found_phrase =
-            Moderation.list_banned_phrases_cache()
-            |> Enum.filter(fn %BannedPhrase{type: type, severity: severity} ->
-              severity_is_at_least(severity, min_severity) and Enum.member?(types, type)
-            end)
-            |> Enum.find(fn %BannedPhrase{type: type, severity: severity} = banned_phrase ->
-              severity_is_at_least(severity, min_severity) and
-                Enum.member?(types, type) and
-                phrase_match?(banned_phrase, message)
+            Moderation.list_banned_phrases_cache(use_case)
+            |> Enum.find(fn %BannedPhrase{type: type} = banned_phrase ->
+              Enum.member?(types, type) and phrase_match?(banned_phrase, message)
             end)
 
-          {found_phrase, %{min_severity: min_severity, matched: found_phrase != nil}}
+          {found_phrase, %{matched: found_phrase != nil}}
         end
       )
 
+    # Track which phrases are being triggered
     if found_phrase do
-      found_phrase.severity
+      :telemetry.execute([:teiserver, :moderation, :message_is_banned], %{}, %{
+        found_phrase_id: found_phrase.id
+      })
     end
-  end
 
-  defp severity_is_at_least(severity_tested, severity_minimum) do
-    case severity_minimum do
-      :low -> true
-      :medium -> Enum.member?([:medium, :high], severity_tested)
-      :high -> :high == severity_tested
-    end
+    # If we found anything at all then the message is banned in this use case
+    not is_nil(found_phrase)
   end
 
   @doc """
@@ -158,9 +155,11 @@ defmodule Teiserver.Moderation.BannedPhrase do
   """
   @spec phrase_match?(BannedPhrase.t(), String.t()) :: boolean()
   def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
-    message
-    |> String.downcase()
-    |> String.contains?(loaded_phrase)
+    # Downcase the message as we are case insensitive
+    message = String.downcase(message)
+    parts = String.split(loaded_phrase, ",")
+
+    String.contains?(message, parts)
   end
 
   def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)

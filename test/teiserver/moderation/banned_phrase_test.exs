@@ -8,7 +8,7 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
   import Teiserver.ModerationFixtures
 
   describe "banned_phrase standard utility functions" do
-    @invalid_attrs %{type: nil, severity: nil, phrase: nil, score_threshold: nil}
+    @invalid_attrs %{type: nil, phrase: nil, score_threshold: nil}
 
     test "list_banned_phrases/0 returns all banned_phrases" do
       banned_phrase = banned_phrase_fixture()
@@ -23,14 +23,12 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
     test "create_banned_phrase/1 with valid data creates a banned_phrase" do
       valid_attrs = %{
         type: "raw",
-        severity: "medium",
         phrase: "some phrase",
         score_threshold: 42
       }
 
       assert {:ok, %BannedPhrase{} = banned_phrase} = Moderation.create_banned_phrase(valid_attrs)
       assert banned_phrase.type == :raw
-      assert banned_phrase.severity == :medium
       assert banned_phrase.phrase == "some phrase"
       assert banned_phrase.score_threshold == 42
     end
@@ -44,7 +42,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
 
       update_attrs = %{
         type: "raw",
-        severity: "medium",
         phrase: "some updated phrase",
         score_threshold: 43
       }
@@ -53,7 +50,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
                Moderation.update_banned_phrase(banned_phrase, update_attrs)
 
       assert banned_phrase.type == :raw
-      assert banned_phrase.severity == :medium
       assert banned_phrase.phrase == "some updated phrase"
       assert banned_phrase.score_threshold == 43
     end
@@ -80,7 +76,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         Moderation.create_banned_phrase(%{
           phrase: "abc",
           type: :raw,
-          severity: :low,
           score_threshold: 0
         })
 
@@ -93,7 +88,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         Moderation.create_banned_phrase(%{
           phrase: "abc*",
           type: :fuzzy,
-          severity: :low,
           score_threshold: 0
         })
 
@@ -106,7 +100,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         Moderation.create_banned_phrase(%{
           phrase: "abc",
           type: :fuzzy,
-          severity: :low,
           score_threshold: 0
         })
 
@@ -118,7 +111,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         Moderation.create_banned_phrase(%{
           phrase: "[abc]*",
           type: :regex,
-          severity: :low,
           score_threshold: 0
         })
 
@@ -131,7 +123,6 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
         Moderation.create_banned_phrase(%{
           phrase: "(abc",
           type: :regex,
-          severity: :low,
           score_threshold: 0
         })
 
@@ -152,6 +143,22 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
       assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
       assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
+      refute BannedPhrase.phrase_match?(phrase, "the quick def fox")
+    end
+
+    test "raw csv" do
+      phrase =
+        banned_phrase_fixture(%{
+          phrase: "abc,def",
+          type: :raw
+        })
+        |> BannedPhrase.load_phrase()
+
+      refute BannedPhrase.phrase_match?(phrase, "the quick brown fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick Abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick ABC fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick abc fox")
+      assert BannedPhrase.phrase_match?(phrase, "the quick def fox")
     end
 
     test "fuzzy" do
@@ -184,84 +191,64 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
   end
 
   describe "load task" do
-    test "task loads messages in correct order" do
+    test "task loads messages" do
       banned_phrase_fixture(%{
-        phrase: "low severity",
-        severity: :low
+        phrase: "Phrase 1"
       })
 
       banned_phrase_fixture(%{
-        phrase: "low severity",
-        severity: :high
+        phrase: "Phrase 2"
       })
 
       banned_phrase_fixture(%{
-        phrase: "low severity",
-        severity: :medium
+        phrase: "Phrase 3"
       })
 
       LoadBannedPhrasesTask.perform()
 
-      [p1, p2, p3] = Moderation.list_banned_phrases_cache()
-      assert p1.severity == :high
-      assert p2.severity == :medium
-      assert p3.severity == :low
+      phrases =
+        Moderation.list_banned_phrases_cache(nil)
+        |> Enum.map(& &1.phrase)
+        |> Enum.sort()
+
+      assert phrases == ["Phrase 1", "Phrase 2", "Phrase 3"]
     end
   end
 
-  describe "message_severity" do
-    setup do
-      low =
-        banned_phrase_fixture(%{
-          phrase: "low severity",
-          severity: :low,
-          type: :raw
-        })
-        |> BannedPhrase.load_phrase()
+  describe "use_case" do
+    test "use cases" do
+      banned_phrase_fixture(%{
+        phrase: "bad_name/chat",
+        use_cases: ["username", "chat"],
+        type: :raw
+      })
 
-      medium =
-        banned_phrase_fixture(%{
-          phrase: "medium severity",
-          severity: :medium,
-          type: :raw
-        })
-        |> BannedPhrase.load_phrase()
+      banned_phrase_fixture(%{
+        phrase: "bad_chat",
+        use_cases: ["chat"],
+        type: :raw
+      })
 
-      high =
-        banned_phrase_fixture(%{
-          phrase: "high severity",
-          severity: :high,
-          type: :raw
-        })
-        |> BannedPhrase.load_phrase()
+      banned_phrase_fixture(%{
+        phrase: "bad_lobby",
+        use_cases: ["lobby"],
+        type: :raw
+      })
 
-      Teiserver.cache_put(:application_metadata_cache, "banned_phrases", [high, medium, low])
+      LoadBannedPhrasesTask.perform()
 
-      :ok
-    end
+      # Correctly matches the messages
+      assert BannedPhrase.message_is_banned?("bad_name/chat", "chat")
+      assert BannedPhrase.message_is_banned?("bad_name/chat", "username")
+      assert BannedPhrase.message_is_banned?("bad_chat", "chat")
 
-    test "low phrase, check all" do
-      assert BannedPhrase.message_severity("low severity", :low) == :low
-    end
+      # Does not match the message because the usecase is wrong
+      refute BannedPhrase.message_is_banned?("bad_chat", "username")
+      refute BannedPhrase.message_is_banned?("bad_name/chat", "lobby")
+      refute BannedPhrase.message_is_banned?("bad_chat", "lobby")
 
-    test "low phrase, check high" do
-      assert BannedPhrase.message_severity("low severity", :high) == nil
-    end
-
-    test "medium phrase, check all" do
-      assert BannedPhrase.message_severity("medium severity", :low) == :medium
-    end
-
-    test "medium phrase, check high" do
-      assert BannedPhrase.message_severity("medium severity", :high) == nil
-    end
-
-    test "high phrase, check all" do
-      assert BannedPhrase.message_severity("high severity", :low) == :high
-    end
-
-    test "high phrase, check high" do
-      assert BannedPhrase.message_severity("high severity", :high) == :high
+      # And we correctly handle use cases that don't exist
+      refute BannedPhrase.message_is_banned?("bad_chat", "not a use case")
     end
   end
 end

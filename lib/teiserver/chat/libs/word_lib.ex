@@ -95,7 +95,7 @@ defmodule Teiserver.Chat.WordLib do
   def blacklisted_phrase?(text) do
     text = StringHelper.leet_replace(text)
 
-    # If it's a high severity match then yes it is blacklisted
-    BannedPhrase.message_severity(text, :high) == :high
+    # TODO: Break this out into different use cases
+    BannedPhrase.message_is_banned?(text, nil)
   end
 end
