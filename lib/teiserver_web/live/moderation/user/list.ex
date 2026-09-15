@@ -137,6 +137,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       "name" => params["name"],
       "email" => params["email"],
       "role" => params["role"],
+      "without_role" => params["without_role"],
       "restriction" => params["restriction"],
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
@@ -148,6 +149,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> UserQueries.where_name_like(search["name"] || "")
     |> UserQueries.where_email_like(search["email"] || "")
     |> UserQueries.where_has_role(search["role"] || "")
+    |> UserQueries.where_not_has_role(search["without_role"] || "")
     |> UserQueries.where_has_restriction(search["restriction"] || "")
 
     # TODO: Possible extra filters to add
@@ -167,8 +169,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     exact_user =
       if try_exact_search? do
         UserQueries.users()
-        |> UserQueries.where_name_lower(search["name"])
-        |> UserQueries.where_email_lower(search["email"])
+        |> UserQueries.where_name_lower(search["name"] || "")
+        |> UserQueries.where_email_lower(search["email"] || "")
         |> UserQueries.load_user_stat()
         |> QueryHelpers.limit_query(1)
         |> Repo.one()

@@ -1,22 +1,18 @@
-<UserComponents.section_menu active="show" user={@user} scope={@scope} />
+<UserComponents.section_menu active="show" user={@user} scope={@scope}>
+  <.link
+    :if={@user}
+    navigate={~p"/teiserver/admin/user/#{@user.id}"}
+    phx-click={JS.push_focus()}
+    class="me-4"
+  >
+    <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
+  </.link>
+
+  <UserComponents.quick_search />
+</UserComponents.section_menu>
 
 <.header :if={@user}>
-  User: {@user.name}
-  <:actions>
-    <.link
-      navigate={~p"/teiserver/admin/user/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button>Old UI</.button>
-    </.link>
-
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}/edit"}
-      phx-click={JS.push_focus()}
-    >
-      <.button>Edit User</.button>
-    </.link>
-  </:actions>
+  {@user.name}
 </.header>
 
 <div style="clear: both;"></div>
@@ -24,54 +20,34 @@
   This page is intended to be a moderation specific list of users, this means it can be tweaked to the needs of the moderation team without needing to worry about admin requirements. Please speak to Teifion (probably in #mod-utils) regarding requests and ideas.
 </div>
 
-<div :if={not Enum.empty?(@alerts)} class="my-2">
-  <div :for={{type, text} <- @alerts} class={"alert #{type}"}>
+<div :if={not Enum.empty?(@alerts)} class="my-2 flex">
+  <div :for={{type, text} <- @alerts} class={"flex-1 alert #{type}"}>
     {text}
   </div>
 </div>
 
 <div class="flex">
-  <div class="flex-1">
-    <h3 class="font-bold text-xl">Details</h3>
-    <.list :if={@user}>
-      <:item title="Name">{@user.name}</:item>
-      <:item title="Email">{@user.email}</:item>
-      <:item title="Registered">
-        {Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}
-      </:item>
-    </.list>
+  <div class="flex-1 px-4">
+    <UserComponents.show_tabset tab={@tab1} set="1" />
+
+    <div :if={@user}>
+      <UserComponents.show_details :if={@tab1 == "details"} user={@user} />
+
+      <UserComponents.show_audit :if={@tab1 == "audit"} audit_logs={@streams.audit_logs} />
+
+      <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} />
+    </div>
   </div>
-  <div :if={@user} class="flex-1">
-    <h3 class="font-bold text-xl">Actions</h3>
+  <div :if={@user} class="flex-1 px-4">
+    <UserComponents.show_tabset tab={@tab2} set="2" />
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
-      phx-click={JS.push_focus()}
-    >
-      <.button>
-        <Fontawesome.icon icon="fa-link" style="solid" /> Mark as smurf of
-      </.button>
-    </.link>
+    <div :if={@user}>
+      <UserComponents.show_details :if={@tab2 == "details"} user={@user} />
 
-    <.link
-      :if={not is_nil(@user.gdpr_forget_after)}
-      navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
-      phx-click={JS.push_focus()}
-    >
-      <.button>
-        <Fontawesome.icon icon="circle-question" /> Clear GDPR forget
-      </.button>
-    </.link>
+      <UserComponents.show_audit :if={@tab2 == "audit"} audit_logs={@streams.audit_logs} />
 
-    <.link
-      :if={is_nil(@user.gdpr_forget_after)}
-      navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
-      phx-click={JS.push_focus()}
-    >
-      <.button>
-        <Fontawesome.icon icon="question" /> Set GDPR forget
-      </.button>
-    </.link>
+      <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} />
+    </div>
   </div>
 </div>
 
