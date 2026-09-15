@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Account.SecurityController do
+  alias Ecto.UUID
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.TOTP
+  alias Teiserver.Logging
   alias Teiserver.OAuth
 
   use TeiserverWeb, :controller
@@ -18,23 +20,93 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
+    user_id = conn.assigns.current_user.id
+
     user_tokens =
       Account.list_user_tokens(
         search: [
-          user_id: conn.assigns.current_user.id
+          user_id: user_id
         ],
         order_by: "Most recently used"
       )
 
-    oauth_applications = OAuth.list_authorized_applications(conn.assigns.current_user.id)
-    oauth_token_counts = OAuth.get_application_token_counts(conn.assigns.current_user.id)
+    oauth_applications = OAuth.list_authorized_applications(user_id)
+    oauth_token_counts = OAuth.get_application_token_counts(user_id)
+
+    discord_link_code =
+      Account.list_codes(
+        search: [
+          user_id: user_id,
+          purpose: "discord_link",
+          expired: false
+        ],
+        order_by: "Newest first",
+        limit: 1
+      )
+      |> List.first()
 
     conn
     |> assign(:user_tokens, user_tokens)
     |> assign(:oauth_applications, oauth_applications)
     |> assign(:oauth_token_counts, oauth_token_counts)
-    |> assign(:has_active_mfa?, has_active_mfa?(conn.assigns.current_user.id))
+    |> assign(:has_active_mfa?, has_active_mfa?(user_id))
+    |> assign(:discord_id, conn.assigns.current_user.discord_id)
+    |> assign(:discord_link_code, discord_link_code)
     |> render("index.html")
+  end
+
+  @spec generate_discord_link_code(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def generate_discord_link_code(conn, _params) do
+    user_id = conn.assigns.current_user.id
+
+    existing_code =
+      Account.list_codes(
+        search: [
+          user_id: user_id,
+          purpose: "discord_link",
+          expired: false
+        ],
+        order_by: "Newest first",
+        limit: 1
+      )
+      |> List.first()
+
+    if existing_code == nil do
+      Account.create_code(%{
+        value: UUID.generate(),
+        purpose: "discord_link",
+        expires: DateTime.shift(DateTime.utc_now(), minute: 15),
+        user_id: user_id
+      })
+    end
+
+    conn
+    |> put_flash(
+      :info,
+      "Use /link command in BAR Discord and provide this generated code within 15 minutes to link your accounts."
+    )
+    |> redirect(to: ~p"/teiserver/account/security")
+  end
+
+  @spec unlink_discord(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def unlink_discord(conn, _params) do
+    user = Account.get_user!(conn.assigns.current_user.id)
+
+    case Account.update_user_discord_id(user, %{discord_id: nil}) do
+      {:ok, _user} ->
+        Logging.add_audit_log(conn, "Discord.unlink", %{})
+
+        conn
+        |> put_flash(:info, "Discord account unlinked.")
+        |> redirect(to: ~p"/teiserver/account/security")
+
+      {:error, changeset} ->
+        Logger.error("Error while unlinking user from Discord: #{inspect(changeset.errors)}")
+
+        conn
+        |> put_flash(:error, "Failed to unlink Discord account!")
+        |> redirect(to: ~p"/teiserver/account/security")
+    end
   end
 
   @spec totp(Plug.Conn.t(), map()) :: Plug.Conn.t()

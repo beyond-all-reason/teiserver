@@ -265,13 +265,9 @@ defmodule Teiserver.Communication.DiscordChannelLib do
         user == nil ->
           {:error, "No user"}
 
-        user.discord_dm_channel_id != nil ->
-          new_discord_message(user.discord_dm_channel_id, message)
-
         user.discord_id != nil ->
           case NostrumUser.create_dm(user.discord_id) do
             {:ok, %{id: channel_id}} ->
-              Account.update_cache_user(user.id, %{discord_dm_channel_id: channel_id})
               new_discord_message(channel_id, message)
 
             _error ->

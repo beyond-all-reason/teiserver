@@ -5,7 +5,6 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
   use TeiserverWeb, :controller
-  import Teiserver.Helper.StringHelper, only: [convert_textarea_to_array: 1]
 
   plug Bodyguard.Plug.Authorize,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
@@ -96,13 +95,11 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"text_callback" => text_callback_params}) do
     text_callback_params =
-      Map.merge(text_callback_params, %{
-        "triggers" =>
-          (text_callback_params["triggers"] || "")
-          |> String.downcase()
-          |> convert_textarea_to_array()
-          |> Enum.sort()
-      })
+      Map.put(
+        text_callback_params,
+        "category",
+        parse_category(text_callback_params["category"])
+      )
 
     case Communication.create_text_callback(text_callback_params) do
       {:ok, _text_callback} ->
@@ -133,13 +130,11 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
   @spec update(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "text_callback" => text_callback_params}) do
     text_callback_params =
-      Map.merge(text_callback_params, %{
-        "triggers" =>
-          (text_callback_params["triggers"] || "")
-          |> String.downcase()
-          |> convert_textarea_to_array()
-          |> Enum.sort()
-      })
+      Map.put(
+        text_callback_params,
+        "category",
+        parse_category(text_callback_params["category"])
+      )
 
     text_callback = Communication.get_text_callback!(id)
 
@@ -154,6 +149,13 @@ defmodule TeiserverWeb.Admin.TextCallbackController do
         |> assign(:text_callback, text_callback)
         |> assign(:changeset, changeset)
         |> render("edit.html")
+    end
+  end
+
+  defp parse_category(category) do
+    case category |> to_string() |> String.trim() do
+      "" -> "default"
+      trimmed -> trimmed
     end
   end
 

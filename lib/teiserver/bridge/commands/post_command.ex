@@ -19,15 +19,13 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   @spec cmd_definition() :: map()
   def cmd_definition do
     %{
-      name: "post",
+      name: name(),
       description: "Post something into the current channel",
       options: [
         %{
-          # type  = sub_command
           type: 1,
           name: "report",
           description: "Post a report",
-          required: true,
           options: [
             %{
               name: "id",
@@ -41,7 +39,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
           type: 1,
           name: "action",
           description: "Post an Action",
-          required: true,
           options: [
             %{
               name: "id",
@@ -55,7 +52,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
           type: 1,
           name: "profile",
           description: "Post the link of a moderation profile",
-          required: true,
           options: [
             %{
               name: "name",

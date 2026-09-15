@@ -17,9 +17,9 @@
               <tr>
                 <th colspan="2">Callback</th>
 
-                <th>Enabled</th>
+                <th>Category</th>
 
-                <th>Triggers</th>
+                <th>Enabled</th>
 
                 <th>Response</th>
 
@@ -36,6 +36,8 @@
                     {text_callback.name}
                   </td>
 
+                  <td>{text_callback.category}</td>
+
                   <td>
                     <%= if text_callback.enabled do %>
                       <i class="fa-fw fa-solid fa-check text-success"></i>
@@ -43,8 +45,6 @@
                       <i class="fa-fw fa-solid fa-times text-danger"></i>
                     <% end %>
                   </td>
-
-                  <td>{Enum.join(text_callback.triggers, ", ")}</td>
 
                   <td>{String.slice(text_callback.response, 0..100)}</td>
 

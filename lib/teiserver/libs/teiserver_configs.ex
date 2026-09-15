@@ -608,24 +608,6 @@ defmodule Teiserver.TeiserverConfigs do
 
   defp discord_configs do
     add_site_config_type(%{
-      key: "teiserver.Bridge from discord",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["Moderator"],
-      description: "Enables bridging from discord to in-lobby channels",
-      default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Bridge from server",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["Moderator"],
-      description: "Enables bridging from in-lobby channels to discord",
-      default: true
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Bridge player numbers",
       section: "Discord",
       type: "boolean",

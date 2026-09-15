@@ -66,9 +66,7 @@ defmodule Teiserver.Lobby.CommandLib do
       Teiserver.store_put(:lobby_command_cache, key, func)
     end)
 
-    # Special case
-    no_command_module = Teiserver.Lobby.Commands.NoCommand
-    Teiserver.store_put(:lobby_command_cache, "no_command", no_command_module)
+    Teiserver.store_put(:lobby_command_cache, "no_command", Teiserver.Lobby.Commands.NoCommand)
 
     # Delete out-dated keys
     old

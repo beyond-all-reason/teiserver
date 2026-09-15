@@ -1,6 +1,6 @@
 defmodule Teiserver.Bridge.BridgeCommandBehaviour do
   @moduledoc """
-  Discord commands used by the bot
+  Discord slash commands used by the bot
   """
 
   @doc """

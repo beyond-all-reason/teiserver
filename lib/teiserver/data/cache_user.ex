@@ -67,7 +67,6 @@ defmodule Teiserver.CacheUser do
     :last_played,
     :last_logout,
     :discord_id,
-    :discord_dm_channel_id,
     :steam_id,
     :smurf_of_id,
     :inserted_at,
@@ -79,8 +78,7 @@ defmodule Teiserver.CacheUser do
     :email_change_code,
     :lobby_hash,
     :chobby_hash,
-    :lobby_client,
-    :discord_dm_channel
+    :lobby_client
   ]
 
   @type t() :: %CacheUser{
@@ -100,7 +98,6 @@ defmodule Teiserver.CacheUser do
           last_played: DateTime.t(),
           last_logout: DateTime.t(),
           discord_id: String.t() | nil,
-          discord_dm_channel_id: String.t() | nil,
           steam_id: String.t() | nil,
           smurf_of_id: integer() | nil,
           inserted_at: DateTime.t(),
@@ -112,8 +109,7 @@ defmodule Teiserver.CacheUser do
           email_change_code: [String.t()],
           lobby_hash: String.t() | nil,
           chobby_hash: String.t() | nil,
-          lobby_client: String.t(),
-          discord_dm_channel: String.t() | nil
+          lobby_client: String.t()
         }
 
   @data_keys [
@@ -129,8 +125,6 @@ defmodule Teiserver.CacheUser do
     :chobby_hash,
     :lobby_client,
     :discord_id,
-    :discord_dm_channel,
-    :discord_dm_channel_id,
     :steam_id
   ]
   def data_keys, do: @data_keys
@@ -146,8 +140,7 @@ defmodule Teiserver.CacheUser do
       :email_change_code,
       :lobby_hash,
       :chobby_hash,
-      :lobby_client,
-      :discord_dm_channel
+      :lobby_client
     ]
   end
 
@@ -1293,8 +1286,7 @@ defmodule Teiserver.CacheUser do
       email_change_code: user.data["email_change_code"],
       lobby_hash: user.data["lobby_hash"],
       chobby_hash: user.data["chobby_hash"],
-      lobby_client: user.data["lobby_client"],
-      discord_dm_channel: user.data["discord_dm_channel"]
+      lobby_client: user.data["lobby_client"]
     })
   end
 

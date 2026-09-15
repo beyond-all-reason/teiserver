@@ -137,7 +137,6 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def deprecated_get_user_by_discord_id(discord_id) do
     discord_id
-    |> to_string()
     |> get_userid_by_discord_id()
     |> deprecated_get_user_by_id()
   end
@@ -207,7 +206,6 @@ defmodule Teiserver.Account.UserCacheLib do
       last_played: user.last_played,
       last_logout: user.last_logout,
       discord_id: user.discord_id,
-      discord_dm_channel_id: user.discord_dm_channel_id,
       steam_id: user.steam_id,
       smurf_of_id: user.smurf_of_id,
       inserted_at: user.inserted_at,
@@ -219,8 +217,7 @@ defmodule Teiserver.Account.UserCacheLib do
       email_change_code: user_data.email_change_code,
       lobby_hash: user_data.lobby_hash,
       chobby_hash: user_data.chobby_hash,
-      lobby_client: user_data.lobby_client,
-      discord_dm_channel: user_data.discord_dm_channel
+      lobby_client: user_data.lobby_client
     }
   end
 

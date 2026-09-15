@@ -82,7 +82,6 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
         roles: ["GDPR forgotten"],
         permissions: [],
         discord_id: nil,
-        discord_dm_channel_id: nil,
         steam_id: nil,
         country: "??"
       })
@@ -95,7 +94,6 @@ defmodule Teiserver.Account.Tasks.GdprForgetTask do
       "country",
       "last_ip",
       "previous_names",
-      "discord_dm_channel",
       "colour",
       "icon"
     ])

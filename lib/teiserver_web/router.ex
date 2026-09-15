@@ -327,6 +327,8 @@ defmodule TeiserverWeb.Router do
     put("/security/update_password", SecurityController, :update_password)
     delete("/security/delete_token/:id", SecurityController, :delete_token)
     delete("/security/revoke_oauth/:id", SecurityController, :revoke_oauth_application)
+    post("/security/discord/generate_code", SecurityController, :generate_discord_link_code)
+    delete("/security/discord/unlink", SecurityController, :unlink_discord)
   end
 
   scope "/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do

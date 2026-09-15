@@ -9,12 +9,12 @@ defmodule Teiserver.Communication.TextCallback do
     field :colour, :string
     field :enabled, :boolean, default: true
 
-    field :triggers, {:array, :string}
-
     field :response, :string
     field :last_triggered, :map, default: %{}
 
     field :rules, :map, default: %{}
+
+    field :category, :string, default: "default"
 
     timestamps()
   end
@@ -28,9 +28,8 @@ defmodule Teiserver.Communication.TextCallback do
       |> trim_strings(~w(name)a)
 
     struct
-    |> cast(params, ~w(name icon colour triggers response enabled rules last_triggered)a)
-    |> validate_required(~w(name icon colour triggers response)a)
-    |> validate_length(:triggers, min: 1)
+    |> cast(params, ~w(name icon colour response enabled rules last_triggered category)a)
+    |> validate_required(~w(name icon colour response category)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), map()) :: boolean
