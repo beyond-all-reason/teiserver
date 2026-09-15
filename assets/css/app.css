@@ -22,9 +22,9 @@
     default: true;
     prefersdark: false;
     color-scheme: "dark";
-    --color-base-100: oklch(25.33% 0.016 252.42);
-    --color-base-200: oklch(23.26% 0.014 253.1);
-    --color-base-300: oklch(21.15% 0.012 254.09);
+    --color-base-100: oklch(28.33% 0.016 252.42);
+    --color-base-200: oklch(24.26% 0.014 253.1);
+    --color-base-300: oklch(20.15% 0.012 254.09);
     --color-base-content: oklch(97.807% 0.029 256.847);
     --color-primary: oklch(58% 0.233 277.117);
     --color-primary-content: oklch(96% 0.018 272.314);
@@ -172,3 +172,11 @@
 .single-block-content {
   @apply w-full max-w-4xl px-4 mx-auto mt-15 rounded-md;
 }
+
+
+/* Apex charts dark mode */
+.apexcharts-text, .apexcharts-menu-item, .apexcharts-legend-text {
+  /* The legend doesn't apply as the style is being manually overriden by a style attribute I've not yet worked out how to remove */
+  @apply dark:fill-neutral-content dark:text-neutral;
+}
+
