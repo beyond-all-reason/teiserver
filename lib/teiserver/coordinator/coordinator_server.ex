@@ -7,6 +7,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RecacheUserStatsTask
   alias Teiserver.CacheUser
   alias Teiserver.Client
@@ -219,10 +220,17 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Coordinator.send_to_user(userid, welcome_message)
       end
 
-      if Map.get(user, :lobby_client, nil) == "skylobby" do
+      mfa_warning? =
+        AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(db_user.roles) and
+          not AuthLib.has_active_mfa?(db_user.id)
+
+      if mfa_warning? do
+        host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+        url = "https://#{host}/teiserver/account/security/totp"
+
         Coordinator.send_to_user(
           userid,
-          "skylobby is not supported so is not benefiting from new features. Future server improvements are likely to break it; please instead use the official Chobby client available from our website - https://www.beyondallreason.info/download"
+          "You should enable Multi-Factor Authentication.\nYou have some elevated privileges but have not enabled your MFA so they will not work (the normal player stuff will still be fine). To enable your MFA login to the website and navigate to your account security section: #{url}."
         )
       end
 
