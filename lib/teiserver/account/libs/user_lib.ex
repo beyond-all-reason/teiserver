@@ -246,7 +246,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def update_user_plain_password(%User{} = user, attrs) do
@@ -257,7 +257,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   @doc """
@@ -273,14 +273,14 @@ defmodule Teiserver.Account.UserLib do
     result =
       Repo.transact(fn ->
         with %Changeset{valid?: true} = changeset <- User.changeset(user, attrs, :email),
-             {:ok, %User{} = user} <- Repo.update(changeset),
-             {:ok, _any} <- EmailHelper.email_changed(user) do
+             {:ok, %User{} = updated_user} <- Repo.update(changeset),
+             {:ok, _any} <- EmailHelper.email_changed(updated_user) do
           Logging.add_audit_log(user.id, ip_address, "email_change_success", %{})
 
-          {:ok, user}
+          {:ok, updated_user}
           |> broadcast_update_user()
           |> cache_put_on_ok(:users_by_id)
-          |> UserCacheLib.decache_user_on_ok()
+          |> UserCacheLib.decache_user_on_ok(user)
         else
           {:error, %Changeset{} = changeset} ->
             {:error, changeset}
@@ -320,7 +320,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def senior_moderator_update_user(%User{} = user, attrs) do
@@ -331,7 +331,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def moderator_update_user(%User{} = user, attrs) do
@@ -342,7 +342,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def server_update_user(%User{} = user, attrs) do
@@ -353,7 +353,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def script_update_user(%User{} = user, attrs) do
@@ -364,7 +364,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def password_reset_update_user(%User{} = user, attrs) do
@@ -375,7 +375,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def update_user_smurf(%User{} = user, attrs) do
@@ -384,7 +384,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def update_user_discord_id(%User{} = user, attrs) do
@@ -393,7 +393,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   @doc """
@@ -419,7 +419,7 @@ defmodule Teiserver.Account.UserLib do
         {:ok, updated_user}
         |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
-        |> UserCacheLib.decache_user_on_ok()
+        |> UserCacheLib.decache_user_on_ok(user)
       end
     end)
   end
@@ -436,7 +436,7 @@ defmodule Teiserver.Account.UserLib do
         {:ok, updated_user}
         |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
-        |> UserCacheLib.decache_user_on_ok()
+        |> UserCacheLib.decache_user_on_ok(user)
       end
     end)
   end
@@ -456,7 +456,7 @@ defmodule Teiserver.Account.UserLib do
   def delete_user(%User{} = user) do
     Repo.delete(user)
     |> cache_delete_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok()
+    |> UserCacheLib.decache_user_on_ok(user)
   end
 
   @doc """
