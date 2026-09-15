@@ -543,9 +543,20 @@ defmodule Teiserver.Account.UserQueries do
     end
   end
 
+  @spec order_by_last_login(t(), :asc | :desc) :: t()
+  def order_by_last_login(query, direction \\ :asc) do
+    if direction == :asc do
+      from(users in query, order_by: [asc: users.last_login])
+    else
+      from(users in query, order_by: [desc: users.last_login])
+    end
+  end
+
   @spec order_by_from_string(t(), String.t()) :: t()
   def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
   def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
   def order_by_from_string(query, "Alphabetical (A-Z)"), do: order_by_name(query, :asc)
   def order_by_from_string(query, "Alphabetical (Z-A)"), do: order_by_name(query, :desc)
+  def order_by_from_string(query, "Most recent login first"), do: order_by_last_login(query, :asc)
+  def order_by_from_string(query, "Oldest login first"), do: order_by_last_login(query, :desc)
 end
