@@ -281,19 +281,19 @@ defmodule Teiserver.Account.UserCacheLib do
   A function purely for UserLib to be able to flash the cache when a User is updated
   and we want to ensure these caches are cleared correctly.
   """
-  def decache_user_on_ok({:ok, %User{} = user} = result) do
-    Teiserver.cache_delete(:users, user.id)
-    Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
-    Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
+  def decache_user_on_ok({:ok, %User{} = _new_user} = result, %User{} = old_user) do
+    Teiserver.cache_delete(:users, old_user.id)
+    Teiserver.cache_delete(:users_lookup_id_with_name, cachename(old_user.name))
+    Teiserver.cache_delete(:users_lookup_id_with_email, cachename(old_user.email))
 
-    if user.discord_id do
-      Teiserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+    if old_user.discord_id do
+      Teiserver.cache_delete(:users_lookup_id_with_discord, old_user.discord_id)
     end
 
     result
   end
 
-  def decache_user_on_ok(result), do: result
+  def decache_user_on_ok(result, _old_user), do: result
 
   @spec decache_user(User.id()) :: :ok | :no_user
   def decache_user(userid) do
