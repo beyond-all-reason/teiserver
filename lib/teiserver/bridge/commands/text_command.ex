@@ -2,6 +2,7 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
   @moduledoc """
   Returns commonly used text
   """
+  alias Nostrum.Struct.Interaction
   alias Teiserver.Communication
   alias Teiserver.Logging
 
@@ -11,6 +12,7 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
 
   # Discord limit of choices per option
   @choice_limit 25
+  @ephemeral 64
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
@@ -61,7 +63,7 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map) :: map()
-  def execute(interaction, _options_map) do
+  def execute(%Interaction{} = interaction, _options_map) do
     subcommand = Enum.at(interaction.data.options, 0)
     text_option = Enum.at(subcommand.options, 0)
 
@@ -72,7 +74,8 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
     case Communication.get_text_callback(text_option.value) do
       nil ->
         Communication.new_interaction_response(
-          "That entry no longer exists, please run the command again."
+          "That entry no longer exists, please run the command again.",
+          @ephemeral
         )
 
       text_callback ->
@@ -89,7 +92,8 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
           Communication.new_interaction_response(text_callback.response)
         else
           Communication.new_interaction_response(
-            "Sorry, I don't want to spam messages. Give it a few minutes before asking again."
+            "Message not posted due to spam prevention. Give it a few minutes before trying again.",
+            @ephemeral
           )
         end
     end

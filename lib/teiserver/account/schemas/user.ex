@@ -324,6 +324,12 @@ defmodule Teiserver.Account.User do
     cast(user, attrs, [:gdpr_forget_after])
   end
 
+  def discord_id_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:discord_id])
+    |> unique_constraint(:discord_id)
+  end
+
   defp change_plain_password(user, attrs) do
     user
     |> cast(attrs, [:password])

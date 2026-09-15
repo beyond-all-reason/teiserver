@@ -2,6 +2,7 @@ defmodule Teiserver.Bridge.Commands.LinkCommand do
   @moduledoc """
   Link Discord and Teiserver accounts
   """
+  alias Nostrum.Struct.Interaction
   alias Teiserver.Account
   alias Teiserver.Communication
 
@@ -36,7 +37,7 @@ defmodule Teiserver.Bridge.Commands.LinkCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
-  def execute(interaction, options_map) do
+  def execute(%Interaction{} = interaction, options_map) do
     code_value = String.trim(options_map["code"] || "")
 
     case Account.get_code(code_value,
@@ -63,7 +64,7 @@ defmodule Teiserver.Bridge.Commands.LinkCommand do
 
       id when id == code.user_id ->
         Account.delete_code(code)
-        respond("This Discord account is already linked to #{code.user.name}.")
+        respond("Linked to #{code.user.name} successfully.")
 
       _other_id ->
         respond(
@@ -73,7 +74,7 @@ defmodule Teiserver.Bridge.Commands.LinkCommand do
   end
 
   defp do_link(code, interaction) do
-    case Account.script_update_user(code.user, %{discord_id: interaction.user.id}) do
+    case Account.update_user_discord_id(code.user, %{discord_id: interaction.user.id}) do
       {:ok, user} ->
         Account.delete_code(code)
         respond("Linked to #{user.name} successfully.")

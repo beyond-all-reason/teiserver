@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Account.SecurityController do
-  alias ExULID.ULID
+  alias Ecto.UUID
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.TOTP
+  alias Teiserver.Logging
   alias Teiserver.OAuth
 
   use TeiserverWeb, :controller
@@ -59,7 +60,7 @@ defmodule TeiserverWeb.Account.SecurityController do
     user_id = conn.assigns.current_user.id
 
     Account.create_code(%{
-      value: ULID.generate(),
+      value: UUID.generate(),
       purpose: "discord_link",
       expires: DateTime.shift(DateTime.utc_now(), minute: 15),
       user_id: user_id
@@ -77,8 +78,10 @@ defmodule TeiserverWeb.Account.SecurityController do
   def unlink_discord(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    case Account.script_update_user(user, %{discord_id: nil}) do
+    case Account.update_user_discord_id(user, %{discord_id: nil}) do
       {:ok, _user} ->
+        Logging.add_audit_log(conn, "Discord.unlink", %{})
+
         conn
         |> put_flash(:info, "Discord account unlinked.")
         |> redirect(to: ~p"/teiserver/account/security")

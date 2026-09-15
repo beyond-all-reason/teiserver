@@ -387,6 +387,15 @@ defmodule Teiserver.Account.UserLib do
     |> UserCacheLib.decache_user_on_ok()
   end
 
+  def update_user_discord_id(%User{} = user, attrs) do
+    user
+    |> User.discord_id_changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_user()
+    |> cache_put_on_ok(:users_by_id)
+    |> UserCacheLib.decache_user_on_ok(user)
+  end
+
   @doc """
   We take a given timestamp so we can identify if the default timestamp was used or one manually set
   """

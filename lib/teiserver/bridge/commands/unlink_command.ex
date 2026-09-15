@@ -2,6 +2,7 @@ defmodule Teiserver.Bridge.Commands.UnlinkCommand do
   @moduledoc """
   Unlink Discord and Tesierver accounts
   """
+  alias Nostrum.Struct.Interaction
   alias Teiserver.Account
   alias Teiserver.Communication
 
@@ -28,17 +29,17 @@ defmodule Teiserver.Bridge.Commands.UnlinkCommand do
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec execute(interaction :: Nostrum.Struct.Interaction.t(), options_map :: map()) :: map()
-  def execute(interaction, _options_map) do
+  def execute(%Interaction{} = interaction, _options_map) do
     case Account.get_userid_by_discord_id(interaction.user.id) do
       nil ->
-        respond("This Discord account isn't linked")
+        respond("Unlinked.")
 
       id ->
         user = Account.get_user!(id)
 
-        case Account.script_update_user(user, %{discord_id: nil}) do
+        case Account.update_user_discord_id(user, %{discord_id: nil}) do
           {:ok, _user} ->
-            respond("Unlinked from #{user.name}.")
+            respond("Unlinked.")
 
           {:error, changeset} ->
             Logger.error("Error while unlinking user from Discord: #{inspect(changeset.errors)}")
