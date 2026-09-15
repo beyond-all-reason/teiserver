@@ -494,6 +494,19 @@ defmodule Teiserver.Account.UserQueries do
       where: ^restriction_name not in users.restrictions
   end
 
+  # Where GDPR Forget
+  @spec where_gdpr_forget_before(t(), DateTime.t()) :: t()
+  def where_gdpr_forget_before(query, datetime) do
+    from users in query,
+      where: users.gdpr_forget_after < ^datetime
+  end
+
+  @spec where_gdpr_forget_after(t(), DateTime.t()) :: t()
+  def where_gdpr_forget_after(query, datetime) do
+    from users in query,
+      where: users.gdpr_forget_after > ^datetime
+  end
+
   # Where -other-
   @spec where_smurf_of(t(), User.id()) :: t()
   def where_smurf_of(query, user_id) do

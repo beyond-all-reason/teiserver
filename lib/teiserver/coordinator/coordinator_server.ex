@@ -344,7 +344,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             icon: "fa-solid fa-sitemap",
             colour: "#AA00AA",
             password: Account.make_bot_password(),
-            roles: ["Bot", "Verified"],
+            roles: ["Bot", "Verified", "Server"],
             data: %{
               bot: true,
               moderator: true,
