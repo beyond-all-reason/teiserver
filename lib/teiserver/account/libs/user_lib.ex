@@ -393,7 +393,7 @@ defmodule Teiserver.Account.UserLib do
     |> Repo.update()
     |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok(user)
+    |> UserCacheLib.decache_user_on_ok()
   end
 
   @doc """

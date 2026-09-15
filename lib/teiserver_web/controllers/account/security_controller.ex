@@ -59,12 +59,26 @@ defmodule TeiserverWeb.Account.SecurityController do
   def generate_discord_link_code(conn, _params) do
     user_id = conn.assigns.current_user.id
 
-    Account.create_code(%{
-      value: UUID.generate(),
-      purpose: "discord_link",
-      expires: DateTime.shift(DateTime.utc_now(), minute: 15),
-      user_id: user_id
-    })
+    existing_code =
+      Account.list_codes(
+        search: [
+          user_id: user_id,
+          purpose: "discord_link",
+          expired: false
+        ],
+        order_by: "Newest first",
+        limit: 1
+      )
+      |> List.first()
+
+    if existing_code == nil do
+      Account.create_code(%{
+        value: UUID.generate(),
+        purpose: "discord_link",
+        expires: DateTime.shift(DateTime.utc_now(), minute: 15),
+        user_id: user_id
+      })
+    end
 
     conn
     |> put_flash(
