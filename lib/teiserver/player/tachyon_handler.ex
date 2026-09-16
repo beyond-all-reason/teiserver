@@ -12,6 +12,8 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Helpers.TachyonParser
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
+  alias Teiserver.Moderation
+  alias Teiserver.Moderation.ReportLib
   alias Teiserver.Party.Types, as: PartyTypes
   alias Teiserver.Player
   alias Teiserver.Player.LoginQueue
@@ -27,6 +29,11 @@ defmodule Teiserver.Player.TachyonHandler do
   require Logger
 
   @behaviour Handler
+
+  @extra_text_max_length 255
+
+  # the tachyon report flow has no equivalent of the web wizard's sub type step
+  @report_sub_type "other"
 
   @type state ::
           %{
@@ -479,6 +486,51 @@ defmodule Teiserver.Player.TachyonHandler do
       {:response, resp, state}
     else
       {:error_response, :unknown_user, state}
+    end
+  end
+
+  def handle_command("user/report", "request", _message_id, msg, state) do
+    %{"userIds" => raw_ids, "reason" => %{"type" => type}} = msg["data"]
+
+    with :ok <- check_reporting_allowed(state.user.id),
+         {:ok, type} <- parse_report_type(type),
+         {:ok, target_ids} <- parse_report_targets(raw_ids, state.user.id) do
+      extra_text = clamp_extra_text(msg["data"]["message"])
+
+      results =
+        Enum.map(target_ids, fn target_id ->
+          Moderation.create_report(%{
+            reporter_id: state.user.id,
+            target_id: target_id,
+            type: type,
+            sub_type: @report_sub_type,
+            extra_text: extra_text
+          })
+        end)
+
+      case Enum.find(results, &match?({:error, _}, &1)) do
+        nil ->
+          {:response, state}
+
+        {:error, changeset} ->
+          Logger.error("cannot create report #{inspect(changeset.errors)}")
+          {:error_response, :internal_error, state}
+      end
+    else
+      {:error, :restricted} ->
+        {:error_response, :unauthorized, "restricted from submitting new reports", state}
+
+      {:error, :unknown_user} ->
+        {:error_response, :unknown_user, state}
+
+      {:error, :unknown_report_type} ->
+        {:error_response, :invalid_request, "unknown report type", state}
+
+      {:error, :no_targets} ->
+        {:error_response, :invalid_request, "no user to report", state}
+
+      {:error, :self_report} ->
+        {:error_response, :invalid_request, "cannot report yourself", state}
     end
   end
 
@@ -1559,5 +1611,46 @@ defmodule Teiserver.Player.TachyonHandler do
       {:ok, dt} -> if DateTime.compare(dt, DateTime.utc_now()) == :gt, do: dt, else: nil
       _error -> nil
     end
+  end
+
+  defp check_reporting_allowed(user_id) do
+    if Account.restricted?(user_id, "Reporting") do
+      {:error, :restricted}
+    else
+      :ok
+    end
+  end
+
+  defp parse_report_type(type) do
+    if Enum.any?(ReportLib.types(), fn {_label, value, _icon} -> value == type end) do
+      {:ok, type}
+    else
+      {:error, :unknown_report_type}
+    end
+  end
+
+  defp parse_report_targets([], _reporter_id), do: {:error, :no_targets}
+
+  defp parse_report_targets(raw_ids, reporter_id) do
+    users = Enum.map(raw_ids, &get_user/1)
+
+    if Enum.any?(users, &match?({:error, _}, &1)) do
+      {:error, :unknown_user}
+    else
+      target_ids = users |> Enum.map(fn {:ok, user} -> user.id end) |> Enum.uniq()
+
+      if reporter_id in target_ids do
+        {:error, :self_report}
+      else
+        {:ok, target_ids}
+      end
+    end
+  end
+
+  defp clamp_extra_text(nil), do: nil
+
+  # postgres counts varchar length in code points, not graphemes
+  defp clamp_extra_text(text) do
+    text |> String.codepoints() |> Enum.take(@extra_text_max_length) |> Enum.join()
   end
 end

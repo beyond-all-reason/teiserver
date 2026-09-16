@@ -408,6 +408,19 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
+  def report_user!(client, user_ids, reason_type, opts \\ []) do
+    data = %{userIds: Enum.map(user_ids, &to_string/1), reason: %{type: reason_type}}
+
+    data =
+      case Keyword.get(opts, :message) do
+        nil -> data
+        message -> Map.put(data, :message, message)
+      end
+
+    :ok = send_request(client, "user/report", data)
+    recv_message!(client)
+  end
+
   def friend_list!(client) do
     :ok = send_request(client, "friend/list")
     recv_message!(client)

@@ -1,11 +1,112 @@
 defmodule TeiserverWeb.Tachyon.UserTest do
   alias Teiserver.Account
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Moderation
   alias Teiserver.Player
   alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 
   setup [{Tachyon, :setup_client}]
+
+  describe "report" do
+    test "one report per target", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, ctx3} = Tachyon.setup_client()
+
+      assert %{"status" => "success"} =
+               Tachyon.report_user!(client, [ctx2[:user].id, ctx3[:user].id], "chat",
+                 message: "spamming the lobby"
+               )
+
+      reports = Moderation.list_reports(search: [reporter_id: user.id])
+
+      assert MapSet.new(reports, & &1.target_id) ==
+               MapSet.new([ctx2[:user].id, ctx3[:user].id])
+
+      assert Enum.all?(reports, &(&1.type == "chat"))
+      assert Enum.all?(reports, &(&1.sub_type == "other"))
+      assert Enum.all?(reports, &(&1.extra_text == "spamming the lobby"))
+    end
+
+    test "message is optional", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      assert %{"status" => "success"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "actions")
+
+      assert [%{extra_text: nil, type: "actions"}] =
+               Moderation.list_reports(search: [reporter_id: user.id])
+    end
+
+    test "repeated targets only get one report", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      target_id = ctx2[:user].id
+
+      assert %{"status" => "success"} =
+               Tachyon.report_user!(client, [target_id, target_id], "chat")
+
+      assert [_only_one] = Moderation.list_reports(search: [reporter_id: user.id])
+    end
+
+    test "an over long message is truncated", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      assert %{"status" => "success"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "chat",
+                 message: String.duplicate("a", 300)
+               )
+
+      assert [%{extra_text: extra_text}] =
+               Moderation.list_reports(search: [reporter_id: user.id])
+
+      assert extra_text == String.duplicate("a", 255)
+    end
+
+    test "one unknown target rejects the whole report", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      assert %{"status" => "failed", "reason" => "unknown_user"} =
+               Tachyon.report_user!(client, [ctx2[:user].id, 999_999_999], "chat")
+
+      assert [] = Moderation.list_reports(search: [reporter_id: user.id])
+    end
+
+    test "target id that isn't a number", %{client: client} do
+      assert %{"status" => "failed", "reason" => "unknown_user"} =
+               Tachyon.report_user!(client, ["not-an-id"], "chat")
+    end
+
+    test "no targets", %{client: client} do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.report_user!(client, [], "chat")
+    end
+
+    test "cannot report yourself", %{user: user, client: client} do
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.report_user!(client, [user.id], "chat")
+    end
+
+    test "unknown reason type", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "vibes")
+
+      assert [] = Moderation.list_reports(search: [reporter_id: user.id])
+    end
+
+    test "restricted from reporting", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      {:ok, _updated} =
+        Account.get_user(user.id) |> Account.script_update_user(%{restrictions: ["Reporting"]})
+
+      assert %{"status" => "failed", "reason" => "unauthorized"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "chat")
+
+      assert [] = Moderation.list_reports(search: [reporter_id: user.id])
+    end
+  end
 
   describe "info" do
     test "works", %{user: user, client: client} do
