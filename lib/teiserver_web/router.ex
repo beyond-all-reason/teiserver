@@ -482,18 +482,6 @@ defmodule TeiserverWeb.Router do
     live("/client/:id", Show, :show)
   end
 
-  scope "/moderation", TeiserverWeb.Moderation do
-    pipe_through([:browser, :app_layout])
-
-    live_session :report_user,
-      on_mount: [
-        {UserAuthentication, :mount_current_user}
-      ] do
-      live "/report_user", ReportUserLive.Index, :index
-      live "/report_user/:id", ReportUserLive.Index, :selected
-    end
-  end
-
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
     pipe_through([:browser, :app_layout, :protected])
 
@@ -518,6 +506,20 @@ defmodule TeiserverWeb.Router do
     put("/ban/:id/enable", BanController, :enable)
     get("/ban/new_with_user", BanController, :new_with_user)
     resources("/ban", BanController, only: [:index, :show, :new, :create, :edit, :update])
+  end
+
+  scope "/moderation", TeiserverWeb.ModerationLive do
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
+
+    live_session :report_user,
+      layout: {TeiserverWeb.Layouts, :public_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: ""}}},
+        {UserAuthentication, :ensure_authenticated}
+      ] do
+      live "/report_user", ReportUser.Index, :index
+      live "/report_user/:id", ReportUser.Index, :selected
+    end
   end
 
   scope "/moderation", TeiserverWeb.ModerationLive do

@@ -1,35 +1,35 @@
-<div class="row" style="padding-top: 5vh;">
-  <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
-    <div class="card mb-3">
-      <div class="card-header">
-        <h3>
-          <img
-            src="/images/logo/logo_favicon.png"
-            height="42"
-            style="margin-right: 5px;"
-            class="d-inline align-top"
-          />
-          <span :if={@user}>
-            Reporting user: {@user.name}
-          </span>
-        </h3>
-      </div>
+<div class="single-block-content">
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h1 :if={@user} class="text-2xl font-bold mb-4">
+        {gettext("Reporting user")}: {@user.name}
+      </h1>
 
-      <div :if={@stage == :loading} class="card-body">
+      <div :if={@stage == :loading}>
         Loading <Fontawesome.icon icon="sync" class="fa-spinner-third" />
       </div>
 
-      <div :if={@stage == :user} class="card-body">
-        User selection is currently not implemented, please select using
-        <a href={~p"/account/relationship/search"}>the relationships section</a>
+      <div :if={@stage == :user} class="text-center">
+        Please select the user you are reporting using the relationships or recent matches pages.
+        <br /><br />
+
+        <div class="flex">
+          <a href={~p"/account/relationship/search"} class="btn btn-success mx-2 flex-1">
+            Relationships
+          </a>
+
+          <a href={~p"/battle"} class="btn btn-primary mx-2 flex-1">
+            Matches
+          </a>
+        </div>
       </div>
 
-      <div :if={@stage == :type} class="card-body">
-        <h5>Reason for report</h5>
-        <div class="row" id="type-row">
-          <div :for={{label, name, icon} <- @types} class="col">
+      <div :if={@stage == :type}>
+        <h5 class="font-bold text-lg">Reason for report</h5>
+        <div class="flex" id="type-row">
+          <div :for={{label, name, icon} <- @types} class="flex-1 mx-2">
             <div
-              class="menu-card"
+              class="w-full btn btn-primary btn-soft h-25"
               id={"type-#{name}"}
               phx-click="select-type"
               phx-value-type={name}
@@ -43,12 +43,12 @@
         </div>
       </div>
 
-      <div :if={@stage == :sub_type} class="card-body">
-        <h5>Type of {@type}</h5>
-        <div class="row">
-          <div :for={{label, name, icon} <- @sub_types[@type]} class="col">
+      <div :if={@stage == :sub_type}>
+        <h5 class="font-bold text-lg">Type of {@type}</h5>
+        <div class="flex">
+          <div :for={{label, name, icon} <- @sub_types[@type]} class="flex-1 mx-2">
             <div
-              class="menu-card"
+              class="w-full btn btn-primary btn-soft h-25"
               id={"sub_type-#{name}"}
               phx-click="select-sub_type"
               phx-value-sub_type={name}
@@ -63,8 +63,8 @@
         </div>
       </div>
 
-      <div :if={@stage == :match} class="card-body">
-        <h5>Which match?</h5>
+      <div :if={@stage == :match}>
+        <h5 class="font-bold text-lg">Which match?</h5>
         Note: If the action took place in the lobby, select the match it took place before.
         <.table
           id="match-table"
@@ -81,13 +81,17 @@
         </.table>
         If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
         <br /><br />
-        <span class="btn btn-outline-warning" id="select-no-match-btn" phx-click="select-no-match">
+        <span
+          class="btn btn-neutral btn-soft"
+          id="select-no-match-btn"
+          phx-click="select-no-match"
+        >
           Select "no match"
         </span>
       </div>
 
-      <div :if={@stage == :extra_text} class="card-body">
-        <h5>Extra info:</h5>
+      <div :if={@stage == :extra_text}>
+        <h5 class="font-bold text-lg">Extra info:</h5>
         Please respect volunteer time and help make our lives easier by providing some information!
         <ul>
           <li>A description of what was done or specific words said</li>
@@ -106,7 +110,7 @@
           id="report_extra_text"
           maxlength="255"
           value=""
-          class="form-control"
+          class="input w-full"
           phx-keyup="update-extra-text"
           phx-debounce="200"
         />
@@ -119,7 +123,7 @@
         </span>
       </div>
 
-      <div :if={@stage == :completed} class="card-body">
+      <div :if={@stage == :completed}>
         <div :if={@result == :success}>
           Your report has been submitted, thank you for taking the time to help improve the community.
           <br /><br />
@@ -129,13 +133,13 @@
         </div>
       </div>
 
-      <div :if={@stage == :not_allowed} class="card-body">
+      <div :if={@stage == :not_allowed}>
         <div class="alert alert-warning">
           {@failure_reason}
         </div>
       </div>
 
-      <div :if={@stage != :not_allowed} class="card-footer">
+      <div :if={@stage != :not_allowed and assigns[:user] != nil} class="card-footer">
         In addition to reporting this user you can Ignore them. You can also Avoid (don't want to play with) them or Block (don't even want to see) them.
         <br /><br />
 
@@ -167,7 +171,7 @@
           Avoid
         </span>
 
-        <span :if={@relationship && @relationship.state == "avoid"} class="btn btn-danger mx-1">
+        <span :if={@relationship && @relationship.state == "avoid"} class="btn btn-error mx-1">
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_avoid()} style="solid" />
           &nbsp;
           Avoiding
@@ -183,7 +187,7 @@
           Block
         </span>
 
-        <span :if={@relationship && @relationship.state == "block"} class="btn btn-danger2 mx-1">
+        <span :if={@relationship && @relationship.state == "block"} class="btn btn-error mx-1">
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_block()} style="solid" />
           &nbsp;
           Blocking

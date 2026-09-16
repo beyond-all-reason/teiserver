@@ -1,4 +1,5 @@
-defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
+defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
+  @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Battle
   alias Teiserver.Helper.DateHelper
@@ -274,6 +275,7 @@ defmodule TeiserverWeb.Moderation.ReportUserLive.Index do
 
   defp get_relationship(%{assigns: %{stage: :not_allowed}} = socket) do
     socket
+    |> assign(relationship: nil)
   end
 
   defp get_relationship(%{assigns: %{current_user: current_user, user: user}} = socket) do
