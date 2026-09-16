@@ -1,0 +1,37 @@
+<AuditLogComponents.section_menu active="show" scope={@scope} />
+
+<.header>
+  Audit Log: {@audit_log.id}
+</.header>
+
+<.list>
+  <:item title="Action">{@audit_log.action}</:item>
+  <:item title="IP">{@audit_log.ip}</:item>
+  <:item :if={@audit_log.user_id} title="User">
+    {@audit_log.user.name} &nbsp;&nbsp;&nbsp;&nbsp;
+    <a
+      :if={allow?(@scope, "Moderator")}
+      href={~p"/moderation/users/#{@audit_log.user_id}"}
+      class="btn btn-primary btn-soft btn-xs"
+    >
+      <Fontawesome.icon icon="link" style="regular" /> Moderator view
+    </a>
+
+    <a
+      :if={allow?(@scope, "Admin")}
+      href={~p"/teiserver/admin/user/#{@audit_log.user_id}"}
+      class="btn btn-warning btn-soft btn-xs"
+    >
+      <Fontawesome.icon icon="link" style="regular" /> Admin view
+    </a>
+  </:item>
+  <:item title="Timestamp">
+    {Calendar.strftime(@audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}
+  </:item>
+</.list>
+<br /><br />
+
+<h3 class="font-bold text-xl">Details</h3>
+<pre>{Jason.encode!(@audit_log.details, pretty: true)}</pre>
+
+<.back navigate={~p"/logging/audit_logs"}>Back to Audit Logs</.back>

@@ -23,6 +23,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.Relationship
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account.RelationshipQueries
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.SmurfKey
   alias Teiserver.Account.SmurfKeyLib
   alias Teiserver.Account.SmurfKeyType
@@ -2400,5 +2401,59 @@ defmodule Teiserver.Account do
       "Lobby chat",
       "Battle chat"
     ])
+  end
+
+  @doc """
+  Creates (if not already created) the system user we use as a reference for system actions
+  """
+  @spec system_user() :: User.t()
+  def system_user do
+    user =
+      get_user(nil,
+        search: [
+          email: "coordinator@teiserver.local"
+        ]
+      )
+
+    case user do
+      nil ->
+        # Make account
+        {:ok, %User{} = account} =
+          script_create_user(%{
+            name: "Coordinator",
+            email: "coordinator@teiserver.local",
+            icon: "fa-solid fa-sitemap",
+            colour: "#AA00AA",
+            password: make_bot_password(),
+            roles: ["Bot", "Verified", "Server"],
+            data: %{
+              bot: true,
+              moderator: true,
+              lobby_client: "Teiserver Internal Process"
+            }
+          })
+
+        update_user_stat(account.id, %{
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
+        })
+
+        account
+
+      account ->
+        account
+    end
+  end
+
+  @doc """
+  Get a scope for system actions.
+  """
+  @spec system_scope() :: Scope.t()
+  def system_scope do
+    user = system_user()
+
+    %Scope{
+      user: user,
+      ip: "0.0.0.0"
+    }
   end
 end

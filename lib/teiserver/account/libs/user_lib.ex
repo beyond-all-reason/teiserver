@@ -566,8 +566,10 @@ defmodule Teiserver.Account.UserLib do
     end
   end
 
-  @spec has_access(integer() | map(), Plug.Conn.t() | User.t()) ::
+  @spec has_access(User.id() | map() | nil, Plug.Conn.t() | User.t()) ::
           {boolean, nil | :not_found | :no_access}
+  def has_access(nil, _conn), do: {false, :no_user}
+
   def has_access(target_user_id, conn_or_user) when is_integer(target_user_id) do
     if allow?(conn_or_user, "Server") do
       {true, nil}

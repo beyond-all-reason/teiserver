@@ -21,14 +21,6 @@ defmodule TeiserverWeb.Admin.MenuLive do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Moderator Reviewer Overwatch))}
-        icon={Teiserver.Moderation.icon()}
-        url={~p"/moderation"}
-      >
-        Moderation
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow?(@current_user, "Senior moderator")}
         icon="person-burst"
         url={~p"/admin/anti-abuse-records"}
@@ -61,27 +53,11 @@ defmodule TeiserverWeb.Admin.MenuLive do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
-        icon={Teiserver.Helper.StylingHelper.icon(:summary)}
-        url={~p"/teiserver/reports"}
-      >
-        Reports
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow_any?(@current_user, ~w(Server Engine))}
         icon={Teiserver.Telemetry.TelemetryLib.icon()}
         url={~p"/telemetry"}
       >
         Telemetry
-      </.menu_page_link>
-
-      <.menu_page_link
-        :if={allow?(@scope, "Admin")}
-        icon={Teiserver.Logging.icon()}
-        url={~p"/logging"}
-      >
-        Logging
       </.menu_page_link>
 
       <.menu_page_link

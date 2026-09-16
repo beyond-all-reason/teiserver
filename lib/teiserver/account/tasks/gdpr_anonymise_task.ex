@@ -19,7 +19,6 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Account.UserQueries
-  alias Teiserver.Coordinator
   alias Teiserver.Helper.StringHelper
   alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
@@ -138,16 +137,17 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
 
   # For some tables we want to keep the data but completely unlink it from the user account
   defp reassign_user_references(%User{id: user_id}) do
-    # The coordinator works as our system user in this context
-    coordinator_id = Coordinator.get_coordinator_userid()
+    %User{id: system_user_id} = Account.system_user()
 
     [
-      {"teiserver_account_smurf_keys", :user_id},
+      {"audit_logs", :user_id},
       {"microblog_posts", :poster_id},
-      {"microblog_uploads", :uploader_id}
+      {"microblog_uploads", :uploader_id},
+      {"moderation_bans", :added_by_id},
+      {"teiserver_account_smurf_keys", :user_id}
     ]
     |> Enum.each(fn {table, field} ->
-      query = "UPDATE #{table} SET #{field} = #{coordinator_id} WHERE #{field} = $1;"
+      query = "UPDATE #{table} SET #{field} = #{system_user_id} WHERE #{field} = $1;"
       {:ok, _results} = SQL.query(Repo, query, [user_id])
     end)
   end

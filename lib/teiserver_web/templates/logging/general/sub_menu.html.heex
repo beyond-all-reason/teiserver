@@ -63,7 +63,7 @@
           <%= if allow?(@current_user, "Server") do %>
             <.sub_menu_button
               active={@active == "audit"}
-              url={~p"/logging/audit"}
+              url={~p"/logging/audit_logs"}
               icon={Teiserver.Logging.AuditLogLib.icon()}
             >
               Audit

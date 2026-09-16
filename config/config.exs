@@ -201,6 +201,10 @@ config :teiserver, Oban,
        # Every hour
        {"0 * * * *", Teiserver.Admin.HourlyCleanupTask},
 
+       # Every day at 6am
+       {"0 6 * * *", Teiserver.Account.DataExpiryTask},
+       {"0 6 * * *", Teiserver.Account.GDPRAnonymiseTask},
+
        # Every day at 8am
        {"0 8 * * *", Teiserver.Admin.DailyCleanupTask},
 

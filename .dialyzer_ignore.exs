@@ -1,6 +1,6 @@
 [
   # This started after inverting a condition in an `if/else` statement. It's hard to fix with all the other ignored warnings here.
-  {"lib/teiserver/account.ex", :guard_fail},
+  {"lib/teiserver/account.ex"},
   {"lib/teiserver/account/reports/growth_report.ex", :no_return},
   {"lib/teiserver/account/reports/growth_report.ex", :call},
   {"lib/teiserver/account/reports/population_report.ex", :no_return},
@@ -161,5 +161,6 @@
   {"lib/teiserver_web/live/moderation/user/smurf_link.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"},
   {"lib/teiserver/account/tasks/gdpr_anonymise_task.ex"},
+  {"lib/teiserver/account/tasks/data_expiry_task.ex"},
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"}
 ]

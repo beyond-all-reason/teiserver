@@ -1,54 +1,52 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
+defmodule TeiserverWeb.LoggingLive.AuditLog.List do
   @moduledoc false
   alias Teiserver.Helper.QueryHelpers
-  alias Teiserver.Moderation
-  alias Teiserver.Moderation.AntiAbuseRecordQueries
+  alias Teiserver.Logging.AuditLogQueries
   alias Teiserver.Repo
-  alias TeiserverWeb.Admin.AntiAbuseRecordComponents
+  alias TeiserverWeb.LoggingLive.AuditLogComponents
 
   use TeiserverWeb, :live_view
 
-  import Teiserver.Helper.StringHelper,
-    only: [uuid_part: 1, boolean_from_form: 1, maybe_to_integer: 1]
-
   import Teiserver.Config, only: [get_user_config_cache: 2, set_user_config: 3]
 
-  @page_size_config_key "last_used.anti_abuse_search_page_size"
+  @page_size_config_key "last_used.audit_log_search_page_size"
   @max_page_size 100
 
-  @impl Phoenix.LiveView
-  def mount(params, _session, %Socket{assigns: %{scope: scope}} = socket)
-      when is_connected?(socket) do
-    Moderation.log_anti_abuse_record_access(nil, scope, :list)
-
+  @impl LiveView
+  def mount(params, _session, %Socket{} = socket) when is_connected?(socket) do
     socket
     |> assign(page: 0)
     |> init_search_params(params)
-    |> get_records()
-    |> get_record_count()
+    |> get_audit_logs()
+    |> get_audit_log_count()
     |> ok()
   end
 
   def mount(_params, _session, %Socket{} = socket) do
     socket
-    |> assign(
-      records: [],
-      record_count: 0,
-      page: 0,
-      page_count: 1,
-      search: %{},
-      search_changed?: false
-    )
+    |> assign(audit_log_count: 0, page: 0, page_count: 1, search: %{}, search_changed?: false)
+    |> stream(:audit_logs, [])
     |> ok()
   end
 
-  @impl Phoenix.LiveView
+  @impl LiveView
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  end
+
+  defp apply_action(socket, :list, _params) do
+    socket
+    |> assign(:page_title, "Listing Audit Logs")
+    |> assign(:audit_log, nil)
+  end
+
+  @impl LiveView
   def handle_event("set-page", %{"page" => page}, %Socket{} = socket) do
     page = String.to_integer(page)
 
     socket
     |> assign(page: page)
-    |> get_records()
+    |> get_audit_logs()
     |> noreply()
   end
 
@@ -66,7 +64,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
       |> MapSet.new()
 
     contains_update_keys? =
-      MapSet.new(["order_by", "page_size", "clean?", "restored?", "expired?"])
+      MapSet.new(["order_by", "page_size"])
       |> MapSet.intersection(diff_keys)
       |> Enum.empty?()
       |> Kernel.not()
@@ -90,16 +88,16 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
 
     socket
     |> assign(search: new_search, search_changed?: false, page: 0)
-    |> get_record_count()
-    |> get_records()
+    |> get_audit_log_count()
+    |> get_audit_logs()
     |> noreply()
   end
 
   def handle_event("reset-search", _params, %Socket{} = socket) do
     socket
     |> init_search_params(%{})
-    |> get_record_count()
-    |> get_records()
+    |> get_audit_log_count()
+    |> get_audit_logs()
     |> noreply()
   end
 
@@ -120,45 +118,38 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
 
   defp convert_search_params(params) do
     %{
-      "user_id" => maybe_to_integer(params["user_id"]),
-      "clean?" => boolean_from_form(params["clean?"]),
-      "restored?" => boolean_from_form(params["restored?"]),
-      "restored_by_id" => params["restored_by_id"],
+      "action" => params["action"],
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
     }
   end
 
-  defp record_query(%Socket{assigns: %{search: search}} = _socket) do
-    AntiAbuseRecordQueries.anti_abuse_records()
-    |> AntiAbuseRecordQueries.where_user_id(search["user_id"])
-    |> AntiAbuseRecordQueries.where_clean(search["clean?"])
-    |> AntiAbuseRecordQueries.where_restored(search["restored?"])
-    |> AntiAbuseRecordQueries.where_restored_by_id(search["restored_by_id"])
+  defp audit_log_query(%Socket{assigns: %{search: search}} = _socket) do
+    AuditLogQueries.audit_logs()
+    |> AuditLogQueries.where_action(search["action"])
   end
 
-  defp get_records(%Socket{assigns: assigns} = socket) do
-    records =
-      record_query(socket)
-      |> AntiAbuseRecordQueries.load_user()
-      |> AntiAbuseRecordQueries.load_restorer()
-      |> AntiAbuseRecordQueries.order_by_inserted_at(:desc)
-      |> QueryHelpers.paginate(assigns.page, assigns.search["page_size"])
+  defp get_audit_logs(%Socket{assigns: %{page: page, search: search}} = socket) do
+    audit_logs =
+      audit_log_query(socket)
+      |> AuditLogQueries.load_user()
+      |> AuditLogQueries.order_by_from_string(search["order_by"])
+      |> QueryHelpers.paginate(page, search["page_size"])
       |> Repo.all()
 
     socket
-    |> assign(records: records)
+    |> stream(:audit_logs, audit_logs, reset: true)
   end
 
-  defp get_record_count(%Socket{assigns: assigns} = socket) do
-    record_count =
-      record_query(socket)
+  defp get_audit_log_count(%Socket{assigns: assigns} = socket) do
+    audit_log_count =
+      audit_log_query(socket)
       |> QueryHelpers.count()
 
-    page_count = :math.ceil(record_count / assigns.search["page_size"]) |> round()
+    page_count = :math.ceil(audit_log_count / assigns.search["page_size"]) |> round()
 
     socket
-    |> assign(record_count: record_count)
+    |> assign(audit_log_count: audit_log_count)
     |> assign(page_count: page_count)
   end
 end

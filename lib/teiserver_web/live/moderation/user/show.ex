@@ -39,6 +39,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         socket
         |> put_flash(:error, "Unable to access this user")
         |> redirect(to: ~p"/moderation/users")
+        |> noreply()
     end
   end
 

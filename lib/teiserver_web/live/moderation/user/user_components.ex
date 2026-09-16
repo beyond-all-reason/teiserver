@@ -344,7 +344,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       id="audit_logs-table"
       rows={@audit_logs}
       table_class="table-sm table-hover"
-      row_click={fn {_id, audit_log} -> JS.navigate(~p"/logging/audit/#{audit_log.id}") end}
+      row_click={fn {_id, audit_log} -> JS.navigate(~p"/logging/audit_logs/#{audit_log.id}") end}
     >
       <:col :let={{_id, audit_log}} label="Date">
         {Calendar.strftime(audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}

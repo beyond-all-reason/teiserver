@@ -151,10 +151,9 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} />
+  <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} scope={@scope} />
   """
-  attr :scope, :map, default: nil
-  attr :current_user, :map, default: nil
+  attr :scope, :map, required: true
   attr :active, :string, required: true
 
   def top_navbar_tw(assigns) do
@@ -198,13 +197,14 @@ defmodule TeiserverWeb.NavComponents do
         <li class={[@active == "microblog" && "menu-active"]}>
           <.link href={~p"/microblog"}>Blog</.link>
         </li>
-        <%= if @current_user || @scope do %>
+
+        <%= if @scope do %>
           <li class={[@active == "chat" && "menu-active"]}>
             <.link href={~p"/chat"}>Chat</.link>
           </li>
 
           <li
-            :if={allow?(@current_user || @scope, "Server")}
+            :if={allow?(@scope, "Server")}
             class={[@active == "logging" && "menu-active"]}
           >
             <.link href={~p"/logging"}>Logging</.link>
@@ -223,28 +223,35 @@ defmodule TeiserverWeb.NavComponents do
           </li>
 
           <li
-            :if={allow_any?(@current_user || @scope, ["Contributor", "Overwatch"])}
+            :if={allow_any?(@scope, ["Contributor", "Overwatch"])}
             class={[@active == "reports" && "menu-active"]}
           >
             <.link href={~p"/teiserver/reports"}>Reports</.link>
           </li>
 
           <li
-            :if={allow?(@current_user || @scope, "Moderator")}
+            :if={allow?(@scope, "Moderator") and not allow?(@scope, "Admin")}
+            class={[@active == "users" && "menu-active"]}
+          >
+            <.link href={~p"/moderation/users"}>Users</.link>
+          </li>
+
+          <li
+            :if={allow?(@scope, "Admin")}
             class={[@active == "users" && "menu-active"]}
           >
             <.link href={~p"/teiserver/admin/user"}>Users</.link>
           </li>
 
           <li
-            :if={allow?(@current_user || @scope, "Overwatch")}
+            :if={allow?(@scope, "Overwatch")}
             class={[@active == "moderation" && "menu-active"]}
           >
             <.link href={~p"/moderation"}>Moderation</.link>
           </li>
 
           <li
-            :if={allow?(@current_user || @scope, "Contributor")}
+            :if={allow?(@scope, "Contributor")}
             class={[@active == "admin" && "menu-active"]}
           >
             <.link href={~p"/admin"}>Admin</.link>

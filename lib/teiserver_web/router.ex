@@ -187,12 +187,6 @@ defmodule TeiserverWeb.Router do
   scope "/logging", TeiserverWeb.Logging, as: :logging do
     pipe_through([:browser, :protected, :app_layout])
 
-    get("/", GeneralController, :index)
-
-    get("/audit/search", AuditLogController, :index)
-    post("/audit/search", AuditLogController, :search)
-    resources("/audit", AuditLogController, only: [:index, :show])
-
     get("/page_views/report", PageViewLogController, :report)
     post("/page_views/report", PageViewLogController, :report)
     get("/page_views/search", PageViewLogController, :index)
@@ -539,7 +533,7 @@ defmodule TeiserverWeb.Router do
       layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
         {Teiserver.Account.DefaultsPlug,
-         {:set, %{site_menu_active: "moderation", sensitive_data: true}}},
+         {:set, %{site_menu_active: "users", sensitive_data: true}}},
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do
@@ -726,6 +720,32 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Admin"}}
       ] do
       live "/tools/mfa_usage", Tools.MFAUsage, :show
+    end
+  end
+
+  scope "/logging", TeiserverWeb.LoggingLive do
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
+
+    live_session :logging,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "logging"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/", Menu, :show
+    end
+
+    live_session :audit_logs,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug,
+         {:set, %{site_menu_active: "logging", sensitive_data: true}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/audit_logs", AuditLog.List, :list
+      live "/audit_logs/:id", AuditLog.Show, :show
     end
   end
 
