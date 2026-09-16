@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.LoggingLive.AuditLogComponents do
   @moduledoc false
   alias Teiserver.Account.Scope
+  alias TeiserverWeb.LiveComponents.UserPicker
 
   use TeiserverWeb, :component
 
@@ -37,6 +38,17 @@ defmodule TeiserverWeb.LoggingLive.AuditLogComponents do
       id="audit_log-search-form"
     >
       <div class="grid grid-flow-row-dense grid-cols-3">
+        <div class="m-2">
+          <div class="fieldset w-full">
+            <.live_component
+              module={UserPicker}
+              id="user_id-user-picker"
+              field={@form[:user_id]}
+              label="User:"
+            />
+          </div>
+        </div>
+
         <div class="m-2">
           <.input_tw
             type="text"

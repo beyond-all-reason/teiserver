@@ -22,6 +22,8 @@ defmodule Teiserver.Logging.AuditLogQueries do
 
   # Where user_id
   @spec where_user_id(t(), [User.id()]) :: t()
+  def where_user_id(query, nil), do: query
+
   def where_user_id(query, user_id) do
     from audit_logs in query,
       where: audit_logs.user_id == ^user_id
