@@ -3,7 +3,6 @@
   {"lib/teiserver/account.ex", :guard_fail},
   {"lib/teiserver/account/reports/growth_report.ex", :no_return},
   {"lib/teiserver/account/reports/growth_report.ex", :call},
-  {"lib/teiserver/account/reports/mapping_report.ex", :no_return},
   {"lib/teiserver/account/reports/population_report.ex", :no_return},
   {"lib/teiserver/account/reports/population_report.ex", :call},
   {"lib/teiserver/account/reports/population_report.ex", :pattern_match},
