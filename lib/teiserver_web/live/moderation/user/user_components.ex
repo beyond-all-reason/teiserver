@@ -7,7 +7,9 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
   use TeiserverWeb, :component
 
-  import TeiserverWeb.CoreComponents, only: [simple_form: 1, input_tw: 1]
+  import TeiserverWeb.CoreComponents,
+    only: [simple_form: 1, input_tw: 1, list: 1, table: 1, button: 1]
+
   import TeiserverWeb.NavComponents, only: [section_menu_link: 1]
 
   @doc """
@@ -66,6 +68,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
         <div class="m-2">
           <.input_tw
+            type="text"
+            field={@form[:without_role]}
+            label="Without role"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
             type="select"
             field={@form[:restriction]}
             label="Has restriction"
@@ -88,7 +98,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
             type="select"
             field={@form[:order_by]}
             label="Order by"
-            options={["Newest first", "Oldest first", "Alphabetical (A-Z)", "Alphabetical (Z-A)"]}
+            options={[
+              "Newest first",
+              "Oldest first",
+              "Alphabetical (A-Z)",
+              "Alphabetical (Z-A)",
+              "Most recent login first",
+              "Oldest login first"
+            ]}
           />
         </div>
 
@@ -244,6 +261,274 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
     <div :for={{colour, icon} <- @icons} class="d-inline-block">
       <i class={"fa-fw text-#{colour} #{icon}"}></i>
     </div>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_tabset tab={@tab} set="1" />
+  """
+
+  attr :tab, :string
+  attr :set, :string
+
+  def show_tabset(assigns) do
+    ~H"""
+    <div role="tablist" class="tabs tabs-border">
+      <a
+        role="tab"
+        class={["tab", @tab == "details" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="details"
+        phx-value-tabset={@set}
+      >
+        Details
+      </a>
+
+      <a
+        role="tab"
+        class={["tab", @tab == "audit" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="audit"
+        phx-value-tabset={@set}
+      >
+        Audit
+      </a>
+
+      <a
+        role="tab"
+        class={["tab", @tab == "actions" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="actions"
+        phx-value-tabset={@set}
+      >
+        Actions
+      </a>
+    </div>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_details user={@user} />
+  """
+  attr :user, User
+
+  def show_details(assigns) do
+    ~H"""
+    <.list>
+      <:item title="Name">{@user.name}</:item>
+      <:item title="Email">{@user.email}</:item>
+      <:item title="Roles">
+        <div :for={role <- @user.roles} class="badge badge-soft badge-primary mx-1">{role}</div>
+      </:item>
+      <:item title="Registered">
+        {@user.inserted_at && Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Last login">
+        {@user.last_login && Calendar.strftime(@user.last_login, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Last played">
+        {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+    </.list>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_audit audit_logs={@streams.audit_logs} />
+  """
+  attr :audit_logs, :list
+
+  def show_audit(assigns) do
+    ~H"""
+    <.table
+      id="audit_logs-table"
+      rows={@audit_logs}
+      table_class="table-sm table-hover"
+      row_click={fn {_id, audit_log} -> JS.navigate(~p"/logging/audit/#{audit_log.id}") end}
+    >
+      <:col :let={{_id, audit_log}} label="Date">
+        {Calendar.strftime(audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}
+      </:col>
+      <:col :let={{_id, audit_log}} label="Action">{audit_log.action}</:col>
+      <:col :let={{_id, audit_log}} label="User">{audit_log.user_id && audit_log.user.name}</:col>
+    </.table>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_actions user={@user} />
+  """
+  attr :user, User
+
+  def show_actions(assigns) do
+    ~H"""
+    <h3 class="font-bold text-lg">Links</h3>
+    <.link
+      navigate={~p"/admin/chat?userid=#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/teiserver/admin/users/ratings/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <Fontawesome.icon icon={Teiserver.icon(:relationship)} style="solid" /> Relationships
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/teiserver/admin/matches/user/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/report/user/#{@user}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> Reports
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-soft btn-sm btn-disabled">
+        <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
+      </.button>
+    </.link>
+    <br /><br />
+
+    <h3 class="font-bold text-lg">Edit details</h3>
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-address-card" style="solid" /> Name
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-envelope" style="solid" /> Email
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-users" style="solid" /> Roles
+      </.button>
+    </.link>
+
+    <br /><br />
+    <h3 class="font-bold text-lg">Actions</h3>
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-person-drowning" style="solid" /> Reset flood protection
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-shield-alt" style="solid" /> Send password reset email
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-gavel" style="solid" /> Ban
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary btn-disabled">
+        <Fontawesome.icon icon="fa-broom" style="solid" /> Reset MFA
+      </.button>
+    </.link>
+
+    <.link
+      navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary">
+        <Fontawesome.icon icon="fa-link" style="solid" /> Mark as smurf of
+      </.button>
+    </.link>
+
+    <.link
+      :if={not is_nil(@user.gdpr_forget_after)}
+      navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary">
+        <Fontawesome.icon icon="circle-question" /> Clear GDPR forget
+      </.button>
+    </.link>
+
+    <.link
+      :if={is_nil(@user.gdpr_forget_after)}
+      navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
+      phx-click={JS.push_focus()}
+    >
+      <.button class="m-1 btn btn-primary">
+        <Fontawesome.icon icon="question" /> Set GDPR forget
+      </.button>
+    </.link>
+    """
+  end
+
+  @doc """
+  <UserComponents.quick_search />
+  """
+  def quick_search(assigns) do
+    ~H"""
+    <form action={~p"/moderation/users"} method="GET" class="inline-block">
+      <.input_tw
+        type="text"
+        value=""
+        name="name"
+        placeholder="Search by username"
+        class="input input-sm"
+      />
+    </form>
     """
   end
 end
