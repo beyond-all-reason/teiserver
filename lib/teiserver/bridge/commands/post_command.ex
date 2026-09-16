@@ -5,7 +5,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
 
@@ -81,7 +80,10 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
             action ->
               channel_id =
-                Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
+                case Communication.get_discord_channel("Public moderation log") do
+                  nil -> nil
+                  channel -> channel.channel_id
+                end
 
               ActionLib.generate_discord_message_text(action) <>
                 "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"

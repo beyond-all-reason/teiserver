@@ -1,28 +1,26 @@
 defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
 
+  alias Nostrum.Api.Channel
+  alias Nostrum.Api.Message
   alias Nostrum.Api.User, as: NostrumUser
   alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Communication.DiscordChannel
   alias Teiserver.Communication.DiscordChannelQueries
+
   use TeiserverWeb, :library_newform
 
   @spec special_channels() :: [String.t()]
   def special_channels do
     [
-      "Announcements",
       "Dev updates",
       "Main chat",
-      "Looking for players",
-      "New player chat",
       "Public moderation log",
       "Overwatch reports",
       "Moderation reports",
       "Server updates",
-      "Error updates",
-      "Github updates",
-      "Dev channel"
+      "Error updates"
     ]
   end
 
@@ -195,7 +193,25 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.create(channel_id, message)
+        channel_id -> Message.create(channel_id, message)
+      end
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
+  @spec rename_discord_channel(String.t() | non_neg_integer(), String.t()) ::
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any}
+  def rename_discord_channel(maybe_channel_id, new_name) do
+    if use_discord?() do
+      case get_channel_id_from_any(maybe_channel_id) do
+        nil ->
+          {:error, "No channel found"}
+
+        channel_id ->
+          Channel.modify(channel_id, %{
+            name: new_name
+          })
       end
     else
       {:error, :discord_disabled}
@@ -219,7 +235,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.get(channel_id, message_id)
+        channel_id -> Message.get(channel_id, message_id)
       end
     else
       {:error, :discord_disabled}
@@ -236,7 +252,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           {:error, "No channel found"}
 
         channel_id ->
-          Nostrum.Api.Message.edit(channel_id, message_id, content: new_message)
+          Message.edit(channel_id, message_id, content: new_message)
       end
     else
       {:error, :discord_disabled}
@@ -249,7 +265,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.delete(channel_id, message_id)
+        channel_id -> Message.delete(channel_id, message_id)
       end
     else
       {:error, :discord_disabled}
@@ -288,7 +304,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.react(channel_id, message_id, URI.encode(emoji))
+        channel_id -> Message.react(channel_id, message_id, URI.encode(emoji))
       end
     else
       {:error, :discord_disabled}
@@ -301,7 +317,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     if use_discord?() do
       case get_channel_id_from_any(maybe_channel_id) do
         nil -> {:error, "No channel found"}
-        channel_id -> Nostrum.Api.Message.unreact(channel_id, message_id, URI.encode(emoji))
+        channel_id -> Message.unreact(channel_id, message_id, URI.encode(emoji))
       end
     else
       {:error, :discord_disabled}

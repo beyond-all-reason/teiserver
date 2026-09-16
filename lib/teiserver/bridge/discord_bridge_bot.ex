@@ -5,11 +5,9 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   alias Nostrum.Api
   alias Nostrum.Api.ApplicationCommand
-  alias Nostrum.Api.Message
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Moderation
 
   use Nostrum.Consumer
@@ -126,11 +124,8 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
-    channel_id = Config.get_site_config_cache("teiserver.Discord channel #telemetry-infologs")
-
     post_to_discord =
       cond do
-        channel_id == nil -> false
         infolog.metadata["shorterror"] == "Errorlog" -> false
         infolog.metadata["private"] == true -> false
         true -> true
@@ -148,7 +143,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         ]
         |> Enum.join("\n")
 
-      Message.create(channel_id, message)
+      Communication.new_discord_message("Error updates", message)
     end
   end
 
@@ -182,16 +177,22 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   end
 
   def get_channel_for_report_type(type) do
-    case type do
-      "actions" ->
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
+    name =
+      case type do
+        "actions" ->
+          "Overwatch reports"
 
-      "chat" ->
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
+        "chat" ->
+          "Moderation reports"
 
-      _other ->
-        Logger.error("Unknown report type #{type}")
-        raise "Unknown report type #{type}"
+        _other ->
+          Logger.error("Unknown report type #{type}")
+          raise "Unknown report type #{type}"
+      end
+
+    case Communication.get_discord_channel(name) do
+      nil -> nil
+      channel -> channel.channel_id
     end
   end
 
@@ -263,12 +264,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   def update_report(%{discord_message_id: nil}), do: :ok
 
   def update_report(report) do
-    channel =
-      if report.type == "actions" do
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-      else
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
-      end
+    channel = get_channel_for_report_type(report.type)
 
     Logger.info("got channel for action #{inspect(report.type)}: #{channel}")
 

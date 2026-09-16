@@ -1,10 +1,10 @@
 defmodule Teiserver.Bridge.DiscordSystem do
   @moduledoc false
-  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Communication
 
   use DynamicSupervisor
   use Task
+
   require Logger
 
   def start_link(_init_arg) do
@@ -49,18 +49,15 @@ defmodule Teiserver.Bridge.DiscordSystem do
 
     result = start()
     Logger.info("Discord system restarted: #{reason}, result: #{inspect(result)}")
-    channel_id = BridgeServer.server_update_channel()
 
-    if channel_id do
-      message =
-        case result do
-          {:ok, _pid} -> "Discord bridge restarted: #{reason}"
-          {:ok, _pid, _info} -> "Discord bridge restarted: #{reason}"
-          other -> "Error restarting discord bridge #{reason}: #{inspect(other)}"
-        end
+    message =
+      case result do
+        {:ok, _pid} -> "Discord bridge restarted: #{reason}"
+        {:ok, _pid, _info} -> "Discord bridge restarted: #{reason}"
+        other -> "Error restarting discord bridge #{reason}: #{inspect(other)}"
+      end
 
-      Communication.new_discord_message(channel_id, message)
-    end
+    Communication.new_discord_message("Server updates", message)
 
     result
   end
