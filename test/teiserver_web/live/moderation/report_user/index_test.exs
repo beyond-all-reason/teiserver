@@ -23,15 +23,9 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
     test "index", %{conn: conn} do
       user = TeiserverTestLib.new_user()
-      {:ok, _index_live, html} = live(conn, ~p"/moderation/report_user/#{user.id}")
 
-      assert html =~ "You must be logged in to report someone"
-      assert html =~ "Reporting user: #{user.name}"
-      refute html =~ "Chat / Communication"
-      refute html =~ "Type of chat"
-      refute html =~ "Which match?"
-      refute html =~ "select-no-match"
-      refute html =~ "Extra info:"
+      {:error, {:redirect, %{to: "/login", flash: %{"error" => "Invalid credentials"}}}} =
+        live(conn, ~p"/moderation/report_user/#{user.id}")
     end
   end
 
