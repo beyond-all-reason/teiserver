@@ -12,8 +12,6 @@ defmodule Teiserver.Communication.TextCallback do
     field :response, :string
     field :last_triggered, :map, default: %{}
 
-    field :rules, :map, default: %{}
-
     field :category, :string, default: "default"
 
     timestamps()
@@ -28,7 +26,7 @@ defmodule Teiserver.Communication.TextCallback do
       |> trim_strings(~w(name)a)
 
     struct
-    |> cast(params, ~w(name icon colour response enabled rules last_triggered category)a)
+    |> cast(params, ~w(name icon colour response enabled last_triggered category)a)
     |> validate_required(~w(name icon colour response category)a)
   end
 
