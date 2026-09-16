@@ -897,7 +897,7 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedDomain)
   end
 
-  @spec list_banned_domains_cache :: MapSet.t(String.t())
+  @spec list_banned_domains_cache() :: MapSet.t(String.t())
   def list_banned_domains_cache do
     Teiserver.cache_get(:application_metadata_cache, "banned_domains", MapSet.new())
   end
@@ -1145,9 +1145,10 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedPhrase)
   end
 
-  @spec list_banned_phrases_cache() :: [BannedPhrase.t()]
-  def list_banned_phrases_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_phrases", [])
+  @spec list_banned_phrases_cache(String.t() | nil) :: [BannedPhrase.t()]
+  def list_banned_phrases_cache(use_case) do
+    use_case = use_case || "all"
+    Teiserver.cache_get(:application_metadata_cache, "banned_phrases/#{use_case}", [])
   end
 
   @doc """

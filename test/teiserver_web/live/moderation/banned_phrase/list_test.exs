@@ -4,12 +4,12 @@ defmodule TeiserverWeb.Moderation.BannedPhraseLive.ListTest do
 
   use TeiserverWeb.ConnCase, async: true
 
-  @create_attrs %{phrase: "some phrase", score_threshold: 123, type: "raw", severity: "medium"}
+  @create_attrs %{phrase: "some phrase", score_threshold: 123, type: "raw", use_cases: ["chat"]}
   @update_attrs %{
     phrase: "some other phrase",
     score_threshold: 456,
     type: "raw",
-    severity: "high"
+    use_cases: ["chat"]
   }
   @invalid_attrs %{phrase: nil}
 
@@ -74,7 +74,7 @@ defmodule TeiserverWeb.Moderation.BannedPhraseLive.ListTest do
                "Phrase",
                "Score threshold",
                "Type",
-               "Severity",
+               "Use cases",
                "Actions"
              ]
 
