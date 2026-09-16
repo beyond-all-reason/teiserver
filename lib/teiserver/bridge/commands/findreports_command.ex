@@ -2,10 +2,9 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
   @moduledoc """
   Calls the bot to link all connected reports discord messages
   """
+  alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Moderation
-  require Logger
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
   @ephemeral 64
@@ -67,24 +66,10 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
 
   # Helper Functions
 
-  defp get_channel(type) do
-    case type do
-      "actions" ->
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-
-      "chat" ->
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
-
-      _other ->
-        Logger.error("Unknown report type #{type}")
-        raise "Unknown report type #{type}"
-    end
-  end
-
   defp handle_report_id(id_str) do
     with {report_id, ""} <- Integer.parse(id_str),
          report when not is_nil(report) <- Moderation.get_report(report_id) do
-      channel = get_channel(report.type)
+      channel = DiscordBridgeBot.get_channel_for_report_type(report.type)
 
       content =
         if report.discord_message_id == nil or channel == nil do
@@ -120,7 +105,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
       report_links =
         reports
         |> Enum.map(fn report ->
-          channel = get_channel(report.type)
+          channel = DiscordBridgeBot.get_channel_for_report_type(report.type)
 
           "- https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"
         end)

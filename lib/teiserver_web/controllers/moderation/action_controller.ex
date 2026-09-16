@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Moderation
@@ -153,12 +153,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec format_discord_link(Moderation.Report.t()) :: String.t()
   def format_discord_link(report) do
-    channel =
-      if report.type == "actions" do
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-      else
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
-      end
+    channel = DiscordBridgeBot.get_channel_for_report_type(report.type)
 
     "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"
   end

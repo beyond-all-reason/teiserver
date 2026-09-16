@@ -2,8 +2,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   @moduledoc """
   The server used to read events from Teiserver and then use the DiscordBridgeBot to send onwards
   """
-
-  alias Nostrum.Api.Channel
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.User
@@ -11,8 +9,9 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Communication
-  alias Teiserver.Config
+
   use GenServer
+
   require Logger
 
   def bot_name, do: "DiscordBridgeBot"
@@ -42,10 +41,6 @@ defmodule Teiserver.Bridge.BridgeServer do
     bridge_pid = get_bridge_pid()
     send(bridge_pid, message)
   end
-
-  @spec server_update_channel() :: integer() | nil
-  def server_update_channel,
-    do: Config.get_site_config_cache("teiserver.Discord channel #server-updates")
 
   @impl GenServer
   def handle_call(:client_state, _from, state) do
@@ -80,16 +75,14 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   # Metrics
   def handle_info({:update_stats, stat_name, value}, state) do
-    config_key =
+    channel_name =
       case stat_name do
-        :client_count -> "teiserver.Discord counter clients"
-        :player_count -> "teiserver.Discord counter players"
-        :match_count -> "teiserver.Discord counter matches"
-        :lobby_count -> "teiserver.Discord counter lobbies"
-        _other -> ""
+        :client_count -> "Clients (counter)"
+        :player_count -> "Players (counter)"
+        :match_count -> "Matches (counter)"
+        :lobby_count -> "Lobbies (counter)"
+        _other -> nil
       end
-
-    channel_id = Config.get_site_config_cache(config_key)
 
     new_name =
       case stat_name do
@@ -100,7 +93,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         _other -> ""
       end
 
-    change_channel_name(channel_id, new_name)
+    Communication.rename_discord_channel(channel_name, new_name)
 
     {:noreply, state}
   end
@@ -126,25 +119,15 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :started}, state) do
     if Communication.use_discord?() do
-      # Main
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #main")
+      Communication.new_discord_message(
+        "Main chat",
+        "Server startup for node #{Teiserver.node_name()}"
+      )
 
-      if channel_id do
-        Communication.new_discord_message(
-          channel_id,
-          "Teiserver startup for node #{Teiserver.node_name()}"
-        )
-      end
-
-      # Server
-      channel_id = server_update_channel()
-
-      if channel_id do
-        Communication.new_discord_message(
-          channel_id,
-          "Teiserver startup for node #{Teiserver.node_name()}"
-        )
-      end
+      Communication.new_discord_message(
+        "Server updates",
+        "Teiserver startup for node #{Teiserver.node_name()}"
+      )
     end
 
     {:noreply, state}
@@ -152,14 +135,10 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
     if Communication.use_discord?() do
-      channel_id = Config.get_site_config_cache("teiserver.Discord channel #server-updates")
-
-      if channel_id do
-        Communication.new_discord_message(
-          channel_id,
-          "Teiserver shutdown for node #{Teiserver.node_name()}"
-        )
-      end
+      Communication.new_discord_message(
+        "Server updates",
+        "Teiserver shutdown for node #{Teiserver.node_name()}"
+      )
     end
 
     {:noreply, state}
@@ -196,38 +175,10 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp build_local_caches(state) do
-    channel_lookup =
-      [
-        "teiserver.Discord channel #main",
-        "teiserver.Discord channel #newbies",
-        "teiserver.Discord channel #promote",
-        "teiserver.Discord channel #moderation-reports",
-        "teiserver.Discord channel #moderation-actions",
-        "teiserver.Discord channel #server-updates",
-        "teiserver.Discord channel #telemetry-infologs",
-        "teiserver.Discord forum #gdt-discussion",
-        "teiserver.Discord forum #gdt-voting"
-      ]
-      |> Enum.map(fn key ->
-        channel_id = Config.get_site_config_cache(key)
-
-        if channel_id do
-          [_prefix, room] = String.split(key, "#")
-
-          {room, channel_id}
-        end
-      end)
-      |> Enum.reject(&(&1 == nil))
-      |> Map.new()
-
-    Teiserver.store_put(:application_metadata_cache, :discord_channel_lookup, channel_lookup)
-
     CommandLib.cache_discord_commands()
     Communication.pre_cache_discord_channels()
 
-    Map.merge(state, %{
-      channel_lookup: channel_lookup
-    })
+    state
   end
 
   @spec get_bridge_account() :: Teiserver.CacheUser.t() | map()
@@ -267,19 +218,6 @@ defmodule Teiserver.Bridge.BridgeServer do
       account ->
         account
     end
-  end
-
-  @spec change_channel_name(String.t(), String.t()) :: boolean()
-  def change_channel_name(_channel_id, ""), do: false
-  def change_channel_name(nil, _new_name), do: false
-  def change_channel_name(0, _new_name), do: false
-
-  def change_channel_name(channel_id, new_name) do
-    Channel.modify(channel_id, %{
-      name: new_name
-    })
-
-    false
   end
 
   @impl GenServer
