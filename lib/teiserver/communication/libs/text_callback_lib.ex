@@ -7,6 +7,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
   use TeiserverWeb, :library
   require Logger
 
+  @minimum_repeat_time 60
+
   # Functions
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-voicemail"
@@ -167,13 +169,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
     now = System.system_time(:second)
 
-    minimum_repeat_time =
-      text_callback
-      |> Map.get(:rules, %{})
-      |> Map.get(:minimum_repeat_time, 60)
-
-    # And now the result
-    now - last_triggered_time > minimum_repeat_time
+    now - last_triggered_time > @minimum_repeat_time
   end
 
   @spec set_last_triggered_time(TextCallback.t(), non_neg_integer()) :: any
