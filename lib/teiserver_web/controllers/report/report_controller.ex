@@ -21,14 +21,8 @@ defmodule TeiserverWeb.Report.ReportController do
 
     module =
       case name do
-        "time_spent" ->
-          Teiserver.Account.TimeSpentReport
-
         "active" ->
           Teiserver.Account.ActiveReport
-
-        "user_age" ->
-          Teiserver.Account.UserAgeReport
 
         "verified" ->
           Teiserver.Account.VerifiedReport
@@ -41,21 +35,6 @@ defmodule TeiserverWeb.Report.ReportController do
 
         "new_user_funnel" ->
           Teiserver.Account.NewUserFunnelReport
-
-        "accolades" ->
-          Teiserver.Account.AccoladeReport
-
-        "relationships" ->
-          Teiserver.Account.RelationshipReport
-
-        "mapping" ->
-          Teiserver.Game.MappingReport
-
-        "leaderboard" ->
-          Teiserver.Account.LeaderboardReport
-
-        "review" ->
-          Teiserver.Account.ReviewReport
 
         "new_smurf" ->
           Teiserver.Account.NewSmurfReport

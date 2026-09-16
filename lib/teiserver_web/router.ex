@@ -435,15 +435,6 @@ defmodule TeiserverWeb.Router do
 
     get("/show/:name", ReportController, :show)
     post("/show/:name", ReportController, :show)
-
-    # Ratings
-    get("/ratings/balance_tester", RatingController, :balance_tester)
-    post("/ratings/balance_tester", RatingController, :balance_tester)
-
-    get("/ratings/distribution_table", RatingController, :distribution_table)
-    post("/ratings/distribution_table", RatingController, :distribution_table)
-    get("/ratings/distribution_graph", RatingController, :distribution_graph)
-    post("/ratings/distribution_graph", RatingController, :distribution_graph)
   end
 
   scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do

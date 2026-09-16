@@ -4,16 +4,6 @@
       <h4>Metrics</h4>
     </div>
 
-    <%= if allow?(@current_user, "Moderator") do %>
-      <.menu_card
-        size={:small}
-        icon={Teiserver.Account.RatingLib.icon()}
-        url={~p"/teiserver/reports/ratings/distribution_table"}
-      >
-        Ratings
-      </.menu_card>
-    <% end %>
-
     <%= if allow?(@current_user, "Engine") do %>
       <.menu_card
         size={:small}
@@ -32,30 +22,6 @@
       Data exports
     </.menu_card>
   <% end %>
-
-  <div class="col-md-12">
-    <h4>Individual users</h4>
-  </div>
-
-  <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.TimeSpentReport.icon()}
-      url={~p"/teiserver/reports/show/time_spent"}
-    >
-      Time spent
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Account.RelationshipReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.RelationshipReport.icon()}
-      url={~p"/teiserver/reports/show/relationships"}
-    >
-      Relationships
-    </.menu_card>
-  <% end %>
 </div>
 
 <div class="row mt-2">
@@ -70,16 +36,6 @@
       url={~p"/teiserver/reports/show/active"}
     >
       Active
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Account.UserAgeReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.UserAgeReport.icon()}
-      url={~p"/teiserver/reports/show/user_age"}
-    >
-      User age
     </.menu_card>
   <% end %>
 
@@ -179,36 +135,6 @@
     <h4>Other</h4>
   </div>
 
-  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:teiserver, Teiserver)[:enable_accolade_mode] == true do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.AccoladeReport.icon()}
-      url={~p"/teiserver/reports/show/accolades"}
-    >
-      Accolades
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.LeaderboardReport.icon()}
-      url={~p"/teiserver/reports/show/leaderboard"}
-    >
-      Leaderboard
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.ReviewReport.icon()}
-      url={~p"/teiserver/reports/show/review"}
-    >
-      Review
-    </.menu_card>
-  <% end %>
-
   <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
     <.menu_card
       size={:small}
@@ -216,16 +142,6 @@
       url={~p"/teiserver/reports/show/open_skill"}
     >
       Open Skill
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Game.MappingReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Game.MappingReport.icon()}
-      url={~p"/teiserver/reports/show/mapping"}
-    >
-      Mapping
     </.menu_card>
   <% end %>
 
