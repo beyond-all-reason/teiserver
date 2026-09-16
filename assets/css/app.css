@@ -120,7 +120,14 @@
 }
 
 .menu-grid {
-  @apply grid grid-flow-row-dense sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 3xl:grid-cols-12 4xl:grid-cols-16;
+  @apply grid grid-flow-row-dense
+    sm:grid-cols-2
+    md:grid-cols-4
+    lg:grid-cols-5
+    xl:grid-cols-7
+    2xl:grid-cols-8
+    3xl:grid-cols-12
+    4xl:grid-cols-16;
 }
 
 .menu-link {

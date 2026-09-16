@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.AnonymiseUserTaskTest do
+defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
   alias Teiserver.Account
   alias Teiserver.Account.GDPRAnonymiseTask
   alias Teiserver.Account.SmurfKeyQueries

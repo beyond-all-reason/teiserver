@@ -335,41 +335,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @spec get_coordinator_account() :: Teiserver.CacheUser.t() | map()
   def get_coordinator_account do
-    user =
-      Account.get_user(nil,
-        search: [
-          email: "coordinator@teiserver.local"
-        ]
-      )
-
-    case user do
-      nil ->
-        # Make account
-        {:ok, account} =
-          Account.script_create_user(%{
-            name: "Coordinator",
-            email: "coordinator@teiserver.local",
-            icon: "fa-solid fa-sitemap",
-            colour: "#AA00AA",
-            password: Account.make_bot_password(),
-            roles: ["Bot", "Verified", "Server"],
-            data: %{
-              bot: true,
-              moderator: true,
-              lobby_client: "Teiserver Internal Process"
-            }
-          })
-
-        Account.update_user_stat(account.id, %{
-          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
-        })
-
-        CacheUser.deprecated_recache_user(account.id)
-        account
-
-      account ->
-        account
-    end
+    Account.system_user()
   end
 
   @impl GenServer

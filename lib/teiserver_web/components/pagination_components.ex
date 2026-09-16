@@ -4,6 +4,8 @@ defmodule TeiserverWeb.PaginationComponents do
   """
   use Phoenix.Component
 
+  import Teiserver.Helper.StringHelper, only: [format_number: 1]
+
   @doc """
   Renders a pagination component with page numbers, navigation, and search parameter preservation.
 
@@ -487,7 +489,7 @@ defmodule TeiserverWeb.PaginationComponents do
         <Fontawesome.icon icon="angle-left" style="regular" />
       </button>
       <button class={"join-item btn btn-#{@size}"}>
-        Page {@page + 1} of {@page_count}
+        Page {@page + 1} of {format_number(@page_count)}
       </button>
       <button
         class={[

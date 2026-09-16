@@ -1,7 +1,6 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
+defmodule TeiserverWeb.LoggingLive.AuditLogComponents do
   @moduledoc false
   alias Teiserver.Account.Scope
-  alias TeiserverWeb.LiveComponents.UserPicker
 
   use TeiserverWeb, :component
 
@@ -9,7 +8,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
   import TeiserverWeb.NavComponents, only: [section_menu_link: 1]
 
   @doc """
-  <TeiserverWeb.Admin.AntiAbuseRecordComponents.search_form
+  <TeiserverWeb.Moderation.AuditLogComponents.search_form
     :if={assigns[:search]}
     params={@search}
   />
@@ -33,54 +32,16 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
     ~H"""
     <.simple_form
       for={@form}
-      id="anti-abuse-record-search-form"
       phx-change="validate-search"
       phx-submit="update-search"
+      id="audit_log-search-form"
     >
       <div class="grid grid-flow-row-dense grid-cols-3">
         <div class="m-2">
-          <div class="fieldset">
-            <.live_component
-              module={UserPicker}
-              id="restored_by_id-user-picker"
-              field={@form[:restored_by_id]}
-              label="Restored by:"
-            />
-          </div>
-        </div>
-
-        <div class="m-2">
           <.input_tw
             type="text"
-            field={@form[:user_id]}
-            label="User ID"
-          />
-        </div>
-
-        <div class="m-2">
-          <.input_tw
-            type="select"
-            field={@form[:clean?]}
-            label="Clean?"
-            options={[{"Any", nil}, {"Clean", true}, {"Unclean", false}]}
-          />
-        </div>
-
-        <div class="m-2">
-          <.input_tw
-            type="select"
-            field={@form[:restored?]}
-            label="Restored?"
-            options={[{"Any", nil}, {"Restored", true}, {"Not restored", false}]}
-          />
-        </div>
-
-        <div class="m-2">
-          <.input_tw
-            type="select"
-            field={@form[:expired?]}
-            label="Expired?"
-            options={[{"Any", nil}, {"Expired", true}, {"Not expired", false}]}
+            field={@form[:action]}
+            label="Action"
           />
         </div>
 
@@ -89,7 +50,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
             type="select"
             field={@form[:order_by]}
             label="Order by"
-            options={["Newest first", "Oldest first", "Expires earliest", "Expires latest"]}
+            options={["Newest first", "Oldest first"]}
           />
         </div>
 
@@ -116,12 +77,12 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
   end
 
   @doc """
-  <AntiAbuseRecordComponents.section_menu
+  <AuditLogComponents.section_menu
     active="some-link"
     scope={@scope}
   />
 
-  <AntiAbuseRecordComponents.section_menu
+  <AuditLogComponents.section_menu
     active="some-link"
     scope={@scope}
   >
@@ -131,7 +92,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
     <:right_links>
       <li>Link goes here</li>
     </:right_links>
-  </AntiAbuseRecordComponents.section_menu>
+  </AuditLogComponents.section_menu>
   """
   attr :scope, Scope, required: true
   attr :active, :string, required: true
@@ -143,8 +104,15 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
     <div class="section-menu-bar">
       <ul class="menu menu-horizontal">
         <.section_menu_link
+          icon="fa-arrow-left"
+          url={~p"/logging"}
+        >
+          Logging
+        </.section_menu_link>
+
+        <.section_menu_link
           icon={StylingHelper.icon(:list)}
-          url={~p"/admin/anti-abuse-records/list"}
+          url={~p"/logging/audit_logs"}
           active={@active == "list"}
         >
           List

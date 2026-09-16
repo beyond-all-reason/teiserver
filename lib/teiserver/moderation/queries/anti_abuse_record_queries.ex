@@ -57,6 +57,23 @@ defmodule Teiserver.Moderation.AntiAbuseRecordQueries do
       where: anti_abuse_records.restored_by_id == ^id
   end
 
+  # Expiry
+  @spec where_expired(t()) :: t()
+  def where_expired(query, now \\ nil) do
+    now = now || DateTime.utc_now()
+
+    from anti_abuse_records in query,
+      where: anti_abuse_records.expires_at < ^now
+  end
+
+  @spec where_not_expired(t()) :: t()
+  def where_not_expired(query, now \\ nil) do
+    now = now || DateTime.utc_now()
+
+    from anti_abuse_records in query,
+      where: anti_abuse_records.expires_at > ^now
+  end
+
   @spec where_identifier(t(), String.t(), String.t()) :: t()
   def where_identifier(query, identifier_type, identifier) do
     from anti_abuse_records in query,
@@ -89,4 +106,19 @@ defmodule Teiserver.Moderation.AntiAbuseRecordQueries do
       from(anti_abuse_records in query, order_by: [desc: anti_abuse_records.inserted_at])
     end
   end
+
+  @spec order_by_expires(t(), :asc | :desc) :: t()
+  def order_by_expires(query, direction \\ :asc) do
+    if direction == :asc do
+      from(anti_abuse_records in query, order_by: [asc: anti_abuse_records.expires])
+    else
+      from(anti_abuse_records in query, order_by: [desc: anti_abuse_records.expires])
+    end
+  end
+
+  @spec order_by_from_string(t(), String.t()) :: t()
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
+  def order_by_from_string(query, "Expires earliest"), do: order_by_expires(query, :asc)
+  def order_by_from_string(query, "Expires latest"), do: order_by_expires(query, :desc)
 end

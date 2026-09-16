@@ -43,14 +43,16 @@ defmodule Teiserver.Logging.AuditLogQueries do
           fragment("? ->> ? = ?", audit_logs.details, "smurf_id", ^user_id)
   end
 
-  # Order by
-  @spec order_by_inserted_at(t(), :asc | :desc) :: t()
-  def order_by_inserted_at(query, direction \\ :asc) do
-    if direction == :asc do
-      from(audit_logs in query, order_by: [asc: audit_logs.inserted_at])
-    else
-      from(audit_logs in query, order_by: [desc: audit_logs.inserted_at])
-    end
+  @spec where_action(t(), nil | String.t() | [String.t()]) :: t()
+  def where_action(query, nil), do: query
+  def where_action(query, ""), do: query
+  def where_action(query, []), do: query
+
+  def where_action(query, action) do
+    actions = List.wrap(action)
+
+    from audit_logs in query,
+      where: audit_logs.action in ^actions
   end
 
   # Joins
@@ -62,4 +64,17 @@ defmodule Teiserver.Logging.AuditLogQueries do
       on: users.id == audit_logs.user_id,
       preload: [user: users]
   end
+
+  @spec order_by_inserted_at(t(), :asc | :desc) :: t()
+  def order_by_inserted_at(query, direction \\ :asc) do
+    if direction == :asc do
+      from(audit_logs in query, order_by: [asc: audit_logs.inserted_at])
+    else
+      from(audit_logs in query, order_by: [desc: audit_logs.inserted_at])
+    end
+  end
+
+  @spec order_by_from_string(t(), String.t()) :: t()
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
 end
