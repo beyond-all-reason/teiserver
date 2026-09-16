@@ -204,7 +204,7 @@ defmodule Teiserver.MixProject do
       ],
       precommit: [
         "deps.unlock --check-unused",
-        "compile --force --warning-as-errors",
+        "compile --force --warnings-as-errors",
         "format",
         "credo",
         "test --raise --warnings-as-errors --exclude needs_attention",
