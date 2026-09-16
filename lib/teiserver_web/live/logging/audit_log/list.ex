@@ -64,7 +64,7 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
       |> MapSet.new()
 
     contains_update_keys? =
-      MapSet.new(["order_by", "page_size"])
+      MapSet.new(["order_by", "page_size", "user_id"])
       |> MapSet.intersection(diff_keys)
       |> Enum.empty?()
       |> Kernel.not()
@@ -119,6 +119,7 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
   defp convert_search_params(params) do
     %{
       "action" => params["action"],
+      "user_id" => maybe_to_integer(params["user_id"]),
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
     }
@@ -127,6 +128,7 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
   defp audit_log_query(%Socket{assigns: %{search: search}} = _socket) do
     AuditLogQueries.audit_logs()
     |> AuditLogQueries.where_action(search["action"])
+    |> AuditLogQueries.where_user_id(search["user_id"])
   end
 
   defp get_audit_logs(%Socket{assigns: %{page: page, search: search}} = socket) do
