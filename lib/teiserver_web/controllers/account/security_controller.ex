@@ -206,39 +206,65 @@ defmodule TeiserverWeb.Account.SecurityController do
   @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def disable_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    Account.disable_totp(user.id)
 
-    conn
-    |> add_breadcrumb(name: "totp", url: conn.request_path)
-    |> assign(:totp_status, :inactive)
-    |> assign(:user, user)
-    |> render("totp.html")
+    if AuthLib.need_to_mfa_refresh?(user.id) do
+      conn
+      |> add_breadcrumb(name: "Details", url: conn.request_path)
+      |> assign(:user, user)
+      |> assign(:redirect, ~p"/teiserver/account/security/totp/disable")
+      |> render("mfa_refresh.html")
+    else
+      Account.disable_totp(user.id)
+
+      conn
+      |> add_breadcrumb(name: "totp", url: conn.request_path)
+      |> assign(:totp_status, :inactive)
+      |> assign(:user, user)
+      |> render("totp.html")
+    end
   end
 
   @spec edit_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def edit_password(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
-    changeset = Account.change_user(user)
 
-    conn
-    |> add_breadcrumb(name: "Password", url: conn.request_path)
-    |> assign(:changeset, changeset)
-    |> assign(:user, user)
-    |> render("edit_password.html")
+    if AuthLib.need_to_mfa_refresh?(user.id) do
+      conn
+      |> add_breadcrumb(name: "Details", url: conn.request_path)
+      |> assign(:user, user)
+      |> assign(:redirect, ~p"/teiserver/account/security/edit_password")
+      |> render("mfa_refresh.html")
+    else
+      changeset = Account.change_user(user)
+
+      conn
+      |> add_breadcrumb(name: "Password", url: conn.request_path)
+      |> assign(:changeset, changeset)
+      |> assign(:user, user)
+      |> render("edit_password.html")
+    end
   end
 
   @spec update_password(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def update_password(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    case Account.update_user_plain_password(user, user_params) do
-      {:ok, _user} ->
-        conn
-        |> put_flash(:info, "Account password updated successfully.")
-        |> redirect(to: ~p"/teiserver/account/security")
+    if AuthLib.need_to_mfa_refresh?(user.id) do
+      conn
+      |> add_breadcrumb(name: "Details", url: conn.request_path)
+      |> assign(:user, user)
+      |> assign(:redirect, ~p"/teiserver/account/security/edit_password")
+      |> render("mfa_refresh.html")
+    else
+      case Account.update_user_plain_password(user, user_params) do
+        {:ok, _user} ->
+          conn
+          |> put_flash(:info, "Account password updated successfully.")
+          |> redirect(to: ~p"/teiserver/account/security")
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "edit_password.html", user: user, changeset: changeset)
+        {:error, %Ecto.Changeset{} = changeset} ->
+          render(conn, "edit_password.html", user: user, changeset: changeset)
+      end
     end
   end
 
