@@ -133,7 +133,12 @@ config :teiserver, Teiserver,
     account_unverified: 14,
     lobby_chat: 90,
     room_chat: 90,
-    battle_minimum_seconds: 120
+    battle_minimum_seconds: 120,
+    direct_messages: 365,
+    linked_audit_logs: 365,
+    unlinked_audit_logs: 365,
+    unverified_users: 14,
+    previous_emails: 14
   },
   require_mfa_for_privileged_roles: true
 
@@ -212,7 +217,7 @@ config :teiserver, Oban,
        {"0 9 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
-       {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+       {"7 1 * * *", Teiserver.Account.DeleteUnverifiedUsersTask},
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
        {"7 1 * * *", Teiserver.OAuth.Tasks.Cleanup},
 
