@@ -60,4 +60,24 @@ defmodule TeiserverWeb.General.Home.IndexLiveTest do
         live(conn, ~p"/account/relationship")
     end
   end
+
+  # We had an issue where an unauthenticated user would visit a page and something
+  # would try to render expecting a scope. It was fixed correctly but caused a bad server
+  # deployment because the supervisor tree would be restarted after a certain number of errors
+  # in quick succession.
+  describe "unauth scope test" do
+    # Without the fix, this test would fail
+    test "unauth access redirects without error" do
+      {:ok, kw} = GeneralTestLib.conn_setup([], [:no_login])
+      {:ok, conn} = Keyword.fetch(kw, :conn)
+      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/account/relationship")
+      assert path == ~p"/login"
+    end
+
+    test "page loads correctly when logged in" do
+      {:ok, kw} = GeneralTestLib.conn_setup(["Verified"])
+      {:ok, conn} = Keyword.fetch(kw, :conn)
+      {:ok, _html, _live} = live(conn, ~p"/account/relationship")
+    end
+  end
 end
