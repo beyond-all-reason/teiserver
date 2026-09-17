@@ -1,7 +1,7 @@
 [tools]
 postgres = "15"
 erlang = "28.5"
-elixir = "1.19.5-otp-28"
+elixir = "1.20.4-otp-28"
 
 [vars]
 pg_data = "tmp/postgres/data"

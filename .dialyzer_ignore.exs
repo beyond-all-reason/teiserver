@@ -24,7 +24,6 @@
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :no_return},
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :call},
   {"lib/teiserver/battle/tasks/post_match_process_task.ex", :unused_fun},
-  {"lib/teiserver/bridge/discord_bridge_bot.ex", :guard_fail},
   {"lib/teiserver/chat.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :unknown_type},
   {"lib/teiserver/communication.ex", :invalid_contract},
@@ -108,7 +107,6 @@
   {"lib/teiserver_web/controllers/admin/discord_channel_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/lobby_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/admin/match_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/admin/user_controller.ex", :guard_fail},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :pattern_match},
   {"lib/teiserver_web/controllers/admin/user_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :no_return},
@@ -152,7 +150,6 @@
   {"test/support/tachyon/matchmaking.ex", :call_without_opaque},
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :call_without_opaque},
   {"lib/teiserver/account/reports/growth_report.ex", :invalid_contract},
-  {"lib/teiserver/account/servers/login_throttle_server.ex", :contract_with_opaque},
   {"lib/teiserver/account/tasks/merge_accounts_task.ex", :invalid_contract},
   {"lib/teiserver/autohost/session.ex", :contract_with_opaque},
   {"lib/teiserver/battle.ex", :invalid_contract},
@@ -215,7 +212,6 @@
   {"lib/teiserver/account/tasks/delete_unverified_users_task.ex"},
   {"lib/teiserver/account/libs/user_lib.ex"},
   {"lib/teiserver_web/live/moderation/report_user/index.ex"},
-  {"lib/teiserver_web/live/moderation/tools/gdpr_restore_perform.ex"},
   {"lib/teiserver/account/tasks/restore_anonymised_user_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]
