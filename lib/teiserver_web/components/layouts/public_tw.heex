@@ -1,5 +1,6 @@
 <div>
   <TeiserverWeb.NavComponents.top_navbar_tw
+    :if={assigns[:scope]}
     active={assigns[:site_menu_active]}
     scope={@scope}
   />
