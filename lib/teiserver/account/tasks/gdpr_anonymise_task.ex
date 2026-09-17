@@ -64,7 +64,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
              LoggingHelpers.add_audit_log(
                user.id,
                nil,
-               "gdpr-forgot",
+               "GDPR Anonymised",
                %{outcome: "completed"}
              ) do
         {:ok, :success}

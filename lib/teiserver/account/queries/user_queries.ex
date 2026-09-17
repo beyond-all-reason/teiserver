@@ -514,6 +514,12 @@ defmodule Teiserver.Account.UserQueries do
       where: users.smurf_of_id == ^user_id
   end
 
+  @spec where_registered_before(t(), DateTime.t()) :: t()
+  def where_registered_before(query, timestamp) do
+    from users in query,
+      where: users.inserted_at < ^timestamp
+  end
+
   # Joins
   @spec load_user_stat(t()) :: t()
   def load_user_stat(query) do

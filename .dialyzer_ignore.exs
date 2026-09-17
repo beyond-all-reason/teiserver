@@ -212,7 +212,7 @@
   {"lib/teiserver_web/live/moderation/user/set_gdpr_forget.ex"},
   {"lib/teiserver_web/live/moderation/user/edit.ex"},
   {"lib/teiserver_web/live/moderation/user/clear_gdpr_forget.ex"},
-  {"lib/teiserver/account/tasks/account_daily_cleanup_task.ex"},
+  {"lib/teiserver/account/tasks/delete_unverified_users_task.ex"},
   {"lib/teiserver/account/libs/user_lib.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]

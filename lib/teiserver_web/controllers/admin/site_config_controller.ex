@@ -43,6 +43,7 @@ defmodule TeiserverWeb.Admin.SiteConfigController do
   @spec update(Plug.Conn.t(), any) :: Plug.Conn.t()
   def update(conn, %{"id" => key, "site_config" => site_config_params}) do
     value = Map.get(site_config_params, "value", "false")
+
     Config.update_site_config(key, value)
 
     tab =
