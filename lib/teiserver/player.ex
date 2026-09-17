@@ -88,6 +88,11 @@ defmodule Teiserver.Player do
   defdelegate battle_start(user_id, battle_id, battle_start_data, password), to: Player.Session
 
   @doc """
+  Let players and spectators know a battle has ended
+  """
+  defdelegate notify_battle_ended(user_id, battle_id, battle_ended_data), to: Player.Session
+
+  @doc """
   Let the player know that they can join a battle associated with a lobby
   """
   @spec lobby_join_battle(

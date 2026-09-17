@@ -289,10 +289,38 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       # content is rather straightforward
       assert tachyon_battle["username"] == ctx3[:user].name
 
-      # when battle terminates members should get notified
-      TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
-      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
-      %{"currentBattle" => nil} = updated
+      player_id = to_string(ctx[:user].id)
+      spectator_ids = MapSet.new([to_string(ctx2[:user].id), to_string(ctx3[:user].id)])
+
+      %{"commandId" => "battle/start"} = Tachyon.recv_message!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+
+      Tachyon.autohost_send_update_event(
+        ctx[:autohost_client],
+        Tachyon.autohost_engine_quit(battle_id)
+      )
+
+      # all participants receive battle/ended event
+      for client <- [ctx[:client], ctx2[:client], client3] do
+        assert %{
+                 "commandId" => "battle/ended",
+                 "data" => %{
+                   "battleId" => ^battle_id,
+                   "players" => [
+                     %{"userId" => ^player_id, "allyTeam" => "0", "team" => "0", "player" => "0"}
+                   ],
+                   "spectators" => spectators,
+                   "winningAllyTeamIds" => []
+                 }
+               } = Tachyon.recv_message!(client)
+
+        assert MapSet.new(spectators, & &1["userId"]) == spectator_ids
+
+        # after which the currentBattle is cleared
+        assert %{"commandId" => "lobby/updated", "data" => %{"currentBattle" => nil}} =
+                 Tachyon.recv_message!(client)
+      end
     end
   end
 

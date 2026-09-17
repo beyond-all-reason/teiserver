@@ -941,7 +941,10 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         )
       end
 
+      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
+
       assert Polling.poll_until_some(fn -> Battle.get_match!(match_id).finished end)
+
       memberships = Battle.get_match_memberships(match_id)
 
       for member <- memberships do
@@ -952,13 +955,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         end
       end
 
-      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
-
       assert Polling.poll_until_true(fn ->
                Game.count_rating_logs(search: [match_id: match_id]) == 2
              end)
 
       for usr <- clients do
+        %{"commandId" => "battle/ended"} = Tachyon.recv_message!(usr.client)
+
         %{"commandId" => "user/updated", "data" => %{"users" => [%{"status" => "menu"}]}} =
           Tachyon.recv_message!(usr.client)
       end
