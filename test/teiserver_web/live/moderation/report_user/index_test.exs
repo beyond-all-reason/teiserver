@@ -49,26 +49,26 @@ defmodule TeiserverWeb.Moderation.ReportUser.IndexLiveTest do
 
       # Select type of chat
       html = index_live |> element("#type-chat") |> render_click()
-      refute html =~ "Chat / Communication"
+      assert html =~ "Chat / Communication"
       assert html =~ "Type of chat"
       refute html =~ "Which match?"
       refute html =~ "select-no-match"
       refute html =~ "Extra info:"
 
-      # Select sub-type of Hate speech
+      # Select sub-type of Hate speech, should reveal a lot more
       html = index_live |> element("#sub_type-hate") |> render_click()
-      refute html =~ "Chat / Communication"
-      refute html =~ "Type of chat"
+      assert html =~ "Chat / Communication"
+      assert html =~ "Type of chat"
       assert html =~ "Which match?"
       assert html =~ "select-no-match"
-      refute html =~ "Extra info:"
+      assert html =~ "Extra info:"
 
-      # Select no match
+      # Select no match, no changes to content
       html = index_live |> element("#select-no-match-btn") |> render_click()
-      refute html =~ "Chat / Communication"
-      refute html =~ "Type of chat"
-      refute html =~ "Which match?"
-      refute html =~ "select-no-match"
+      assert html =~ "Chat / Communication"
+      assert html =~ "Type of chat"
+      assert html =~ "Which match?"
+      assert html =~ "select-no-match"
       assert html =~ "Extra info:"
 
       # Insert extra info
