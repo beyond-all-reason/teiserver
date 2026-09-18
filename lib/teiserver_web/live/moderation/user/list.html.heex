@@ -10,31 +10,43 @@
 
 <UserComponents.search_form params={@search} changed?={@search_changed?} />
 
+<.live_component
+  :if={@preferences}
+  module={UserListPreferences}
+  id="user-list-preferences-form"
+  scope={@scope}
+  preferences={@preferences}
+  update_parent={true}
+/>
+
 <div style="clear: both;"></div>
-<div class="alert alert-info alert-soft my-4">
-  This page is intended to be a moderation specific list of users, this means it can be tweaked to the needs of the moderation team without needing to worry about admin requirements. Please speak to Teifion (probably in #mod-utils) regarding requests and ideas.
-</div>
 
 <.table
+  :if={@preferences}
   id="users-table"
-  rows={@streams.users}
-  table_class="table-sm table-zebra mt-4"
-  row_click={fn {_id, user} -> JS.navigate(~p"/moderation/users/#{user}") end}
+  rows={@users}
+  table_class={["table-sm mt-4 ", @preferences.table_class]}
+  row_click={fn user -> JS.navigate(~p"/moderation/users/#{user}") end}
 >
-  <:col :let={{_id, user}} label="User">{user.name}</:col>
-  <:col :let={{_id, user}} :if={@is_moderator?} label="Email">{user.email}</:col>
-  <:col :let={{_id, user}} label="Client">{user.client}</:col>
-  <:col :let={{_id, user}} label="Status">
+  <:col :let={user} label="User">{user.name}</:col>
+  <:col :let={user} :if={@is_moderator?} label="Email">
+    <span :if={@preferences.email == "partial"}>
+      {user.email |> String.split("@") |> List.last()}
+    </span>
+    <span :if={@preferences.email == "full"}>{user.email}</span>
+  </:col>
+  <:col :let={user} :if={@preferences.client?} label="Client">{user.client}</:col>
+  <:col :let={user} label="Status">
     <UserComponents.status_icon user={user} />
   </:col>
-  <:col :let={{_id, user}} :if={@is_moderator?} label="HW">{user.hw_string}</:col>
-  <:col :let={{_id, user}} :if={@is_moderator?} label="IP">{user.last_ip}</:col>
-  <:col :let={{_id, user}} label="Roles">
+  <:col :let={user} :if={@is_moderator?} label="HW">{user.hw_string}</:col>
+  <:col :let={user} :if={@is_moderator?} label="IP">{user.last_ip}</:col>
+  <:col :let={user} label="Roles">
     {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
     {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
     {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
   </:col>
-  <:col :let={{_id, user}} label="Registered">
+  <:col :let={user} label="Registered">
     {Calendar.strftime(user.inserted_at, "%Y-%m-%d")}
   </:col>
 </.table>

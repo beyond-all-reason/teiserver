@@ -6,6 +6,7 @@ defmodule Teiserver.Config.UserConfigTypes.Cache do
   alias Teiserver.Config.UserConfigTypes.LastUsedValueConfigs
   alias Teiserver.Config.UserConfigTypes.PrivacyConfigs
   alias Teiserver.Config.UserConfigTypes.ProfileConfigs
+  alias Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs
   alias Teiserver.Helpers.CacheHelper
 
   use Supervisor
@@ -14,7 +15,8 @@ defmodule Teiserver.Config.UserConfigTypes.Cache do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),
          :ok <- ProfileConfigs.create(),
          :ok <- PrivacyConfigs.create(),
-         :ok <- LastUsedValueConfigs.create() do
+         :ok <- LastUsedValueConfigs.create(),
+         :ok <- TableColumnPreferenceConfigs.create() do
       {:ok, sup}
     end
   end

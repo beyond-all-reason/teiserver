@@ -4,6 +4,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
+  alias TeiserverWeb.LiveComponents.Moderation.UserListPreferences
   alias TeiserverWeb.ModerationLive.User.FormComponent
   alias TeiserverWeb.ModerationLive.UserComponents
 
@@ -18,8 +19,10 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   def mount(params, _session, %Socket{} = socket) when is_connected?(socket) do
     is_moderator? = allow?(socket, "Moderator")
 
+    preferences = UserListPreferences.get_preferences(socket.assigns.scope)
+
     socket
-    |> assign(page: 0, is_moderator?: is_moderator?)
+    |> assign(page: 0, is_moderator?: is_moderator?, preferences: preferences)
     |> init_search_params(params)
     |> get_users()
     |> get_user_count()
@@ -34,9 +37,11 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       page_count: 1,
       search: %{},
       search_changed?: false,
-      is_moderator?: false
+      is_moderator?: false,
+      preferences: nil
     )
-    |> stream(:users, [])
+    # |> stream(:users, [])
+    |> assign(users: [])
     |> ok()
   end
 
@@ -49,11 +54,6 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     socket
     |> assign(:page_title, "Listing Banned Domains")
     |> assign(:user, nil)
-  end
-
-  @impl LiveView
-  def handle_info({FormComponent, {:saved, user}}, socket) do
-    {:noreply, stream_insert(socket, :users, user)}
   end
 
   @impl LiveView
@@ -114,6 +114,17 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> init_search_params(%{})
     |> get_user_count()
     |> get_users()
+    |> noreply()
+  end
+
+  @impl LiveView
+  def handle_info({:updated_preference, key, value}, %Socket{} = socket) do
+    new_preferences =
+      socket.assigns.preferences
+      |> Map.put(key, value)
+
+    socket
+    |> assign(preferences: new_preferences)
     |> noreply()
   end
 
@@ -238,7 +249,9 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       |> redirect(to: ~p"/moderation/users/#{user.id}")
     else
       socket
-      |> stream(:users, users, reset: true)
+      |> assign(users: users)
+
+      # |> stream(:users, users, reset: true)
     end
   end
 
