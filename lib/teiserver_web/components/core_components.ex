@@ -707,7 +707,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
   attr :row_class, :any, default: nil, doc: "the function for setting the tr class"
 
-  attr :table_class, :string, default: ""
+  attr :table_class, :any, default: ""
 
   attr :row_item, :any,
     default: &Function.identity/1,
