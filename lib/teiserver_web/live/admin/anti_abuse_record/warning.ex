@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.Warning do
+defmodule TeiserverWeb.AdminLive.AntiAbuseRecord.Warning do
   @moduledoc false
   use TeiserverWeb, :live_view
 

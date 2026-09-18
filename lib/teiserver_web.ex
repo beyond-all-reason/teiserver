@@ -152,6 +152,7 @@ defmodule TeiserverWeb do
     quote do
       use Phoenix.LiveComponent
       alias Phoenix.LiveComponent
+      alias Phoenix.LiveView.Socket
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
@@ -166,6 +167,7 @@ defmodule TeiserverWeb do
       use Phoenix.Component
       alias Phoenix.LiveView.JS
       import TeiserverWeb.Gettext
+      alias Phoenix.LiveView.Socket
 
       alias Teiserver.Helper.StylingHelper
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]

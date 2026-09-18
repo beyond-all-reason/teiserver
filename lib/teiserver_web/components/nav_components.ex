@@ -377,8 +377,6 @@ defmodule TeiserverWeb.NavComponents do
   """
   attr :url, :string, required: true
   attr :icon, :string, required: true
-  attr :icon_class, :string, default: "solid"
-  attr :size, :atom, default: nil
   slot :inner_block, required: true
 
   def menu_page_link(assigns) do

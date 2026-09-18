@@ -682,7 +682,7 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/admin", TeiserverWeb.Admin do
+  scope "/admin", TeiserverWeb.AdminLive do
     pipe_through([:live_browser, :app_layout, :protected, :tailwind])
 
     live_session :admin_menu,
@@ -692,7 +692,8 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise_any, ["Contributor", "Overwatch"]}}
       ] do
-      live "/", MenuLive, :show
+      live "/", Menu, :show
+      live "/palette", Palette, :show
     end
 
     live_session :admin_antiabuse,
@@ -703,14 +704,10 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, :ensure_authenticated},
         {UserAuthentication, {:authorise, "Senior moderator"}}
       ] do
-      live "/anti-abuse-records", AntiAbuseRecordLive.Warning, :warning
-      live "/anti-abuse-records/list", AntiAbuseRecordLive.List, :list
-      live "/anti-abuse-records/:id", AntiAbuseRecordLive.Show, :show
+      live "/anti-abuse-records", AntiAbuseRecord.Warning, :warning
+      live "/anti-abuse-records/list", AntiAbuseRecord.List, :list
+      live "/anti-abuse-records/:id", AntiAbuseRecord.Show, :show
     end
-  end
-
-  scope "/admin", TeiserverWeb.AdminLive do
-    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
 
     live_session :admin_tools,
       layout: {TeiserverWeb.Layouts, :admin_tw},
