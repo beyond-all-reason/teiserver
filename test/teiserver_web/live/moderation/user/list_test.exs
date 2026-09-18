@@ -20,6 +20,9 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
     end
 
     test "can access list page when authorized" do
+      # Need too add user fixtures to prevent it jumping
+      AccountFixtures.user_fixture()
+
       {:ok, kw} = GeneralTestLib.conn_setup(["Moderator"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
       {:ok, live, _html} = live(conn, ~p"/moderation/users")
@@ -34,13 +37,21 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
     # We have no "no records" test for this page as there will always
     # be at least one user, the one viewing it.
 
-    test "with records" do
-      {:ok, kw} = GeneralTestLib.conn_setup(["Moderator"])
-      {:ok, conn} = Keyword.fetch(kw, :conn)
+    test "jump when only one user", %{conn: conn} do
+      # Need too add user fixtures to prevent it jumping
+      user = AccountFixtures.user_fixture(%{name: "MyUniqueTestUser"})
 
-      AccountFixtures.user_fixture(%{cidr: "192.168.0.1/32"})
-      AccountFixtures.user_fixture(%{cidr: "192.168.0.2/32"})
-      AccountFixtures.user_fixture(%{cidr: "192.168.0.3/32"})
+      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/moderation/users?name=MyUniqueTestUser")
+
+      assert path == ~p"/moderation/users/#{user.id}"
+    end
+
+    test "with records", %{conn: conn} do
+      AccountFixtures.user_fixture()
+      AccountFixtures.user_fixture()
+      AccountFixtures.user_fixture()
+      AccountFixtures.user_fixture()
+      AccountFixtures.user_fixture()
 
       {:ok, live, _html} = live(conn, ~p"/moderation/users")
 
@@ -62,13 +73,14 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
                "Registered"
              ]
 
-      # There will always be at leas 5 users at this stage but it's possible
+      # There will always be at least 5 users at this stage but it's possible
       # there are more
       assert Enum.count(table.rows) >= 5
     end
 
     test "search", %{conn: conn} do
       AccountFixtures.user_fixture(%{name: "FormidablePerson"})
+      AccountFixtures.user_fixture(%{name: "AnotherFormidable"})
 
       for i <- 1..40 do
         AccountFixtures.user_fixture(%{name: "CoherentPerson#{i}"})
@@ -109,7 +121,7 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
         |> render()
         |> table_to_map()
 
-      assert Enum.count(table.rows) == 1
+      assert Enum.count(table.rows) == 2
 
       # Remove that filter
       live

@@ -231,8 +231,15 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         })
       end)
 
-    socket
-    |> stream(:users, users, reset: true)
+    if Enum.count(users) == 1 do
+      user = hd(users)
+
+      socket
+      |> redirect(to: ~p"/moderation/users/#{user.id}")
+    else
+      socket
+      |> stream(:users, users, reset: true)
+    end
   end
 
   defp get_user_count(%Socket{assigns: assigns} = socket) do
