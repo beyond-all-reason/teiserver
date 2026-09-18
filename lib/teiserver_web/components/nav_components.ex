@@ -165,7 +165,6 @@ defmodule TeiserverWeb.NavComponents do
             Setting this to false for now as it will not correctly select dark CSS in some cases
           --%>
           <button
-            :if={false}
             class="flex p-2 cursor-pointer [[data-theme=system]_&]:bg-blue-900"
             phx-click={JS.dispatch("phx:set-theme")}
             data-phx-theme="system"
