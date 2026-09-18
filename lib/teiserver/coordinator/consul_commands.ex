@@ -134,19 +134,24 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     # Moderator info regarding relationships
     player_status =
       if Auth.moderator?(senderid) do
+        player_ids = Battle.list_lobby_players(state.lobby_id)
+
         blocks =
           senderid
           |> RelationshipLib.list_userids_blocked_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
           |> Enum.map(&CacheUser.get_username/1)
 
         avoids =
           senderid
           |> RelationshipLib.list_userids_avoided_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
           |> Enum.map(&CacheUser.get_username/1)
 
         ignores =
           senderid
           |> RelationshipLib.list_userids_ignored_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
           |> Enum.map(&CacheUser.get_username/1)
 
         [
