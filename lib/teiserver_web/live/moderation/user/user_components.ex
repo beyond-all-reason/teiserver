@@ -46,7 +46,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           <.input_tw
             type="text"
             field={@form[:name]}
-            label="Name"
+            label="Name/ID"
           />
         </div>
 
@@ -525,7 +525,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         type="text"
         value=""
         name="name"
-        placeholder="Search by username"
+        placeholder="Search by id/username"
         class="input input-sm"
       />
     </form>

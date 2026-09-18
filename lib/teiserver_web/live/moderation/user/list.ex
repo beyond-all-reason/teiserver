@@ -166,7 +166,20 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         search["email"] && search["email"] != ""
       ])
 
-    exact_user =
+    exact_user_by_id =
+      case Integer.parse(search["name"] || "") do
+        {id, _rem} ->
+          UserQueries.users()
+          |> UserQueries.where_id(id)
+          |> UserQueries.load_user_stat()
+          |> QueryHelpers.limit_query(1)
+          |> Repo.one()
+
+        _any ->
+          nil
+      end
+
+    exact_user_by_string =
       if try_exact_search? do
         UserQueries.users()
         |> UserQueries.where_name_lower(search["name"] || "")
@@ -176,21 +189,24 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         |> Repo.one()
       end
 
+    exact_matches =
+      [exact_user_by_id, exact_user_by_string]
+      |> Enum.reject(&is_nil/1)
+
+    exact_ids = Enum.map(exact_matches, & &1.id)
+
     users =
       user_query(socket)
       |> UserQueries.load_user_stat()
       |> UserQueries.order_by_from_string(search["order_by"])
       |> QueryHelpers.paginate(page, search["page_size"])
       |> Repo.all()
+      # This reject puts our exact matches at the top of the list, we have to remove
+      # the other instance of that user or it will not appear at the top of
+      # the list
+      |> Enum.reject(&Enum.member?(exact_ids, &1.id))
       |> then(fn results ->
-        # This puts our exact match at the top of the list, we have to remove
-        # the other instance of that user or it will not appear at the top of
-        # the list
-        if exact_user do
-          [exact_user | Enum.reject(results, fn %{id: id} -> id == exact_user.id end)]
-        else
-          results
-        end
+        exact_matches ++ results
       end)
       |> Enum.map(fn %User{} = user ->
         # If a user has not logged in yet they will
