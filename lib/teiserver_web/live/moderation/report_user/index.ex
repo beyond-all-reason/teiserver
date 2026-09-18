@@ -5,72 +5,72 @@ defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ReportLib
+
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    socket =
-      socket
-      |> assign(:site_menu_active, "teiserver_account")
-      |> assign(:view_colour, Moderation.colour())
-      |> assign(:report, %{})
-      |> assign(:user, nil)
-      |> assign(:stage, :loading)
-      |> assign(:extra_text, "")
-      |> add_breadcrumb(name: "Report user", url: ~p"/moderation/report_user")
-      |> apply_structure()
-
-    {:ok, socket}
+    socket
+    |> assign(report: %{}, user: nil, stage: :loading, extra_text: "")
+    |> apply_structure()
+    |> ok()
   end
 
   @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
     user = Account.get_user_by_id(id)
 
-    socket =
-      socket
-      |> assign(:id_str, id)
-      |> assign(:user, user)
-      |> assign(:report, %{
+    socket
+    |> assign(
+      user: user,
+      stage: :in_progress,
+      type: nil,
+      sub_type: nil,
+      match_id: nil,
+      show_matches: false,
+      result: nil,
+      report: %{
         user_id: user.id
-      })
-      |> assign(:stage, :type)
-      |> allowed_to_use_form()
-      |> get_user_matches()
-      |> get_relationship()
-
-    {:noreply, socket}
+      }
+    )
+    |> allowed_to_use_form()
+    |> get_user_matches()
+    |> get_relationship()
+    |> noreply()
   end
 
   def handle_params(_params, _url, socket) do
-    socket =
-      socket
-      |> assign(:stage, :user)
-
-    {:noreply, socket}
+    socket
+    |> assign(stage: :user)
+    |> noreply()
   end
 
   @impl Phoenix.LiveView
   def handle_event(
         "submit-extra-text",
         _event,
-        %{assigns: %{stage: :extra_text} = assigns} = socket
+        %{assigns: assigns} = socket
       ) do
+    match_id =
+      case assigns.match_id do
+        :no_match -> nil
+        _any -> assigns.match_id
+      end
+
     report_params = %{
       reporter_id: assigns.current_user.id,
       target_id: assigns.user.id,
       type: assigns.type,
       sub_type: assigns.sub_type,
       extra_text: assigns.extra_text,
-      match_id: assigns.match_id
+      match_id: match_id
     }
 
     case Moderation.create_report(report_params) do
       {:ok, _report} ->
-        {:noreply,
-         socket
-         |> assign(:result, :success)
-         |> assign(:stage, :completed)}
+        socket
+        |> assign(result: :success, stage: :completed)
+        |> noreply()
 
       v ->
         raise v
@@ -81,47 +81,43 @@ defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
   def handle_event(
         "update-extra-text",
         %{"value" => value},
-        %{assigns: %{stage: :extra_text}} = socket
+        socket
       ) do
-    {:noreply,
-     socket
-     |> assign(:extra_text, value)}
+    socket
+    |> assign(extra_text: value)
+    |> noreply()
   end
 
   def handle_event(
         "select-match-" <> match_id_str,
         _params,
-        %{assigns: %{stage: :match}} = socket
+        socket
       ) do
-    {:noreply,
-     socket
-     |> assign(:match_id, String.to_integer(match_id_str))
-     |> assign(:stage, :extra_text)}
+    socket
+    |> assign(match_id: String.to_integer(match_id_str))
+    |> noreply()
   end
 
-  def handle_event("select-no-match", _params, %{assigns: %{stage: :match}} = socket) do
-    {:noreply,
-     socket
-     |> assign(:match_id, nil)
-     |> assign(:stage, :extra_text)}
+  def handle_event("select-no-match", _params, socket) do
+    socket
+    |> assign(match_id: :no_match)
+    |> noreply()
   end
 
   def handle_event(
         "select-sub_type",
-        %{"sub_type" => type},
-        %{assigns: %{stage: :sub_type}} = socket
+        %{"sub_type" => sub_type},
+        socket
       ) do
-    {:noreply,
-     socket
-     |> assign(:sub_type, type)
-     |> assign(:stage, :match)}
+    socket
+    |> assign(sub_type: sub_type)
+    |> noreply()
   end
 
-  def handle_event("select-type", %{"type" => type}, %{assigns: %{stage: :type}} = socket) do
-    {:noreply,
-     socket
-     |> assign(:type, type)
-     |> assign(:stage, :sub_type)}
+  def handle_event("select-type", %{"type" => type}, socket) do
+    socket
+    |> assign(type: type, sub_type: nil)
+    |> noreply()
   end
 
   def handle_event(
@@ -146,24 +142,43 @@ defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
   end
 
   def handle_event(
+        "unignore-user",
+        _event,
+        %{assigns: %{current_user: current_user, user: user}} = socket
+      ) do
+    case Account.unignore_user(current_user.id, user.id) do
+      {:ok, _result} ->
+        socket
+        |> put_flash(:success, "You are no longer ignoring #{user.name}")
+        |> get_relationship()
+        |> noreply()
+
+      {:error, reason} ->
+        socket
+        |> put_flash(:warning, "Failed to ignore user: #{reason}")
+        |> get_relationship()
+        |> noreply()
+    end
+  end
+
+  def handle_event(
         "avoid-user",
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    socket =
-      case Account.avoid_user(current_user.id, user.id) do
-        {:ok, _result} ->
-          socket
-          |> put_flash(:success, "You are now avoiding #{user.name}")
-          |> get_relationship()
+    case Account.avoid_user(current_user.id, user.id) do
+      {:ok, _result} ->
+        socket
+        |> put_flash(:success, "You are now avoiding #{user.name}")
+        |> get_relationship()
+        |> noreply()
 
-        {:error, reason} ->
-          socket
-          |> put_flash(:warning, "Failed to avoid user: #{reason}")
-          |> get_relationship()
-      end
-
-    {:noreply, socket}
+      {:error, reason} ->
+        socket
+        |> put_flash(:warning, "Failed to avoid user: #{reason}")
+        |> get_relationship()
+        |> noreply()
+    end
   end
 
   def handle_event(
@@ -171,20 +186,19 @@ defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
         _event,
         %{assigns: %{current_user: current_user, user: user}} = socket
       ) do
-    socket =
-      case Account.block_user(current_user.id, user.id) do
-        {:ok, _result} ->
-          socket
-          |> put_flash(:success, "You are now blocking #{user.name}")
-          |> get_relationship()
+    case Account.block_user(current_user.id, user.id) do
+      {:ok, _result} ->
+        socket
+        |> put_flash(:success, "You are now blocking #{user.name}")
+        |> get_relationship()
+        |> noreply()
 
-        {:error, reason} ->
-          socket
-          |> put_flash(:warning, "Failed to block user: #{reason}")
-          |> get_relationship()
-      end
-
-    {:noreply, socket}
+      {:error, reason} ->
+        socket
+        |> put_flash(:warning, "Failed to block user: #{reason}")
+        |> get_relationship()
+        |> noreply()
+    end
   end
 
   def handle_event(_text, _event, socket) do
@@ -268,8 +282,7 @@ defmodule TeiserverWeb.ModerationLive.ReportUser.Index do
       socket
     else
       socket
-      |> assign(:failure_reason, failure_reason)
-      |> assign(:stage, :not_allowed)
+      |> assign(failure_reason: failure_reason, stage: :not_allowed)
     end
   end
 

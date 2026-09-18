@@ -1,5 +1,10 @@
 <div class="single-block-content">
-  <div class="card bg-base-200 shadow-xl">
+  <div class={[
+    "card shadow-xl",
+    @result == nil && "bg-base-200",
+    @result == :success && "bg-success/50",
+    @stage == :not_allowed && "bg-warning/50"
+  ]}>
     <div class="card-body">
       <h1 :if={@user} class="text-2xl font-bold mb-4">
         {gettext("Reporting user")}: {@user.name}
@@ -24,12 +29,12 @@
         </div>
       </div>
 
-      <div :if={@stage == :type}>
-        <h5 class="font-bold text-lg">Reason for report</h5>
+      <div :if={@stage == :in_progress}>
+        <h5 class="font-bold text-lg mb-1">Reason for report</h5>
         <div class="flex" id="type-row">
           <div :for={{label, name, icon} <- @types} class="flex-1 mx-2">
             <div
-              class="w-full btn btn-primary btn-soft h-25"
+              class={["w-full btn btn-primary h-25", @type != name && "btn-soft"]}
               id={"type-#{name}"}
               phx-click="select-type"
               phx-value-type={name}
@@ -41,91 +46,94 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <div :if={@stage == :sub_type}>
-        <h5 class="font-bold text-lg">Type of {@type}</h5>
-        <div class="flex">
-          <div :for={{label, name, icon} <- @sub_types[@type]} class="flex-1 mx-2">
-            <div
-              class="w-full btn btn-primary btn-soft h-25"
-              id={"sub_type-#{name}"}
-              phx-click="select-sub_type"
-              phx-value-sub_type={name}
-            >
-              <span>
-                <i class={"fa-fw fa-solid #{icon} fa-3x"} id={"icon-sub_type-#{name}"}></i>
-                <br />
-                {label}
-              </span>
+        <div :if={@type} class="my-2">
+          <h5 class="font-bold text-lg">Type of {@type}</h5>
+          <div class="flex">
+            <div :for={{label, name, icon} <- @sub_types[@type]} class="flex-1 mx-2">
+              <div
+                class={["w-full btn btn-primary h-25", @sub_type != name && "btn-soft"]}
+                id={"sub_type-#{name}"}
+                phx-click="select-sub_type"
+                phx-value-sub_type={name}
+              >
+                <span>
+                  <i class={"fa-fw fa-solid #{icon} fa-3x"} id={"icon-sub_type-#{name}"}></i>
+                  <br />
+                  {label}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div :if={@stage == :match}>
-        <h5 class="font-bold text-lg">Which match?</h5>
-        Note: If the action took place in the lobby, select the match it took place before.
-        <.table
-          id="match-table"
-          rows={@matches}
-          table_class="table-sm table-hover"
-          row_click={fn match -> "select-match-#{match.id}" end}
-        >
-          <:col :let={match} label="Match">{match.label}</:col>
-          <:col :let={match} label="Map">{match.map}</:col>
-          <:col :let={match} label="When?">{match.time_ago}</:col>
-          <:col :let={match} label="Match length">
-            {duration_to_str_short(match.game_duration)}
-          </:col>
-        </.table>
-        If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
-        <br /><br />
-        <span
-          class="btn btn-neutral btn-soft"
-          id="select-no-match-btn"
-          phx-click="select-no-match"
-        >
-          Select "no match"
-        </span>
-      </div>
+        <div :if={@sub_type} class="my-2">
+          <h5 class="font-bold text-lg">Which match?</h5>
+          Note: If the action took place in the lobby, select the match it took place before.
+          <.table
+            id="match-table"
+            rows={@matches}
+            table_class="table-sm table-hover"
+            row_class={fn match -> match.id == @match_id && " bg-primary/50" end}
+            row_click={fn match -> "select-match-#{match.id}" end}
+          >
+            <:col :let={match} label="Match">{match.label}</:col>
+            <:col :let={match} label="Map">{match.map}</:col>
+            <:col :let={match} label="When?">{match.time_ago}</:col>
+            <:col :let={match} label="Match length">
+              {duration_to_str_short(match.game_duration)}
+            </:col>
+          </.table>
+          If you cannot find the match here then you can submit the report without a match selected but it may mean we cannot find evidence and are thus unable to handle the report.
+          <br /><br />
+          <span
+            class="btn btn-neutral btn-soft"
+            id="select-no-match-btn"
+            phx-click="select-no-match"
+          >
+            Select "no match"
+          </span>
+        </div>
 
-      <div :if={@stage == :extra_text}>
-        <h5 class="font-bold text-lg">Extra info:</h5>
-        Please respect volunteer time and help make our lives easier by providing some information!
-        <ul>
-          <li>A description of what was done or specific words said</li>
-          <li>
-            A link to the replay itself from
-            <a href="https://bar-rts.com/replays" target="_blank">BAR Replays</a>
-            if you did not select the game from the list before
-          </li>
-          <li>Timestamps (even if approximate) of in-game events</li>
-        </ul>
-        <br /><br />
-        We may ignore reports with descriptions stating simply "spec cheating", if you want to accuse someone of that, please provide a link to the replay and concrete examples of what you think is suspicious, with timestamps. If you'd like to provide more information, open a ticket on the Discord to accompany the report.
-        <input
-          type="text"
-          name="extra_text"
-          id="report_extra_text"
-          maxlength="255"
-          value=""
-          class="input w-full"
-          phx-keyup="update-extra-text"
-          phx-debounce="200"
-        />
-        <span
-          class={"btn btn-#{@view_colour} float-end mt-2 #{if @extra_text in [nil, ""], do: "disabled"}"}
-          phx-click={if @extra_text not in [nil, ""], do: "submit-extra-text"}
-          id="submit-report-btn"
-        >
-          Submit report
-        </span>
+        <div :if={@sub_type} class="my-2">
+          <h5 class="font-bold text-lg">Extra info:</h5>
+          Please respect volunteer time and help make our lives easier by providing some information!
+          <ul>
+            <li>A description of what was done or specific words said</li>
+            <li>
+              A link to the replay itself from
+              <a href="https://bar-rts.com/replays" target="_blank">BAR Replays</a>
+              if you did not select the game from the list before
+            </li>
+            <li>Timestamps (even if approximate) of in-game events</li>
+          </ul>
+          <br /><br />
+          We may ignore reports with descriptions stating simply "spec cheating", if you want to accuse someone of that, please provide a link to the replay and concrete examples of what you think is suspicious, with timestamps. If you'd like to provide more information, open a ticket on the Discord to accompany the report.
+          <input
+            type="text"
+            name="extra_text"
+            id="report_extra_text"
+            maxlength="255"
+            value=""
+            class="w-full input"
+            phx-keyup="update-extra-text"
+            phx-debounce="25"
+          />
+          <span
+            class={"btn btn-warning float-end mt-2 #{if @extra_text in [nil, ""], do: "disabled"}"}
+            phx-click={if @extra_text not in [nil, ""], do: "submit-extra-text"}
+            id="submit-report-btn"
+          >
+            Submit report
+          </span>
+        </div>
       </div>
 
       <div :if={@stage == :completed}>
         <div :if={@result == :success}>
-          Your report has been submitted, thank you for taking the time to help improve the community.
+          <div class="text-lg p-2">
+            Your report has been submitted, thank you for taking the time to help improve the community.
+          </div>
           <br /><br />
           Please note if you want to then you can ignore, avoid or even block {@user.name} via <a href={
             ~p"/profile/#{@user.id}"
@@ -133,10 +141,8 @@
         </div>
       </div>
 
-      <div :if={@stage == :not_allowed}>
-        <div class="alert alert-warning">
-          {@failure_reason}
-        </div>
+      <div :if={@stage == :not_allowed} class="text-xl">
+        {@failure_reason}
       </div>
 
       <div :if={@stage != :not_allowed and assigns[:user] != nil} class="card-footer">
@@ -155,7 +161,11 @@
           Ignore
         </span>
 
-        <span :if={@relationship && @relationship.ignore == true} class="btn btn-warning mx-1">
+        <span
+          :if={@relationship && @relationship.ignore == true}
+          phx-click="unignore-user"
+          class="btn btn-warning mx-1"
+        >
           <Fontawesome.icon icon={Teiserver.Account.RelationshipLib.icon_ignore()} style="solid" />
           &nbsp;
           Ignoring
