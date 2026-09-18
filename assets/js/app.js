@@ -6,10 +6,7 @@ import { LiveSocket } from "phoenix_live_view"
 // import {hooks as colocatedHooks} from "phoenix-colocated/teiserver"
 import topbar from "../vendor/topbar_tw"
 import LiveCharts from "live_charts"
-
-// TODO: Is this used any more? I think we can probably remove the UserSocket and thus this line
-// Local files
-import socket from "./socket"
+import CommandPalette from "./hooks/command_palette"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -17,6 +14,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
   hooks: {
   // your other hooks...
   // e.g. SomeCustomHook,
+  CommandPalette,
 
   // Expand LiveCharts hooks at the end
   ...LiveCharts.Hooks,

@@ -30,7 +30,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       <.menu_page_link
         :if={allow?(@current_user, "Contributor")}
         icon="fa-server"
-        icon_class="fa-solid"
         url={~p"/admin"}
       >
         Admin
@@ -47,7 +46,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       <.menu_page_link
         :if={allow?(@current_user, "Overwatch")}
         icon={Teiserver.Moderation.icon()}
-        icon_class="fa-solid"
         url={~p"/moderation"}
       >
         Moderation
@@ -56,7 +54,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       <.menu_page_link
         :if={allow?(@current_user, "Contributor")}
         icon={StylingHelper.icon(:summary)}
-        icon_class="fa-solid"
         url={~p"/teiserver/reports"}
       >
         Reports
@@ -64,27 +61,25 @@ defmodule TeiserverWeb.GeneralLive.Menu do
 
       <.menu_page_link
         icon={Teiserver.Chat.RoomMessageLib.icon()}
-        icon_class="fa-solid"
         url={~p"/chat"}
       >
         Chat
       </.menu_page_link>
 
-      <.menu_page_link icon={Teiserver.Lobby.icon()} icon_class="fa-solid" url={~p"/battle/lobbies"}>
+      <.menu_page_link icon={Teiserver.Lobby.icon()} url={~p"/battle/lobbies"}>
         Lobbies
       </.menu_page_link>
 
-      <.menu_page_link icon={Teiserver.Battle.MatchLib.icon()} icon_class="fa-solid" url={~p"/battle"}>
+      <.menu_page_link icon={Teiserver.Battle.MatchLib.icon()} url={~p"/battle"}>
         Matches
       </.menu_page_link>
 
-      <.menu_page_link icon={Teiserver.Microblog.icon()} icon_class="fa-solid" url={~p"/microblog"}>
+      <.menu_page_link icon={Teiserver.Microblog.icon()} url={~p"/microblog"}>
         Microblog
       </.menu_page_link>
 
       <.menu_page_link
         icon={Teiserver.Account.UserLib.icon()}
-        icon_class="fa-solid"
         url={~p"/profile"}
       >
         Account
@@ -92,7 +87,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
 
       <.menu_page_link
         icon={Teiserver.Account.RelationshipLib.icon()}
-        icon_class="fa-solid"
         url={~p"/account/relationship"}
       >
         Relationships

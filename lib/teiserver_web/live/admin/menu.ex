@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.MenuLive do
+defmodule TeiserverWeb.AdminLive.Menu do
   @moduledoc false
   use TeiserverWeb, :live_view
 
@@ -88,7 +88,6 @@ defmodule TeiserverWeb.Admin.MenuLive do
         :if={allow_any?(@scope, ~w(Server))}
         icon={Teiserver.Communication.DiscordChannelLib.icon()}
         url={~p"/admin/discord_channels"}
-        icon_class="fa-brands"
       >
         Discord channels
       </.menu_page_link>
@@ -150,10 +149,17 @@ defmodule TeiserverWeb.Admin.MenuLive do
       >
         MFA Usage
       </.menu_page_link>
+
+      <.menu_page_link
+        icon="list"
+        url={~p"/admin/palette"}
+      >
+        Cmd Palette test
+      </.menu_page_link>
     </div>
 
     <div class="menu-grid">
-      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"} size={:small}>
+      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"}>
         Back
       </.menu_page_link>
     </div>

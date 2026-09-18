@@ -49,7 +49,7 @@ defmodule TeiserverWeb.LoggingLive.Menu do
     </div>
 
     <div class="menu-grid">
-      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"} size={:small}>
+      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"}>
         Back
       </.menu_page_link>
     </div>

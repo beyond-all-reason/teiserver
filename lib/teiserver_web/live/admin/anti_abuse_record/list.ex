@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.List do
+defmodule TeiserverWeb.AdminLive.AntiAbuseRecord.List do
   @moduledoc false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation

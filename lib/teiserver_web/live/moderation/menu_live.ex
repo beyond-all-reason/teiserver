@@ -14,7 +14,6 @@ defmodule TeiserverWeb.ModerationLive.Menu do
     <div class="menu-grid">
       <.menu_page_link
         icon={Teiserver.Moderation.ReportLib.icon()}
-        icon_class="fa-solid"
         url={~p"/moderation/report"}
       >
         Reports
@@ -22,7 +21,6 @@ defmodule TeiserverWeb.ModerationLive.Menu do
 
       <.menu_page_link
         icon={Teiserver.Moderation.ActionLib.icon()}
-        icon_class="fa-solid"
         url={~p"/moderation/action"}
       >
         Actions
@@ -30,7 +28,6 @@ defmodule TeiserverWeb.ModerationLive.Menu do
 
       <.menu_page_link
         icon={Teiserver.Moderation.BanLib.icon()}
-        icon_class="fa-solid"
         url={~p"/moderation/ban"}
       >
         Bans
@@ -80,7 +77,7 @@ defmodule TeiserverWeb.ModerationLive.Menu do
     </div>
 
     <div class="menu-grid">
-      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"} size={:small}>
+      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"}>
         Back
       </.menu_page_link>
     </div>
