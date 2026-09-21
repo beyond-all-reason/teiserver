@@ -510,7 +510,7 @@ defmodule TeiserverWeb.NavComponents do
 
     ~H"""
     <li>
-      <a href={@url} class={["tab", @class, @active_class]}>
+      <a href={@url} class={["tab ", @class, @active_class]}>
         <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
       </a>
     </li>

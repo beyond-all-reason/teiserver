@@ -22,7 +22,10 @@
   </:col>
   <:col :let={record} label="Restored by">{record.restored_by && record.restored_by.name}</:col>
   <:action :let={record}>
-    <.link navigate={~p"/admin/anti-abuse-records/#{record.id}"} class="btn btn-warning btn-sm">
+    <.link
+      navigate={~p"/moderation/anti-abuse-records/#{record.id}"}
+      class="btn btn-warning btn-sm"
+    >
       View record
     </.link>
   </:action>

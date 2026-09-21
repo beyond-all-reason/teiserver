@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
+defmodule TeiserverWeb.Moderation.AntiAbuseRecordLive.ShowTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
   alias Teiserver.ModerationFixtures
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
       {:ok, conn} = Keyword.fetch(kw, :conn)
 
       {:error, {:redirect, %{to: path}}} =
-        live(conn, ~p"/admin/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
+        live(conn, ~p"/moderation/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
 
       assert path == ~p"/login"
     end
@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
       {:ok, conn} = Keyword.fetch(kw, :conn)
 
       {:error, {:redirect, %{to: path}}} =
-        live(conn, ~p"/admin/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
+        live(conn, ~p"/moderation/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
 
       assert path == ~p"/"
     end
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
       scope = GeneralTestLib.scope_fixture(user)
       aar = ModerationFixtures.anti_abuse_record_fixture(scope)
 
-      {:ok, _live, _html} = live(conn, ~p"/admin/anti-abuse-records/#{aar.id}")
+      {:ok, _live, _html} = live(conn, ~p"/moderation/anti-abuse-records/#{aar.id}")
 
       audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(user.id)
       assert audit_log.action == "Anti-abuse record access"
@@ -53,10 +53,10 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
        {:redirect,
         %{
           status: 302,
-          to: "/admin/anti-abuse-records/list",
+          to: "/moderation/anti-abuse-records/list",
           flash: _flash
         }}} =
-        live(conn, ~p"/admin/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
+        live(conn, ~p"/moderation/anti-abuse-records/d9aa6217-8eab-46f3-9dbf-593b8173c85c")
 
       audit_log = LoggingTestLib.get_most_recent_audit_log_for_user(kw[:user].id)
       assert audit_log.action == "Anti-abuse record access"
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ShowTest do
           restored_at: DateTime.utc_now() |> DateTime.shift(day: 1)
         })
 
-      {:ok, _live, html} = live(conn, ~p"/admin/anti-abuse-records/#{aar.id}")
+      {:ok, _live, html} = live(conn, ~p"/moderation/anti-abuse-records/#{aar.id}")
 
       assert html =~ ~s(Anti-abuse record: #{uuid_part(aar.id)})
       assert html =~ ~s(User record is not clean)

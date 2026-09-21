@@ -64,6 +64,14 @@ defmodule TeiserverWeb.ModerationLive.Menu do
       >
         Banned IPs
       </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow?(@current_user, "Senior moderator")}
+        icon="person-burst"
+        url={~p"/moderation/anti-abuse-records"}
+      >
+        Anti-abuse records
+      </.menu_page_link>
     </div>
 
     <div class="menu-grid">
@@ -73,6 +81,14 @@ defmodule TeiserverWeb.ModerationLive.Menu do
         url={~p"/moderation/tools/time_compare"}
       >
         Time compare
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow?(@scope, "Moderator")}
+        icon="question"
+        url={~p"/moderation/tools/gdpr_restore"}
+      >
+        GDPR restore
       </.menu_page_link>
     </div>
 

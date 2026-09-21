@@ -593,6 +593,19 @@ defmodule TeiserverWeb.Router do
       live "/banned_domains/:id/show/edit", BannedDomain.Show, :edit
     end
 
+    live_session :moderation_antiabuse,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug,
+         {:set, %{site_menu_active: "moderation", sensitive_data: true}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Senior moderator"}}
+      ] do
+      live "/anti-abuse-records", AntiAbuseRecord.Warning, :warning
+      live "/anti-abuse-records/list", AntiAbuseRecord.List, :list
+      live "/anti-abuse-records/:id", AntiAbuseRecord.Show, :show
+    end
+
     live_session :moderation_tools,
       layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
@@ -601,6 +614,9 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do
       live "/tools/time_compare", Tools.TimeCompare, :show
+      live "/tools/gdpr_restore", Tools.GDPRRestoreWarning
+      live "/tools/gdpr_restore/perform", Tools.GDPRRestorePerform
+      live "/tools/gdpr_restore/success/:user_id", Tools.GDPRRestoreSuccess
     end
   end
 
@@ -694,19 +710,6 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/", Menu, :show
       live "/palette", Palette, :show
-    end
-
-    live_session :admin_antiabuse,
-      layout: {TeiserverWeb.Layouts, :admin_tw},
-      on_mount: [
-        {Teiserver.Account.DefaultsPlug,
-         {:set, %{site_menu_active: "admin", sensitive_data: true}}},
-        {UserAuthentication, :ensure_authenticated},
-        {UserAuthentication, {:authorise, "Senior moderator"}}
-      ] do
-      live "/anti-abuse-records", AntiAbuseRecord.Warning, :warning
-      live "/anti-abuse-records/list", AntiAbuseRecord.List, :list
-      live "/anti-abuse-records/:id", AntiAbuseRecord.Show, :show
     end
 
     live_session :admin_tools,

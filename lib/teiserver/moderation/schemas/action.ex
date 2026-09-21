@@ -6,6 +6,8 @@ defmodule Teiserver.Moderation.Action do
 
   use TeiserverWeb, :schema
 
+  @type id :: pos_integer()
+
   typed_schema "moderation_actions" do
     belongs_to :target, Teiserver.Account.User
     field :reason, :string

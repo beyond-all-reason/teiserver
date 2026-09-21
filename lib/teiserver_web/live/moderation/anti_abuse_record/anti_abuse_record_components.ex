@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
+defmodule TeiserverWeb.Moderation.AntiAbuseRecordComponents do
   @moduledoc false
   alias Teiserver.Account.Scope
   alias TeiserverWeb.LiveComponents.UserPicker
@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
   import TeiserverWeb.NavComponents, only: [section_menu_link: 1]
 
   @doc """
-  <TeiserverWeb.Admin.AntiAbuseRecordComponents.search_form
+  <TeiserverWeb.Moderation.AntiAbuseRecordComponents.search_form
     :if={assigns[:search]}
     params={@search}
   />
@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
       <ul class="menu menu-horizontal">
         <.section_menu_link
           icon={StylingHelper.icon(:list)}
-          url={~p"/admin/anti-abuse-records/list"}
+          url={~p"/moderation/anti-abuse-records/list"}
           active={@active == "list"}
         >
           List
@@ -163,7 +163,19 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordComponents do
       </ul>
 
       <div class="section-menu-bar-inner_block">
-        {render_slot(@inner_block)}
+        <ul class="menu menu-horizontal">
+          <.section_menu_link
+            :if={allow?(@scope, "Moderator")}
+            class="btn btn-warning btn-soft"
+            icon="question"
+            url={~p"/moderation/tools/gdpr_restore"}
+            active={false}
+          >
+            Restoration
+          </.section_menu_link>
+
+          {render_slot(@inner_block)}
+        </ul>
       </div>
     </div>
     """
