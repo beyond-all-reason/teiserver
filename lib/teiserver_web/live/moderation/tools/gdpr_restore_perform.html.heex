@@ -1,0 +1,121 @@
+<ToolsComponents.section_menu active="gdpr_restore" scope={@scope} />
+
+<div :if={@record == nil} class="single-block-content">
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h1 class="text-center text-4xl font-bold">GDPR account restoration</h1>
+
+      <p class="p-1">
+        Fill in one of the fields below with the identifier given by the user and click Validate.
+        <ul>
+          <li>
+            - If the validator matches you will be presented with an option to restore the user or cancel the process.
+          </li>
+          <li>
+            - If no match you will be presented with an error message.
+          </li>
+        </ul>
+        Clicking "Validate" will not perform the restoration.
+      </p>
+      <br />
+
+      <.simple_form
+        :if={assigns[:form]}
+        for={@form}
+        id="gdpr-restore-form"
+        phx-change="validate-form"
+        phx-submit="submit-form"
+      >
+        <div class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:email]}
+            label="Email"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:discord_id]}
+            label="Discord ID"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:steam_id]}
+            label="Steam ID"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="flex">
+          <div class="flex-1 px-2">
+            <a href={~p"/moderation"} class="btn btn-lg btn-neutral w-full">
+              Cancel
+            </a>
+          </div>
+          <div class="flex-1 px-2">
+            <button class="btn btn-primary btn-lg w-full">
+              <Fontawesome.icon icon="question" style="regular" /> Validate
+            </button>
+          </div>
+        </div>
+      </.simple_form>
+    </div>
+  </div>
+</div>
+
+<div :if={@record != nil} class="single-block-content p-10 px-30">
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <div class="alert alert-info w-full">
+        Record successfully retrieved
+      </div>
+      <.list>
+        <:item title="Record ID">
+          <pre>{@record.id}</pre>
+        </:item>
+        <:item title="User ID">
+          <pre>{@record.user_id}</pre>
+        </:item>
+
+        <:item :if={not Enum.empty?(@restrictions)} title="Restrictions">
+          {Enum.join(@restrictions, ", ")}
+          <div :if={@banned?} class="mt-2">
+            <span class="badge badge-error">
+              This user is restricted from playing
+            </span>
+          </div>
+        </:item>
+
+        <:item :if={Enum.empty?(@restrictions)} title="">
+          <span class="badge badge-success">
+            No restrictions
+          </span>
+        </:item>
+      </.list>
+
+      <div class="flex mt-8">
+        <div class="flex-1 px-2">
+          <a href={~p"/moderation"} class="btn btn-lg btn-neutral w-full">
+            Cancel
+          </a>
+        </div>
+        <div class="flex-1 px-2">
+          <span
+            phx-click="perform-restore"
+            class="btn btn-lg btn-primary w-full"
+            id="perform-restore"
+          >
+            Perform restoration
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

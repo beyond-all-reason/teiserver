@@ -22,7 +22,7 @@ defmodule Teiserver.AccountFixtures do
       attrs
       |> Enum.into(%{
         name: "TEST_#{name}",
-        email: "email@email#{:rand.uniform(999_999_999_999)}",
+        email: "email@email#{:rand.uniform(999_999_999_999)}.com",
         colour: "#00AA00",
         icon: "fa-solid fa-user",
         permissions: permissions,

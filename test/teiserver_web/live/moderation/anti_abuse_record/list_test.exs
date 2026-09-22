@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
+defmodule TeiserverWeb.Moderation.AntiAbuseRecordLive.ListTest do
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
   alias Teiserver.ModerationFixtures
@@ -11,21 +11,21 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
     test "cannot access list page without authenticating" do
       {:ok, kw} = GeneralTestLib.conn_setup([], [:no_login])
       {:ok, conn} = Keyword.fetch(kw, :conn)
-      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/moderation/anti-abuse-records/list")
       assert path == ~p"/login"
     end
 
     test "cannot access list page when unauthorized" do
       {:ok, kw} = GeneralTestLib.conn_setup(["Moderator"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
-      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/moderation/anti-abuse-records/list")
       assert path == ~p"/"
     end
 
     test "can access list page when authorized" do
       {:ok, kw} = GeneralTestLib.conn_setup(["Senior moderator"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
-      {:ok, live, _html} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:ok, live, _html} = live(conn, ~p"/moderation/anti-abuse-records/list")
 
       assert has_element?(live, "#anti-abuse-records-table")
 
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
     test "no records" do
       {:ok, kw} = GeneralTestLib.conn_setup(["Senior moderator"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
-      {:ok, live, _html} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:ok, live, _html} = live(conn, ~p"/moderation/anti-abuse-records/list")
 
       # Should have an empty table as we have no records at this time
       {:ok, table} =
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
           restored_at: DateTime.utc_now() |> DateTime.shift(day: 1)
         })
 
-      {:ok, live, _html} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:ok, live, _html} = live(conn, ~p"/moderation/anti-abuse-records/list")
 
       {:ok, table} =
         live
@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Admin.AntiAbuseRecordLive.ListTest do
         restored_at: DateTime.utc_now() |> DateTime.shift(day: 1)
       })
 
-      {:ok, live, html} = live(conn, ~p"/admin/anti-abuse-records/list")
+      {:ok, live, html} = live(conn, ~p"/moderation/anti-abuse-records/list")
 
       # 20 + 20 + 1 = 41 records
       assert html =~ "41 records found"

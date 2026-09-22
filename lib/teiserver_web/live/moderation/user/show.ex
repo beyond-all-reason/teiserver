@@ -10,6 +10,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
   use TeiserverWeb, :live_view
 
+  import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
+
   @tab1_default "details"
   @tab2_default "actions"
 
@@ -36,6 +38,13 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         |> noreply()
 
       _no_access ->
+        if user do
+          add_audit_log(socket.assigns.scope, "User access attempt", %{
+            user_id: user && user.id,
+            page: "gdpr_restore/perform"
+          })
+        end
+
         socket
         |> put_flash(:error, "Unable to access this user")
         |> redirect(to: ~p"/moderation/users")
@@ -71,6 +80,10 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
     restriction_alert =
       cond do
+        # If they are anonymised then we will not alert for any restrictions
+        Enum.member?(user.roles, "GDPR forgotten") ->
+          nil
+
         Enum.member?(user.restrictions, "Permanently banned") ->
           {"alert-error", "This user is permanently banned"}
 
@@ -92,6 +105,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
     alerts =
       [
+        Enum.member?(user.roles, "GDPR forgotten") &&
+          {"alert-error", "This user has been GDPR anonymised"},
         not is_nil(user.gdpr_forget_after) &&
           {"alert-error", "This user is set to be forgotten under the GDPR right to be forgotten"},
         mfa_warning? &&

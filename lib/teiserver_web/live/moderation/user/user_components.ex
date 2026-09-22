@@ -362,156 +362,162 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
   def show_actions(assigns) do
     ~H"""
-    <h3 class="font-bold text-lg">Links</h3>
-    <.link
-      navigate={~p"/admin/chat?userid=#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm">
-        <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
-      </.button>
-    </.link>
+    <div :if={not Enum.member?(@user.roles, "GDPR forgotten")}>
+      <h3 class="font-bold text-lg">Links</h3>
+      <.link
+        navigate={~p"/admin/chat?userid=#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/teiserver/admin/users/ratings/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm">
-        <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/teiserver/admin/users/ratings/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+          <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm">
-        <Fontawesome.icon icon={Teiserver.icon(:relationship)} style="solid" /> Relationships
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+          <Fontawesome.icon icon={Teiserver.icon(:relationship)} style="solid" /> Relationships
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/teiserver/admin/matches/user/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm">
-        <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/teiserver/admin/matches/user/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+          <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/report/user/#{@user}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm">
-        <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> Reports
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/report/user/#{@user}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+          <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> Reports
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-soft btn-sm btn-disabled">
-        <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
-      </.button>
-    </.link>
-    <br /><br />
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-soft btn-sm btn-disabled">
+          <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
+        </.button>
+      </.link>
+      <br /><br />
 
-    <h3 class="font-bold text-lg">Edit details</h3>
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-address-card" style="solid" /> Name
-      </.button>
-    </.link>
+      <h3 class="font-bold text-lg">Edit details</h3>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-address-card" style="solid" /> Name
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-envelope" style="solid" /> Email
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-envelope" style="solid" /> Email
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-users" style="solid" /> Roles
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-users" style="solid" /> Roles
+        </.button>
+      </.link>
 
-    <br /><br />
-    <h3 class="font-bold text-lg">Actions</h3>
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-person-drowning" style="solid" /> Reset flood protection
-      </.button>
-    </.link>
+      <br /><br />
+      <h3 class="font-bold text-lg">Actions</h3>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-person-drowning" style="solid" /> Reset flood protection
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-shield-alt" style="solid" /> Send password reset email
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-shield-alt" style="solid" /> Send password reset email
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-gavel" style="solid" /> Ban
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-gavel" style="solid" /> Ban
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary btn-disabled">
-        <Fontawesome.icon icon="fa-broom" style="solid" /> Reset MFA
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary btn-disabled">
+          <Fontawesome.icon icon="fa-broom" style="solid" /> Reset MFA
+        </.button>
+      </.link>
 
-    <.link
-      navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary">
-        <Fontawesome.icon icon="fa-link" style="solid" /> Mark as smurf of
-      </.button>
-    </.link>
+      <.link
+        navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary">
+          <Fontawesome.icon icon="fa-link" style="solid" /> Mark as smurf of
+        </.button>
+      </.link>
 
-    <.link
-      :if={not is_nil(@user.gdpr_forget_after)}
-      navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary">
-        <Fontawesome.icon icon="circle-question" /> Clear GDPR forget
-      </.button>
-    </.link>
+      <.link
+        :if={not is_nil(@user.gdpr_forget_after)}
+        navigate={~p"/moderation/users/#{@user.id}/clear_gdpr_forget"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary">
+          <Fontawesome.icon icon="circle-question" /> Clear GDPR forget
+        </.button>
+      </.link>
 
-    <.link
-      :if={is_nil(@user.gdpr_forget_after)}
-      navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
-      phx-click={JS.push_focus()}
-    >
-      <.button class="m-1 btn btn-primary">
-        <Fontawesome.icon icon="question" /> Set GDPR forget
-      </.button>
-    </.link>
+      <.link
+        :if={is_nil(@user.gdpr_forget_after)}
+        navigate={~p"/moderation/users/#{@user.id}/set_gdpr_forget"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary">
+          <Fontawesome.icon icon="question" /> Set GDPR forget
+        </.button>
+      </.link>
+    </div>
+
+    <div :if={Enum.member?(@user.roles, "GDPR forgotten")} class="mt-4">
+      This user has been GDPR anonymised, you cannot perform any actions on their account.
+    </div>
     """
   end
 

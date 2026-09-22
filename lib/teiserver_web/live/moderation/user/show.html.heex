@@ -15,13 +15,8 @@
   {@user.name}
 </.header>
 
-<div style="clear: both;"></div>
-<div class="alert alert-info alert-soft my-4">
-  This page is intended to be a moderation specific list of users, this means it can be tweaked to the needs of the moderation team without needing to worry about admin requirements. Please speak to Teifion (probably in #mod-utils) regarding requests and ideas.
-</div>
-
 <div :if={not Enum.empty?(@alerts)} class="my-2 flex">
-  <div :for={{type, text} <- @alerts} class={"flex-1 alert #{type}"}>
+  <div :for={{type, text} <- @alerts} class={"mx-2 flex-1 alert #{type}"}>
     {text}
   </div>
 </div>

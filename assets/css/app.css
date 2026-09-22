@@ -165,7 +165,7 @@
 }
 
 .section-menu-bar-inner_block {
-  @apply float-right m-2;
+  @apply float-right;
 }
 
 .btn-reset-form {

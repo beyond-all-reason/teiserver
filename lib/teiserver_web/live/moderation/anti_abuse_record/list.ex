@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.AdminLive.AntiAbuseRecord.List do
+defmodule TeiserverWeb.ModerationLive.AntiAbuseRecord.List do
   @moduledoc false
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation
   alias Teiserver.Moderation.AntiAbuseRecordQueries
   alias Teiserver.Repo
-  alias TeiserverWeb.Admin.AntiAbuseRecordComponents
+  alias TeiserverWeb.Moderation.AntiAbuseRecordComponents
 
   use TeiserverWeb, :live_view
 

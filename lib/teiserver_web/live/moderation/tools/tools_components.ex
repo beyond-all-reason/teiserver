@@ -48,6 +48,14 @@ defmodule TeiserverWeb.ModerationLive.ToolsComponents do
           Time compare
         </.section_menu_link>
 
+        <.section_menu_link
+          icon="fa-question"
+          url={~p"/moderation/tools/gdpr_restore"}
+          active={@active == "gdpr_restore"}
+        >
+          GDPR restore
+        </.section_menu_link>
+
         {render_slot(@extra_links)}
       </ul>
 

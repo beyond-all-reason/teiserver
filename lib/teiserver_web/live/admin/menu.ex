@@ -21,14 +21,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow?(@current_user, "Senior moderator")}
-        icon="person-burst"
-        url={~p"/admin/anti-abuse-records"}
-      >
-        Anti-abuse records
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow_any?(@current_user, ~w(Moderator))}
         icon={Teiserver.Account.UserLib.icon()}
         url={~p"/teiserver/admin/user"}

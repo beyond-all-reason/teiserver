@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.AdminLive.AntiAbuseRecord.Show do
+defmodule TeiserverWeb.ModerationLive.AntiAbuseRecord.Show do
   @moduledoc false
   alias Teiserver.Moderation
   alias Teiserver.Moderation.AntiAbuseRecord
   alias Teiserver.Moderation.AntiAbuseRecordQueries
   alias Teiserver.Repo
-  alias TeiserverWeb.Admin.AntiAbuseRecordComponents
+  alias TeiserverWeb.Moderation.AntiAbuseRecordComponents
 
   use TeiserverWeb, :live_view
 
@@ -29,7 +29,7 @@ defmodule TeiserverWeb.AdminLive.AntiAbuseRecord.Show do
       |> ok()
     else
       socket
-      |> redirect(to: ~p"/admin/anti-abuse-records/list")
+      |> redirect(to: ~p"/moderation/anti-abuse-records/list")
       |> put_flash(:info, "No record found")
       |> ok()
     end

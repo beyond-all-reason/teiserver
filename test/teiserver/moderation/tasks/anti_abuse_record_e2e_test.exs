@@ -1,5 +1,6 @@
 defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
   alias Teiserver.Account
+  alias Teiserver.Account.RestoreAnonymisedUserTask
   alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
@@ -8,7 +9,6 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
   alias Teiserver.Moderation.AntiAbuseRecord
   alias Teiserver.Moderation.CreateAntiAbuseRecordTask
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
-  alias Teiserver.Moderation.RestoreAnonymisedUserTask
 
   use Teiserver.DataCase, async: false
 
@@ -99,13 +99,15 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
       # Now can we restore it?
       # TODO actually restore it, for now we just want to ensure the decode process works
       restore_data =
-        RestoreAnonymisedUserTask.restore_from_record(found_record, :email, user.email)
+        RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
-      assert restore_data == %{
-               "post_ids" => [],
-               "upload_ids" => [],
-               "smurf_key_ids" => []
-             }
+      assert restore_data ==
+               {:ok,
+                %{
+                  "post_ids" => [],
+                  "upload_ids" => [],
+                  "smurf_key_ids" => []
+                }}
     end
   end
 
@@ -204,15 +206,17 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
              Jason.decode(found_record.hashes["restore_data"])
            )
 
-    # Now can we restore it?
-    # TODO actually restore it, for now we just want to ensure the decode process works
+    # Dry run restore, full tests for post-processing exist in
+    # Teiserver.Account.GDPRAnonymiseTaskTest
     restore_data =
-      RestoreAnonymisedUserTask.restore_from_record(found_record, :email, user.email)
+      RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
-    assert restore_data == %{
-             "post_ids" => [user_post1.id, user_post2.id],
-             "upload_ids" => Enum.sort([user_upload1.id, user_upload2.id]),
-             "smurf_key_ids" => [user_key1.id, user_key2.id]
-           }
+    assert restore_data ==
+             {:ok,
+              %{
+                "post_ids" => [user_post1.id, user_post2.id],
+                "upload_ids" => Enum.sort([user_upload1.id, user_upload2.id]),
+                "smurf_key_ids" => [user_key1.id, user_key2.id]
+              }}
   end
 end
