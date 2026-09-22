@@ -6,18 +6,16 @@ defmodule Teiserver.Admin.DeleteUserTask do
   alias Teiserver.Repo
 
   @doc """
-  Expects a list of user ids, returns the results of the query
-
-  ******************************************************************
-  BE SUPER CAREFUL, this hard delete *a lot* of stuff.
-  It should be used for dev purposes, but not for anything like prod
-  data. It erase audits and moderation logs.
-  ******************************************************************
+  Expects a list of user ids, hard deletes the user and most related
+  data. Anything not deleted is nulled or swapped to reference the system
+  user. This function _cannot_ be undone without restoring a backup.
   """
   @spec delete_users([non_neg_integer()]) :: :ok
   def delete_users(id_list) do
     id_list
     |> Enum.each(&Account.decache_user/1)
+
+    system_user_id = Account.system_user().id
 
     [
       # Accolades
@@ -27,6 +25,7 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM account_relationships WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)",
       "DELETE FROM account_friend_requests WHERE to_user_id = ANY($1) OR from_user_id = ANY($1)",
       "DELETE FROM account_friends WHERE user1_id = ANY($1) OR user2_id = ANY($1)",
+      "UPDATE account_users SET smurf_of_id = NULL WHERE smurf_of_id = ANY($1)",
 
       # Telemetry
       "DELETE FROM telemetry_complex_client_events WHERE user_id = ANY($1)",
@@ -61,7 +60,12 @@ defmodule Teiserver.Admin.DeleteUserTask do
 
       # Moderation
       "DELETE FROM moderation_reports WHERE reporter_id = ANY($1) OR target_id = ANY($1)",
-      "DELETE FROM moderation_actions WHERE target_id = ANY($1)"
+      "DELETE FROM moderation_actions WHERE target_id = ANY($1)",
+      "DELETE FROM moderation_bans WHERE source_id = ANY($1)",
+      "UPDATE moderation_bans SET added_by_id = #{system_user_id} WHERE added_by_id = ANY($1)",
+
+      # User prefs
+      "DELETE FROM microblog_user_preferences WHERE user_id = ANY($1)"
     ]
     |> Enum.each(fn query ->
       SQL.query!(Repo, query, [id_list])
@@ -74,7 +78,5 @@ defmodule Teiserver.Admin.DeleteUserTask do
     # Delete our cache of them
     id_list
     |> Enum.each(fn userid -> CacheUser.decache_user(userid) end)
-
-    :ok
   end
 end

@@ -145,7 +145,6 @@
   {"lib/teiserver_web/router.ex", :no_return},
   {"lib/teiserver_web/templates/admin/lobby/lobby_chat.html.heex", :call},
   {"lib/teiserver_web/templates/admin/lobby/server_chat.html.heex", :call},
-  {"lib/teiserver/account/tasks/merge_accounts_task.ex", :no_return},
 
   # Added with OTP-28 migration
   {"test/support/teiserver_test_lib.ex", :call},
@@ -153,7 +152,6 @@
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :call_without_opaque},
   {"lib/teiserver/account/reports/growth_report.ex", :invalid_contract},
   {"lib/teiserver/account/servers/login_throttle_server.ex", :contract_with_opaque},
-  {"lib/teiserver/account/tasks/merge_accounts_task.ex", :invalid_contract},
   {"lib/teiserver/autohost/session.ex", :contract_with_opaque},
   {"lib/teiserver/battle.ex", :invalid_contract},
   {"lib/teiserver/battle/tasks/battle_daily_cleanup_task.ex", :invalid_contract},
@@ -217,5 +215,6 @@
   {"lib/teiserver_web/live/moderation/report_user/index.ex"},
   {"lib/teiserver_web/live/moderation/tools/gdpr_restore_perform.ex"},
   {"lib/teiserver/account/tasks/restore_anonymised_user_task.ex"},
+  {"lib/teiserver/moderation/tasks/delete_expired_anti_abuse_records_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]
