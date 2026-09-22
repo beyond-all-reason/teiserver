@@ -89,7 +89,7 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
 
   def handle_event("execute", _params, %Socket{assigns: assigns} = socket) do
     case Enum.at(assigns.commands, assigns.selected_idx) do
-      %{} = command ->
+      {%{} = command, _idx} ->
         socket
         |> execute(command)
         |> noreply()
