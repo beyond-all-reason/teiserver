@@ -336,9 +336,6 @@ defmodule TeiserverWeb.Router do
   scope "/battle", TeiserverWeb.Battle, as: :ts_battle do
     pipe_through([:browser, :app_layout, :protected])
 
-    get("/ratings/leaderboard", RatingsController, :leaderboard)
-    get("/ratings/leaderboard/:type", RatingsController, :leaderboard)
-
     live_session :board_view,
       on_mount: [
         {UserAuthentication, :ensure_authenticated}
