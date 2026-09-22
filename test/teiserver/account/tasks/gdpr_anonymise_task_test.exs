@@ -36,9 +36,6 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
 
       :ok = GDPRAnonymiseTask.perform(%{})
 
-      # Sleep, just to ensure we have done everything in the task
-      :timer.sleep(500)
-
       updated_user = Account.get_user!(user.id)
       assert updated_user.name == user.name
 
@@ -57,9 +54,6 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> Repo.update!()
 
       :ok = GDPRAnonymiseTask.perform(%{})
-
-      # Sleep, just to ensure we have done everything in the task
-      :timer.sleep(500)
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
@@ -126,9 +120,6 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
 
       :ok = GDPRAnonymiseTask.perform(%{})
 
-      # Sleep, just to ensure we have done everything in the task
-      :timer.sleep(500)
-
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
       assert updated_user.roles == ["GDPR forgotten"]
@@ -177,9 +168,6 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email, true)
 
       assert result == {:ok, :success}
-
-      # Sleep, just to ensure we have done everything in the task
-      :timer.sleep(500)
 
       key_count =
         SmurfKeyQueries.smurf_keys()
