@@ -29,19 +29,19 @@ defmodule Teiserver.Moderation.ActionQueries do
 
   # Expiry
   @spec where_expired(t()) :: t()
-  def where_expired(query, now \\ nil) do
-    now = now || DateTime.utc_now()
+  def where_expired(query, timestamp \\ nil) do
+    timestamp = timestamp || DateTime.utc_now()
 
     from actions in query,
-      where: actions.expires < ^now
+      where: actions.expires < ^timestamp
   end
 
   @spec where_not_expired(t()) :: t()
-  def where_not_expired(query, now \\ nil) do
-    now = now || DateTime.utc_now()
+  def where_not_expired(query, timestamp \\ nil) do
+    timestamp = timestamp || DateTime.utc_now()
 
     from actions in query,
-      where: actions.expires > ^now
+      where: actions.expires > ^timestamp
   end
 
   @spec load_target(t()) :: t()
