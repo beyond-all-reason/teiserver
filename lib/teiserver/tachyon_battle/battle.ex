@@ -318,12 +318,28 @@ defmodule Teiserver.TachyonBattle.Battle do
   end
 
   defp notify_battle_ended(state) do
-    players =
+    teams =
       for {ally_team, ally_id} <- Enum.with_index(state.start_script.ally_teams),
           {team, team_id} <- Enum.with_index(ally_team.teams),
-          {player, player_id} <- Enum.with_index(team.players) do
+          do: {ally_id, team_id, team}
+
+    players =
+      for {ally_id, team_id, team} <- teams,
+          {player, player_id} <- Map.get(team, :players, []) |> Enum.with_index() do
         %{
           user_id: player.user_id,
+          name: player.name,
+          ally_team: ally_id,
+          team: team_id,
+          player: player_id
+        }
+      end
+
+    bots =
+      for {ally_id, team_id, team} <- teams,
+          {bot, player_id} <- Map.get(team, :bots, []) |> Enum.with_index() do
+        %{
+          ai_short_name: bot.ai_short_name,
           ally_team: ally_id,
           team: team_id,
           player: player_id
@@ -335,13 +351,14 @@ defmodule Teiserver.TachyonBattle.Battle do
     # All participants who are not players are considered spectators
     # An issue to change the way we track spectators - https://github.com/beyond-all-reason/teiserver/issues/1534
     spectators =
-      for id <- Map.keys(state.participants),
+      for {id, %{name: name}} <- state.participants,
           not MapSet.member?(player_ids, id),
-          do: %{user_id: id}
+          do: %{user_id: id, name: name}
 
     battle_ended_data = %{
       battle_id: state.id,
       players: players,
+      bots: bots,
       spectators: spectators,
       winning_ally_team_ids: state.winning_ally_team_ids
     }

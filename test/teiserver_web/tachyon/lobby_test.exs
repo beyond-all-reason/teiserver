@@ -219,6 +219,15 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], ctx[:lobby_id])
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
 
+      %{"status" => "success"} =
+        Tachyon.lobby_add_bot!(ctx[:client], "1", "ScavengersOffenseAI",
+          version: "botv0",
+          name: "Scavy"
+        )
+
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+
       Tachyon.send_request(ctx[:client], "lobby/startBattle", %{id: ctx[:lobby_id]})
 
       %{"commandId" => "autohost/start"} =
@@ -290,6 +299,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       assert tachyon_battle["username"] == ctx3[:user].name
 
       player_id = to_string(ctx[:user].id)
+      player_name = ctx[:user].name
       spectator_ids = MapSet.new([to_string(ctx2[:user].id), to_string(ctx3[:user].id)])
 
       %{"commandId" => "battle/start"} = Tachyon.recv_message!(ctx2[:client])
@@ -308,7 +318,21 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
                  "data" => %{
                    "battleId" => ^battle_id,
                    "players" => [
-                     %{"userId" => ^player_id, "allyTeam" => "0", "team" => "0", "player" => "0"}
+                     %{
+                       "userId" => ^player_id,
+                       "name" => ^player_name,
+                       "allyTeam" => "0",
+                       "team" => "0",
+                       "player" => "0"
+                     }
+                   ],
+                   "bots" => [
+                     %{
+                       "shortName" => "ScavengersOffenseAI",
+                       "allyTeam" => "1",
+                       "team" => "0",
+                       "player" => "0"
+                     }
                    ],
                    "spectators" => spectators,
                    "winningAllyTeamIds" => []
