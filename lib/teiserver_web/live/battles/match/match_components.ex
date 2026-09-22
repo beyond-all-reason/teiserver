@@ -23,15 +23,6 @@ defmodule TeiserverWeb.Battle.MatchComponents do
       List
     </.section_menu_button>
 
-    <.section_menu_button
-      bsname={@view_colour}
-      icon={Teiserver.Account.RatingLib.icon()}
-      active={@active == "ratings"}
-      url={~p"/battle/ratings"}
-    >
-      Ratings
-    </.section_menu_button>
-
     <%= if @match_id do %>
       <.section_menu_button
         bsname={@view_colour}

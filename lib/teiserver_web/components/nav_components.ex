@@ -94,12 +94,6 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item text="Matches" route={~p"/battle"} active={@active == "match"} />
 
             <.top_nav_item
-              text="Leaderboard"
-              route={~p"/battle/ratings/leaderboard"}
-              active={@active == "leaderboard"}
-            />
-
-            <.top_nav_item
               :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
               text="Reports"
               route={~p"/teiserver/reports"}
@@ -215,10 +209,6 @@ defmodule TeiserverWeb.NavComponents do
 
           <li class={[@active == "match" && "menu-active"]}>
             <.link href={~p"/battle"}>Matches</.link>
-          </li>
-
-          <li class={[@active == "leaderboard" && "menu-active"]}>
-            <.link href={~p"/battle/ratings/leaderboard"}>Leaderboard</.link>
           </li>
 
           <li
