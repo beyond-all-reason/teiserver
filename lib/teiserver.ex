@@ -1,7 +1,5 @@
 defmodule Teiserver do
   @moduledoc false
-  alias Teiserver.Account.User
-  alias Teiserver.Admin.DeleteUserTask
   alias Teiserver.Helpers.CacheHelper
 
   @spec icon :: String.t()
@@ -24,12 +22,6 @@ defmodule Teiserver do
     :code.load_file(module)
     :code.purge(module)
     :code.load_file(module)
-  end
-
-  @spec manually_delete_user(User.id()) :: :ok
-  def manually_delete_user(id) do
-    Application.put_env(:elixir, :ansi_enabled, true)
-    DeleteUserTask.delete_users([id])
   end
 
   @spec node_name() :: String.t()
