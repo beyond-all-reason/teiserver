@@ -742,7 +742,7 @@ defmodule Teiserver.CacheUser do
           not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           Account.restricted?(db_user, ["Permanently banned"]) ->
@@ -833,7 +833,7 @@ defmodule Teiserver.CacheUser do
           not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Rate limited?
