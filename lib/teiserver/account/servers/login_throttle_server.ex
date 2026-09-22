@@ -10,8 +10,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
   alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Helpers.BurstyRateLimiter
+
   use GenServer
-  require Logger
 
   @typep member :: %{pid: pid(), mon_ref: reference(), user_id: User.id()}
   @typep state :: %{

@@ -403,8 +403,7 @@
             <% data = @role_data[role] %>
             <%= if data != nil and Map.get(data, :badge) != false do %>
               <div class="role-badge">
-                <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}>
-                </i>
+                <i class={"fa-fw fa-2x #{data.icon}"} style={"color: #{data.colour}"} title={role}></i>
                 <br />
                 {role}
               </div>
