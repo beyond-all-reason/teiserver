@@ -1335,12 +1335,23 @@ defmodule Teiserver.Player.TachyonHandler do
         Enum.map(data.players, fn p ->
           %{
             userId: to_string(p.user_id),
+            name: p.name,
             allyTeam: to_string(p.ally_team),
             team: to_string(p.team),
             player: to_string(p.player)
           }
         end),
-      spectators: Enum.map(data.spectators, fn s -> %{userId: to_string(s.user_id)} end),
+      bots:
+        Enum.map(data.bots, fn bot ->
+          %{
+            shortName: bot.ai_short_name,
+            allyTeam: to_string(bot.ally_team),
+            team: to_string(bot.team),
+            player: to_string(bot.player)
+          }
+        end),
+      spectators:
+        Enum.map(data.spectators, fn s -> %{userId: to_string(s.user_id), name: s.name} end),
       winningAllyTeamIds: Enum.map(data.winning_ally_team_ids, &to_string/1)
     }
   end

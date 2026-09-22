@@ -1799,6 +1799,7 @@ defmodule Teiserver.Player.Session do
         battle_ended_data = %{
           battle_id: battle_id,
           players: [],
+          bots: [],
           spectators: [],
           winning_ally_team_ids: []
         }

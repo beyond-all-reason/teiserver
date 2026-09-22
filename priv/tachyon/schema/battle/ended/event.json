@@ -25,11 +25,35 @@
                             "userId": {
                                 "$ref": "../../definitions/userId.json"
                             },
+                            "name": { "type": "string" },
                             "allyTeam": { "type": "string" },
                             "team": { "type": "string" },
                             "player": { "type": "string" }
                         },
-                        "required": ["userId", "allyTeam", "team", "player"]
+                        "required": [
+                            "userId",
+                            "name",
+                            "allyTeam",
+                            "team",
+                            "player"
+                        ]
+                    }
+                },
+                "bots": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "shortName": {
+                                "description": "Short name of the bot. Used to uniquely identify which bot to run",
+                                "type": "string",
+                                "maxLength": 20
+                            },
+                            "allyTeam": { "type": "string" },
+                            "team": { "type": "string" },
+                            "player": { "type": "string" }
+                        },
+                        "required": ["shortName", "allyTeam", "team", "player"]
                     }
                 },
                 "spectators": {
@@ -39,9 +63,10 @@
                         "properties": {
                             "userId": {
                                 "$ref": "../../definitions/userId.json"
-                            }
+                            },
+                            "name": { "type": "string" }
                         },
-                        "required": ["userId"]
+                        "required": ["userId", "name"]
                     }
                 },
                 "winningAllyTeamIds": {
@@ -52,6 +77,7 @@
             "required": [
                 "battleId",
                 "players",
+                "bots",
                 "spectators",
                 "winningAllyTeamIds"
             ]
