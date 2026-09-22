@@ -205,7 +205,9 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </ul>
 
       <div class="section-menu-bar-inner_block">
-        {render_slot(@inner_block)}
+        <ul class="menu menu-horizontal">
+          {render_slot(@inner_block)}
+        </ul>
       </div>
     </div>
     """
@@ -270,6 +272,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
   attr :tab, :string
   attr :set, :string
+  attr :scope, Scope
 
   def show_tabset(assigns) do
     ~H"""
@@ -302,6 +305,17 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         phx-value-tabset={@set}
       >
         Actions
+      </a>
+
+      <a
+        :if={allow?(@scope, "Server")}
+        role="tab"
+        class={["tab", @tab == "raw" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="raw"
+        phx-value-tabset={@set}
+      >
+        Raw
       </a>
     </div>
     """
@@ -522,6 +536,53 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   end
 
   @doc """
+  <UserComponents.show_raw user={@user} />
+  """
+  attr :user, User
+  attr :cache_user, :map
+
+  def show_raw(assigns) do
+    json_user =
+      assigns[:user]
+      |> Map.drop([
+        :__struct__,
+        :__meta__,
+        :user_configs,
+        :smurf_of,
+        :user_stat,
+        :data,
+        :password
+      ])
+      |> Jason.encode!(pretty: true)
+
+    cache_user_json =
+      assigns[:cache_user]
+      |> Map.from_struct()
+      |> Map.drop([
+        :password
+      ])
+      |> Jason.encode!(pretty: true)
+
+    assigns =
+      assigns
+      |> assign(json_user: json_user)
+      |> assign(cache_user_json: cache_user_json)
+
+    ~H"""
+    <div class="flex">
+      <div class="flex-1">
+        <h4>User JSON struct</h4>
+        <textarea name="" id="" rows="40" class="form-control font-mono w-full">{@json_user}</textarea>
+      </div>
+      <div class="flex-1">
+        <h4>Cache user JSON struct</h4>
+        <textarea name="" id="" rows="40" class="form-control font-mono w-full">{@cache_user_json}</textarea>
+      </div>
+    </div>
+    """
+  end
+
+  @doc """
   <UserComponents.quick_search />
   """
   def quick_search(assigns) do
@@ -533,6 +594,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         name="name"
         placeholder="Search by id/username"
         class="input input-sm"
+        fieldset?={false}
       />
     </form>
     """

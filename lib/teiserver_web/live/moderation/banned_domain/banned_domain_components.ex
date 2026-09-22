@@ -131,7 +131,9 @@ defmodule TeiserverWeb.ModerationLive.BannedDomainComponents do
       </ul>
 
       <div class="section-menu-bar-inner_block">
-        {render_slot(@inner_block)}
+        <ul class="menu menu-horizontal">
+          {render_slot(@inner_block)}
+        </ul>
       </div>
     </div>
     """

@@ -36,19 +36,19 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow?(@scope, "Admin")}
-        icon={Teiserver.Logging.icon()}
-        url={~p"/logging"}
-      >
-        Logging
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow?(@current_user, "Overwatch")}
         icon={Teiserver.Moderation.icon()}
         url={~p"/moderation"}
       >
         Moderation
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow?(@scope, "Admin")}
+        icon={Teiserver.Logging.icon()}
+        url={~p"/logging"}
+      >
+        Logging
       </.menu_page_link>
 
       <.menu_page_link

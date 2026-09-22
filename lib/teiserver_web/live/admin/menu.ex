@@ -21,43 +21,11 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Moderator))}
-        icon={Teiserver.Account.UserLib.icon()}
-        url={~p"/teiserver/admin/user"}
-      >
-        Users (Admin)
-      </.menu_page_link>
-
-      <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Moderator))}
-        icon="users"
-        url={~p"/moderation/users"}
-      >
-        Users (Moderation)
-      </.menu_page_link>
-
-      <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Reviewer))}
-        icon={Teiserver.Chat.LobbyMessageLib.icon()}
-        url={~p"/admin/chat"}
-      >
-        Chat
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow_any?(@current_user, ~w(Server Engine))}
         icon={Teiserver.Telemetry.TelemetryLib.icon()}
         url={~p"/telemetry"}
       >
         Telemetry
-      </.menu_page_link>
-
-      <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Reviewer))}
-        icon={Teiserver.Battle.MatchLib.icon()}
-        url={~p"/teiserver/admin/matches"}
-      >
-        Matches
       </.menu_page_link>
 
       <.menu_page_link

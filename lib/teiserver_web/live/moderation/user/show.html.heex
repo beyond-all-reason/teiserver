@@ -1,7 +1,7 @@
 <UserComponents.section_menu active="show" user={@user} scope={@scope}>
   <.link
     :if={@user}
-    navigate={~p"/teiserver/admin/user/#{@user.id}"}
+    href={~p"/teiserver/admin/user/#{@user.id}"}
     phx-click={JS.push_focus()}
     class="me-4"
   >
@@ -23,7 +23,7 @@
 
 <div class="flex">
   <div class="flex-1 px-4">
-    <UserComponents.show_tabset tab={@tab1} set="1" />
+    <UserComponents.show_tabset scope={@scope} tab={@tab1} set="1" />
 
     <div :if={@user}>
       <UserComponents.show_details :if={@tab1 == "details"} user={@user} />
@@ -31,10 +31,16 @@
       <UserComponents.show_audit :if={@tab1 == "audit"} audit_logs={@streams.audit_logs} />
 
       <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} />
+
+      <UserComponents.show_raw
+        :if={@tab1 == "raw" and allow?(@scope, "Server")}
+        user={@user}
+        cache_user={@cache_user}
+      />
     </div>
   </div>
   <div :if={@user} class="flex-1 px-4">
-    <UserComponents.show_tabset tab={@tab2} set="2" />
+    <UserComponents.show_tabset scope={@scope} tab={@tab2} set="2" />
 
     <div :if={@user}>
       <UserComponents.show_details :if={@tab2 == "details"} user={@user} />
@@ -42,6 +48,12 @@
       <UserComponents.show_audit :if={@tab2 == "audit"} audit_logs={@streams.audit_logs} />
 
       <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} />
+
+      <UserComponents.show_raw
+        :if={@tab2 == "raw" and allow?(@scope, "Server")}
+        user={@user}
+        cache_user={@cache_user}
+      />
     </div>
   </div>
 </div>

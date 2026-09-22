@@ -5,7 +5,6 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias TeiserverWeb.LiveComponents.Moderation.UserListPreferences
-  alias TeiserverWeb.ModerationLive.User.FormComponent
   alias TeiserverWeb.ModerationLive.UserComponents
 
   use TeiserverWeb, :live_view

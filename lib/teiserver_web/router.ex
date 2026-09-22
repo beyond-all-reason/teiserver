@@ -591,7 +591,7 @@ defmodule TeiserverWeb.Router do
     end
 
     live_session :moderation_antiabuse,
-      layout: {TeiserverWeb.Layouts, :admin_tw},
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
       on_mount: [
         {Teiserver.Account.DefaultsPlug,
          {:set, %{site_menu_active: "moderation", sensitive_data: true}}},

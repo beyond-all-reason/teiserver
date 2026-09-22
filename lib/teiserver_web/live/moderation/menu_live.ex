@@ -34,6 +34,22 @@ defmodule TeiserverWeb.ModerationLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
+        :if={allow_any?(@current_user, ~w(Reviewer))}
+        icon={Teiserver.Chat.LobbyMessageLib.icon()}
+        url={~p"/admin/chat"}
+      >
+        Chat
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@current_user, ~w(Reviewer))}
+        icon={Teiserver.Battle.MatchLib.icon()}
+        url={~p"/teiserver/admin/matches"}
+      >
+        Matches
+      </.menu_page_link>
+
+      <.menu_page_link
         :if={allow?(@scope, "Moderator")}
         icon="users"
         url={~p"/moderation/users"}

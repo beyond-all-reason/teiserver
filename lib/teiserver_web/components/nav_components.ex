@@ -187,73 +187,61 @@ defmodule TeiserverWeb.NavComponents do
         <li class={[@active == "home" && "menu-active"]}>
           <.link href={~p"/"}>Home</.link>
         </li>
+
+        <li
+          :if={allow?(@scope, "Contributor")}
+          class={[@active == "admin" && "menu-active"]}
+        >
+          <.link href={~p"/admin"}>Admin</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Overwatch")}
+          class={[@active == "moderation" && "menu-active"]}
+        >
+          <.link href={~p"/moderation"}>Moderation</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Server")}
+          class={[@active == "logging" && "menu-active"]}
+        >
+          <.link href={~p"/logging"}>Logging</.link>
+        </li>
+
+        <li
+          :if={allow_any?(@scope, ["Contributor", "Overwatch"])}
+          class={[@active == "reports" && "menu-active"]}
+        >
+          <.link href={~p"/teiserver/reports"}>Reports</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "chat" && "menu-active"]}>
+          <.link href={~p"/chat"}>Chat</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "lobbies" && "menu-active"]}>
+          <.link href={~p"/battle/lobbies"}>Lobbies</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "match" && "menu-active"]}>
+          <.link href={~p"/battle"}>Matches</.link>
+        </li>
+
         <li class={[@active == "microblog" && "menu-active"]}>
           <.link href={~p"/microblog"}>Blog</.link>
         </li>
 
-        <%= if @scope do %>
-          <li class={[@active == "chat" && "menu-active"]}>
-            <.link href={~p"/chat"}>Chat</.link>
-          </li>
+        <li
+          :if={allow?(@scope, "Moderator")}
+          class={[@active == "users" && "menu-active"]}
+        >
+          <.link href={~p"/moderation/users"}>Users</.link>
+        </li>
 
-          <li
-            :if={allow?(@scope, "Server")}
-            class={[@active == "logging" && "menu-active"]}
-          >
-            <.link href={~p"/logging"}>Logging</.link>
-          </li>
-
-          <li class={[@active == "lobbies" && "menu-active"]}>
-            <.link href={~p"/battle/lobbies"}>Lobbies</.link>
-          </li>
-
-          <li class={[@active == "match" && "menu-active"]}>
-            <.link href={~p"/battle"}>Matches</.link>
-          </li>
-
-          <li
-            :if={allow_any?(@scope, ["Contributor", "Overwatch"])}
-            class={[@active == "reports" && "menu-active"]}
-          >
-            <.link href={~p"/teiserver/reports"}>Reports</.link>
-          </li>
-
-          <li
-            :if={allow?(@scope, "Moderator") and not allow?(@scope, "Admin")}
-            class={[@active == "users" && "menu-active"]}
-          >
-            <.link href={~p"/moderation/users"}>Users</.link>
-          </li>
-
-          <li
-            :if={allow?(@scope, "Admin")}
-            class={[@active == "users" && "menu-active"]}
-          >
-            <.link href={~p"/teiserver/admin/user"}>Users</.link>
-          </li>
-
-          <li
-            :if={allow?(@scope, "Overwatch")}
-            class={[@active == "moderation" && "menu-active"]}
-          >
-            <.link href={~p"/moderation"}>Moderation</.link>
-          </li>
-
-          <li
-            :if={allow?(@scope, "Contributor")}
-            class={[@active == "admin" && "menu-active"]}
-          >
-            <.link href={~p"/admin"}>Admin</.link>
-          </li>
-
-          <li>
-            <.link href={~p"/logout"} method="delete">Log out</.link>
-          </li>
-        <% else %>
-          <li class={[@active == "login" && "menu-active"]}>
-            <.link href={~p"/login"}>Log in</.link>
-          </li>
-        <% end %>
+        <li :if={@scope}>
+          <.link href={~p"/logout"} method="delete">Log out</.link>
+        </li>
       </ul>
     </nav>
     """

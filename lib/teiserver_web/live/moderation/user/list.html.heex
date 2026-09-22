@@ -1,10 +1,7 @@
-<UserComponents.section_menu active="list" scope={@scope} />
+<UserComponents.section_menu active="list" scope={@scope}></UserComponents.section_menu>
 
 <.header>
   Listing Users
-  <:actions>
-    <.link patch={~p"/moderation/users/new"}></.link>
-  </:actions>
 </.header>
 <div class="heading-subtitle">{format_number(@user_count)} users found</div>
 
@@ -59,19 +56,3 @@
 </div>
 
 <.back navigate={~p"/moderation"}>Back to moderation</.back>
-
-<.modal
-  :if={@live_action in [:new, :edit]}
-  id="user-modal"
-  show
-  on_cancel={JS.patch(~p"/moderation/users")}
->
-  <.live_component
-    module={FormComponent}
-    id={@user.id || :new}
-    title={@page_title}
-    action={@live_action}
-    user={@user}
-    patch={~p"/moderation/users"}
-  />
-</.modal>

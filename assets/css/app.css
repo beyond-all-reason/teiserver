@@ -141,7 +141,7 @@
 }
 
 .admin-sensitive-topbar, .moderation-sensitive-topbar {
-  @apply bg-warning text-warning-content p-2;
+  @apply p-2;
   
   position: fixed;
   top: 0;
@@ -149,6 +149,14 @@
   right: 0;
   z-index: 1000;
   text-align: center;
+}
+
+.admin-sensitive-topbar {
+  @apply bg-error text-error-content;
+}
+
+.moderation-sensitive-topbar {
+  @apply bg-warning text-warning-content;
 }
 
 .section-menu-bar {
