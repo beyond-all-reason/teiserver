@@ -177,7 +177,7 @@
 }
 
 .single-block-content {
-  @apply w-full max-w-4xl px-4 mx-auto mt-15 rounded-md;
+  @apply w-full max-w-4xl px-4 mx-auto mt-30 rounded-md;
 }
 
 .list-title-item {

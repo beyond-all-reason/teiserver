@@ -1,0 +1,129 @@
+<div class="single-block-content">
+  <div class="card bg-base-200 shadow-xl">
+    <div :if={@stage == :loading} class="card-body" id="stage-loading">
+      <h1 class="text-4xl font-bold mb-4 text-center">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+      </h1>
+    </div>
+
+    <div :if={@stage == :warning} class="card-body" id="stage-warning">
+      <h1 class="text-4xl font-bold mb-4">
+        {gettext("Delete your Beyond All Reason account")}
+      </h1>
+      <p>
+        Deleting your account is permanent, and it may not do what you expect. Please read this before continuing.
+      </p>
+
+      <p>
+        <span class="font-bold">What will be erased:</span>
+        your email address, profile and settings, and the link between your name and your play history. In public replays, match archives, and leaderboards your username will be replaced with an anonymised handle.
+      </p>
+
+      <p>
+        <span class="font-bold">What will be kept:</span>
+        a minimal, non-public anti-abuse record containing hashed technical identifiers, your moderation and sanction history, your matchmaking rating, and the links needed to honour other players' ignore and avoid lists. This record is access-restricted and is kept for 2 years, or 5 years if your account has moderation actions, or until an active sanction expires if that is later. This is described in section 6 of our Privacy Policy.
+      </p>
+
+      <h2 class="font-bold text-2xl mt-4">What this means in practice:</h2>
+
+      <ul>
+        <li>
+          - Deletion will <span class="font-bold">not</span>
+          reset your matchmaking rating. If you create a new account and our systems link it to this record, your previous rating and any active sanctions may be applied to it, or the new account may be refused.
+        </li>
+        <li>
+          - Deletion will <span class="font-bold">not</span>
+          remove you from other players' ignore and avoid lists. Those belong to them.
+        </li>
+        <li>
+          - Deletion <span class="font-bold">cannot be undone</span>
+          beyond what the anti-abuse record contains. Your profile, and your name on chat and replays, are gone for good.
+        </li>
+      </ul>
+
+      <h2 class="font-bold text-2xl mt-4">What happens next:</h2>
+      <p>
+        Your account is deactivated immediately and permanently deleted after 30 days. Logging in again at any point during those 30 days cancels the deletion and reactivates your account.
+      </p>
+
+      <div class="flex mt-4">
+        <div class="flex-1 mx-2">
+          <a href={~p"/profile"} class="btn btn-primary w-full">
+            Cancel
+          </a>
+        </div>
+        <div class="flex-1 mx-2">
+          <span phx-click="continue" class="btn btn-error w-full">
+            Continue
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div :if={@stage == :confirmation} class="card-body" id="stage-confirmation">
+      <h1 class="text-4xl font-bold mb-4">
+        {gettext("Confirm deletion")}
+      </h1>
+      <p>
+        To confirm, type your username
+        <span class="font-bold font-mono">{@current_user.name}</span>
+        below. Your account will then be deactivated and deleted in 30 days.
+      </p>
+
+      <.simple_form
+        for={@form}
+        id="confirmation-form"
+        phx-submit="confirm-deletion"
+        class="w-full"
+      >
+        <.input
+          field={@form[:name]}
+          type="text"
+          autofocus="autofocus"
+          tabindex="1"
+          required
+          autocomplete="off"
+        />
+        <br />
+        <div class="flex mt-2">
+          <div class="flex-1 pr-2">
+            <a href={~p"/profile"} class="btn btn-primary w-full">
+              Cancel
+            </a>
+          </div>
+          <div class="flex-1 pl-2">
+            <.button
+              phx-disable-with={gettext("Confirming")}
+              class="btn btn-error w-full"
+              tabindex="40"
+            >
+              {gettext("Confirm deletion")} <span aria-hidden="true">→</span>
+            </.button>
+          </div>
+        </div>
+      </.simple_form>
+    </div>
+
+    <div :if={@stage == :perform} class="card-body" id="stage-perform">
+      <div :if={assigns[:error]} class="alert alert-error">
+        <span class="text-xl font-bold">
+          {@error}
+        </span>
+      </div>
+
+      <div :if={assigns[:updated_user]}>
+        <h1 class="text-4xl font-bold mb-4">
+          {gettext("Your account is scheduled for deletion")}
+        </h1>
+        <p>
+          Your account <span class="font-bold font-mono">{@updated_user.name}</span>
+          has been deactivated and will be permanently deleted on <span class="font-bold font-mono">{Calendar.strftime(@updated_user.gdpr_forget_after, "%Y-%m-%d %H:%M:%S")} UTC</span>. We have sent a confirmation to your registered email address.
+        </p>
+
+        <p>
+          If you change your mind, log in again before that date and your account will be restored automatically. You have now been signed out.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
