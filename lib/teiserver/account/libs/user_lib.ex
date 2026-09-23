@@ -631,6 +631,9 @@ defmodule Teiserver.Account.UserLib do
 
   defp can_login(%User{} = user) do
     cond do
+      gdpr_forget_in_progress?(user) ->
+        {:gdpr_forget_is_set, user}
+
       Account.restricted?(user, ["Login"]) ->
         {:error,
          "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
@@ -645,9 +648,6 @@ defmodule Teiserver.Account.UserLib do
 
       Account.get_user_totp_status(user.id) == :active ->
         {:requires_mfa, user}
-
-      gdpr_forget_in_progress?(user) ->
-        {:gdpr_forget_is_set, user}
 
       true ->
         :ok
@@ -736,5 +736,15 @@ defmodule Teiserver.Account.UserLib do
   """
   def gdpr_forget_in_progress?(%User{gdpr_forget_after: gdpr_forget_after}) do
     not is_nil(gdpr_forget_after)
+  end
+
+  @doc """
+  The number of days since they last changed their email, returns `nil` if they
+  have not changed their email or we have not recorded when it was last changed.
+  """
+  def days_since_last_email_change(%User{email_last_changed_at: nil}), do: nil
+
+  def days_since_last_email_change(%User{email_last_changed_at: email_last_changed_at}) do
+    DateTime.diff(DateTime.utc_now(), email_last_changed_at, :day)
   end
 end
