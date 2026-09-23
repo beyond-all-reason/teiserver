@@ -85,6 +85,7 @@ defmodule Teiserver.Player.SessionTest do
 
     start_data = %{
       ips: ["127.0.0.1"],
+      match_id: 123,
       port: 1234,
       engine: %{version: "v1"},
       game: %{spring_name: "game"},

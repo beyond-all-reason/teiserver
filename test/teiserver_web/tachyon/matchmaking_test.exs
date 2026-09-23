@@ -871,7 +871,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "battleId" => _id,
+                 "matchId" => _id,
                  "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
@@ -890,7 +890,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "battleId" => _id,
+                 "matchId" => _id,
                  "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},

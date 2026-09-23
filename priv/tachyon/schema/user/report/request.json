@@ -18,14 +18,19 @@
             "properties": {
                 "userIds": {
                     "type": "array",
-                    "items": { "$ref": "../../definitions/userId.json" }
+                    "items": { "$ref": "../../definitions/userId.json" },
+                    "minItems": 1
                 },
                 "reason": {
                     "type": "object",
                     "properties": { "type": { "type": "string" } },
                     "required": ["type"]
                 },
-                "message": { "type": "string" }
+                "message": { "type": "string", "maxLength": 255 },
+                "matchId": {
+                    "$ref": "../../definitions/matchId.json",
+                    "description": "the match the report is about, if any"
+                }
             },
             "required": ["userIds", "reason"]
         }

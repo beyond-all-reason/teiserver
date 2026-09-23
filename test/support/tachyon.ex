@@ -417,6 +417,12 @@ defmodule Teiserver.Support.Tachyon do
         message -> Map.put(data, :message, message)
       end
 
+    data =
+      case Keyword.get(opts, :match_id) do
+        nil -> data
+        match_id -> Map.put(data, :matchId, to_string(match_id))
+      end
+
     :ok = send_request(client, "user/report", data)
     recv_message!(client)
   end

@@ -1,0 +1,6 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/matchId.json",
+    "title": "MatchId",
+    "type": "string",
+    "examples": ["48213"]
+}

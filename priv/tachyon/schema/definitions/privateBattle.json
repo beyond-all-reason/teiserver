@@ -4,7 +4,7 @@
     "description": "Battle informations including secrets to pass to spring for joining the game server. Don't expose secrets to other players.",
     "type": "object",
     "properties": {
-        "battleId": { "$ref": "../definitions/battleId.json" },
+        "matchId": { "$ref": "../definitions/matchId.json" },
         "username": { "type": "string" },
         "password": { "type": "string" },
         "ips": {
@@ -34,7 +34,7 @@
         }
     },
     "required": [
-        "battleId",
+        "matchId",
         "username",
         "password",
         "ips",

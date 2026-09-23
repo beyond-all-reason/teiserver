@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
   alias ExUnit.Callbacks
   alias Teiserver.AssetFixtures
+  alias Teiserver.Battle
   alias Teiserver.Player
   alias Teiserver.Player.Session
   alias Teiserver.Support.Tachyon
@@ -298,11 +299,16 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       # content is rather straightforward
       assert tachyon_battle["username"] == ctx3[:user].name
 
+      match_id = tachyon_battle["matchId"]
+      assert %Battle.Match{} = match_id |> String.to_integer() |> Battle.get_match()
+
       player_id = to_string(ctx[:user].id)
       player_name = ctx[:user].name
       spectator_ids = MapSet.new([to_string(ctx2[:user].id), to_string(ctx3[:user].id)])
 
-      %{"commandId" => "battle/start"} = Tachyon.recv_message!(ctx2[:client])
+      %{"commandId" => "battle/start", "data" => %{"matchId" => ^match_id}} =
+        Tachyon.recv_message!(ctx2[:client])
+
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
 
@@ -316,7 +322,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
         assert %{
                  "commandId" => "battle/ended",
                  "data" => %{
-                   "battleId" => ^battle_id,
+                   "matchId" => ^match_id,
                    "players" => [
                      %{
                        "userId" => ^player_id,

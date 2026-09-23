@@ -5,6 +5,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.Battle
   alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -494,7 +495,8 @@ defmodule Teiserver.Player.TachyonHandler do
 
     with :ok <- check_reporting_allowed(state.user.id),
          {:ok, type} <- parse_report_type(type),
-         {:ok, target_ids} <- parse_report_targets(raw_ids, state.user.id) do
+         {:ok, target_ids} <- parse_report_targets(raw_ids, state.user.id),
+         {:ok, match_id} <- parse_report_match(msg["data"]["matchId"]) do
       extra_text = clamp_extra_text(msg["data"]["message"])
 
       results =
@@ -504,7 +506,8 @@ defmodule Teiserver.Player.TachyonHandler do
             target_id: target_id,
             type: type,
             sub_type: @report_sub_type,
-            extra_text: extra_text
+            extra_text: extra_text,
+            match_id: match_id
           })
         end)
 
@@ -531,6 +534,9 @@ defmodule Teiserver.Player.TachyonHandler do
 
       {:error, :self_report} ->
         {:error_response, :invalid_request, "cannot report yourself", state}
+
+      {:error, :unknown_match} ->
+        {:error_response, :invalid_request, "unknown match", state}
     end
   end
 
@@ -1317,7 +1323,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def battle_state_to_tachyon(%PT.BattleState{} = battle) do
     %{
-      battleId: battle.id,
+      matchId: to_string(battle.match_id),
       username: battle.username,
       password: battle.password,
       ips: battle.ips,
@@ -1330,7 +1336,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   defp battle_ended_to_tachyon(data) do
     %{
-      battleId: data.battle_id,
+      matchId: to_string(data.match_id),
       players:
         Enum.map(data.players, fn p ->
           %{
@@ -1655,6 +1661,17 @@ defmodule Teiserver.Player.TachyonHandler do
       else
         {:ok, target_ids}
       end
+    end
+  end
+
+  defp parse_report_match(nil), do: {:ok, nil}
+
+  defp parse_report_match(raw_id) do
+    with {:ok, match_id} <- TachyonParser.parse_int(raw_id),
+         %Battle.Match{} <- Battle.get_match(match_id) do
+      {:ok, match_id}
+    else
+      _invalid -> {:error, :unknown_match}
     end
   end
 

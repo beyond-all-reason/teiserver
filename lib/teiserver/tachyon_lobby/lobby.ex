@@ -674,10 +674,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
     case resp do
       # Using the returned password in case the user was already a battle participant
       # and has an existing password
-      {:ok, %{ips: ips, port: port, password: password}} ->
+      {:ok, %{ips: ips, port: port, match_id: match_id, password: password}} ->
         join_data = %{
           ips: ips,
           port: port,
+          match_id: match_id,
           engine: %{version: data.engine_version},
           game: %{spring_name: data.game_version},
           map: %{spring_name: data.map_name}
@@ -1094,6 +1095,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       start_data = %{
         ips: host_data.ips,
         port: host_data.port,
+        match_id: host_data.match_id,
         engine: %{version: data.engine_version},
         game: %{spring_name: data.game_version},
         map: %{spring_name: data.map_name}

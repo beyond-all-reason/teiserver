@@ -203,6 +203,7 @@ defmodule Teiserver.Player.Session do
   @type start_data :: %{
           ips: [String.t()],
           port: integer(),
+          match_id: TachyonBattle.Types.match_id(),
           engine: %{version: String.t()},
           game: %{spring_name: String.t()},
           map: %{spring_name: String.t()}
@@ -1503,6 +1504,7 @@ defmodule Teiserver.Player.Session do
       {:joined, state} ->
         battle_state = %PT.BattleState{
           id: battle_id,
+          match_id: battle_start_data.match_id,
           username: state.user.name,
           password: password,
           ips: battle_start_data.ips,

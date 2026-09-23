@@ -15,7 +15,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   require Logger
 
-  @type connection_info :: %{ips: [String.t()], port: integer()}
+  @type connection_info :: %{ips: [String.t()], port: integer(), match_id: T.match_id()}
 
   @type state :: %{
           id: T.id(),
@@ -186,7 +186,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @impl GenServer
   def handle_call(:get_connection_info, _from, state) do
-    {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
+    {:reply, {:ok, Map.take(state, [:ips, :port, :match_id])}, state}
   end
 
   def handle_call({:send_message, msg}, _from, state) do
@@ -225,7 +225,9 @@ defmodule Teiserver.TachyonBattle.Battle do
       {_pid, participant} when not is_nil(participant) ->
         # This participant and their password is already known by the autohost
         # returning the existing password as the new one wouldn't be recognised
-        resp = state |> Map.take([:ips, :port]) |> Map.put(:password, participant.password)
+        resp =
+          state |> Map.take([:ips, :port, :match_id]) |> Map.put(:password, participant.password)
+
         {:reply, {:ok, resp}, state}
 
       # The engine cannot deal with a total of more than 254 players
@@ -238,7 +240,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
         case Autohost.add_player(pid, data) do
           :ok ->
-            resp = state |> Map.take([:ips, :port]) |> Map.put(:password, password)
+            resp = state |> Map.take([:ips, :port, :match_id]) |> Map.put(:password, password)
             state = put_in(state, [:participants, user_id], %{name: name, password: password})
             {:reply, {:ok, resp}, state}
 
@@ -357,6 +359,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
     battle_ended_data = %{
       battle_id: state.id,
+      match_id: state.match_id,
       players: players,
       bots: bots,
       spectators: spectators,

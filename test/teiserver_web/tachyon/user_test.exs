@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Tachyon.UserTest do
   alias Teiserver.Account
+  alias Teiserver.Battle
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Moderation
   alias Teiserver.Player
@@ -48,18 +49,15 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       assert [_only_one] = Moderation.list_reports(search: [reporter_id: user.id])
     end
 
-    test "an over long message is truncated", %{user: user, client: client} do
+    test "an over long message is rejected", %{user: user, client: client} do
       {:ok, ctx2} = Tachyon.setup_client()
 
-      assert %{"status" => "success"} =
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.report_user!(client, [ctx2[:user].id], "chat",
                  message: String.duplicate("a", 300)
                )
 
-      assert [%{extra_text: extra_text}] =
-               Moderation.list_reports(search: [reporter_id: user.id])
-
-      assert extra_text == String.duplicate("a", 255)
+      assert [] = Moderation.list_reports(search: [reporter_id: user.id])
     end
 
     test "one unknown target rejects the whole report", %{user: user, client: client} do
@@ -91,6 +89,26 @@ defmodule TeiserverWeb.Tachyon.UserTest do
 
       assert %{"status" => "failed", "reason" => "invalid_request"} =
                Tachyon.report_user!(client, [ctx2[:user].id], "vibes")
+
+      assert [] = Moderation.list_reports(search: [reporter_id: user.id])
+    end
+
+    test "can name the match it is about", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+      match = create_match!(user)
+
+      assert %{"status" => "success"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "chat", match_id: match.id)
+
+      assert [%{match_id: match_id}] = Moderation.list_reports(search: [reporter_id: user.id])
+      assert match_id == match.id
+    end
+
+    test "an unknown match is rejected", %{user: user, client: client} do
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      assert %{"status" => "failed", "reason" => "invalid_request"} =
+               Tachyon.report_user!(client, [ctx2[:user].id], "chat", match_id: 999_999_999)
 
       assert [] = Moderation.list_reports(search: [reporter_id: user.id])
     end
@@ -352,5 +370,22 @@ defmodule TeiserverWeb.Tachyon.UserTest do
       {:ok, %{"data" => %{"users" => [user_data]}}} = Tachyon.recv_message(client)
       assert user_data["roles"] == ["moderator"]
     end
+  end
+
+  defp create_match!(founder) do
+    {:ok, match} =
+      Battle.create_match(%{
+        map: "red desert",
+        tags: %{},
+        team_count: 2,
+        team_size: 1,
+        passworded: false,
+        game_type: "Duel",
+        bots: %{},
+        founder_id: founder.id,
+        started: DateTime.utc_now()
+      })
+
+    match
   end
 end
