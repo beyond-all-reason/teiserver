@@ -965,7 +965,9 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{id: id} = setup_full_lobby([1, 1])
       {:error, _reason} = Lobby.update_properties(id, "2", %{map_name: "new map"})
     end
+  end
 
+  describe "voting" do
     test "changing map with 2 players requires a vote" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
@@ -982,7 +984,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote_update}}}
       assert vote_update.id == vote.id
-      assert %{majority: 2, quorum: 2} = vote_update
+      assert %{majority: 0.501, quorum: 2} = vote_update
     end
 
     test "changing a second time does nothing" do
@@ -996,7 +998,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
     end
 
-    test "vote timeout triggers event" do
+    test "vote timeout with no votes" do
       %{id: id} = setup_full_lobby([1, 1])
       :ok = Lobby.join_queue(id, "2")
       :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
@@ -1006,6 +1008,103 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
       vote_id = vote.id
       assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :timeout}}
+    end
+
+    test "vote timeout with cast votes" do
+      %{id: id} = setup_full_lobby([2, 2])
+      for user_id <- ["2", "3", "4"], do: :ok = Lobby.join_queue(id, user_id)
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      vote_id = vote.id
+
+      # We have 4 players, 3 votes needed for quorum
+      assert vote.quorum == 3
+      assert vote.majority == 0.501
+
+      # 2 yes (vote initiator is voting yes by default), 1 no vote
+      # the result is uncertain,
+      # the vote continues because the forht player can change the outcome
+      :ok = Lobby.vote_submit(id, "2", {vote_id, :yes})
+      :ok = Lobby.vote_submit(id, "3", {vote_id, :no})
+
+      LobbyProcess.trigger_vote_timeout(id, vote_id)
+
+      # Vote reached timeout and since we have quorum votes the result is valid
+      # From the non abstaining cast votes we have 2/3 yes votes
+      # which is higher than the 50.1% majority needed, the vote passed
+      assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :passed}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.map_name == "new map"
+    end
+
+    test "vote ends if remaining votes can't change outcome" do
+      %{id: id} = setup_full_lobby([2, 2])
+      for user_id <- ["2", "3", "4"], do: :ok = Lobby.join_queue(id, user_id)
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      vote_id = vote.id
+
+      # We have 4 players, 3 votes needed for quorum
+      assert vote.quorum == 3
+      assert vote.majority == 0.501
+
+      # 1 yes (vote initiator is voting yes by default), 2 no votes
+      :ok = Lobby.vote_submit(id, "2", {vote_id, :no})
+      :ok = Lobby.vote_submit(id, "3", {vote_id, :no})
+
+      # There is no way to change the outcome by the pending votes
+      # so the vote will end immediately to save time
+      # From the non abstaining cast votes we have 1/3 yes votes
+      # which is less than the 50.1% majority required for the vote to pass
+      # therefore the vote failed
+      assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :failed}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.map_name != "new map"
+    end
+
+    test "vote ends early if everyone voted" do
+      %{id: id} = setup_full_lobby([2, 2])
+      for user_id <- ["2", "3", "4"], do: :ok = Lobby.join_queue(id, user_id)
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+      vote_id = vote.id
+
+      # We have 4 players, 3 votes needed for quorum
+      assert vote.quorum == 3
+      assert vote.majority == 0.501
+
+      # 1 yes (vote initiator is voting yes by default), 2 no, 2 abstain votes
+      :ok = Lobby.vote_submit(id, "1234", {vote_id, :abstain})
+      :ok = Lobby.vote_submit(id, "2", {vote_id, :abstain})
+      :ok = Lobby.vote_submit(id, "3", {vote_id, :abstain})
+      :ok = Lobby.vote_submit(id, "4", {vote_id, :abstain})
+
+      # Everyone voted so the vote is ended early to save time
+      # From the non abstaining cast votes we have 0/0 yes votes
+      # which is less than the 50.1% majority required for the vote pass
+      # therefore the vote failed
+      assert_receive {:lobby, ^id, {:vote_ended, ^vote_id, :failed}}
+    end
+
+    test "voter disconnect is the same as leaving (abstain)" do
+      %{id: id, users: users} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      Process.unlink(users["2"].pid)
+      Process.exit(users["2"].pid, :kill)
+
+      # 1 yes vote from the vote initiator and an abstain from the leaver
+      # meets quorum (everyone voted)
+      # From the non abstaining cast votes we have 1/1 yes votes
+      # which is more than the 50.1% majority required for the vote to pass
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
+      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
+      assert vote_id == vote.id
+      assert result == :passed
     end
 
     test "vote timeout is bound to a current vote" do
@@ -1110,34 +1209,6 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
 
       :ok = Lobby.vote_submit(id, "2", {vote.id, :no})
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
-      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
-      assert vote_id == vote.id
-      assert result == :failed
-    end
-
-    test "yes + abstain mean vote fails" do
-      %{id: id} = setup_full_lobby([1, 1])
-      :ok = Lobby.join_queue(id, "2")
-      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
-
-      :ok = Lobby.vote_submit(id, "2", {vote.id, :abstain})
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
-      assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
-      assert vote_id == vote.id
-      assert result == :failed
-    end
-
-    test "voter disconnect is the same as leaving (abstain)" do
-      %{id: id, users: users} = setup_full_lobby([1, 1])
-      :ok = Lobby.join_queue(id, "2")
-      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
-      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
-
-      Process.unlink(users["2"].pid)
-      Process.exit(users["2"].pid, :kill)
-
       assert_receive {:lobby, ^id, {:updated, %{current_vote: nil}}}
       assert_receive {:lobby, ^id, {:vote_ended, vote_id, result}}
       assert vote_id == vote.id

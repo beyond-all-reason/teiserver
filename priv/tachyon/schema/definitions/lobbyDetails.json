@@ -171,9 +171,28 @@
                         }
                     }
                 },
-                "until": { "$ref": "../definitions/unixTime.json" }
+                "until": { "$ref": "../definitions/unixTime.json" },
+                "quorum": {
+                    "description": "this many player must vote for the vote to be valid at all",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "majority": {
+                    "description": "percentage of yes votes out of non abstaining votes required for the vote to pass",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
             },
-            "required": ["id", "action", "initiator", "voters", "until"]
+            "required": [
+                "id",
+                "action",
+                "initiator",
+                "voters",
+                "until",
+                "quorum",
+                "majority"
+            ]
         },
         "voteHistory": {
             "type": "object",

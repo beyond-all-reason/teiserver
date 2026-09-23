@@ -552,7 +552,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
              }
 
       assert vote["quorum"] == 2
-      assert vote["majority"] == 2
+      assert vote["majority"] == 0.501
 
       # check joining a lobby also holds the vote details
       {:ok, ctx3} = Tachyon.setup_client()

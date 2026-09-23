@@ -16,6 +16,8 @@ defmodule Teiserver.TachyonLobby.Events.VoteEnded do
 end
 
 defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.VoteEnded do
+  alias Teiserver.TachyonLobby.Event
+  alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.Events.VoteEnded
   alias Teiserver.TachyonLobby.Types, as: LT
 
@@ -59,6 +61,57 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.VoteEnd
       })
 
     side_effects = [{:vote_ended, ev.vote, ev.outcome} | agg.side_effects]
-    %{agg | data: data, changes: changes, side_effects: side_effects}
+    agg = %{agg | data: data, changes: changes, side_effects: side_effects}
+
+    apply_outcome(agg, ev.outcome, ev.vote.action)
   end
+
+  defp apply_outcome(agg, outcome, _action) when outcome != :passed, do: agg
+
+  defp apply_outcome(agg, :passed, {:change_map, new_map}),
+    do: Event.apply_event(%Events.UpdateMapName{new_map: new_map}, agg)
+
+  defp apply_outcome(agg, :passed, {:appoint_boss, boss_id}),
+    do: Event.apply_event(%Events.UpdateBoss{action: :add, appointee_id: boss_id}, agg)
+
+  defp apply_outcome(agg, :passed, {:kickban, target_id, ban_until}) do
+    data = agg.data
+
+    target_in_lobby? =
+      is_map_key(data.players, target_id) or
+        is_map_key(data.spectators, target_id)
+
+    cond do
+      target_in_lobby? ->
+        Event.apply_event(%Events.Kickban{user_id: target_id, ban_until: ban_until}, agg)
+
+      ban_until != nil ->
+        effective_ban_until =
+          if DateTime.compare(ban_until, DateTime.utc_now()) == :gt,
+            do: ban_until,
+            else: nil
+
+        case effective_ban_until do
+          nil ->
+            agg
+
+          dt ->
+            ms = DateTime.diff(dt, DateTime.utc_now(), :millisecond)
+
+            side_effects =
+              if ms > 0,
+                do: [{:send_after, ms, {:ban_expired, target_id}} | agg.side_effects],
+                else: agg.side_effects
+
+            new_data = put_in(data.banned_users[target_id], dt)
+            %{agg | data: new_data, side_effects: side_effects}
+        end
+
+      true ->
+        agg
+    end
+  end
+
+  # just let the thing crash if a new vote action shows up. It'll be easy
+  # to spot and fix/add support. :start isn't yet supported
 end
