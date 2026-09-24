@@ -849,6 +849,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
+        {:vote_submit, _user_id, _ballot},
+        _state,
+        %LT.Data{current_vote: nil} = data
+      ),
+      do: {:keep_state, data, [{:reply, from, {:error, :invalid_vote}}]}
+
+  def handle_event(
+        {:call, from},
         {:vote_submit, _user_id, {vote_id, _ballot}},
         _state,
         %LT.Data{} = data
@@ -1191,11 +1199,17 @@ defmodule Teiserver.TachyonLobby.Lobby do
   end
 
   def handle_event(:info, {:vote_timeout, vote_id}, _state, %LT.Data{} = data)
-      when data.current_vote.id == vote_id do
+      when data.current_vote.id == vote_id and data.primary? do
+    outcome =
+      case vote_result(data.current_vote, true) do
+        {:ended, result} -> result
+        :undecided -> :timeout
+      end
+
     event = %Events.VoteEnded{
       finished_at: DateTime.utc_now(),
       vote: data.current_vote,
-      outcome: :timeout
+      outcome: outcome
     }
 
     data = process_events(data, [event]).data
@@ -1744,10 +1758,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
         if p.id == initiator_id, do: {p.id, :yes}, else: {p.id, :pending}
       end
 
-    # ensure we need absolute majority.
-    # 0.501 works until 254 players, which is the hard limit of players
-    # in a game
+    # Quorum is the minimum number of votes required for the vote to be valid
+    # 0.501 works until 254 players, which is the hard limit of players in a game
     quorum = (map_size(voters) * 0.501) |> :math.ceil() |> trunc()
+
+    # Majority is the share of yes among yes + no (abstain excluded) votes needed to
+    # pass the vote. Using 50.1% for simple majority for now, but it can be changed to
+    # require supermajority or even an unanimous vote if wanted
+    majority = 0.501
 
     %LT.VoteState{
       id: "vote-#{state.vote_idx}",
@@ -1757,7 +1775,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       duration_s: vote_duration_s,
       until: DateTime.utc_now() |> DateTime.shift(Duration.new!(second: vote_duration_s)),
       quorum: quorum,
-      majority: quorum
+      majority: majority
     }
   end
 
@@ -1785,5 +1803,55 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end)
 
     :ok
+  end
+
+  @spec vote_result(LT.VoteState.t(), boolean()) :: :undecided | {:ended, :passed | :failed}
+  def vote_result(%LT.VoteState{} = vote, timeout \\ false) do
+    vote_frequencies = vote.voters |> Map.values() |> Enum.frequencies()
+
+    yes = Map.get(vote_frequencies, :yes, 0)
+    no = Map.get(vote_frequencies, :no, 0)
+    abstain = Map.get(vote_frequencies, :abstain, 0)
+    pending = Map.get(vote_frequencies, :pending, 0)
+
+    voted = yes + no + abstain
+
+    total_non_abstaining = yes + no + pending
+
+    cond do
+      # We have quorum and there is no way to change the outcome of the vote
+      # even if every pending vote changed to no, ending the vote early to save time
+      voted >= vote.quorum and total_non_abstaining > 0 and
+          yes / total_non_abstaining >= vote.majority ->
+        {:ended, :passed}
+
+      # We have quorum and there is no way to change the outcome of the vote
+      # even if every pending vote changed to yes, ending the vote early to save time
+      voted >= vote.quorum and total_non_abstaining > 0 and
+          (yes + pending) / total_non_abstaining < vote.majority ->
+        {:ended, :failed}
+
+      # Everyone has voted, therefore we must also have a quorum
+      # Ending the vote early to save time
+      pending == 0 ->
+        vote_result_by_majority(yes, no, vote.majority)
+
+      # We are out of time, we can still make a decision if we have quorum
+      timeout and voted >= vote.quorum ->
+        vote_result_by_majority(yes, no, vote.majority)
+
+      true ->
+        :undecided
+    end
+  end
+
+  @spec vote_result_by_majority(non_neg_integer(), non_neg_integer(), float()) ::
+          {:ended, :passed | :failed}
+  defp vote_result_by_majority(yes, no, majority) do
+    non_abstaining = yes + no
+
+    if non_abstaining > 0 and yes / non_abstaining >= majority,
+      do: {:ended, :passed},
+      else: {:ended, :failed}
   end
 end
