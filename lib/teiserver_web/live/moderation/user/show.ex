@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
@@ -127,6 +128,14 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   defp switch_tab(socket, "actions", tabset) do
     socket
     |> assign_tabset("actions", tabset)
+  end
+
+  defp switch_tab(%Socket{assigns: assigns} = socket, "raw", tabset) do
+    cache_user = UserCacheLib.deprecated_get_user_by_id(assigns.user.id)
+
+    socket
+    |> assign(cache_user: cache_user)
+    |> assign_tabset("raw", tabset)
   end
 
   defp switch_tab(%Socket{assigns: %{user: user}} = socket, "audit", tabset) do

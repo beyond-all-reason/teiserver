@@ -511,6 +511,10 @@ defmodule TeiserverWeb.CoreComponents do
   attr :class, :any, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :any, default: nil, doc: "the input error class to use over defaults"
 
+  attr :fieldset?, :boolean,
+    default: true,
+    doc: "include the fieldset class in the wrapping div, defaults to true"
+
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
@@ -609,7 +613,7 @@ defmodule TeiserverWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input_tw(assigns) do
     ~H"""
-    <div class="fieldset">
+    <div class={@fieldset? && "fieldset"}>
       <label>
         <span :if={@label} class="label mb-1">{@label}</span>
         <input
