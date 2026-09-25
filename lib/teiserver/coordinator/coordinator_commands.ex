@@ -177,7 +177,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "whois", senderid: senderid, remaining: remaining} = _cmd, state) do
-    case CacheUser.deprecated_get_user_by_name(remaining) do
+    case Account.get_user_by_name(remaining) do
       nil ->
         CacheUser.send_direct_message(
           state.userid,
@@ -348,7 +348,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     do: do_handle(%{cmd | command: "mute"}, state)
 
   defp do_handle(%{command: "mute", senderid: senderid, remaining: remaining} = _cmd, state) do
-    case CacheUser.deprecated_get_user_by_name(remaining) do
+    case Account.get_user_by_name(remaining) do
       nil ->
         Coordinator.send_to_user(
           senderid,
@@ -382,7 +382,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     do: do_handle(%{cmd | command: "unmute"}, state)
 
   defp do_handle(%{command: "unmute", senderid: senderid, remaining: remaining} = _cmd, state) do
-    case CacheUser.deprecated_get_user_by_name(remaining) do
+    case Account.get_user_by_name(remaining) do
       nil ->
         Coordinator.send_to_user(
           senderid,

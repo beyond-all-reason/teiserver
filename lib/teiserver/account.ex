@@ -2168,8 +2168,8 @@ defmodule Teiserver.Account do
   @spec get_userid_from_name(String.t()) :: integer() | nil
   def get_userid_from_name(name), do: UserCacheLib.get_userid(name)
 
-  @spec deprecated_get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_name(username), to: UserCacheLib
+  @spec get_user_by_name(String.t()) :: T.user() | nil
+  defdelegate get_user_by_name(username), to: UserCacheLib
 
   @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
   defdelegate deprecated_get_user_by_email(email), to: UserCacheLib

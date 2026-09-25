@@ -50,14 +50,14 @@ defmodule Teiserver.Account.UserCacheLib do
     end
   end
 
-  @spec deprecated_get_user_by_name(String.t() | nil) :: T.user() | nil
-  def deprecated_get_user_by_name(nil), do: nil
-  def deprecated_get_user_by_name(""), do: nil
+  @spec get_user_by_name(String.t() | nil) :: User.t() | nil
+  def get_user_by_name(nil), do: nil
+  def get_user_by_name(""), do: nil
 
-  def deprecated_get_user_by_name(username) do
+  def get_user_by_name(username) do
     username
     |> get_userid()
-    |> deprecated_get_user_by_id()
+    |> get_user_by_id()
   end
 
   @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
@@ -100,6 +100,23 @@ defmodule Teiserver.Account.UserCacheLib do
     case Teiserver.cache_get(:users, id) do
       nil ->
         deprecated_recache_user(id)
+        Teiserver.cache_get(:users, id)
+
+      user ->
+        user
+    end
+  end
+
+  @spec get_user_by_id(User.id() | nil) :: User.t() | nil
+  def get_user_by_id(nil), do: nil
+  def get_user_by_id(""), do: nil
+
+  def get_user_by_id(id) do
+    id = int_parse(id)
+
+    case Teiserver.cache_get(:users, id) do
+      nil ->
+        recache_user(id)
         Teiserver.cache_get(:users, id)
 
       user ->
@@ -168,6 +185,33 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def deprecated_recache_user(id) when is_integer(id) do
     Account.get_user(id) |> deprecated_recache_user()
+  end
+
+  @spec recache_user(User.id() | User.t() | nil) :: :ok
+  def recache_user(nil), do: :ok
+
+  def recache_user(%{id: id} = user) do
+    # Decache
+    Teiserver.cache_delete(:account_user_cache, id)
+    Teiserver.cache_delete(:account_user_cache_bang, id)
+    Teiserver.cache_delete(:account_membership_cache, id)
+    Teiserver.cache_delete(:config_user_cache, id)
+
+    Account.decache_relationships(id)
+
+    # Recache
+    Teiserver.cache_put(:users_lookup_id_with_name, cachename(user.name), id)
+    Teiserver.cache_put(:users_lookup_id_with_email, cachename(user.email), id)
+
+    if user.discord_id do
+      Teiserver.cache_put(:users_lookup_id_with_discord, user.discord_id, id)
+    end
+
+    :ok
+  end
+
+  def recache_user(id) when is_integer(id) do
+    Account.get_user(id) |> recache_user()
   end
 
   @doc """

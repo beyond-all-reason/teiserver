@@ -39,7 +39,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     cmd_id = "c.party.invite_to_party"
 
     with [username] <- String.split(data) |> Enum.map(&String.trim/1),
-         user when not is_nil(user) <- UserCacheLib.deprecated_get_user_by_name(username),
+         user when not is_nil(user) <- Account.get_user_by_name(username),
          # this check isn't great, it should be done in the party server
          # which is the source of truth for parties, but I'm taking a shortcut
          :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
@@ -126,7 +126,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     cmd_id = "c.party.cancel_invite_to_party"
 
     with [username] <- String.split(data) |> Enum.map(&String.trim/1),
-         user when not is_nil(user) <- UserCacheLib.deprecated_get_user_by_name(username),
+         user when not is_nil(user) <- Account.get_user_by_name(username),
          :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
          :ok <- if(Account.client_exists?(user.id), do: :ok, else: :no_client) do
       party_id = state.party_id

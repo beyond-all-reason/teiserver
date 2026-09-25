@@ -276,7 +276,7 @@ defmodule Teiserver.CacheUser do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    existing_bot = deprecated_get_user_by_name(bot_name)
+    existing_bot = Account.get_user_by_name(bot_name)
 
     cond do
       allow?(bot_host_id, :moderator) == false ->
@@ -478,9 +478,6 @@ defmodule Teiserver.CacheUser do
 
   @spec get_userid(String.t()) :: integer() | nil
   defdelegate get_userid(username), to: UserCacheLib
-
-  @spec deprecated_get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_name(username), to: UserCacheLib
 
   @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
   defdelegate deprecated_get_user_by_email(email), to: UserCacheLib
@@ -812,13 +809,11 @@ defmodule Teiserver.CacheUser do
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
 
-    case deprecated_get_user_by_name(username) do
+    case Account.get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
       user ->
-        db_user = Account.get_user(user.id)
-
         cond do
           user.smurf_of_id != nil ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
@@ -830,10 +825,10 @@ defmodule Teiserver.CacheUser do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Rate limited?
@@ -845,7 +840,7 @@ defmodule Teiserver.CacheUser do
 
             {:error, "Flood protection"}
 
-          Account.verify_md5_password(md5_password, db_user.password) == false ->
+          Account.verify_md5_password(md5_password, user.password) == false ->
             if String.contains?(username, "@") do
               {:error,
                "Invalid password for username, check you are not using your email address as the name"}
@@ -853,21 +848,21 @@ defmodule Teiserver.CacheUser do
               {:error, "Invalid password"}
             end
 
-          Account.restricted?(db_user, ["Permanently banned"]) ->
+          Account.restricted?(user, ["Permanently banned"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
-          Account.restricted?(db_user, ["Login"]) ->
+          Account.restricted?(user, ["Login"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
             {:error, @suspended_string}
 
-          not Auth.verified?(db_user) ->
+          not Auth.verified?(user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
@@ -882,7 +877,7 @@ defmodule Teiserver.CacheUser do
           # This is also defined in UserLib but that imports CacheUser so we
           # repeat it here as we don't want a circular dependency and the plan is to remove
           # this module later.
-          not is_nil(db_user.gdpr_forget_after) ->
+          not is_nil(user.gdpr_forget_after) ->
             host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
             {:error, "You must login via the website to activate this account - #{host}/login"}
 
@@ -894,7 +889,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              Auth.is_bot?(db_user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -904,7 +899,7 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not Auth.has_any_role?(db_user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 

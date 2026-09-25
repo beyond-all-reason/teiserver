@@ -509,11 +509,11 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  defp do_handle("GETUSERID", data, msg_id, state) do
+  defp do_handle("GETUSERID", username, msg_id, state) do
     if CacheUser.allow?(state.userid, :bot) do
-      target = CacheUser.deprecated_get_user_by_name(data)
+      target = Account.get_user_by_name(username)
       hash = target.lobby_hash
-      reply(:user_id, {data, hash, target.id}, msg_id, state)
+      reply(:user_id, {username, hash, target.id}, msg_id, state)
     else
       state
     end

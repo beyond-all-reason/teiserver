@@ -205,7 +205,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(%{"username" => username, "GPU" => _gpu} = contents, from_id) do
-    case CacheUser.deprecated_get_user_by_name(username) do
+    case Account.get_user_by_name(username) do
       nil ->
         Logger.warning(
           "No username on handle_json_msg: #{username} - #{Kernel.inspect(contents)}"
@@ -225,7 +225,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           }
 
           Account.update_user_stat(user.id, stats)
-          CalculateSmurfKeyTask.calculate_apply_keys(stats, user)
+          CalculateSmurfKeyTask.calculate_apply_keys(stats, user.id)
           AutomodServer.check_user(user.id)
         end
     end
@@ -401,7 +401,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # DMs
   defp handle_direct_message(from_id, "broken_connection " <> username, _state) do
     if Auth.is_bot?(from_id) or Auth.admin?(from_id) or Auth.moderator?(from_id) do
-      user = Account.deprecated_get_user_by_name(username)
+      user = Account.get_user_by_name(username)
 
       if user do
         Telemetry.log_complex_server_event(user.id, "spads.broken_connection", %{from_id: from_id})
@@ -485,7 +485,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, to, msg] ->
         host = Client.get_client_by_id(from_id)
-        user = CacheUser.deprecated_get_user_by_name(username)
+        user = Account.get_user_by_name(username)
 
         cond do
           host == nil or user == nil ->
@@ -525,7 +525,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, _user_num, to, msg] ->
         host = Client.get_client_by_id(from_id)
-        user = CacheUser.deprecated_get_user_by_name(username)
+        user = Account.get_user_by_name(username)
 
         if host == nil do
           Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
@@ -538,7 +538,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           case to do
             "d" ->
               # We don't persist this as it's already persisted elsewhere
-              # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
               :ok
 
             "dallies" ->

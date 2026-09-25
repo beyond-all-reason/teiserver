@@ -436,8 +436,8 @@ CLIENTS test_room #{user.name}\n"
     _recv_raw(socket)
 
     # Check our starting situation
-    assert UserCacheLib.deprecated_get_user_by_name(new_name) == nil
-    assert %{name: ^old_name} = UserCacheLib.deprecated_get_user_by_name(old_name)
+    assert Account.get_user_by_name(new_name) == nil
+    assert %{name: ^old_name} = Account.get_user_by_name(old_name)
     assert %{id: ^userid} = UserCacheLib.deprecated_get_user_by_id(userid)
     assert %{userid: ^userid} = Client.get_client_by_id(userid)
 

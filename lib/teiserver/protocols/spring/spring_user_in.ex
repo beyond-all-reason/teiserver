@@ -95,11 +95,11 @@ defmodule Teiserver.Protocols.Spring.UserIn do
     reply(:user, :whois, result, msg_id, state)
   end
 
-  def do_handle("whoisName", userid_str, msg_id, state) do
+  def do_handle("whoisName", username, msg_id, state) do
     result =
-      case Account.deprecated_get_user_by_name(userid_str) do
+      case Account.get_user_by_name(username) do
         nil ->
-          {:no_user, userid_str}
+          {:no_user, username}
 
         user ->
           {:ok, user}
