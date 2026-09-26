@@ -156,9 +156,12 @@ defmodule TeiserverWeb.NavComponents do
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
         <li>
           <%!--
-            Setting this to false for now as it will not correctly select dark CSS in some cases
+            Hiding this as when selected will swap to dark as part of tweaks made
+            to keep things consistent between system and dark mode. First loading of the site
+            will select this mode after which the user can select light or dark as desired.
           --%>
           <button
+            :if={false}
             class="flex p-2 cursor-pointer [[data-theme=system]_&]:bg-blue-900"
             phx-click={JS.dispatch("phx:set-theme")}
             data-phx-theme="system"

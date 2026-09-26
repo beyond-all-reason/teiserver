@@ -94,6 +94,19 @@ defmodule TeiserverWeb.Router do
     end
   end
 
+  scope "/account", TeiserverWeb.AccountLive do
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
+
+    live_session :gdpr_self_service,
+      layout: {TeiserverWeb.Layouts, :public_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "account"}}},
+        {UserAuthentication, :ensure_authenticated}
+      ] do
+      live "/gdpr-self-service", Manage.GDPRAnonymise
+    end
+  end
+
   scope "/microblog", TeiserverWeb.Microblog do
     pipe_through([:live_browser, :app_layout])
 

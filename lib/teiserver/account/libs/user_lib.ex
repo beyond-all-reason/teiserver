@@ -631,6 +631,9 @@ defmodule Teiserver.Account.UserLib do
 
   defp can_login(%User{} = user) do
     cond do
+      gdpr_forget_in_progress?(user) ->
+        {:gdpr_forget_is_set, user}
+
       Account.restricted?(user, ["Login"]) ->
         {:error,
          "Your account is currently suspended. Check the suspension's status at https://discord.gg/beyond-all-reason -> #moderation-bot"}
@@ -645,9 +648,6 @@ defmodule Teiserver.Account.UserLib do
 
       Account.get_user_totp_status(user.id) == :active ->
         {:requires_mfa, user}
-
-      gdpr_forget_in_progress?(user) ->
-        {:gdpr_forget_is_set, user}
 
       true ->
         :ok
