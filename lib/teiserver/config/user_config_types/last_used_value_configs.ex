@@ -7,6 +7,9 @@ defmodule Teiserver.Config.UserConfigTypes.LastUsedValueConfigs do
 
   @spec create() :: :ok
   def create do
+    # Admin
+    add_last_used("last_used.text_callback_search_page_size")
+
     # Moderation
     add_last_used("last_used.anti_abuse_search_page_size")
     add_last_used("last_used.banned_phrase_search_page_size")

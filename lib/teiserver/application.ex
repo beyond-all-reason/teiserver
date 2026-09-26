@@ -63,6 +63,7 @@ defmodule Teiserver.Application do
         Teiserver.Config.UserConfigTypes.Cache,
         Teiserver.Config.SiteConfigTypes.Cache,
         Teiserver.MetadataCache,
+        Teiserver.Bridge.DiscordCacheSupervisor,
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
         Teiserver.General.RateLimit,

@@ -7,7 +7,11 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
 
   @spec create() :: :ok
   def create do
-    # Moderation user list
+    # Staff; text callbacks
+    add_preference("col_pref.staff_text_callbacks.response_size", "100")
+    add_preference("col_pref.staff_text_callbacks.show_link", "row-click")
+
+    # Moderation; user list
     add_preference("col_pref.mod_users.table_class", "table-zebra")
     add_preference("col_pref.mod_users.email", "partial")
     add_preference("col_pref.mod_users.client?", true)

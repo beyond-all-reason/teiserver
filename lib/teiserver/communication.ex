@@ -177,9 +177,9 @@ defmodule Teiserver.Communication do
       %Ecto.Changeset{source: %TextCallback{}}
 
   """
-  @spec change_text_callback(TextCallback.t()) :: Ecto.Changeset.t()
-  def change_text_callback(%TextCallback{} = text_callback) do
-    TextCallback.changeset(text_callback, %{})
+  @spec change_text_callback(TextCallback.t(), map()) :: Ecto.Changeset.t()
+  def change_text_callback(%TextCallback{} = text_callback, params \\ %{}) do
+    TextCallback.changeset(text_callback, params)
   end
 
   @doc """
