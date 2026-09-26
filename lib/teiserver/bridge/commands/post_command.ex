@@ -112,7 +112,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
               "User \"#{name}\" not found"
 
             user ->
-              "https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
+              "#{name}: https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
           end
       end
 
