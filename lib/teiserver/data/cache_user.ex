@@ -453,7 +453,7 @@ defmodule Teiserver.CacheUser do
   def request_email_change(nil, _new_email), do: {:error, "no user"}
 
   def request_email_change(user, new_email) do
-    case deprecated_get_user_by_email(new_email) do
+    case Account.get_user_by_email(new_email) do
       nil ->
         code = :rand.uniform(899_999) + 100_000
         {:ok, deprecated_update_user(%{user | email_change_code: ["#{code}", new_email]})}
@@ -478,9 +478,6 @@ defmodule Teiserver.CacheUser do
 
   @spec get_userid(String.t()) :: integer() | nil
   defdelegate get_userid(username), to: UserCacheLib
-
-  @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_email(email), to: UserCacheLib
 
   @spec deprecated_get_user_by_discord_id(String.t()) :: T.user() | nil
   defdelegate deprecated_get_user_by_discord_id(discord_id), to: UserCacheLib
