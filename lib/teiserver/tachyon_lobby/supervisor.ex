@@ -16,13 +16,6 @@ defmodule Teiserver.TachyonLobby.Supervisor do
     end
   end
 
-  def start_lobby_from_snapshot(lobby_id, serialized_state) do
-    DynamicSupervisor.start_child(
-      __MODULE__,
-      {Lobby, {lobby_id, {:snapshot, serialized_state}}}
-    )
-  end
-
   def start_replica(%LT.Data{} = data) do
     # TODO: handle race condition there
     {:ok, _pid} =

@@ -15,7 +15,6 @@ defmodule Teiserver.Party do
   alias Teiserver.Party.Server
   alias Teiserver.Party.Supervisor
   alias Teiserver.Party.Types, as: PT
-  alias Teiserver.Tachyon.System
 
   @type id :: PT.Data.id()
 
@@ -30,14 +29,6 @@ defmodule Teiserver.Party do
       :ignore -> {:error, :ignore}
       {:error, reason} -> {:error, reason}
     end
-  end
-
-  def restore_parties do
-    System.restore_state("party", __MODULE__, :restore_party)
-  end
-
-  def restore_party(id, serialized_state) do
-    Supervisor.start_party_from_snapshot(id, serialized_state)
   end
 
   @spec rejoin(id(), User.id()) ::
