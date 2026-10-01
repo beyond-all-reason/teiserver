@@ -25,7 +25,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
     if Communication.use_discord?() do
       DynamicSupervisor.start_child(
         __MODULE__,
-        Supervisor.child_spec(Teiserver.Bridge.DiscordSupervisor, restart: :temporary)
+        Supervisor.child_spec(Teiserver.Bridge.DiscordBotSupervisor, restart: :temporary)
       )
     else
       :disabled
@@ -36,7 +36,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
   def restart(reason) do
     Logger.info("Restarting discord system")
 
-    case Process.whereis(Teiserver.Bridge.DiscordSupervisor) do
+    case Process.whereis(Teiserver.Bridge.DiscordBotSupervisor) do
       x when is_pid(x) ->
         DynamicSupervisor.terminate_child(
           __MODULE__,

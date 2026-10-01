@@ -27,7 +27,8 @@ defmodule Teiserver.Account.AuthLib do
       "Overwatch",
       "Contributor",
       "Event Organizer",
-      "Caster"
+      "Caster",
+      "Staff"
     ]
   end
 

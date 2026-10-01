@@ -192,7 +192,7 @@ defmodule TeiserverWeb.NavComponents do
         </li>
 
         <li
-          :if={allow?(@scope, "Contributor")}
+          :if={allow?(@scope, "Admin")}
           class={[@active == "admin" && "menu-active"]}
         >
           <.link href={~p"/admin"}>Admin</.link>
@@ -203,6 +203,13 @@ defmodule TeiserverWeb.NavComponents do
           class={[@active == "moderation" && "menu-active"]}
         >
           <.link href={~p"/moderation"}>Moderation</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Staff")}
+          class={[@active == "staff" && "menu-active"]}
+        >
+          <.link href={~p"/staff"}>Staff</.link>
         </li>
 
         <li

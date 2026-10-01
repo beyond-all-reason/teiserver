@@ -797,17 +797,37 @@ defmodule TeiserverWeb.CoreComponents do
 
   @doc """
   Renders a back navigation link.
+
+  Use navigate within the same LiveView session and href when directing to a different session.
+
   ## Examples
-      <.back navigate={~p"/posts"}>Back to posts</.back>
+      <.back navigate={~p"/section/posts"}>Back to posts</.back>
+
+      <.back href={~p"/section"}>Back to section</.back>
   """
-  attr :navigate, :any, required: true
+  attr :navigate, :any
+  attr :href, :any
   slot :inner_block, required: true
 
-  def back(assigns) do
+  def back(%{navigate: _navigate} = assigns) do
     ~H"""
     <div class="mt-16">
       <.link
         navigate={@navigate}
+        class="btn btn-secondary btn-soft text-sm font-semibold leading-6"
+      >
+        <i class="fa-fw fa-solid fa-arrow-left" />
+        {render_slot(@inner_block)}
+      </.link>
+    </div>
+    """
+  end
+
+  def back(%{href: _href} = assigns) do
+    ~H"""
+    <div class="mt-16">
+      <.link
+        href={@href}
         class="btn btn-secondary btn-soft text-sm font-semibold leading-6"
       >
         <i class="fa-fw fa-solid fa-arrow-left" />

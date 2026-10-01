@@ -37,14 +37,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@scope, ~w(Contributor Overwatch))}
-        icon={Teiserver.Communication.TextCallbackLib.icon()}
-        url={~p"/admin/text_callbacks"}
-      >
-        Text callbacks
-      </.menu_page_link>
-
-      <.menu_page_link
         :if={allow_any?(@scope, ~w(Server))}
         icon={Teiserver.Communication.DiscordChannelLib.icon()}
         url={~p"/admin/discord_channels"}

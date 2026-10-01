@@ -6,12 +6,13 @@ defmodule Teiserver.Account.Role do
   alias Teiserver.Account.Role
 
   @enforce_keys [:name]
-  defstruct [:name, :colour, :icon, contains: [], badge: false]
+  defstruct [:name, :colour, :icon, contains: [], badge: false, description: ""]
 
   @type t() :: %Role{
           name: String.t(),
           colour: String.t(),
           icon: String.t(),
-          contains: [String.t()]
+          contains: [String.t()],
+          description: String.t()
         }
 end

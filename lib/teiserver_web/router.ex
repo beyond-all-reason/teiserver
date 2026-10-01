@@ -471,6 +471,36 @@ defmodule TeiserverWeb.Router do
     post "/users/refresh_token", UserController, :refresh_token
   end
 
+  # Staff
+  scope "/staff", TeiserverWeb.StaffLive do
+    pipe_through([:live_browser, :app_layout, :protected, :tailwind])
+
+    live_session :staff_menu,
+      layout: {TeiserverWeb.Layouts, :public_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "staff"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Staff"}}
+      ] do
+      live "/", Menu, :menu
+    end
+
+    live_session :staff_text_callbacks,
+      layout: {TeiserverWeb.Layouts, :public_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "staff"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Staff"}}
+      ] do
+      live "/text_callbacks", TextCallback.List, :list
+      live "/text_callbacks/new", TextCallback.List, :new
+      live "/text_callbacks/:id/edit", TextCallback.List, :edit
+
+      live "/text_callbacks/:id", TextCallback.Show, :show
+      live "/text_callbacks/:id/show/edit", TextCallback.Show, :edit
+    end
+  end
+
   # ADMIN
   scope "/admin", TeiserverWeb.AdminDashLive, as: :ts do
     pipe_through([:browser, :app_layout, :protected])
@@ -486,6 +516,7 @@ defmodule TeiserverWeb.Router do
     live("/client/:id", Show, :show)
   end
 
+  # MODERATION
   scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
     pipe_through([:browser, :app_layout, :protected])
 
@@ -632,10 +663,6 @@ defmodule TeiserverWeb.Router do
 
   scope "/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :app_layout, :protected])
-
-    resources("/text_callbacks", TextCallbackController,
-      only: [:index, :new, :create, :show, :edit, :update, :delete]
-    )
 
     resources("/discord_channels", DiscordChannelController,
       only: [:index, :new, :create, :show, :edit, :update, :delete]

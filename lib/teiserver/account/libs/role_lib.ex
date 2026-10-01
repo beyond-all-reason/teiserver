@@ -13,6 +13,14 @@ defmodule Teiserver.Account.RoleLib do
   @role_data [
                # Property
                %Role{
+                 name: "Staff",
+                 colour: "#FFFFFF",
+                 icon: "fa-solid fa-user-tie",
+                 contains: ["VIP", "Trusted"],
+                 description:
+                   "Contributors, Overwatch and others who perform services for the BAR org in some capacity."
+               },
+               %Role{
                  name: "Trusted",
                  colour: "#FFFFFF",
                  icon: "fa-solid fa-check-square",
@@ -57,7 +65,7 @@ defmodule Teiserver.Account.RoleLib do
                  name: "Contributor",
                  colour: "#66AA66",
                  icon: "fa-solid fa-code-commit",
-                 contains: ["Trusted", "BAR+", "VIP"],
+                 contains: ["Trusted", "BAR+", "VIP", "Staff"],
                  badge: true
                },
 
@@ -66,7 +74,7 @@ defmodule Teiserver.Account.RoleLib do
                  name: "Overwatch",
                  colour: "#AA7733",
                  icon: "fa-solid fa-user-secret",
-                 contains: ["BAR+", "Trusted"]
+                 contains: ["BAR+", "Trusted", "Staff"]
                },
                %Role{
                  name: "Reviewer",
@@ -85,7 +93,15 @@ defmodule Teiserver.Account.RoleLib do
                  name: "Moderator",
                  colour: "#FFAA00",
                  icon: "fa-solid fa-gavel",
-                 contains: ["Reviewer", "Contributor", "Overwatch", "BAR+", "VIP", "Trusted"],
+                 contains: [
+                   "Reviewer",
+                   "Contributor",
+                   "Overwatch",
+                   "BAR+",
+                   "VIP",
+                   "Trusted",
+                   "Staff"
+                 ],
                  badge: true
                },
                %Role{
@@ -99,7 +115,8 @@ defmodule Teiserver.Account.RoleLib do
                    "Overwatch",
                    "BAR+",
                    "VIP",
-                   "Trusted"
+                   "Trusted",
+                   "Staff"
                  ],
                  badge: true
                },
@@ -115,7 +132,8 @@ defmodule Teiserver.Account.RoleLib do
                    "Overwatch",
                    "BAR+",
                    "VIP",
-                   "Trusted"
+                   "Trusted",
+                   "Staff"
                  ],
                  badge: true
                },
@@ -132,7 +150,8 @@ defmodule Teiserver.Account.RoleLib do
                    "Overwatch",
                    "BAR+",
                    "VIP",
-                   "Trusted"
+                   "Trusted",
+                   "Staff"
                  ],
                  badge: true
                },
