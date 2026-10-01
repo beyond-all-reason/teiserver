@@ -566,6 +566,16 @@ defmodule Teiserver.Account.UserLib do
     end
   end
 
+  @doc """
+  Returns true if the given user can be accessed by the scope
+  """
+  def can_access_user?(%User{} = user, %Scope{} = scope) do
+    case has_access(user, scope) do
+      {true, _any} -> true
+      _any_other_result -> false
+    end
+  end
+
   @spec has_access(User.id() | map() | nil, Plug.Conn.t() | User.t()) ::
           {boolean, nil | :not_found | :no_access}
   def has_access(nil, _conn), do: {false, :no_user}

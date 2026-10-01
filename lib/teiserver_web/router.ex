@@ -581,7 +581,7 @@ defmodule TeiserverWeb.Router do
       live "/users", User.List, :list
 
       live "/users/:id", User.Show, :show
-      live "/users/:id/edit", User.Edit, :edit
+      live "/users/:id/edit/name", User.Show, :edit_name
       live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
       live "/users/:id/set_gdpr_forget", User.SetGDPRForget
       live "/users/:id/smurf_link", User.SmurfLink, :show
@@ -791,8 +791,6 @@ defmodule TeiserverWeb.Router do
 
     get("/metrics", GeneralController, :metrics)
 
-    get("/users/rename_form/:id", UserController, :rename_form)
-    put("/users/rename_post/:id", UserController, :rename_post)
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/relationships/:id", UserController, :relationships)
     put("/users/:id/disable_totp", UserController, :disable_totp)

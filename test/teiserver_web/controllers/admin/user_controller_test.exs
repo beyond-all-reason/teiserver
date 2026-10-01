@@ -81,41 +81,4 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end
-
-  describe "rename user" do
-    test "redirects when data is valid", %{conn: conn} do
-      user =
-        GeneralTestLib.make_user(%{
-          "email" => "tsuser_rename@test.local",
-          "data" => %{}
-        })
-
-      CacheUser.deprecated_recache_user(user.id)
-
-      conn =
-        put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}", new_name: "new_test_name")
-
-      assert redirected_to(conn) == ~p"/teiserver/admin/user/#{user}"
-
-      conn = get(conn, ~p"/teiserver/admin/user/#{user}")
-      assert html_response(conn, 200) =~ "new_test_name"
-    end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      user =
-        GeneralTestLib.make_user(%{
-          "email" => "tsuser_rename_bad@test.local",
-          "data" => %{}
-        })
-
-      CacheUser.deprecated_recache_user(user.id)
-
-      conn =
-        put(conn, ~p"/teiserver/admin/users/rename_post/#{user.id}",
-          new_name: "this_name_is_too_long_and_has_invalid_characters!"
-        )
-
-      assert html_response(conn, 200) =~ "New user name:"
-    end
-  end
 end

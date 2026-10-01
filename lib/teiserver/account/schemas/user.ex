@@ -324,6 +324,13 @@ defmodule Teiserver.Account.User do
     cast(user, attrs, [:gdpr_forget_after])
   end
 
+  def rename_changeset(%User{} = user, new_name) do
+    user
+    |> cast(%{name: new_name}, [:name])
+    |> validate_required([:name])
+    |> validate_name_change()
+  end
+
   def discord_id_changeset(user, attrs) do
     user
     |> cast(attrs, [:discord_id])

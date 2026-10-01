@@ -59,3 +59,17 @@
 </div>
 
 <.back navigate={~p"/moderation/users"}>Back to Users</.back>
+
+<.modal
+  :if={@live_action == :edit_name and not is_nil(@user)}
+  id="user-edit_name-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormNameComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+  />
+</.modal>
