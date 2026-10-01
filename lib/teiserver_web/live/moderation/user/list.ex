@@ -4,8 +4,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
-  alias TeiserverWeb.LiveComponents.Moderation.UserListPreferences
   alias TeiserverWeb.ModerationLive.UserComponents
+  alias TeiserverWeb.ModerationLive.UserListPreferences
 
   use TeiserverWeb, :live_view
 
@@ -167,7 +167,9 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     # PreviousNames
   end
 
-  defp get_users(%Socket{assigns: %{page: page, search: search}} = socket) do
+  defp get_users(
+         %Socket{assigns: %{page: page, search: search, preferences: preferences}} = socket
+       ) do
     # If they have searched for a name, we want to put that name
     # at the top of the table
     try_exact_search? =
@@ -207,7 +209,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
     users =
       user_query(socket)
-      |> UserQueries.load_user_stat()
+      |> maybe_load_user_stat(preferences)
       |> UserQueries.order_by_from_string(search["order_by"])
       |> QueryHelpers.paginate(page, search["page_size"])
       |> Repo.all()
@@ -221,7 +223,14 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       |> Enum.map(fn %User{} = user ->
         # If a user has not logged in yet they will
         # not have a user stat so we need a default value for that
-        stat = (user.user_stat && user.user_stat.data) || %{}
+        # additionally if the relevant columns are hidden we won't
+        # need to load it. We still pretend we do for consistency though.
+        stat =
+          case user do
+            %{user_stat: nil} -> %{}
+            %{user_stat: %{data: %{}}} -> user.user_stat.data
+            _any -> %{}
+          end
 
         hw_string =
           if stat["hardware:cpuinfo"] != "" and stat["hardware:cpuinfo"] != nil do
@@ -274,5 +283,11 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     socket
     |> assign(user_count: user_count)
     |> assign(page_count: page_count)
+  end
+
+  defp maybe_load_user_stat(query, %{skip_user_stat?: true}), do: query
+
+  defp maybe_load_user_stat(query, _any) do
+    UserQueries.load_user_stat(query)
   end
 end
