@@ -10,11 +10,7 @@ defmodule Teiserver.Party.System do
   def init(_init_arg) do
     children = [
       Teiserver.Party.Registry,
-      Teiserver.Party.Supervisor,
-      Supervisor.child_spec(
-        {Teiserver.Tachyon.SyncTask, %{mfa: [Teiserver.Party, :restore_parties, []]}},
-        id: RestorePartyTask
-      )
+      Teiserver.Party.Supervisor
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

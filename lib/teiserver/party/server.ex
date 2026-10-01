@@ -3,11 +3,9 @@ defmodule Teiserver.Party.Server do
   transient state machine to hold a party state and mediate player interactions
   """
 
-  alias Plug.Crypto
   alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Helpers.MonitorCollection, as: MC
-  alias Teiserver.KvStore
   alias Teiserver.Matchmaking
   alias Teiserver.Messaging
   alias Teiserver.Party
@@ -15,7 +13,6 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party.Events
   alias Teiserver.Party.Types, as: PT
   alias Teiserver.Player
-  alias Teiserver.Tachyon
 
   require Logger
 
@@ -206,43 +203,6 @@ defmodule Teiserver.Party.Server do
       |> add_member(user_id, creator_pid)
 
     {:ok, :running, data}
-  end
-
-  def init({party_id, {:snapshot, serialized_state}}) do
-    Process.flag(:trap_exit, true)
-    Logger.metadata(actor_type: :party, actor_id: party_id)
-    Logger.debug("Restoring party from snapshot")
-
-    snapshot = Crypto.non_executable_binary_to_term(serialized_state, [:safe])
-    now = DateTime.utc_now()
-
-    expired_invite_ids =
-      Enum.filter(snapshot.invited, fn {_id, i} -> not DateTime.before?(now, i.valid_until) end)
-      |> Enum.map(fn {id, _invite} -> id end)
-      |> MapSet.new()
-
-    invited =
-      for {id, i} <- snapshot.invited, not MapSet.member?(expired_invite_ids, id), into: %{} do
-        duration = max(1, DateTime.diff(i.valid_until, now))
-        tref = :timer.send_after(duration, {:invite_timeout, i.id})
-        {id, Map.put(i, :timeout_ref, tref)}
-      end
-
-    data = %PT.Data{
-      version: snapshot.version,
-      id: party_id,
-      members: snapshot.members,
-      ids_to_rejoin: MapSet.difference(snapshot.ids_to_rejoin, expired_invite_ids),
-      invited: invited,
-      # no restoration of matchmaking yet
-      matchmaking: nil,
-      max_members: Config.get_site_config_cache(max_size_key())
-    }
-
-    timeout = Tachyon.get_restoration_timeout()
-    actions = [{:state_timeout, timeout, :snapshot_timeout}]
-
-    {:ok, :starting_up, data, actions}
   end
 
   @impl :gen_statem
@@ -487,37 +447,6 @@ defmodule Teiserver.Party.Server do
     {:keep_state, %{data | monitors: monitors, matchmaking: nil}}
   end
 
-  def handle_event({:call, from}, {:rejoin, user_id, user_pid}, :starting_up, %PT.Data{} = data) do
-    if MapSet.member?(data.ids_to_rejoin, user_id) do
-      data =
-        data
-        |> Map.update!(:ids_to_rejoin, &MapSet.delete(&1, user_id))
-        |> Map.update!(:monitors, fn mc ->
-          val =
-            if is_map_key(data.members, user_id),
-              do: {:member, user_id},
-              else: {:invite, user_id}
-
-          MC.monitor(mc, user_pid, val)
-        end)
-
-      actions = [{:reply, from, {:ok, overview_from_data(data)}}]
-
-      if MapSet.size(data.ids_to_rejoin) == 0 do
-        Logger.debug("all member rejoined, start up completed")
-        {:next_state, :running, data, actions}
-      else
-        {:keep_state, data, actions}
-      end
-    else
-      {:keep_state, data, [{:reply, from, {:error, :not_a_member}}]}
-    end
-  end
-
-  def handle_event({:call, from}, {:rejoin, _user_id}, _state, %PT.Data{} = data) do
-    {:keep_state, data, [{:reply, from, {:error, :invalid_party}}]}
-  end
-
   def handle_event(:info, {:invite_timeout, user_id}, :running, %PT.Data{} = data) do
     case Map.get(data.invited, user_id) do
       nil ->
@@ -526,28 +455,6 @@ defmodule Teiserver.Party.Server do
       invite ->
         data = cancel_invite_internal(invite, data)
         {:keep_state, data}
-    end
-  end
-
-  def handle_event(:info, {:DOWN, ref, :process, _pid, :shutdown}, state, %PT.Data{} = data) do
-    val = MC.get_val(data.monitors, ref)
-    data = Map.update!(data, :monitors, &MC.demonitor_by_val(&1, val))
-
-    data =
-      case val do
-        {:invite, user_id} when is_map_key(data.invited, user_id) ->
-          Map.update!(data, :ids_to_rejoin, &MapSet.put(&1, user_id))
-
-        {:member, user_id} when is_map_key(data.members, user_id) ->
-          Map.update!(data, :ids_to_rejoin, &MapSet.put(&1, user_id))
-
-        _other ->
-          data
-      end
-
-    case {state, val} do
-      {:running, val} when val != nil -> {:next_state, :shutting_down, data}
-      _other_state -> {:keep_state, data}
     end
   end
 
@@ -578,58 +485,13 @@ defmodule Teiserver.Party.Server do
       else: {:keep_state, data}
   end
 
-  def handle_event({:call, from}, _event, :shutting_down, %PT.Data{} = data) do
-    {:keep_state, data, [{:reply, from, {:error, :party_shutting_down}}]}
-  end
-
-  def handle_event({:call, _from}, _event, :starting_up, %PT.Data{} = data) do
-    {:keep_state, data, [:postpone]}
-  end
-
-  def handle_event(:info, _event, :starting_up, %PT.Data{} = data) do
-    {:keep_state, data, [:postpone]}
-  end
-
   def handle_event(:internal, :empty, _state, %PT.Data{} = data) do
     {:stop, {:shutdown, :empty}, data}
-  end
-
-  def handle_event(:state_timeout, :snapshot_timeout, :starting_up, %PT.Data{} = data) do
-    Logger.warning("failed to recover before time out. Missing #{inspect(data.ids_to_rejoin)}")
-    {:stop, :normal}
   end
 
   def handle_event(:info, {:EXIT, _pid, reason}, _state, %PT.Data{} = _data) do
     {:stop, reason}
   end
-
-  @impl :gen_statem
-  def terminate(:shutdown, :shutting_down, %PT.Data{} = data) do
-    # by that time, the party should have received all the :shutdown signals
-    cond do
-      MapSet.size(data.ids_to_rejoin) != Enum.count(data.members) + Enum.count(data.invited) ->
-        Logger.warning("Missing ids to rejoin, refusing to snapshot invalid state")
-
-      Tachyon.should_restore_state?() ->
-        to_save =
-          data
-          |> Map.take([:version, :members, :ids_to_rejoin, :invited])
-          |> Map.update!(:invited, fn invited ->
-            Enum.map(invited, fn {user_id, invite} ->
-              {user_id, Map.drop(invite, [:timeout_ref])}
-            end)
-            |> Map.new()
-          end)
-          |> :erlang.term_to_binary()
-
-        KvStore.put("party", data.id, to_save)
-
-      true ->
-        nil
-    end
-  end
-
-  def terminate(_reason, _state, %PT.Data{} = _data), do: nil
 
   defp process_events(%PT.Data{} = data, events) do
     new_aggregate = compute_aggregate(data, events)

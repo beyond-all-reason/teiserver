@@ -4,7 +4,6 @@ defmodule Teiserver.Player.SessionTest do
   alias Teiserver.Cluster
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking.QueueServer
-  alias Teiserver.Player
   alias Teiserver.Player.Session
   alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Player.Types, as: PT
@@ -12,7 +11,6 @@ defmodule Teiserver.Player.SessionTest do
   alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon.Matchmaking, as: SupportMM
   alias Teiserver.Support.TaggedEcho
-  alias Teiserver.Tachyon, as: TachyonLib
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
 
@@ -49,11 +47,6 @@ defmodule Teiserver.Player.SessionTest do
 
   def setup_session(_context) do
     {:ok, setup_void_session()}
-  end
-
-  def setup_config(_context) do
-    TachyonLib.enable_state_restoration()
-    Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
   end
 
   defp disconnect(fake_conn) do
@@ -215,17 +208,6 @@ defmodule Teiserver.Player.SessionTest do
 
       :ok = Session.join_queues(ctx1.user.id, [{queue_ctx.id, queue_ctx.version}])
       assert_receive {:user2, {:matchmaking, {:queues_joined, _queues}}}
-    end
-  end
-
-  describe "restore from snapshots" do
-    setup [:setup_session, :setup_config]
-
-    test "can restart a session after shutdown", %{user: user, sess_pid: sess_pid} do
-      TachyonLib.restart_system()
-      Polling.poll_until(fn -> nil end, fn _result -> not Process.alive?(sess_pid) end)
-
-      Polling.poll_until_some(fn -> Player.lookup_session(user.id) end)
     end
   end
 

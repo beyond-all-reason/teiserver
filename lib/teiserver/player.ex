@@ -30,8 +30,6 @@ defmodule Teiserver.Player do
   @spec connection_via_tuple(User.id()) :: GenServer.name()
   defdelegate connection_via_tuple(user_id), to: Player.Registry, as: :via_tuple
 
-  defdelegate restore_sessions(), to: Player.Session
-
   @doc """
   To be used when a process is interested in the presence of a given player.
   """
