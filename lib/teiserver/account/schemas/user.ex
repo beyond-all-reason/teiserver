@@ -106,7 +106,7 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client email_last_changed_at)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
