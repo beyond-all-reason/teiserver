@@ -2,6 +2,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.AccountFixtures
   alias Teiserver.CacheUser
   alias Teiserver.Logging
@@ -33,15 +34,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   end
 
   defp create_day_data(day) do
-    all_ids =
-      Account.list_users()
-      |> Enum.map(fn u -> u.id end)
-
     user_ids =
-      all_ids
-      |> CacheUser.deprecated_list_users()
-      |> Enum.filter(fn u -> u.bot == false end)
-      |> Enum.map(fn u -> u.id end)
+      Account.list_users(search: [not_has_role: "Bot"], limit: :infinity, select: [:id])
+      |> Enum.map(fn %{id: id} -> id end)
 
     [u1, u2 | remaining] = user_ids
 
@@ -109,20 +104,13 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
       Logging.create_server_minute_log(params)
     end)
 
-    create_activity_data(day)
+    create_activity_data(day, user_ids)
 
     # Now create the day data
     assert :ok == PersistServerDayTask.perform(%{})
   end
 
-  defp create_activity_data(day) do
-    user_ids =
-      Account.list_users()
-      |> Enum.map(fn u -> u.id end)
-      |> CacheUser.deprecated_list_users()
-      |> Enum.filter(fn u -> u.bot == false end)
-      |> Enum.map(fn u -> u.id end)
-
+  defp create_activity_data(day, user_ids) do
     activity_data = %{
       total: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),
       player: Map.new(user_ids, fn id -> {id, :rand.uniform(100)} end),

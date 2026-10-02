@@ -475,9 +475,6 @@ defmodule Teiserver.CacheUser do
   @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
   defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
 
-  @spec deprecated_list_users(list) :: list
-  defdelegate deprecated_list_users(id_list), to: UserCacheLib
-
   @spec deprecated_recache_user(Integer.t()) :: :ok
   defdelegate deprecated_recache_user(id), to: UserCacheLib
 

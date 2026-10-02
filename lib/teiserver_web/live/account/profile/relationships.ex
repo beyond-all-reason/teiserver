@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Account.ProfileLive.Relationships do
       end)
 
     mutual_friends =
-      Account.list_users_from_cache(mutual_friend_ids)
+      Account.list_users_by_ids(mutual_friend_ids)
       |> Enum.sort_by(fn user -> user.name end, &<=/2)
 
     socket

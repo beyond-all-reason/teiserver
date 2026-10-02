@@ -26,15 +26,9 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
     AccountFixtures.user_fixture()
     AccountFixtures.user_fixture()
 
-    all_ids =
-      Account.list_users()
-      |> Enum.map(fn u -> u.id end)
-
     user_ids =
-      all_ids
-      |> CacheUser.deprecated_list_users()
-      |> Enum.filter(fn u -> u.bot == false end)
-      |> Enum.map(fn u -> u.id end)
+      Account.list_users(search: [not_has_role: "Bot"], limit: :infinity, select: [:id])
+      |> Enum.map(fn %{id: id} -> id end)
 
     [u1, u2 | remaining] = user_ids
 

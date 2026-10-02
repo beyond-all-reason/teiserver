@@ -171,10 +171,10 @@ defmodule Teiserver.Account.UserCacheLib do
     |> get_user_by_id()
   end
 
-  @spec deprecated_list_users(list) :: list
-  def deprecated_list_users(id_list) do
+  @spec list_users_by_ids(list) :: list
+  def list_users_by_ids(id_list) do
     id_list
-    |> Enum.map(&deprecated_get_user_by_id/1)
+    |> Enum.map(&get_user_by_id/1)
     |> Enum.filter(fn user -> user != nil end)
   end
 
