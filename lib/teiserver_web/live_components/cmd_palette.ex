@@ -30,23 +30,31 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
       allow: ["Moderator"]
     },
     %{
-      id: "goto:users-moderation",
+      id: "goto:users",
       cmd: :goto,
-      label: "Goto: Users (Moderation)",
+      label: "Goto: Users",
       path: "/moderation/users",
       allow: ["Moderator"]
     },
     %{
-      id: "goto:users-admin",
+      id: "goto:actions",
       cmd: :goto,
-      label: "Goto: Users (Admin)",
-      path: "/teiserver/admin/users",
-      allow: ["Admin"]
+      label: "Goto: Reports",
+      path: "/moderation/report",
+      allow: ["Overwatch"]
+    },
+    %{
+      id: "goto:actions",
+      cmd: :goto,
+      label: "Goto: Actions",
+      path: "/moderation/action",
+      allow: ["Overwatch"]
     }
   ]
 
   attr :id, :any
   attr :scope, Scope
+  attr :extra_commands, :list, default: []
 
   @impl LiveComponent
   def mount(socket) do
@@ -57,8 +65,10 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
 
   @impl LiveComponent
   def update(%{scope: %Scope{} = scope} = assigns, %Socket{} = socket) do
+    extra_commands = parse_extra_commands(assigns[:extra_commands] || [])
+
     all_commands =
-      @command_objects
+      (extra_commands ++ @command_objects)
       |> Enum.filter(fn
         %{allow: perms} -> AuthLib.allow?(scope, perms)
         _other -> true
@@ -108,13 +118,13 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
   end
 
   # Close on Escape key
-  def handle_event("keyup", %{"key" => "Escape"}, %Socket{} = socket) do
+  def handle_event("keydown", %{"key" => "Escape"}, %Socket{} = socket) do
     socket
     |> close()
     |> noreply()
   end
 
-  def handle_event("keyup", %{"key" => "ArrowUp"}, %Socket{assigns: assigns} = socket) do
+  def handle_event("keydown", %{"key" => "ArrowUp"}, %Socket{assigns: assigns} = socket) do
     new_selected_idx =
       if assigns.selected_idx > 0 do
         assigns.selected_idx - 1
@@ -127,7 +137,7 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
     |> noreply()
   end
 
-  def handle_event("keyup", %{"key" => "ArrowDown"}, %Socket{assigns: assigns} = socket) do
+  def handle_event("keydown", %{"key" => "ArrowDown"}, %Socket{assigns: assigns} = socket) do
     new_selected_idx =
       if assigns.selected_idx do
         assigns.selected_idx + 1
@@ -140,7 +150,7 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
     |> noreply()
   end
 
-  def handle_event("keyup", _params, %Socket{} = socket) do
+  def handle_event("keydown", _params, %Socket{} = socket) do
     socket
     |> noreply()
   end
@@ -169,6 +179,16 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
   defp execute(%Socket{} = socket, %{cmd: :goto, path: path} = _cmd) do
     socket
     |> redirect(to: path)
+  end
+
+  # Takes the supplied commands and ensures they work as expected
+  defp parse_extra_commands(commands) do
+    commands
+    |> Enum.filter(fn cmd ->
+      Map.has_key?(cmd, :id) and
+        Map.has_key?(cmd, :label) and
+        Map.has_key?(cmd, :cmd)
+    end)
   end
 
   @impl LiveComponent
@@ -200,9 +220,9 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
               type="text"
               name="query"
               value={@query}
-              placeholder=">"
+              placeholder="Type to filter"
               autocomplete="off"
-              phx-keyup="keyup"
+              phx-keydown="keydown"
               phx-target={@myself}
               class="w-full border-0 p-3 outline-none"
             />
@@ -215,10 +235,13 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
               phx-target={@myself}
               phx-value-id={id}
               class={[
-                "block w-full rounded p-1 text-left hover:bg-primary",
+                "block w-full rounded p-1 pl-2 text-left hover:bg-primary",
                 @selected_idx == idx && "bg-primary/50"
               ]}
             >
+              <span :if={@selected_idx == idx} class="float-right">
+                <Fontawesome.icon icon="arrow-right" style="regular" />
+              </span>
               {label}
             </span>
 

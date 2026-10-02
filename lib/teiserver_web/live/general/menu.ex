@@ -99,6 +99,13 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Relationships
       </.menu_page_link>
+
+      <.menu_page_link
+        icon="list"
+        url={~p"/palette"}
+      >
+        Cmd Palette test
+      </.menu_page_link>
     </div>
 
     <div class="menu-grid">

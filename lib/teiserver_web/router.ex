@@ -91,6 +91,7 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, :ensure_authenticated}
       ] do
       live "/", Menu, :index
+      live "/palette", Palette, :show
     end
   end
 
@@ -746,7 +747,6 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise_any, ["Contributor", "Overwatch"]}}
       ] do
       live "/", Menu, :show
-      live "/palette", Palette, :show
     end
 
     live_session :admin_tools,
