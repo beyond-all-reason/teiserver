@@ -2174,8 +2174,8 @@ defmodule Teiserver.Account do
   @spec get_user_by_email(String.t()) :: User.t() | nil
   defdelegate get_user_by_email(email), to: UserCacheLib
 
-  @spec deprecated_get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_discord_id(discord_id), to: UserCacheLib
+  @spec get_user_by_discord_id(integer() | String.t()) :: User.t() | nil
+  defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib

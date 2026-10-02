@@ -44,7 +44,7 @@ defmodule TeiserverWeb.StaffLive.TextCallback.Show do
         |> Repo.all()
         |> Enum.map(fn log ->
           user =
-            Account.deprecated_get_user_by_discord_id(log.details["discord_user_id"]) ||
+            Account.get_user_by_discord_id(log.details["discord_user_id"]) ||
               %{name: nil}
 
           channel =

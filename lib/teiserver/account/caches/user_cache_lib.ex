@@ -133,7 +133,7 @@ defmodule Teiserver.Account.UserCacheLib do
     get_user_by_id(user_id) || raise "No user of the ID #{inspect(user_id)}"
   end
 
-  @spec get_userid_by_discord_id(String.t() | nil) :: User.id() | nil
+  @spec get_userid_by_discord_id(integer() | nil) :: User.id() | nil
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
@@ -151,20 +151,24 @@ defmodule Teiserver.Account.UserCacheLib do
           nil
 
         %{id: id} ->
-          deprecated_recache_user(id)
+          recache_user(id)
           id
       end
     end)
   end
 
-  @spec deprecated_get_user_by_discord_id(String.t() | nil) :: T.user() | nil
-  def deprecated_get_user_by_discord_id(nil), do: nil
-  def deprecated_get_user_by_discord_id(""), do: nil
+  @spec get_user_by_discord_id(integer() | String.t() | nil) :: User.t() | nil
+  def get_user_by_discord_id(nil), do: nil
+  def get_user_by_discord_id(""), do: nil
 
-  def deprecated_get_user_by_discord_id(discord_id) do
+  def get_user_by_discord_id(discord_id) when is_binary(discord_id) do
+    int_parse(discord_id) |> get_user_by_discord_id()
+  end
+
+  def get_user_by_discord_id(discord_id) do
     discord_id
     |> get_userid_by_discord_id()
-    |> deprecated_get_user_by_id()
+    |> get_user_by_id()
   end
 
   @spec deprecated_list_users(list) :: list
