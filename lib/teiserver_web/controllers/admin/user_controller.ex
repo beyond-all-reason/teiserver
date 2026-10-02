@@ -1042,59 +1042,6 @@ defmodule TeiserverWeb.Admin.UserController do
     |> redirect(to: ~p"/teiserver/admin/user/#{user.id}" <> "#details_tab")
   end
 
-  @spec rename_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def rename_form(conn, %{"id" => id}) do
-    user = Account.get_user(id)
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        conn
-        |> assign(:user, user)
-        |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
-        |> render("rename_form.html")
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec rename_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def rename_post(conn, %{"id" => id, "new_name" => new_name}) do
-    user = Account.get_user(id)
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        admin_action = AuthLib.allow?(conn, "Senior moderator")
-
-        case CacheUser.rename_user(user.id, new_name, admin_action) do
-          :success ->
-            add_audit_log(conn, "Teiserver:Changed user name", %{
-              user_id: user.id,
-              from: user.name,
-              to: new_name
-            })
-
-            conn
-            |> put_flash(:success, "User renamed")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
-
-          {:error, reason} ->
-            conn
-            |> assign(:user, user)
-            |> put_flash(:danger, "Error with rename: #{reason}")
-            |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
-            |> render("rename_form.html")
-        end
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
   @spec applying(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def applying(conn, %{"id" => id} = params) do
     # Gives stuff time to happen

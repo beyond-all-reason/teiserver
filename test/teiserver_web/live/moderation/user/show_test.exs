@@ -1,4 +1,5 @@
 defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
+  alias Teiserver.Account
   alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
 
@@ -31,6 +32,37 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       user = AccountFixtures.user_fixture()
 
       {:ok, _live, _html} = live(conn, ~p"/moderation/users/#{user.id}")
+    end
+  end
+
+  describe "altering data" do
+    setup [:auth]
+
+    test "rename", %{conn: conn} do
+      user = AccountFixtures.user_fixture()
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/name")
+
+      live
+      |> form("#user-rename-form", user: %{name: "Invalid name for a few reasons"})
+      |> render_submit()
+
+      html = live |> render()
+      assert html =~ ~s(Max length 20 characters)
+
+      # Ensure nothing changed
+      assert Account.get_user_by_id!(user.id).name == user.name
+
+      random_name = "renamed#{:rand.uniform(899_999_999) + 100_000_000}"
+
+      live
+      |> form("#user-rename-form", user: %{name: random_name})
+      |> render_submit()
+
+      assert_patch(live, "/moderation/users/#{user.id}")
+
+      # Ensure it has changed over
+      assert Account.get_user_by_id!(user.id).name == random_name
     end
   end
 

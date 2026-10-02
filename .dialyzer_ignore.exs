@@ -208,13 +208,13 @@
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"},
   {"lib/teiserver_web/live/moderation/user/show.ex"},
   {"lib/teiserver_web/live/moderation/user/set_gdpr_forget.ex"},
-  {"lib/teiserver_web/live/moderation/user/edit.ex"},
   {"lib/teiserver_web/live/moderation/user/clear_gdpr_forget.ex"},
   {"lib/teiserver/account/tasks/delete_unverified_users_task.ex"},
   {"lib/teiserver/account/libs/user_lib.ex"},
   {"lib/teiserver_web/live/moderation/report_user/index.ex"},
   {"lib/teiserver_web/live/moderation/tools/gdpr_restore_perform.ex"},
   {"lib/teiserver/account/tasks/restore_anonymised_user_task.ex"},
+  {"lib/teiserver_web/live/moderation/user/form_name_component.ex"},
   {"lib/teiserver/moderation/tasks/delete_expired_anti_abuse_records_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]

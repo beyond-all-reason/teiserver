@@ -1,12 +1,12 @@
 defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
-  alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
-  alias Teiserver.Repo
+  alias TeiserverWeb.ModerationLive.User.FormNameComponent
   alias TeiserverWeb.ModerationLive.UserComponents
 
   use TeiserverWeb, :live_view
@@ -23,33 +23,35 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
   @impl LiveView
   def handle_params(%{"id" => id}, _url, socket) when is_connected?(socket) do
-    user = Account.get_user(id)
+    user =
+      UserQueries.users()
+      |> UserQueries.where_id(id)
+      |> UserQueries.load_user_stat()
+      |> Repo.one()
 
-    case UserLib.has_access(user, socket) do
-      {true, _role} ->
-        user
-        |> UserLib.make_favourite()
-        |> insert_recently(socket)
+    if UserLib.can_access_user?(user, socket.assigns.scope) do
+      user
+      |> UserLib.make_favourite()
+      |> insert_recently(socket)
 
-        socket
-        |> assign(user: user, page_title: "User details: #{user.name}")
-        |> switch_tab(@tab1_default, "1")
-        |> switch_tab(@tab2_default, "2")
-        |> set_user_alerts()
-        |> noreply()
+      socket
+      |> assign(user: user, page_title: "User details: #{user.name}")
+      |> switch_tab(@tab1_default, "1")
+      |> switch_tab(@tab2_default, "2")
+      |> set_user_alerts()
+      |> noreply()
+    else
+      if user do
+        add_audit_log(socket.assigns.scope, "User access attempt", %{
+          user_id: user && user.id,
+          page: "gdpr_restore/perform"
+        })
+      end
 
-      _no_access ->
-        if user do
-          add_audit_log(socket.assigns.scope, "User access attempt", %{
-            user_id: user && user.id,
-            page: "gdpr_restore/perform"
-          })
-        end
-
-        socket
-        |> put_flash(:error, "Unable to access this user")
-        |> redirect(to: ~p"/moderation/users")
-        |> noreply()
+      socket
+      |> put_flash(:error, "Unable to access this user")
+      |> redirect(to: ~p"/moderation/users")
+      |> noreply()
     end
   end
 

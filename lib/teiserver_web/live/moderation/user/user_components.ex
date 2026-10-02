@@ -382,7 +382,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/admin/chat?userid=#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
         </.button>
       </.link>
@@ -391,7 +391,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/teiserver/admin/users/ratings/#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon={Teiserver.Account.RatingLib.icon()} style="solid" /> Ratings
         </.button>
       </.link>
@@ -400,7 +400,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon={Teiserver.icon(:relationship)} style="solid" /> Relationships
         </.button>
       </.link>
@@ -409,7 +409,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/teiserver/admin/matches/user/#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="solid" /> Matches
         </.button>
       </.link>
@@ -418,7 +418,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/moderation/report/user/#{@user}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> Reports
         </.button>
       </.link>
@@ -427,7 +427,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         navigate={~p"/moderation/users/#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-sm btn-disabled">
+        <.button class="m-1 btn btn-primary btn-soft btn-disabled">
           <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
         </.button>
       </.link>
@@ -435,10 +435,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
       <h3 class="font-bold text-lg">Edit details</h3>
       <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/edit/name"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
+        <.button class="m-1 btn btn-primary">
           <Fontawesome.icon icon="fa-address-card" style="solid" /> Name
         </.button>
       </.link>

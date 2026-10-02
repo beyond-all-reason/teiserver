@@ -7,14 +7,6 @@
     Recache
   </a>
 
-  <a
-    class="dropdown-item"
-    href={~p"/teiserver/admin/users/rename_form/#{@user.id}"}
-  >
-    <Fontawesome.icon icon="fa-pen-field" style="solid" /> &nbsp;
-    Rename
-  </a>
-
   <a class="dropdown-item" href={~p"/moderation/report_user/#{@user.id}"}>
     <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> &nbsp;
     Report form
