@@ -1,0 +1,81 @@
+<DiscordChannelComponents.section_menu active="list" scope={@scope}>
+  <.link
+    :if={allow?(@scope, "Admin")}
+    patch={~p"/admin/discord_channels/new"}
+    class="btn btn-primary btn-sm"
+  >
+    <Fontawesome.icon icon="plus" style="regular" /> New discord channel
+  </.link>
+</DiscordChannelComponents.section_menu>
+
+<.header>
+  Listing discord channels
+</.header>
+<div class="heading-subtitle">{@discord_channel_count} discord channels found</div>
+
+<DiscordChannelComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.live_component
+  :if={@preferences}
+  module={PreferencesComponent}
+  id="discord_channel-list-preferences-form"
+  scope={@scope}
+  preferences={@preferences}
+  update_parent={true}
+/>
+
+<.table
+  :if={@preferences}
+  id="discord_channels-table"
+  rows={@discord_channels}
+  table_class="table-sm table-zebra mt-4"
+  row_click={
+    String.contains?(@preferences.show_link, "row-click") &&
+      fn discord_channel -> JS.navigate(~p"/admin/discord_channels/#{discord_channel}") end
+  }
+  row_id={fn discord_channel -> "discord_channels-#{discord_channel.id}" end}
+>
+  <:col :let={discord_channel} label="Name">{discord_channel.name}</:col>
+  <:col :let={discord_channel} label="Channel ID">{discord_channel.channel_id}</:col>
+  <:action :let={discord_channel}>
+    <div class={[
+      not String.contains?(@preferences.show_link, "button") && "sr-only",
+      "btn btn-info btn-outline btn-xs me-2"
+    ]}>
+      <.link navigate={~p"/admin/discord_channels/#{discord_channel}"}>Show</.link>
+    </div>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/admin/discord_channels/#{discord_channel}/edit"}
+      class="btn btn-secondary btn-outline btn-xs me-2"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back href={~p"/admin"}>Back to admin</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit] and allow?(@scope, "Admin")}
+  id="discord_channel-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/discord_channels")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@discord_channel.id || :new}
+    title={@page_title}
+    action={@live_action}
+    discord_channel={@discord_channel}
+    patch={~p"/admin/discord_channels"}
+    scope={@scope}
+  />
+</.modal>

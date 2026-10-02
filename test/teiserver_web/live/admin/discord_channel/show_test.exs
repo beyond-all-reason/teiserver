@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Staff.TextCallbackLive.ShowTest do
+defmodule TeiserverWeb.Admin.DiscordChannelLive.ShowTest do
   alias Teiserver.Communication
   alias Teiserver.CommunicationFixtures
   alias Teiserver.Helpers.GeneralTestLib
@@ -11,27 +11,27 @@ defmodule TeiserverWeb.Staff.TextCallbackLive.ShowTest do
       {:ok, conn} = Keyword.fetch(kw, :conn)
 
       {:error, {:redirect, %{to: path}}} =
-        live(conn, ~p"/staff/text_callbacks/123")
+        live(conn, ~p"/admin/discord_channels/123")
 
       assert path == ~p"/login"
     end
 
     test "cannot access show page when unauthorized" do
-      {:ok, kw} = GeneralTestLib.conn_setup(["Verified"])
+      {:ok, kw} = GeneralTestLib.conn_setup(["Moderator"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
 
       {:error, {:redirect, %{to: path}}} =
-        live(conn, ~p"/staff/text_callbacks/123")
+        live(conn, ~p"/admin/discord_channels/123")
 
       assert path == ~p"/"
     end
 
     test "can access show page when authorized" do
-      {:ok, kw} = GeneralTestLib.conn_setup(["Contributor"])
+      {:ok, kw} = GeneralTestLib.conn_setup(["Admin"])
       {:ok, conn} = Keyword.fetch(kw, :conn)
-      text_callback = CommunicationFixtures.text_callback_fixture()
+      discord_channel = CommunicationFixtures.discord_channel_fixture()
 
-      {:ok, _live, _html} = live(conn, ~p"/staff/text_callbacks/#{text_callback.id}")
+      {:ok, _live, _html} = live(conn, ~p"/admin/discord_channels/#{discord_channel.id}")
     end
   end
 
@@ -43,38 +43,38 @@ defmodule TeiserverWeb.Staff.TextCallbackLive.ShowTest do
     # the newer version of phoenix solves it and we're trying to do things
     # across two different versions
     @tag :needs_attention
-    test "redirect on no text callback", %{conn: conn} do
+    test "redirect on no discord channel", %{conn: conn} do
       {:error,
        {:redirect,
         %{
           status: 302,
-          to: "/staff/text_callbacks/list",
+          to: "/admin/discord_channels/list",
           flash: _flash
         }}} =
-        live(conn, ~p"/staff/text_callbacks/123456789")
+        live(conn, ~p"/admin/discord_channels/123456789")
     end
 
-    test "render text callback", %{conn: conn} do
-      text_callback = CommunicationFixtures.text_callback_fixture()
+    test "render discord channel", %{conn: conn} do
+      discord_channel = CommunicationFixtures.discord_channel_fixture()
 
-      {:ok, _live, html} = live(conn, ~p"/staff/text_callbacks/#{text_callback.id}")
+      {:ok, _live, html} = live(conn, ~p"/admin/discord_channels/#{discord_channel.id}")
 
-      assert html =~ ~s(Text callback: #{text_callback.name})
+      assert html =~ ~s(Discord channel: #{discord_channel.name})
     end
   end
 
   describe "deleting data" do
     setup [:auth]
 
-    test "deletes text_callback", %{conn: conn} do
-      text_callback = CommunicationFixtures.text_callback_fixture()
-      {:ok, live, _html} = live(conn, ~p"/staff/text_callbacks/#{text_callback.id}")
+    test "deletes discord_channel", %{conn: conn} do
+      discord_channel = CommunicationFixtures.discord_channel_fixture()
+      {:ok, live, _html} = live(conn, ~p"/admin/discord_channels/#{discord_channel.id}")
 
       assert live |> element(".btn-error", "Delete") |> render_click()
 
-      refute Communication.get_text_callback(text_callback.id)
+      refute Communication.get_discord_channel(discord_channel.id)
 
-      assert_redirect(live, "/staff/text_callbacks")
+      assert_redirect(live, "/admin/discord_channels")
     end
   end
 

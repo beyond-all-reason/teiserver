@@ -1,0 +1,49 @@
+<DiscordChannelComponents.section_menu active="show" scope={@scope}>
+  <DiscordChannelComponents.quick_search />
+</DiscordChannelComponents.section_menu>
+
+<.header>
+  Discord channel: {@discord_channel.name}
+  <:actions>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/admin/discord_channels/#{@discord_channel}/show/edit"}
+      phx-click={JS.push_focus()}
+      class="btn btn-primary btn-sm"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      phx-click="delete-discord-channel"
+      data-confirm="Are you sure you want to delete this discord channel?"
+      class="btn btn-error btn-sm"
+    >
+      <Fontawesome.icon icon="trash" style="regular" /> Delete
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name">{@discord_channel.name}</:item>
+  <:item title="Channel ID">{@discord_channel.channel_id}</:item>
+</.list>
+
+<.back href={~p"/admin/discord_channels"}>Back to Discord channels</.back>
+
+<.modal
+  :if={@live_action == :edit and allow?(@scope, "Admin")}
+  id="discord_channel-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/discord_channels/#{@discord_channel}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@discord_channel.id}
+    title={@page_title}
+    action={@live_action}
+    discord_channel={@discord_channel}
+    patch={~p"/admin/discord_channels/#{@discord_channel}"}
+    scope={@scope}
+  />
+</.modal>
