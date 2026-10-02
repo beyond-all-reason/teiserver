@@ -15,6 +15,8 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
     add_preference("col_pref.mod_users.table_class", "table-zebra")
     add_preference("col_pref.mod_users.email", "partial")
     add_preference("col_pref.mod_users.client?", true)
+    add_preference("col_pref.mod_users.hw?", true)
+    add_preference("col_pref.mod_users.ip?", true)
   end
 
   defp add_preference(key, default) do

@@ -38,8 +38,8 @@
   <:col :let={user} label="Status">
     <UserComponents.status_icon user={user} />
   </:col>
-  <:col :let={user} :if={@is_moderator?} label="HW">{user.hw_string}</:col>
-  <:col :let={user} :if={@is_moderator?} label="IP">{user.last_ip}</:col>
+  <:col :let={user} :if={@is_moderator? and @preferences.hw?} label="HW">{user.hw_string}</:col>
+  <:col :let={user} :if={@is_moderator? and @preferences.ip?} label="IP">{user.last_ip}</:col>
   <:col :let={user} label="Roles">
     {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
     {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}

@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.LiveComponents.Moderation.UserListPreferences do
+defmodule TeiserverWeb.ModerationLive.UserListPreferences do
   @moduledoc """
   <.live_component
     :if={@preferences}
@@ -83,6 +83,24 @@ defmodule TeiserverWeb.LiveComponents.Moderation.UserListPreferences do
           </div>
 
           <div class="m-2">
+            <br />
+            <.input_tw
+              type="checkbox"
+              field={@form[:ip?]}
+              label="IP column"
+            />
+          </div>
+
+          <div class="m-2">
+            <br />
+            <.input_tw
+              type="checkbox"
+              field={@form[:hw?]}
+              label="HW column"
+            />
+          </div>
+
+          <div class="m-2">
             <.input_tw
               type="select"
               field={@form[:table_class]}
@@ -156,11 +174,20 @@ defmodule TeiserverWeb.LiveComponents.Moderation.UserListPreferences do
     [
       :email,
       :client?,
+      :hw?,
+      :ip?,
       :table_class
     ]
     |> Map.new(fn key ->
       value = get_user_config_cache(user.id, "#{@prefix}.#{key}")
       {key, value}
     end)
+    |> maybe_skip_user_stat()
+  end
+
+  defp maybe_skip_user_stat(preferences) do
+    skip = not Enum.any?([preferences[:client?], preferences[:hw?], preferences[:ip?]])
+
+    Map.put(preferences, :skip_user_stat?, skip)
   end
 end
