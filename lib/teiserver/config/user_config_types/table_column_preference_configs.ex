@@ -7,9 +7,8 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
 
   @spec create() :: :ok
   def create do
-    # Staff; text callbacks
-    add_preference("col_pref.staff_text_callbacks.response_size", "100")
-    add_preference("col_pref.staff_text_callbacks.show_link", "row-click")
+    # Admin; discord channels
+    add_preference("col_pref.admin_discord_channels.show_link", "row-click")
 
     # Moderation; user list
     add_preference("col_pref.mod_users.table_class", "table-zebra")
@@ -17,6 +16,10 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
     add_preference("col_pref.mod_users.client?", true)
     add_preference("col_pref.mod_users.hw?", true)
     add_preference("col_pref.mod_users.ip?", true)
+
+    # Staff; text callbacks
+    add_preference("col_pref.staff_text_callbacks.response_size", "100")
+    add_preference("col_pref.staff_text_callbacks.show_link", "row-click")
   end
 
   defp add_preference(key, default) do

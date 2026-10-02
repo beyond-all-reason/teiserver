@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.StaffLive.TextCallback.PreferencesComponent do
+defmodule TeiserverWeb.AdminLive.DiscordChannel.PreferencesComponent do
   @moduledoc """
   <.live_component
     :if={@preferences}
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.StaffLive.TextCallback.PreferencesComponent do
 
   import Teiserver.Config, only: [get_user_config_cache: 2, set_user_config: 3]
 
-  @prefix "col_pref.staff_text_callbacks"
+  @prefix "col_pref.admin_discord_channels"
 
   attr :preferences, :map, required: true
   attr :scope, Scope, required: true
@@ -61,22 +61,9 @@ defmodule TeiserverWeb.StaffLive.TextCallback.PreferencesComponent do
         phx-change="update-preferences"
         phx-submit="submit-preferences"
         phx-target={@myself}
-        id="text_callback-list-preferences-form"
+        id="discord_channel-list-preferences-form"
       >
         <div class="form-input-grid">
-          <div class="m-2">
-            <.input_tw
-              type="select"
-              field={@form[:response_size]}
-              options={[
-                {"None", "hide"},
-                {"100 characters", "100"},
-                {"200 characters", "200"},
-                {"Full", "full"}
-              ]}
-              label="Response size"
-            />
-          </div>
           <div class="m-2">
             <.input_tw
               type="select"
@@ -153,7 +140,6 @@ defmodule TeiserverWeb.StaffLive.TextCallback.PreferencesComponent do
 
   def get_preferences(%Scope{user: user}) do
     [
-      :response_size,
       :show_link
     ]
     |> Map.new(fn key ->

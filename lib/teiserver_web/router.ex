@@ -661,14 +661,6 @@ defmodule TeiserverWeb.Router do
     end
   end
 
-  scope "/admin", TeiserverWeb.Admin, as: :admin do
-    pipe_through([:browser, :app_layout, :protected])
-
-    resources("/discord_channels", DiscordChannelController,
-      only: [:index, :new, :create, :show, :edit, :update, :delete]
-    )
-  end
-
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do
     pipe_through([:browser, :app_layout, :protected])
 
@@ -757,6 +749,21 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Admin"}}
       ] do
       live "/tools/mfa_usage", Tools.MFAUsage, :show
+    end
+
+    live_session :admin_discord_channels,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "admin"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/discord_channels", DiscordChannel.List, :list
+      live "/discord_channels/new", DiscordChannel.List, :new
+      live "/discord_channels/:id/edit", DiscordChannel.List, :edit
+
+      live "/discord_channels/:id", DiscordChannel.Show, :show
+      live "/discord_channels/:id/show/edit", DiscordChannel.Show, :edit
     end
   end
 
