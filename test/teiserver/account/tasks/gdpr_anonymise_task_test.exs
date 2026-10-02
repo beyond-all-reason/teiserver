@@ -4,6 +4,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
   alias Teiserver.Account.RestoreAnonymisedUserTask
   alias Teiserver.Account.SmurfKeyQueries
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserNoteQueries
   alias Teiserver.AccountFixtures
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Helper.QueryHelpers
@@ -68,7 +69,12 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
       {:ok, dry_run_result} =
         RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email)
 
-      assert dry_run_result == %{"post_ids" => [], "smurf_key_ids" => [], "upload_ids" => []}
+      assert dry_run_result == %{
+               "post_ids" => [],
+               "smurf_key_ids" => [],
+               "upload_ids" => [],
+               "user_notes" => []
+             }
 
       # Try a restore, nothing should change but we want to ensure there's not an error when we do it
       result =
@@ -96,6 +102,9 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
       user_upload1 = MicroblogFixtures.upload_fixture(%{uploader_id: user.id})
       user_upload2 = MicroblogFixtures.upload_fixture(%{uploader_id: user.id})
 
+      AccountFixtures.user_note_fixture(%{user_id: user.id, contents: "First contents"})
+      AccountFixtures.user_note_fixture(%{user_id: user.id, contents: "Second contents"})
+
       # Ensure the items we created exist and we are counting them the correct way
       key_count =
         SmurfKeyQueries.smurf_keys()
@@ -117,6 +126,13 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> QueryHelpers.count()
 
       assert upload_count == 2
+
+      user_note_count =
+        UserNoteQueries.user_notes()
+        |> UserNoteQueries.where_user_id(user.id)
+        |> QueryHelpers.count()
+
+      assert user_note_count == 2
 
       :ok = GDPRAnonymiseTask.perform(%{})
 
@@ -150,6 +166,13 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> QueryHelpers.count()
 
       assert upload_count == 0
+
+      user_note_count =
+        UserNoteQueries.user_notes()
+        |> UserNoteQueries.where_user_id(user.id)
+        |> QueryHelpers.count()
+
+      assert user_note_count == 0
 
       # Try a dry-run
       {:ok, dry_run_result} =
@@ -189,6 +212,16 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> QueryHelpers.count()
 
       assert upload_count == 2
+
+      # We are rebuilding these so need to verify them slightly differently
+      user_note_contents =
+        UserNoteQueries.user_notes()
+        |> UserNoteQueries.where_user_id(user.id)
+        |> Repo.all()
+        |> Enum.map(& &1.contents)
+        |> Enum.sort()
+
+      assert user_note_contents == ["First contents", "Second contents"]
 
       restored_user = Account.get_user(user.id)
       assert restored_user.email == user.email

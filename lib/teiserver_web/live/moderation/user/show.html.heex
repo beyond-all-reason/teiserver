@@ -1,11 +1,20 @@
 <UserComponents.section_menu active="show" user={@user} scope={@scope}>
   <.link
-    :if={@user}
-    href={~p"/teiserver/admin/user/#{@user.id}"}
+    href={~p"/teiserver/admin/user/#{@user_id}"}
     phx-click={JS.push_focus()}
     class="me-4"
   >
     <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
+  </.link>
+
+  <.link
+    navigate={~p"/moderation/users/#{@user_id}/new/note"}
+    phx-click={JS.push_focus()}
+    class="me-4"
+  >
+    <.button class="btn btn-sm btn-primary btn-soft">
+      <Fontawesome.icon icon="fa-file-lines" style="solid" /> New note
+    </.button>
   </.link>
 
   <UserComponents.quick_search />
@@ -30,6 +39,13 @@
 
       <UserComponents.show_audit :if={@tab1 == "audit"} audit_logs={@streams.audit_logs} />
 
+      <UserComponents.show_notes
+        :if={@tab1 == "notes"}
+        user_notes={@streams.user_notes}
+        scope={@scope}
+        user_id={@user_id}
+      />
+
       <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} />
 
       <UserComponents.show_raw
@@ -46,6 +62,13 @@
       <UserComponents.show_details :if={@tab2 == "details"} user={@user} />
 
       <UserComponents.show_audit :if={@tab2 == "audit"} audit_logs={@streams.audit_logs} />
+
+      <UserComponents.show_notes
+        :if={@tab2 == "notes"}
+        user_notes={@streams.user_notes}
+        scope={@scope}
+        user_id={@user_id}
+      />
 
       <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} />
 
@@ -70,6 +93,22 @@
     module={FormNameComponent}
     id={@user.id}
     user={@user}
+    scope={@scope}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action == :new_note and not is_nil(@user)}
+  id="user-new_note-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    title="New user note"
+    module={UserNoteFormComponent}
+    action={:new}
+    id={@user.id}
+    user_note={%UserNote{}}
     scope={@scope}
   />
 </.modal>

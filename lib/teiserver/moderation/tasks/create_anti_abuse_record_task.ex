@@ -17,6 +17,8 @@ defmodule Teiserver.Moderation.CreateAntiAbuseRecordTask do
   alias Teiserver.Account.Scope
   alias Teiserver.Account.SmurfKeyQueries
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserNote
+  alias Teiserver.Account.UserNoteQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Microblog.PostQueries
   alias Teiserver.Microblog.UploadQueries
@@ -121,10 +123,25 @@ defmodule Teiserver.Moderation.CreateAntiAbuseRecordTask do
       |> Enum.map(& &1.id)
       |> Enum.sort()
 
+    user_notes =
+      UserNoteQueries.user_notes()
+      |> UserNoteQueries.where_user_id(id)
+      |> Repo.all()
+      |> Enum.map(fn %UserNote{} = note ->
+        %{
+          creator_id: note.creator_id,
+          permission: note.permission,
+          contents: note.contents,
+          inserted_at: note.inserted_at,
+          updated_at: note.updated_at
+        }
+      end)
+
     %{
       smurf_key_ids: smurf_key_ids,
       post_ids: post_ids,
-      upload_ids: upload_ids
+      upload_ids: upload_ids,
+      user_notes: user_notes
     }
   end
 

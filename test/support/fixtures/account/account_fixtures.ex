@@ -44,4 +44,21 @@ defmodule Teiserver.AccountFixtures do
     {:ok, friend} = Account.create_friend(user_id1, user_id2)
     friend
   end
+
+  @doc """
+  Generate a tag.
+  """
+  def user_note_fixture(attrs \\ %{}) do
+    {:ok, user_note} =
+      attrs
+      |> Enum.into(%{
+        user_id: attrs[:user_id] || user_fixture().id,
+        creator_id: attrs[:creator_id] || user_fixture().id,
+        contents: "Some contents",
+        permission: "Moderator"
+      })
+      |> Account.create_user_note()
+
+    user_note
+  end
 end

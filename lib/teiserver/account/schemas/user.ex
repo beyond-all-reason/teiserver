@@ -52,6 +52,7 @@ defmodule Teiserver.Account.User do
     field :lobby_client, :string
 
     has_many :user_configs, Teiserver.Config.UserConfig
+    has_many :notes, Teiserver.Account.UserNote
 
     # Extra user.ex relations go here
     belongs_to :smurf_of, Teiserver.Account.User

@@ -79,6 +79,8 @@ defmodule Teiserver.Account.DataExpiryTask do
       {"account_relationships", :to_user_id},
       {"teiserver_account_accolades", :giver_id},
       {"teiserver_account_accolades", :recipient_id},
+      {"user_notes", :user_id},
+      {"user_notes", :creator_id},
 
       # Messages
       {"direct_messages", :from_id},

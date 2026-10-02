@@ -110,6 +110,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
   # not actually forget the user
   defp forget_user_references(%User{id: user_id}) do
     [
+      # Gone forever
       {"account_codes", :user_id},
       {"account_friends", :user1_id},
       {"account_friends", :user2_id},
@@ -127,7 +128,11 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
       {"teiserver_account_user_totps", :user_id},
       {"telemetry_user_properties", :user_id},
       {"telemetry_infologs", :user_id},
-      {"teiserver_account_user_stats", :user_id}
+      {"teiserver_account_user_stats", :user_id},
+      {"user_notes", :creator_id},
+
+      # Encrypted replica in AAR
+      {"user_notes", :user_id}
     ]
     |> Enum.each(fn {table, field} ->
       query = "DELETE FROM #{table} WHERE #{field} = $1;"
