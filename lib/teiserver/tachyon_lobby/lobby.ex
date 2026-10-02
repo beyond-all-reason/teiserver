@@ -25,6 +25,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   alias Plug.Crypto
   alias Teiserver.Account.User
+  alias Teiserver.Asset
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Cluster
@@ -306,6 +307,23 @@ defmodule Teiserver.TachyonLobby.Lobby do
         do: MapSet.new([start_params.creator_data.id]),
         else: MapSet.new()
 
+    client_specified_polystartboxes? =
+      is_map_key(start_params.game_options, "mapmetadata_startpos") or
+        is_map_key(start_params.game_options, "mapmetadata_startboxes_set")
+
+    game_options =
+      if client_specified_polystartboxes? do
+        start_params.game_options
+      else
+        case Asset.get_polygon_startboxes(start_params.map_name) do
+          nil ->
+            start_params.game_options
+
+          modoptions ->
+            Map.merge(modoptions, start_params.game_options)
+        end
+      end
+
     state =
       %LT.Data{
         id: id,
@@ -318,7 +336,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         boss_enabled?: start_params.boss_enabled?,
         bosses: bosses,
         ally_team_config: start_params.ally_team_config,
-        game_options: start_params.game_options,
+        game_options: game_options,
         tags: start_params.tags,
         players: %{
           start_params.creator_data.id => %LT.Player{

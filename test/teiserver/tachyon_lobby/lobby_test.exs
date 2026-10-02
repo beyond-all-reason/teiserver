@@ -67,13 +67,28 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   test "create with defaults" do
+    AssetFixtures.create_map(%{
+      spring_name: "the map",
+      display_name: "the map",
+      thumbnail_url: "http://irrelevant.com",
+      modoptions: %{
+        mapmetadata_startpos: "ImNvdWNvdSIK",
+        mapmetadata_startboxes_set: "ImhlbGxvIgo="
+      }
+    })
+
     {:ok, _pid, details} =
       mk_start_params([1, 1])
+      |> Map.put(:map_name, "the map")
       |> Lobby.create()
 
     assert details.boss_enabled? == false
     assert details.bosses == MapSet.new()
-    assert details.game_options == %{}
+
+    assert details.game_options == %{
+             "mapmetadata_startpos" => "ImNvdWNvdSIK",
+             "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+           }
   end
 
   test "create lobby with game options" do
