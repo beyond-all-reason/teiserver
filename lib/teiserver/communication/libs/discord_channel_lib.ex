@@ -275,7 +275,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   @spec send_discord_dm(User.id(), String.t()) :: map | nil | {:error, any()}
   def send_discord_dm(userid, message) do
     if use_discord?() do
-      user = Account.deprecated_get_user_by_id(userid)
+      user = Account.get_user_by_id(userid)
 
       cond do
         user == nil ->

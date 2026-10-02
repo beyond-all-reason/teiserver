@@ -2181,10 +2181,10 @@ defmodule Teiserver.Account do
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_id(User.id()) :: User.t() | nil
-  defdelegate get_user_by_id(id), to: UserLib
+  defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec get_user_by_id!(User.id()) :: User.t()
-  defdelegate get_user_by_id!(id), to: UserLib
+  defdelegate get_user_by_id!(id), to: UserCacheLib
 
   @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
   defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
@@ -2193,7 +2193,7 @@ defmodule Teiserver.Account do
   def list_users_from_cache(id_list), do: UserCacheLib.deprecated_list_users(id_list)
 
   @spec decache_user(User.t()) :: :ok
-  defdelegate decache_user(user_or_user_id), to: UserLib
+  defdelegate decache_user(user_or_user_id), to: UserCacheLib
 
   @spec deprecated_recache_user(User.id() | User.t()) :: :ok
   defdelegate deprecated_recache_user(id), to: UserCacheLib

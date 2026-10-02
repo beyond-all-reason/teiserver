@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.UserCacheLibTest do
   alias Teiserver.Account
-  alias Teiserver.Account.UserCacheLib
 
   use Teiserver.DataCase, async: false
   import Teiserver.AccountFixtures, only: [user_fixture: 0]
@@ -15,7 +14,7 @@ defmodule Teiserver.Account.UserCacheLibTest do
         fn -> Account.get_userid_from_name(user.name) end
       ]
 
-      {deadlocks, at_round} = check_deadlocks(fn -> UserCacheLib.decache_user(user.id) end, fns)
+      {deadlocks, at_round} = check_deadlocks(fn -> Account.decache_user(user.id) end, fns)
 
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 
@@ -32,7 +31,7 @@ defmodule Teiserver.Account.UserCacheLibTest do
         fn -> Account.get_user_by_email(user.email) end
       ]
 
-      {deadlocks, at_round} = check_deadlocks(fn -> UserCacheLib.decache_user(user.id) end, fns)
+      {deadlocks, at_round} = check_deadlocks(fn -> Account.decache_user(user.id) end, fns)
 
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 

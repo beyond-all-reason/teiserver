@@ -162,7 +162,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         CacheUser.send_direct_message(state.userid, userid, "Thank you")
 
       _other_message ->
-        user = CacheUser.deprecated_get_user_by_id(userid)
+        user = Account.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
         if not Auth.is_bot?(user) do
@@ -209,8 +209,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   def handle_info({:do_client_inout, :login, userid}, state) do
-    user = CacheUser.deprecated_get_user_by_id(userid)
-    db_user = Account.get_user(userid)
+    user = Account.get_user_by_id(userid)
 
     if user do
       # Do we have a system welcome message?
@@ -221,8 +220,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       mfa_warning? =
-        AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(db_user.roles) and
-          not AuthLib.has_active_mfa?(db_user.id)
+        AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
+          not AuthLib.has_active_mfa?(user.id)
 
       if mfa_warning? do
         host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
@@ -235,7 +234,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       relevant_restrictions =
-        db_user.restrictions
+        user.restrictions
         |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
       if not Enum.empty?(relevant_restrictions) do
@@ -283,7 +282,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           # Do we need an acknowledgement? If they are muted then no.
           msg =
             cond do
-              Account.has_mute?(db_user) ->
+              Account.has_mute?(user) ->
                 msg ++ @dispute_string
 
               has_warning ->

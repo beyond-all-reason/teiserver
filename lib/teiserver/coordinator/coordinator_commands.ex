@@ -101,7 +101,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
-    sender = CacheUser.deprecated_get_user_by_id(senderid)
+    sender = Account.get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
 
     # Hours should be rounded down to make it more
@@ -186,7 +186,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         )
 
       user ->
-        sender = CacheUser.deprecated_get_user_by_id(senderid)
+        sender = Account.get_user_by_id(senderid)
         stats = Account.get_user_stat_data(user.id)
 
         previous_names =

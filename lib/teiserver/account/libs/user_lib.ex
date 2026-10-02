@@ -22,9 +22,8 @@ defmodule Teiserver.Account.UserLib do
   use TeiserverWeb, :library_newform
 
   import Teiserver.Helpers.CacheHelper,
-    only: [cache_get_or_store: 3, cache_put_on_ok: 2, cache_delete_on_ok: 2]
+    only: [cache_put_on_ok: 2, cache_delete_on_ok: 2]
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse!: 1]
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3, add_audit_log: 4]
 
   @gdpr_forget_cooldown_days 30
@@ -112,39 +111,6 @@ defmodule Teiserver.Account.UserLib do
     args
     |> UserQueries.count_users()
     |> Repo.aggregate(:count, :id)
-  end
-
-  @doc """
-  Attempts to get the user from the cache, failing that it will get it from the database.
-
-  Returns nil if no user found.
-  """
-  @spec get_user_by_id(User.id() | String.t()) :: User.t() | nil
-  def get_user_by_id(user_id) do
-    case User.parse_user_id(user_id) do
-      {:ok, user_id} -> cache_get_or_store(:users_by_id, user_id, fn -> get_user(user_id) end)
-      {:error, _reason} -> nil
-    end
-  end
-
-  @doc """
-  Identical to `get_user_by_id/1` but with a raise instead of a nil result in the event of
-  no user found in the database.
-  """
-  @spec get_user_by_id!(User.id() | String.t()) :: User.t()
-  def get_user_by_id!(user_id) do
-    get_user_by_id(user_id) || raise "No user of the ID #{inspect(user_id)}"
-  end
-
-  @spec decache_user(User.t() | User.id()) :: :ok | {:error, any}
-  def decache_user(%User{id: user_id}), do: decache_user(user_id)
-
-  def decache_user(user_id) do
-    user_id = int_parse!(user_id)
-    Teiserver.cache_delete(:users_by_id, user_id)
-
-    # This to be removed as part of the removal of CacheUser removal
-    UserCacheLib.decache_user(user_id)
   end
 
   @doc """
