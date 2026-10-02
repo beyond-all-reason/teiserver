@@ -101,13 +101,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         MFA Usage
       </.menu_page_link>
-
-      <.menu_page_link
-        icon="list"
-        url={~p"/admin/palette"}
-      >
-        Cmd Palette test
-      </.menu_page_link>
     </div>
 
     <div class="menu-grid">

@@ -1,6 +1,5 @@
 defmodule TeiserverWeb.Admin.UserControllerTest do
   alias Teiserver.AccountFixtures
-  alias Teiserver.CacheUser
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
