@@ -11,6 +11,13 @@ defmodule Teiserver.TachyonLobby.Events.UpdateMapName do
   @type t() :: %__MODULE__{
           new_map: String.t()
         }
+
+  @spec new(String.t()) :: t()
+  def new(new_map_name) do
+    %__MODULE__{
+      new_map: new_map_name
+    }
+  end
 end
 
 defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateMapName do

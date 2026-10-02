@@ -39,6 +39,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby.Event
   alias Teiserver.TachyonLobby.Events
+  alias Teiserver.TachyonLobby.Events.UpdateMapName
   alias Teiserver.TachyonLobby.ListMonitor
   alias Teiserver.TachyonLobby.Registry, as: LobbyRegistry
   alias Teiserver.TachyonLobby.Supervisor, as: LobbySupervisor
@@ -1704,7 +1705,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:ok, [%Events.StartVote{vote_state: vote}]}
 
       true ->
-        {:ok, [%Events.UpdateMapName{new_map: new_map}]}
+        {:ok, [UpdateMapName.new(new_map)]}
     end
   end
 
