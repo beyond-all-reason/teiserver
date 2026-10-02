@@ -17,6 +17,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Coordinator.Parser
   alias Teiserver.Lobby
   alias Teiserver.Moderation
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Room
   alias Teiserver.Telemetry
 
@@ -159,6 +160,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     case converted_message do
       ^warning_response ->
         Client.clear_awaiting_warn_ack(userid)
+        activate_warning_actions(userid)
         CacheUser.send_direct_message(state.userid, userid, "Thank you")
 
       _other_message ->
@@ -233,6 +235,28 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           "You should enable Multi-Factor Authentication.\nYou have some elevated privileges but have not enabled your MFA so they will not work (the normal player stuff will still be fine). To enable your MFA login to the website and navigate to your account security section: #{url}."
         )
       end
+
+      pending_actions =
+        Moderation.list_actions(
+          search: [
+            target_id: userid,
+            expiry: "Pending only"
+          ]
+        )
+
+      {login_activated, _warning_pending} =
+        Enum.split_with(pending_actions, fn action ->
+          not Enum.member?(action.restrictions, "Warning reminder")
+        end)
+
+      db_user =
+        if Enum.empty?(login_activated) do
+          db_user
+        else
+          activate_actions(login_activated)
+          RefreshUserRestrictionsTask.refresh_user(userid)
+          Account.get_user(userid)
+        end
 
       relevant_restrictions =
         db_user.restrictions
@@ -325,6 +349,34 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     )
 
     {:noreply, state}
+  end
+
+  defp activate_warning_actions(userid) do
+    pending_warnings =
+      Moderation.list_actions(
+        search: [
+          target_id: userid,
+          expiry: "Pending only",
+          in_restrictions: "Warning reminder"
+        ]
+      )
+
+    activate_actions(pending_warnings)
+
+    if not Enum.empty?(pending_warnings) do
+      RefreshUserRestrictionsTask.refresh_user(userid)
+    end
+  end
+
+  defp activate_actions(actions) do
+    now = DateTime.utc_now()
+
+    Enum.each(actions, fn action ->
+      if action.duration do
+        expires = DateTime.add(now, action.duration, :second)
+        Moderation.update_action(action, %{"expires" => expires})
+      end
+    end)
   end
 
   def make_and_cache_coordinator_account do
