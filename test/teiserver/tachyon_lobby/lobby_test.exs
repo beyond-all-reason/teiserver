@@ -1707,6 +1707,35 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
                       {:updated,
                        %{game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}}}}
     end
+
+    test "changing map also set polystartboxes" do
+      AssetFixtures.create_map(%{
+        spring_name: "new map",
+        display_name: "new map",
+        thumbnail_url: "http://irrelevant.com",
+        modoptions: %{
+          mapmetadata_startpos: "ImNvdWNvdSIK",
+          mapmetadata_startboxes_set: "ImhlbGxvIgo="
+        }
+      })
+
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+
+      assert_receive {:lobby, ^id,
+                      {:updated,
+                       %{
+                         map_name: "new map",
+                         game_options: %{
+                           "mapmetadata_startpos" => "ImNvdWNvdSIK",
+                           "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+                         }
+                       }}}
+    end
   end
 
   describe "update tags" do
