@@ -51,7 +51,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
   defp apply_action(socket, :list, _params) do
     socket
-    |> assign(:page_title, "Listing Banned Domains")
+    |> assign(:page_title, "Listing Users")
     |> assign(:user, nil)
   end
 
