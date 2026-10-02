@@ -344,9 +344,6 @@ defmodule Teiserver.CacheUser do
     max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
-      admin_action == false and WordLib.reserved_name?(name) == true ->
-        {:error, "That name is in restricted for use by the server, please choose another"}
-
       admin_action == false and WordLib.acceptable_name?(name) == false ->
         {:error, "Not an acceptable name, please see section B3 of the code of conduct"}
 

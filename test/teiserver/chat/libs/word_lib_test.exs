@@ -1,7 +1,9 @@
 defmodule Teiserver.Chat.WordLibTest do
   alias Teiserver.Account
   alias Teiserver.Chat.WordLib
+  alias Teiserver.Helpers.CacheHelper
   alias Teiserver.Lobby.ChatLib
+  alias Teiserver.Moderation
   alias Teiserver.Room
   alias Teiserver.TeiserverTestLib
 
@@ -25,22 +27,56 @@ defmodule Teiserver.Chat.WordLibTest do
     assert WordLib.flagged_words("he is a agtard") == 0
   end
 
-  test "allowed names" do
-    allowed = [
-      "flatulence",
-      "Llama"
-    ]
+  describe "names" do
+    test "default data" do
+      allowed = [
+        "flatulence",
+        "Llama",
+        "TEST_ZWedXgDCun7uDYK"
+      ]
 
-    disallowed = [
-      "llLl1iI"
-    ]
+      disallowed = [
+        "llLl1iI"
+      ]
 
-    for name <- allowed do
-      assert WordLib.acceptable_name?(name)
+      for name <- allowed do
+        assert WordLib.acceptable_name?(name)
+      end
+
+      for name <- disallowed do
+        refute WordLib.acceptable_name?(name)
+      end
     end
 
-    for name <- disallowed do
-      refute WordLib.acceptable_name?(name)
+    test "using banned phrases" do
+      CacheHelper.store_delete(:application_metadata_cache, "banned_phrases/username")
+      assert WordLib.acceptable_name?("TEST_ZWedXgDCun7uDYK")
+
+      Moderation.create_banned_phrase(%{
+        phrase: "uDYK,other",
+        score_threshold: 1,
+        type: :raw,
+        use_cases: ["username"]
+      })
+
+      refute WordLib.acceptable_name?("TEST_ZWedXgDCun7uDYK")
+      CacheHelper.store_delete(:application_metadata_cache, "banned_phrases/username")
+    end
+
+    test "using banned phrases - no false positive" do
+      CacheHelper.store_delete(:application_metadata_cache, "banned_phrases/username")
+
+      assert WordLib.acceptable_name?("TEST_ZWedXgDCun7uDYK")
+
+      Moderation.create_banned_phrase(%{
+        phrase: "uDYK,other",
+        score_threshold: 1,
+        type: :raw,
+        use_cases: ["chat"]
+      })
+
+      assert WordLib.acceptable_name?("TEST_ZWedXgDCun7uDYK")
+      CacheHelper.store_delete(:application_metadata_cache, "banned_phrases/username")
     end
   end
 
