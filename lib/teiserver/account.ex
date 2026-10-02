@@ -33,6 +33,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserStat
   alias Teiserver.Account.UserStatLib
   alias Teiserver.Account.UserToken
@@ -2455,5 +2456,86 @@ defmodule Teiserver.Account do
       user: user,
       ip: "0.0.0.0"
     }
+  end
+
+  @doc """
+  Gets a single user_note.
+
+  Raises `Ecto.NoResultsError` if the Banned phrase does not exist.
+
+  ## Examples
+
+      iex> get_user_note!(123)
+      %UserNote{}
+
+      iex> get_user_note!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_note!(id), do: Repo.get!(UserNote, id)
+
+  @doc """
+  Creates a user_note.
+
+  ## Examples
+
+      iex> create_user_note(%{field: value})
+      {:ok, %UserNote{}}
+
+      iex> create_user_note(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_note(attrs \\ %{}) do
+    %UserNote{}
+    |> UserNote.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_note.
+
+  ## Examples
+
+      iex> update_user_note(user_note, %{field: new_value})
+      {:ok, %UserNote{}}
+
+      iex> update_user_note(user_note, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_note(%UserNote{} = user_note, attrs) do
+    user_note
+    |> UserNote.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a user_note.
+
+  ## Examples
+
+      iex> delete_user_note(user_note)
+      {:ok, %UserNote{}}
+
+      iex> delete_user_note(user_note)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_note(%UserNote{} = user_note) do
+    Repo.delete(user_note)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_note changes.
+
+  ## Examples
+
+      iex> change_user_note(user_note)
+      %Ecto.Changeset{data: %UserNote{}}
+
+  """
+  def change_user_note(%UserNote{} = user_note, attrs \\ %{}) do
+    UserNote.changeset(user_note, attrs)
   end
 end

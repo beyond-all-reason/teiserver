@@ -289,6 +289,16 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
       <a
         role="tab"
+        class={["tab", @tab == "notes" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="notes"
+        phx-value-tabset={@set}
+      >
+        Notes
+      </a>
+
+      <a
+        role="tab"
         class={["tab", @tab == "audit" && "tab-active"]}
         phx-click="switch-tab"
         phx-value-tab="audit"
@@ -358,7 +368,6 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       id="audit_logs-table"
       rows={@audit_logs}
       table_class="table-sm table-hover"
-      row_click={fn {_id, audit_log} -> JS.navigate(~p"/logging/audit_logs/#{audit_log.id}") end}
     >
       <:col :let={{_id, audit_log}} label="Date">
         {Calendar.strftime(audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}
@@ -366,6 +375,69 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <:col :let={{_id, audit_log}} label="Action">{audit_log.action}</:col>
       <:col :let={{_id, audit_log}} label="User">{audit_log.user_id && audit_log.user.name}</:col>
     </.table>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_notes user_notes={@streams.user_notes} scope={@scope} />
+  """
+  attr :user_id, :any
+  attr :scope, Scope
+  attr :user_notes, :list
+
+  def show_notes(assigns) do
+    ~H"""
+    <div class="">
+      <.link
+        navigate={~p"/moderation/users/#{@user_id}/new/note"}
+        phx-click={JS.push_focus()}
+        class="float-right"
+      >
+        <.button class="btn btn-sm btn-primary btn-soft" style="margin-top: -20px;">
+          <Fontawesome.icon icon="fa-file-lines" style="solid" /> New note
+        </.button>
+      </.link>
+
+      <div class="clear-both"></div>
+      <div
+        :for={{_id, user_note} <- @user_notes}
+        class="w-full mt-2 pt-2 border-t border-t-1 border-t-primary/20"
+      >
+        <div class="float-right">
+          <.link
+            :if={@scope.user.id == user_note.creator_id}
+            navigate={~p"/moderation/users/#{user_note.user_id}/edit/note/#{user_note.id}"}
+            class="btn btn-xs btn-info"
+          >
+            Edit
+          </.link>
+          <span
+            :if={@scope.user.id == user_note.creator_id or allow?(@scope, "Admin")}
+            class="btn btn-xs btn-error"
+            phx-click="delete-user_note"
+            phx-value-user_note_id={user_note.id}
+            data-confirm="Are you sure you want to delete this user note?"
+          >
+            Delete
+          </span>
+        </div>
+        <span class="font-bold">{user_note.creator_id && user_note.creator.name}</span>
+        <span class="ml-4 text-sm">
+          {Calendar.strftime(user_note.inserted_at, "%Y-%m-%d %H:%M:%S")}
+
+          <span :if={user_note.inserted_at != user_note.updated_at} class="ml-4">
+            Edited at: {Calendar.strftime(user_note.updated_at, "%Y-%m-%d %H:%M:%S")}
+          </span>
+
+          <span class="ml-4">
+            ({user_note.permission})
+          </span>
+        </span>
+        <div :if={allow?(@scope, user_note.permission)} class="user-note-contents mt-2">
+          {Phoenix.HTML.raw(MDEx.to_html!(user_note.contents))}
+        </div>
+      </div>
+    </div>
     """
   end
 
@@ -551,7 +623,8 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         :smurf_of,
         :user_stat,
         :data,
-        :password
+        :password,
+        :notes
       ])
       |> Jason.encode!(pretty: true)
 

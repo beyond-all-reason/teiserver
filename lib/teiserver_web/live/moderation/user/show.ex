@@ -1,12 +1,16 @@
 defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
+  alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Account.UserNote
+  alias Teiserver.Account.UserNoteQueries
   alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
   alias TeiserverWeb.ModerationLive.User.FormNameComponent
+  alias TeiserverWeb.ModerationLive.User.UserNoteFormComponent
   alias TeiserverWeb.ModerationLive.UserComponents
 
   use TeiserverWeb, :live_view
@@ -22,7 +26,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   end
 
   @impl LiveView
-  def handle_params(%{"id" => id}, _url, socket) when is_connected?(socket) do
+  def handle_params(%{"id" => id} = params, _url, socket) when is_connected?(socket) do
     user =
       UserQueries.users()
       |> UserQueries.where_id(id)
@@ -35,10 +39,11 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       |> insert_recently(socket)
 
       socket
-      |> assign(user: user, page_title: "User details: #{user.name}")
+      |> assign(user: user, page_title: "User details: #{user.name}", user_id: id)
       |> switch_tab(@tab1_default, "1")
       |> switch_tab(@tab2_default, "2")
       |> set_user_alerts()
+      |> apply_action(socket.assigns.live_action, params)
       |> noreply()
     else
       if user do
@@ -55,14 +60,15 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     end
   end
 
-  def handle_params(_params, _url, socket) do
+  def handle_params(%{"id" => id}, _url, socket) do
     socket
     |> assign(
       user: nil,
       page_title: "User details",
       alerts: [],
       tab1: "details",
-      tab2: "actions"
+      tab2: "actions",
+      user_id: id
     )
     |> noreply()
   end
@@ -71,6 +77,49 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   def handle_event("switch-tab", %{"tab" => tab, "tabset" => tabset}, %Socket{} = socket) do
     socket
     |> switch_tab(tab, tabset)
+    |> noreply()
+  end
+
+  def handle_event(
+        "delete-user_note",
+        %{"user_note_id" => user_note_id},
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope} = assigns
+    user_note = Account.get_user_note!(user_note_id)
+
+    allowed? = user_note.creator_id == assigns.scope.user.id or allow?(assigns.scope, "Admin")
+
+    result =
+      Repo.transact(fn ->
+        with true <- allowed?,
+             {:ok, _user_note} <- Account.delete_user_note(user_note),
+             %{} <-
+               add_audit_log(scope, "Delete UserNote", %{
+                 user_note_id: user_note.id,
+                 user_id: user_note.user_id
+               }) do
+          {:ok, :success}
+        else
+          _error -> {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user_note.user_id}")
+        |> put_flash(:success, "User note deleted")
+        |> switch_tab("notes", nil)
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to delete user note")
+        |> noreply()
+    end
+
+    socket
     |> noreply()
   end
 
@@ -154,6 +203,20 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     |> stream(:audit_logs, audit_logs, reset: true)
   end
 
+  defp switch_tab(%Socket{assigns: %{user: user}} = socket, "notes", tabset) do
+    user_notes =
+      UserNoteQueries.user_notes()
+      |> UserNoteQueries.where_user_id(user.id)
+      |> UserNoteQueries.load_creator()
+      |> UserNoteQueries.order_by_inserted_at(:desc)
+      |> QueryHelpers.limit_query(100)
+      |> Repo.all()
+
+    socket
+    |> assign_tabset("notes", tabset)
+    |> stream(:user_notes, user_notes, reset: true)
+  end
+
   defp assign_tabset(socket, tab, "1") do
     socket
     |> assign(tab1: tab)
@@ -163,4 +226,36 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     socket
     |> assign(tab2: tab)
   end
+
+  defp assign_tabset(socket, _tab, nil) do
+    socket
+  end
+
+  defp apply_action(%Socket{} = socket, :edit_note, %{"user_note_id" => user_note_id}) do
+    user_note = Account.get_user_note!(user_note_id)
+    %{user: user, scope: scope} = socket.assigns
+
+    cond do
+      user_note.user_id != user.id ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+
+      user_note.creator_id != scope.user.id and not allow?(scope, "Admin") ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+
+      true ->
+        socket
+        |> assign(:page_title, "Edit user note")
+        |> assign(:user_note, user_note)
+    end
+  end
+
+  defp apply_action(%Socket{} = socket, :new_note, _params) do
+    socket
+    |> assign(:page_title, "New user note")
+    |> assign(:user_note, %UserNote{})
+  end
+
+  defp apply_action(%Socket{} = socket, _any, _params), do: socket
 end

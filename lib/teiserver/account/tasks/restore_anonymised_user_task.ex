@@ -15,6 +15,7 @@ defmodule Teiserver.Account.RestoreAnonymisedUserTask do
   alias Teiserver.Account
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserNote
   alias Teiserver.Moderation
   alias Teiserver.Moderation.AntiAbuseRecord
   alias Teiserver.Moderation.AntiAbuseRecordQueries
@@ -143,11 +144,17 @@ defmodule Teiserver.Account.RestoreAnonymisedUserTask do
     [
       {"microblog_posts", :poster_id, data["post_ids"]},
       {"microblog_uploads", :uploader_id, upload_ids_bytes},
-      {"teiserver_account_smurf_keys", :user_id, data["smurf_key_ids"]}
+      {"teiserver_account_smurf_keys", :user_id, data["smurf_key_ids"]},
+      {&restore_user_note/2, data["user_notes"]}
     ]
-    |> Enum.each(fn {table, field, ids} ->
-      query = "UPDATE #{table} SET #{field} = #{user_id} WHERE id = ANY($1);"
-      {:ok, _results} = SQL.query(Repo, query, [ids])
+    |> Enum.each(fn
+      {f, entries} when is_function(f) ->
+        inserts = Enum.map(entries, fn entry -> f.(user_id, entry) end)
+        Repo.insert_all(UserNote, inserts)
+
+      {table, field, ids} ->
+        query = "UPDATE #{table} SET #{field} = #{user_id} WHERE id = ANY($1);"
+        {:ok, _results} = SQL.query(Repo, query, [ids])
     end)
   end
 
@@ -160,5 +167,20 @@ defmodule Teiserver.Account.RestoreAnonymisedUserTask do
       },
       scope
     )
+  end
+
+  defp restore_user_note(user_id, %{} = note) do
+    {:ok, inserted_at} = NaiveDateTime.from_iso8601(note["inserted_at"] <> "Z")
+    {:ok, updated_at} = NaiveDateTime.from_iso8601(note["updated_at"] <> "Z")
+
+    %{
+      id: UUID.generate(),
+      user_id: user_id,
+      creator_id: note["creator_id"],
+      permission: note["permission"],
+      contents: note["contents"],
+      inserted_at: inserted_at,
+      updated_at: updated_at
+    }
   end
 end

@@ -196,6 +196,10 @@
   @apply text-sm leading-6 text-neutral/80 dark:text-neutral-content/80
 }
 
+.user-note-contents li {
+  @apply ml-4 list-disc;
+}
+
 /* Apex charts dark mode */
 .apexcharts-text, .apexcharts-menu-item, .apexcharts-legend-text {
   /* The legend doesn't apply as the style is being manually overriden by a style attribute I've not yet worked out how to remove */

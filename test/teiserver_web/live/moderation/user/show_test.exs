@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       {:ok, _live, html} = live(conn, ~p"/moderation/users/#{user.id}")
 
       # Strip out whitespace so it's on one line and easier to match correctly
-      html = String.replace(html, ~r/\s+/, " ")
+      html = normalise_text(html)
 
       assert html =~ ~s(<dd class="list-content-item"> #{user.name} </dd>)
     end
