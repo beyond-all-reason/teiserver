@@ -2101,6 +2101,20 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert not is_map_key(t1, :bots)
       assert not is_map_key(t2, :players)
     end
+
+    test "with an empty team" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([1, 1, 1]) |> Lobby.create()
+
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player("other-user-id"))
+      {:ok, _team_details} = Lobby.join_ally_team(id, "other-user-id", 2)
+
+      start_script = LobbyProcess.get_start_script(id)
+
+      assert %{ally_teams: [%{teams: [t1]}, %{teams: []}, %{teams: [t3]}]} = start_script
+      %{players: [%AT.Player{user_id: @default_user_id}]} = t1
+      %{players: [%AT.Player{user_id: "other-user-id"}]} = t3
+    end
   end
 
   defp mk_player(user_id) do

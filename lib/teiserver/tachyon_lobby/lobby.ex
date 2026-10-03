@@ -1616,11 +1616,23 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec gen_start_script(LT.Data.t()) :: AT.StartScript.t()
   defp gen_start_script(%LT.Data{} = state) do
+    number_of_ally_teams =
+      Map.values(state.players)
+      |> Enum.max_by(& &1.team)
+      |> Map.get(:team)
+      |> elem(0)
+
+    base_ally_teams = List.duplicate([], number_of_ally_teams + 1)
+
     sorted =
       Map.values(state.players)
       |> Enum.sort_by(& &1.team)
       |> Enum.group_by(&elem(&1.team, 0))
-      |> Map.values()
+
+    sorted =
+      Enum.reduce(sorted, base_ally_teams, fn {idx, players}, base ->
+        List.replace_at(base, idx, players)
+      end)
 
     ally_teams =
       for {at, %LT.AllyTeamConfig{} = at_config} <- Enum.zip(sorted, state.ally_team_config) do
