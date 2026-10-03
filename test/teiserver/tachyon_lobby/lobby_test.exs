@@ -1366,6 +1366,14 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
              ]
     end
 
+    test "teams must not be empty" do
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2]) |> Lobby.create()
+
+      {:error, _message} =
+        Lobby.update_properties(id, @default_user_id, %{ally_team_config: %{teams: []}})
+    end
+
     test "ally team config diff with less ally team teams" do
       {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([1, 1, 1]) |> Lobby.create()
