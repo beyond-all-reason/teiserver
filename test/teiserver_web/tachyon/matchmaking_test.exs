@@ -16,20 +16,24 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
 
   defp altair_attr(id),
-    do: %{
-      spring_name: "Altair Crossing Remake " <> id,
-      display_name: "Altair Crossing",
-      thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
-      matchmaking_queues: [id]
-    }
+    do:
+      %{
+        spring_name: "Altair Crossing Remake " <> id,
+        display_name: "Altair Crossing",
+        thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
+        matchmaking_queues: [id]
+      }
+      |> add_startboxes(2)
 
   defp rosetta_attr(id),
-    do: %{
-      spring_name: "Rosetta " <> id,
-      display_name: "Rosetta",
-      thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
-      matchmaking_queues: [id]
-    }
+    do:
+      %{
+        spring_name: "Rosetta " <> id,
+        display_name: "Rosetta",
+        thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
+        matchmaking_queues: [id]
+      }
+      |> add_startboxes(2)
 
   defp map_attrs(id),
     do: [altair_attr(id), rosetta_attr(id)]
@@ -109,7 +113,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       }
     ]
 
-    Map.put(attrs, :startboxes_set, boxes)
+    polygon_startboxes = %{
+      "mapmetadata_startpos" => "ImNvdWNvdSIK",
+      "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+    }
+
+    attrs
+    |> Map.put(:startboxes_set, boxes)
+    |> Map.update(:modoptions, polygon_startboxes, fn m -> Map.merge(polygon_startboxes, m) end)
   end
 
   defp mk_queue(attrs) do
@@ -839,6 +850,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+
+      assert %{
+               "gameOptions" => %{
+                 "mapmetadata_startpos" => "ImNvdWNvdSIK",
+                 "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+               }
+             } = data
+
       battle_id = data["battleId"]
 
       host_data = %{

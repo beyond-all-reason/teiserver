@@ -262,13 +262,18 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
           AT.StartScript.t()
   defp start_script(state, engine, game, map) do
-    %AT.StartScript{
+    res = %AT.StartScript{
       engine_version: engine.version,
       game_name: game,
       map_name: map.spring_name,
       start_pos_type: :ingame,
       ally_teams: get_ally_teams(state, map)
     }
+
+    case Asset.get_polygon_startboxes(map) do
+      nil -> res
+      modoptions -> %{res | game_options: modoptions}
+    end
   end
 
   @spec get_ally_teams(state(), Asset.Map.t()) :: [Autohost.ally_team(), ...]
