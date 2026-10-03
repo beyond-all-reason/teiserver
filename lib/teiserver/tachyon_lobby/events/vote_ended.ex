@@ -69,7 +69,7 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.VoteEnd
   defp apply_outcome(agg, outcome, _action) when outcome != :passed, do: agg
 
   defp apply_outcome(agg, :passed, {:change_map, new_map}),
-    do: Event.apply_event(%Events.UpdateMapName{new_map: new_map}, agg)
+    do: Events.UpdateMapName.new(new_map) |> Event.apply_event(agg)
 
   defp apply_outcome(agg, :passed, {:appoint_boss, boss_id}),
     do: Event.apply_event(%Events.UpdateBoss{action: :add, appointee_id: boss_id}, agg)

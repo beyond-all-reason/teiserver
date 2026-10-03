@@ -2,6 +2,7 @@ defmodule Teiserver.Asset.MapLib do
   @moduledoc false
   alias Ecto.Multi
   alias Teiserver.Asset
+  alias Teiserver.Asset.MapQueries
   alias Teiserver.Repo
 
   @spec icon :: String.t()
@@ -50,6 +51,27 @@ defmodule Teiserver.Asset.MapLib do
     case sb do
       nil -> nil
       sb -> Enum.map(sb["startboxes"], &poly_to_startbox/1)
+    end
+  end
+
+  @doc """
+  These are the special modoptions that control startboxes on the game side.
+  The strings are base64 encoded polygons, that shouldn't matter for teiserver
+  """
+  @type polystartbox_modoptions :: %{String.t() => String.t()}
+  @spec get_polygon_startboxes(Asset.Map.t() | String.t()) ::
+          polystartbox_modoptions() | nil
+  def get_polygon_startboxes(%Asset.Map{} = map) do
+    %{
+      "mapmetadata_startpos" => map.modoptions["mapmetadata_startpos"],
+      "mapmetadata_startboxes_set" => map.modoptions["mapmetadata_startboxes_set"]
+    }
+  end
+
+  def get_polygon_startboxes(spring_name) do
+    case MapQueries.get_map(spring_name) do
+      nil -> nil
+      %Asset.Map{} = map -> get_polygon_startboxes(map)
     end
   end
 

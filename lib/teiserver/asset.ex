@@ -53,6 +53,10 @@ defmodule Teiserver.Asset do
   @spec get_startboxes(Asset.Map.t(), number_of_teams :: non_neg_integer()) :: [startbox()] | nil
   defdelegate get_startboxes(map, number_of_teams), to: MapLib
 
+  @type polystartbox_modoptions :: MapLib.polystartbox_modoptions()
+  @spec get_polygon_startboxes(Asset.Map.t() | String.t()) :: polystartbox_modoptions() | nil
+  defdelegate get_polygon_startboxes(map), to: MapLib
+
   @spec get_engines() :: [Engine.t()]
   defdelegate get_engines(), to: EngineQueries
 
