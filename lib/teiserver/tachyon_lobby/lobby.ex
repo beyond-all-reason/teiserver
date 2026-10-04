@@ -1708,6 +1708,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
     end
   end
 
+  defp update_property(:ally_team_config, %{teams: []}, _state, _user_id) do
+    {:error, "empty ally team configuration"}
+  end
+
   defp update_property(:ally_team_config, new_config, state, _user_id) do
     {:ok,
      [%Events.UpdateAllyTeamConfig{old_config: state.ally_team_config, new_config: new_config}]}
