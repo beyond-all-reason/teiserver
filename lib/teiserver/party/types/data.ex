@@ -17,7 +17,6 @@ defmodule Teiserver.Party.Types.Data do
     :members,
     :max_members,
     invited: %{},
-    ids_to_rejoin: MapSet.new(),
     monitors: MC.new(),
     matchmaking: nil
   ]
@@ -27,7 +26,6 @@ defmodule Teiserver.Party.Types.Data do
           id: id(),
           monitors: MC.t(),
           members: %{User.id() => %{id: User.id(), joined_at: DateTime.t()}},
-          ids_to_rejoin: MapSet.t(User.id()),
           invited: %{User.id() => PT.Invite},
           matchmaking: nil | %{queues: [{Matchmaking.queue_id(), version :: String.t()}]},
           max_members: pos_integer()

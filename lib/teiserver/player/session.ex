@@ -8,23 +8,19 @@ defmodule Teiserver.Player.Session do
   """
 
   alias Phoenix.PubSub
-  alias Plug.Crypto
   alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Teiserver.Helpers.MonitorCollection, as: MC
-  alias Teiserver.KvStore
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Messaging
   alias Teiserver.Party
   alias Teiserver.Party.Types, as: PartyTypes
   alias Teiserver.Player.SessionRegistry
-  alias Teiserver.Player.SessionSupervisor
   alias Teiserver.Player.Types, as: PT
   alias Teiserver.Player.Types.MessagingState
-  alias Teiserver.Tachyon
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Types, as: LT
@@ -98,25 +94,6 @@ defmodule Teiserver.Player.Session do
       lobby_list_subscription: nil
     }
   end
-
-  @impl GenServer
-  def terminate(:shutdown, %PT.Data{} = state) do
-    if Tachyon.should_restore_state?() do
-      # store more stuff as we enable the restoration of
-      # more state at startup
-      to_save =
-        %{
-          user_id: state.user.id,
-          party: state.party,
-          lobby_id: get_in(state.lobby.id)
-        }
-        |> :erlang.term_to_binary()
-
-      KvStore.put("session", to_string(state.user.id), to_save)
-    end
-  end
-
-  def terminate(_reason, _state), do: nil
 
   ################################################################################
   #                                                                              #
@@ -573,120 +550,11 @@ defmodule Teiserver.Player.Session do
     send(session_pid, :flush_lobby_list_updates)
   end
 
-  def restore_sessions do
-    Teiserver.Tachyon.System.restore_state("session", __MODULE__, :restore_session)
-  end
-
-  def restore_session(_blob_key, blob_value) do
-    snapshot = Crypto.non_executable_binary_to_term(blob_value, [:safe])
-
-    SessionSupervisor.start_session_from_snapshot(snapshot.user_id, snapshot)
-  end
-
   ################################################################################
   #                                                                              #
   #                       INTERNAL MESSAGE HANDLERS                              #
   #                                                                              #
   ################################################################################
-
-  @impl GenServer
-  def handle_continue({:snapshot, snapshot}, _state) do
-    user = Account.get_user!(snapshot.user_id)
-
-    state = initial_empty_state(user)
-
-    with {:ok, state} <- restore_parties(state, snapshot.party),
-         {:ok, state} <- rejoin_lobby(state, snapshot.lobby_id) do
-      broadcast_user_update!(user, :menu)
-
-      Logger.debug("session restored from snapshot")
-
-      {:ok, _tref} = :timer.send_after(@connection_timeout, :connection_timeout)
-      {:noreply, state}
-    else
-      {:error, err} ->
-        Logger.warning("Could not restore session: #{inspect(err)}")
-        {:stop, :normal}
-    end
-  end
-
-  defp restore_parties(state, party_snapshot) do
-    with {:ok, state} <- rejoin_current_party(state, party_snapshot) do
-      rejoin_invite_parties(state, party_snapshot)
-    end
-  end
-
-  defp rejoin_current_party(state, party_snapshot) do
-    if party_snapshot.current_party == nil do
-      {:ok, state}
-    else
-      case Party.rejoin(party_snapshot.current_party, state.user.id) do
-        {:ok, %PartyTypes.Overview{} = party_state} ->
-          state =
-            state
-            |> Map.update!(:party, fn p ->
-              %{p | current_party: party_state.id, version: party_state.version}
-            end)
-            |> Map.update!(:monitors, &MC.monitor(&1, party_state.pid, :current_party))
-
-          {:ok, state}
-
-        x ->
-          x
-      end
-    end
-  end
-
-  defp rejoin_invite_parties(state, party_snapshot) do
-    result =
-      Enum.reduce_while(party_snapshot.invited_to, state, fn {_version, id}, state ->
-        case Party.rejoin(id, state.user.id) do
-          {:ok, %PartyTypes.Overview{} = party_state} ->
-            state =
-              state
-              |> update_in([Access.key!(:party), Access.key!(:invited_to)], fn invites ->
-                [{party_state.version, id} | invites]
-              end)
-              |> Map.update!(
-                :monitors,
-                &MC.monitor(&1, party_state.pid, {:invited_to_party, id})
-              )
-
-            {:cont, state}
-
-          x ->
-            # for simplicity, "undo" everything, even if not yet there
-            for id <- party_snapshot.invited_ids do
-              MC.demonitor_by_val(state.monitors, {:invited_to_party, id})
-            end
-
-            {:halt, x}
-        end
-      end)
-
-    case result do
-      {:error, err} -> {:error, err}
-      st -> {:ok, st}
-    end
-  end
-
-  defp rejoin_lobby(state, nil), do: {:ok, state}
-
-  defp rejoin_lobby(state, lobby_id) do
-    case TachyonLobby.rejoin(lobby_id, state.user.id) do
-      {:ok, lobby_pid, %LT.Details{} = details} ->
-        state =
-          state
-          |> Map.update!(:monitors, &MC.monitor(&1, lobby_pid, {:lobby, details.id}))
-          |> Map.put(:lobby, %{id: details.id})
-
-        {:ok, state}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
-  end
-
   @impl GenServer
   def handle_call({:replace, new_conn_pid}, _from, %PT.Data{} = state) do
     original_conn_pid = state.conn_pid

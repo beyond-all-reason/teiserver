@@ -1,9 +1,6 @@
 defmodule Teiserver.Party.PartyTest do
-  alias ExUnit.Callbacks
   alias Teiserver.Party
-  alias Teiserver.Party.Types, as: PT
   alias Teiserver.Support.Polling
-  alias Teiserver.Tachyon, as: TachyonLib
 
   use Teiserver.DataCase
 
@@ -12,96 +9,5 @@ defmodule Teiserver.Party.PartyTest do
   test "create party" do
     assert {:ok, %{id: party_id}} = Party.create_party(123)
     Polling.poll_until_some(fn -> Party.lookup(party_id) end)
-  end
-
-  describe "snapshot" do
-    setup [:setup_config]
-
-    test "restore party from snapshot" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id, pid: party_pid}} = Party.create_party(123, sink_pid)
-      Process.exit(sink_pid, :shutdown)
-
-      TachyonLib.restart_system()
-      Polling.poll_until(fn -> Process.alive?(party_pid) end, &(&1 == false))
-      Polling.poll_until_some(fn -> Party.lookup(party_id) end)
-    end
-
-    test "user leave after restoration tears down party" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id}} = Party.create_party(123, sink_pid)
-      Process.exit(sink_pid, :shutdown)
-
-      TachyonLib.restart_system()
-      {:ok, _party} = Party.rejoin(party_id, 123)
-      :ok = Party.leave_party(party_id, 123)
-      Polling.poll_until_nil(fn -> Party.lookup(party_id) end)
-    end
-
-    test "monitors are re-setup" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id}} = Party.create_party(123, sink_pid)
-      Process.exit(sink_pid, :shutdown)
-
-      TachyonLib.restart_system()
-
-      sink_pid = mk_sink()
-      {:ok, _party} = Party.rejoin(party_id, 123, sink_pid)
-      Process.exit(sink_pid, :kill)
-      Polling.poll_until_nil(fn -> Party.lookup(party_id) end)
-    end
-
-    test "random user can't rejoin" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id}} = Party.create_party(123, sink_pid)
-      Process.exit(sink_pid, :shutdown)
-
-      TachyonLib.restart_system()
-      assert {:error, :not_a_member} = Party.rejoin(party_id, 456)
-    end
-
-    test "invited can rejoin" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id, pid: party_pid}} = Party.create_party(123, sink_pid)
-
-      sink_pid2 = mk_sink(:sink2)
-      {:ok, _invite} = Party.create_invite(party_id, 456, sink_pid2)
-
-      Process.exit(sink_pid, :shutdown)
-      Process.exit(sink_pid2, :shutdown)
-      :timer.sleep(10)
-
-      TachyonLib.restart_system()
-      Polling.poll_until(fn -> Process.alive?(party_pid) end, &(&1 == false))
-      Polling.poll_until_some(fn -> Party.lookup(party_id) end)
-
-      {:ok, _party} = Party.rejoin(party_id, 456)
-    end
-
-    test "timeout if no rejoin in time" do
-      sink_pid = mk_sink()
-      {:ok, %PT.Overview{id: party_id}} = Party.create_party(123, sink_pid)
-      Process.exit(sink_pid, :shutdown)
-
-      TachyonLib.set_restoration_timeout(0)
-      Callbacks.on_exit(fn -> TachyonLib.reset_restoration_timeout() end)
-
-      TachyonLib.restart_system()
-      # we are going to assume that 2ms is enough time for the party to be restored
-      # and then timeout. The actual restoration logic is already tested earlier in
-      # this file so assume it works
-      :timer.sleep(2)
-      Polling.poll_until_nil(fn -> Party.lookup(party_id) end)
-    end
-  end
-
-  def setup_config(_context) do
-    TachyonLib.enable_state_restoration()
-    Callbacks.on_exit(fn -> TachyonLib.disable_state_restoration() end)
-  end
-
-  defp mk_sink(name \\ :sink) do
-    Supervisor.child_spec({Task, fn -> :timer.sleep(:infinity) end}, id: name)
-    |> Callbacks.start_supervised!()
   end
 end
