@@ -2127,8 +2127,8 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       # we really care about is the correct assignment of start box to ally teams
       assert %{ally_teams: [at1, at3]} = start_script
 
-      %{startBox: ^startbox1, teams: [%{players: [%AT.Player{user_id: @default_user_id}]}]} = at1
-      %{startBox: ^startbox3, teams: [%{players: [%AT.Player{user_id: "other-user-id"}]}]} = at3
+      %{start_box: ^startbox1, teams: [%{players: [%AT.Player{user_id: @default_user_id}]}]} = at1
+      %{start_box: ^startbox3, teams: [%{players: [%AT.Player{user_id: "other-user-id"}]}]} = at3
     end
   end
 
