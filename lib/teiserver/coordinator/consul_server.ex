@@ -1320,7 +1320,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_user(name, state) do
     name = String.downcase(name)
 
-    case CacheUser.get_userid(name) do
+    case Account.get_userid_from_name(name) do
       nil ->
         # Try partial search of players in lobby
         battle = Lobby.get_lobby(state.lobby_id)

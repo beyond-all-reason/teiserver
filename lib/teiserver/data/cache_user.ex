@@ -466,8 +466,8 @@ defmodule Teiserver.CacheUser do
   @spec get_username(User.id()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
 
-  @spec get_userid(String.t()) :: integer() | nil
-  defdelegate get_userid(username), to: UserCacheLib
+  @spec get_userid_from_name(String.t()) :: integer() | nil
+  defdelegate get_userid_from_name(username), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib

@@ -271,7 +271,7 @@ defmodule Teiserver.Lobby.ChatLib do
       if bot? do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
           [_full_match, username, remainder] ->
-            userid = CacheUser.get_userid(username) || user.id
+            userid = Account.get_userid_from_name(username) || user.id
             {userid, "g: #{remainder}"}
 
           _no_match ->

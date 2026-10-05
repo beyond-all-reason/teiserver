@@ -3,7 +3,6 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTaskTest do
 
   alias Teiserver.Account
   alias Teiserver.AccountFixtures
-  alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistServerDayTask
   use Teiserver.DataCase

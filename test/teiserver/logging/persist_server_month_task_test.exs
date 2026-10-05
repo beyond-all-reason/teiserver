@@ -2,9 +2,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMonthTaskTest do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.AccountFixtures
-  alias Teiserver.CacheUser
   alias Teiserver.Logging
   alias Teiserver.Logging.Tasks.PersistServerDayTask
   alias Teiserver.Logging.Tasks.PersistServerMonthTask

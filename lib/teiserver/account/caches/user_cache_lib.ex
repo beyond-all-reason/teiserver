@@ -24,11 +24,11 @@ defmodule Teiserver.Account.UserCacheLib do
     end
   end
 
-  @spec get_userid(String.t() | nil) :: User.id() | nil
-  def get_userid(nil), do: nil
-  def get_userid(""), do: nil
+  @spec get_userid_from_name(String.t() | nil) :: User.id() | nil
+  def get_userid_from_name(nil), do: nil
+  def get_userid_from_name(""), do: nil
 
-  def get_userid(username) do
+  def get_userid_from_name(username) do
     username = cachename(username)
 
     case Teiserver.cache_get(:users_lookup_id_with_name, username) do
@@ -41,7 +41,7 @@ defmodule Teiserver.Account.UserCacheLib do
             nil
 
           user ->
-            deprecated_recache_user(user)
+            recache_user(user)
             user.id
         end
 
@@ -56,7 +56,7 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def get_user_by_name(username) do
     username
-    |> get_userid()
+    |> get_userid_from_name()
     |> get_user_by_id()
   end
 

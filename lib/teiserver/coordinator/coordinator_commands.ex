@@ -408,7 +408,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     end)
     |> Enum.uniq()
     |> Enum.reduce(nil, fn target, party_id ->
-      case CacheUser.get_userid(target) do
+      case Account.get_userid_from_name(target) do
         nil ->
           CacheUser.send_direct_message(
             state.userid,
@@ -449,7 +449,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     end)
     |> Enum.uniq()
     |> Enum.each(fn target ->
-      case CacheUser.get_userid(target) do
+      case Account.get_userid_from_name(target) do
         nil ->
           :ok
 
