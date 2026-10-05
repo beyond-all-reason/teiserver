@@ -5,6 +5,8 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   across multiple node and focus on their own logic.
   """
 
+  alias Teiserver.Cluster
+
   @doc """
   When it is required to create a new gen_statem process wrapping the module,
   generally on a different node, it will be created under this supervisor.
@@ -31,6 +33,13 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
               :gen_statem.init_result(state_type :: term(), data :: term())
 
   @doc """
+  Optional callback to customize the routing key used with rendez vous hashing
+  to determine which node is the primary, and which nodes are the replica.
+  defaults to {wrapped_module, id}
+  """
+  @callback routing_key(id :: term()) :: term()
+
+  @doc """
   This is the same as c:gen_statem.handle_event/4
   """
   @callback handle_event(
@@ -39,6 +48,8 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
               current_state :: term(),
               data :: term()
             ) :: :gen_statem.event_handler_result(term())
+
+  @optional_callbacks [routing_key: 1]
 
   @doc """
   the internal data used by the wrapper module
@@ -81,10 +92,14 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
             raise "#{inspect(__MODULE__)} doesn't implement supervisor/0"
           end
 
-        DynamicSupervisor.start_child(sup, {__MODULE__, {id, init_arg}})
+        mfa = {DynamicSupervisor, :start_child, [sup, {__MODULE__, {id, init_arg}}]}
+        __MODULE__.routing_key(id) |> Cluster.primary_apply(mfa)
       end
 
       defoverridable start: 2
+
+      def routing_key(id), do: {__MODULE__, id}
+      defoverridable routing_key: 1
     end
   end
 
@@ -170,8 +185,8 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
     end
   end
 
-  # not a blind `defdelegate`, put a default timeout
-  def call(server_ref, request, timeout \\ :timer.seconds(5)) do
-    :gen_statem.call(server_ref, request, timeout)
+  def call({mod, id}, request, timeout \\ :timer.seconds(5)) do
+    mfa = {:gen_statem, :call, [mod.name(id), request, timeout]}
+    mod.routing_key(id) |> Cluster.primary_apply(mfa)
   end
 end
