@@ -106,20 +106,20 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   @impl :gen_statem
   def init({mod, id, init_args}) do
     case mod.init(init_args) do
-      {:ok, state, data} ->
+      {:ok, state, module_data} ->
         {:ok, state,
          %__MODULE__{
            mod: mod,
            id: id,
-           module_data: data
+           module_data: module_data
          }}
 
-      {:ok, state, data, actions} ->
+      {:ok, state, module_data, actions} ->
         {:ok, state,
          %__MODULE__{
            mod: mod,
            id: id,
-           module_data: data
+           module_data: module_data
          }, actions}
 
       :ignore ->
