@@ -4,25 +4,14 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   """
 
   alias Teiserver.Asset
+  alias Teiserver.Matchmaking.Config
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
 
   use DynamicSupervisor
 
-  def default_queues do
-    engines =
-      case Asset.get_engine(in_matchmaking: true) do
-        nil -> []
-        e -> [%{version: e.name}]
-      end
-
-    games =
-      case Asset.get_game(in_matchmaking: true) do
-        nil -> []
-        g -> [%{spring_game: g.name}]
-      end
-
+  def default_queues(engines, games) do
     [
       QueueServer.init_state(%{
         id: "1v1",
@@ -77,8 +66,39 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
     ]
   end
 
-  def get_queues() do
-    default_queues()
+  def test_queues(engines, games) do
+    [
+      QueueServer.init_state(%{
+        id: "test-1v1",
+        name: "Test 1v1",
+        team_size: 1,
+        team_count: 2,
+        engines: engines,
+        games: games,
+        maps: Asset.get_maps_for_queue("1v1"),
+        algo: :ignore_os
+      })
+    ]
+  end
+
+  def get_queues do
+    engines =
+      case Asset.get_engine(in_matchmaking: true) do
+        nil -> []
+        e -> [%{version: e.name}]
+      end
+
+    games =
+      case Asset.get_game(in_matchmaking: true) do
+        nil -> []
+        g -> [%{spring_game: g.name}]
+      end
+
+    if Config.test_queues_enabled?() do
+      default_queues(engines, games) ++ test_queues(engines, games)
+    else
+      default_queues(engines, games)
+    end
   end
 
   def start_queue!(state) do
