@@ -175,7 +175,6 @@
   {"lib/teiserver/tcp/spring/spring_tcp_server.ex", :invalid_contract},
   {"lib/teiserver_web/controllers/admin/lobby_controller.ex", :invalid_contract},
   {"lib/teiserver_web/controllers/admin/match_controller.ex", :invalid_contract},
-  {"lib/teiserver_web/controllers/admin/user_controller.ex", :invalid_contract},
   {"lib/teiserver_web/controllers/logging/aggregate_view_log_controller.ex", :invalid_contract},
   {"lib/teiserver_web/controllers/logging/match_log_controller.ex", :invalid_contract},
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex",
