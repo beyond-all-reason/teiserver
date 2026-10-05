@@ -512,7 +512,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("GETUSERID", username, msg_id, state) do
     if CacheUser.allow?(state.userid, :bot) do
       target = Account.get_user_by_name(username)
-      hash = target.lobby_hash
+      hash = Account.get_user_stat_data(target.id)["lobby_hash"]
       reply(:user_id, {username, hash, target.id}, msg_id, state)
     else
       state
