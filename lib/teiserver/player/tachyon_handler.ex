@@ -4,8 +4,8 @@ defmodule Teiserver.Player.TachyonHandler do
   """
 
   alias Teiserver.Account
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
-  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Helpers.Collections
@@ -53,7 +53,7 @@ defmodule Teiserver.Player.TachyonHandler do
     user = conn.assigns[:token].owner
 
     with addr when is_list(addr) <- :inet.ntoa(conn.remote_ip),
-         {:ok, user} <- CacheUser.tachyon_login(user, to_string(addr), lobby_client) do
+         {:ok, user} <- Login.tachyon_login(user, to_string(addr), lobby_client) do
       {:ok, %{user: user}}
     else
       {:error, :einval} ->
@@ -470,6 +470,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
     if user != nil do
       %{status: status} = Session.get_user_info(user.id)
+      country = Account.get_user_stat_data(user.id)["country"] || "??"
 
       resp =
         %{
@@ -477,7 +478,7 @@ defmodule Teiserver.Player.TachyonHandler do
           username: user.name,
           displayName: user.name,
           clanId: nil,
-          countryCode: user.country,
+          countryCode: country,
           status: status,
           roles: roles_to_tachyon(user.roles)
         }
@@ -1099,7 +1100,7 @@ defmodule Teiserver.Player.TachyonHandler do
         username: user.name,
         displayName: user.name,
         clanId: nil,
-        countryCode: user.country,
+        countryCode: Account.get_user_stat_data(user.id)["country"] || "??",
         status: :menu,
         party: party_state_to_tachyon(sess_state.party),
         invitedToParties: Enum.map(sess_state.invited_to_parties, &party_state_to_tachyon/1),

@@ -8,6 +8,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Login
   alias Teiserver.Account.RecacheUserStatsTask
   alias Teiserver.CacheUser
   alias Teiserver.Client
@@ -56,7 +57,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     account = make_and_cache_coordinator_account()
 
     {user, client} =
-      case CacheUser.internal_client_login(account.id) do
+      case Login.internal_client_login(account.id) do
         {:ok, user, client} -> {user, client}
         :error -> raise "No coordinator user found"
       end

@@ -1,9 +1,10 @@
 defmodule Teiserver.SpringAuthTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
+  alias Teiserver.Account.Registration
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.BitParse
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.TeiserverTestLib
   use Teiserver.ServerCase, async: false
@@ -504,7 +505,7 @@ CLIENTS test_room #{user.name}\n"
     )
 
     # Un-flood them
-    CacheUser.set_flood_level(userid, 0)
+    Login.set_flood_level(userid, 0)
     # And re-verify them
     Account.verify_user(userid)
 
@@ -628,7 +629,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      CacheUser.user_register_params_with_md5(
+      Registration.user_register_params_with_md5(
         "test_bad_id",
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
