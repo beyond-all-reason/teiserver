@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.TOTP
+  alias Teiserver.Account.TOTPLib
   alias Teiserver.Logging
   alias Teiserver.OAuth
 
@@ -151,9 +152,13 @@ defmodule TeiserverWeb.Account.SecurityController do
     user = Account.get_user!(conn.assigns.current_user.id)
     {_status, decoded_secret} = Base.decode32(totp_params["secret"])
 
-    case Account.validate_totp(decoded_secret, totp_params["otp"]) do
+    now = DateTime.utc_now()
+
+    case Account.validate_totp(decoded_secret, totp_params["otp"], now) do
       :ok ->
-        Account.set_secret(user.id, decoded_secret)
+        {:ok, totp} = Account.set_secret(user.id, decoded_secret)
+        TOTPLib.set_last_used(user.id, now)
+        TOTPLib.reset_wrong_otp_counter(totp)
 
         conn
         |> put_flash(:info, "MFA set successfully.")

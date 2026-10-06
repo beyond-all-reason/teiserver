@@ -1,6 +1,8 @@
 defmodule TeiserverWeb.Account.SecurityControllerTest do
   alias Phoenix.Flash
   alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.TOTPLib
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
   alias Teiserver.OAuth
@@ -74,6 +76,30 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
       conn = delete(conn, ~p"/teiserver/account/security/revoke_oauth/#{app.id}")
       assert redirected_to(conn) == ~p"/teiserver/account/security"
       assert Flash.get(conn.assigns.flash, :info)
+    end
+  end
+
+  describe "TOTP" do
+    setup do
+      {:ok, kw} =
+        GeneralTestLib.conn_setup(TeiserverTestLib.player_permissions())
+        |> TeiserverTestLib.conn_setup()
+
+      {:ok, conn: kw[:conn], user: kw[:user]}
+    end
+
+    test "sets last_used when MFA is enabled", %{conn: conn, user: user} do
+      secret = NimbleTOTP.secret()
+
+      post(conn, ~p"/teiserver/account/security/totp/update", %{
+        "totp" => %{
+          "secret" => Base.encode32(secret, padding: false),
+          "otp" => NimbleTOTP.verification_code(secret)
+        }
+      })
+
+      assert %DateTime{} = TOTPLib.get_last_used(user.id)
+      refute AuthLib.need_to_mfa_refresh?(user.id)
     end
   end
 

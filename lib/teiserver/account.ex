@@ -175,6 +175,10 @@ defmodule Teiserver.Account do
           :ok | {:error, :inactive | :invalid | :used}
   defdelegate validate_totp(user_or_secret, otp), to: TOTPLib
 
+  @spec validate_totp(User.t() | binary, String.t(), DateTime.t()) ::
+          :ok | {:error, :inactive | :invalid | :used}
+  defdelegate validate_totp(user_or_secret, otp, time), to: TOTPLib
+
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
 
