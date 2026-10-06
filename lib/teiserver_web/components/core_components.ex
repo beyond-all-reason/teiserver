@@ -177,8 +177,10 @@ defmodule TeiserverWeb.CoreComponents do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   def flash_group(assigns) do
+    # We set the z-index to 9999 because in some cases the toast is not correctly displaying
+    # over other elements even though it's a toast class
     ~H"""
-    <div class="toast toast-top toast-end mt-25">
+    <div class="toast toast-top toast-end mt-25 z-9999">
       <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
       <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
       <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
