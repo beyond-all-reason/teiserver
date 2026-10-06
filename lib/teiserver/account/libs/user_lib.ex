@@ -5,12 +5,12 @@ defmodule Teiserver.Account.UserLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Registration
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserQueries
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.EmailHelper
@@ -60,7 +60,7 @@ defmodule Teiserver.Account.UserLib do
       |> Map.new(fn r -> {r, 1} end)
 
     %{
-      "play_time_rank" => user.rank
+      "play_time_rank" => Account.get_user_stat_data(user.id)["rank"] || 0
     }
     |> Map.merge(role_icons)
   end
@@ -187,7 +187,7 @@ defmodule Teiserver.Account.UserLib do
       |> broadcast_create_user()
 
     case res do
-      {:ok, user} -> {:ok, CacheUser.post_user_creation_actions(user, ip)}
+      {:ok, user} -> {:ok, Registration.post_user_creation_actions(user, ip)}
       err -> err
     end
   end

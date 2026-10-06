@@ -7,6 +7,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
@@ -631,7 +632,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
-        CacheUser.set_flood_level(userid, 100)
+        Login.set_flood_level(userid, 100)
         Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
@@ -780,7 +781,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         player_count = Battle.get_lobby_player_count(state.lobby_id)
 
         if player_count >= 7 do
-          if user.chobby_hash == nil do
+          if Account.get_user_stat_data(user.id)["chobby_hash"] == nil do
             %{new_client | player: false}
           else
             new_client

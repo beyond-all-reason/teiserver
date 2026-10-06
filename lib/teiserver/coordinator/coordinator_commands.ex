@@ -259,7 +259,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           if Auth.admin?(sender) or Auth.moderator?(sender) do
             # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
             # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-            # rank_time = CacheUser.rank_time(user.id)
+            # rank_time = Login.rank_time(user.id)
 
             smurfs =
               Account.smurf_search(user)
