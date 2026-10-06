@@ -103,7 +103,7 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item
               :if={allow?(@current_user, "Moderator")}
               text="Users"
-              route={~p"/teiserver/admin/user"}
+              route={~p"/moderation/users"}
               active={@active == "teiserver_user"}
             />
 

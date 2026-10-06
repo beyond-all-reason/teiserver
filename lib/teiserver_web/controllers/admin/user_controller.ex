@@ -202,6 +202,7 @@ defmodule TeiserverWeb.Admin.UserController do
             :user_configs,
             :smurf_of,
             :user_stat,
+            :notes,
             :data
           ])
 

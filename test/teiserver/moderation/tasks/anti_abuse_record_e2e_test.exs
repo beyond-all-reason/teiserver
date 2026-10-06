@@ -97,7 +97,6 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
              )
 
       # Now can we restore it?
-      # TODO actually restore it, for now we just want to ensure the decode process works
       restore_data =
         RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
@@ -106,7 +105,8 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
                 %{
                   "post_ids" => [],
                   "upload_ids" => [],
-                  "smurf_key_ids" => []
+                  "smurf_key_ids" => [],
+                  "user_notes" => []
                 }}
     end
   end
@@ -130,6 +130,9 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
     user_upload1 = MicroblogFixtures.upload_fixture(%{uploader_id: user.id})
     user_upload2 = MicroblogFixtures.upload_fixture(%{uploader_id: user.id})
     _admin_upload = MicroblogFixtures.upload_fixture(%{uploader_id: admin.id})
+
+    %{creator_id: note1_creator_id} = AccountFixtures.user_note_fixture(%{user_id: user.id})
+    %{creator_id: note2_creator_id} = AccountFixtures.user_note_fixture(%{user_id: user.id})
 
     # Need to define this as a value since we can't later use it inside
     # a match
@@ -208,15 +211,19 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
 
     # Dry run restore, full tests for post-processing exist in
     # Teiserver.Account.GDPRAnonymiseTaskTest
-    restore_data =
+    {:ok, restore_data} =
       RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
-    assert restore_data ==
-             {:ok,
-              %{
-                "post_ids" => [user_post1.id, user_post2.id],
-                "upload_ids" => Enum.sort([user_upload1.id, user_upload2.id]),
-                "smurf_key_ids" => [user_key1.id, user_key2.id]
-              }}
+    data_keys = restore_data |> Map.keys() |> Enum.sort()
+    assert data_keys == ["post_ids", "smurf_key_ids", "upload_ids", "user_notes"]
+
+    assert restore_data["post_ids"] == [user_post1.id, user_post2.id]
+    assert restore_data["upload_ids"] == Enum.sort([user_upload1.id, user_upload2.id])
+    assert restore_data["smurf_key_ids"] == [user_key1.id, user_key2.id]
+
+    assert match?(
+             [%{"creator_id" => ^note1_creator_id}, %{"creator_id" => ^note2_creator_id}],
+             restore_data["user_notes"]
+           )
   end
 end

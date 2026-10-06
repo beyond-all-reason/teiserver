@@ -64,6 +64,10 @@ defmodule Teiserver.Admin.DeleteUserTask do
       "DELETE FROM moderation_bans WHERE source_id = ANY($1)",
       "UPDATE moderation_bans SET added_by_id = #{system_user_id} WHERE added_by_id = ANY($1)",
 
+      # Notes
+      "DELETE FROM user_notes WHERE user_id = ANY($1)",
+      "UPDATE user_notes SET creator_id = #{system_user_id} WHERE creator_id = ANY($1)",
+
       # User prefs
       "DELETE FROM microblog_user_preferences WHERE user_id = ANY($1)"
     ]
