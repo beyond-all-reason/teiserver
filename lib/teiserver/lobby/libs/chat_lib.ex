@@ -255,8 +255,8 @@ defmodule Teiserver.Lobby.ChatLib do
     end
   end
 
-  @spec persist_message(T.user(), String.t(), T.lobby_id(), atom) :: any
-  def persist_message(user, msg, lobby_id, type) do
+  @spec persist_message(User.t(), String.t(), T.lobby_id(), atom) :: any
+  def persist_message(%User{} = user, msg, lobby_id, type) do
     lobby = Lobby.get_lobby(lobby_id)
     bot? = Auth.is_bot?(user)
 
@@ -271,7 +271,7 @@ defmodule Teiserver.Lobby.ChatLib do
       if bot? do
         case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
           [_full_match, username, remainder] ->
-            userid = CacheUser.get_userid(username) || user.id
+            userid = Account.get_userid_from_name(username) || user.id
             {userid, "g: #{remainder}"}
 
           _no_match ->

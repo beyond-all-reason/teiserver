@@ -18,17 +18,17 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_username_by_id(userid) do
     userid = int_parse(userid)
 
-    case deprecated_get_user_by_id(userid) do
+    case get_user_by_id(userid) do
       nil -> nil
       user -> user.name
     end
   end
 
-  @spec get_userid(String.t() | nil) :: User.id() | nil
-  def get_userid(nil), do: nil
-  def get_userid(""), do: nil
+  @spec get_userid_from_name(String.t() | nil) :: User.id() | nil
+  def get_userid_from_name(nil), do: nil
+  def get_userid_from_name(""), do: nil
 
-  def get_userid(username) do
+  def get_userid_from_name(username) do
     username = cachename(username)
 
     case Teiserver.cache_get(:users_lookup_id_with_name, username) do
@@ -41,7 +41,7 @@ defmodule Teiserver.Account.UserCacheLib do
             nil
 
           user ->
-            deprecated_recache_user(user)
+            recache_user(user)
             user.id
         end
 
@@ -50,25 +50,23 @@ defmodule Teiserver.Account.UserCacheLib do
     end
   end
 
-  @spec deprecated_get_user_by_name(String.t() | nil) :: T.user() | nil
-  def deprecated_get_user_by_name(nil), do: nil
-  def deprecated_get_user_by_name(""), do: nil
+  @spec get_user_by_name(String.t() | nil) :: User.t() | nil
+  def get_user_by_name(nil), do: nil
+  def get_user_by_name(""), do: nil
 
-  def deprecated_get_user_by_name(username) do
+  def get_user_by_name(username) do
     username
-    |> get_userid()
-    |> deprecated_get_user_by_id()
+    |> get_userid_from_name()
+    |> get_user_by_id()
   end
 
-  @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
-  def deprecated_get_user_by_email(nil), do: nil
-  def deprecated_get_user_by_email(""), do: nil
+  @spec get_user_by_email(String.t()) :: User.t() | nil
+  def get_user_by_email(nil), do: nil
+  def get_user_by_email(""), do: nil
 
-  def deprecated_get_user_by_email(email) do
-    cachename_email = cachename(email)
-
+  def get_user_by_email(email) do
     id =
-      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
+      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename(email), fn ->
         user =
           Account.query_user(
             search: [
@@ -82,12 +80,12 @@ defmodule Teiserver.Account.UserCacheLib do
             nil
 
           %{id: id} ->
-            deprecated_recache_user(id)
+            recache_user(id)
             id
         end
       end)
 
-    deprecated_get_user_by_id(id)
+    get_user_by_id(id)
   end
 
   @spec deprecated_get_user_by_id(User.id() | nil) :: T.user() | nil
@@ -97,17 +95,45 @@ defmodule Teiserver.Account.UserCacheLib do
   def deprecated_get_user_by_id(id) do
     id = int_parse(id)
 
-    case Teiserver.cache_get(:users, id) do
+    case Teiserver.cache_get(:deprecated_users, id) do
       nil ->
         deprecated_recache_user(id)
-        Teiserver.cache_get(:users, id)
+        Teiserver.cache_get(:deprecated_users, id)
 
       user ->
         user
     end
   end
 
-  @spec get_userid_by_discord_id(String.t() | nil) :: User.id() | nil
+  @doc """
+  Attempts to get the user from the cache, failing that it will get it from the database.
+
+  Returns nil if no user found.
+  """
+  @spec get_user_by_id(User.id() | String.t()) :: User.t() | nil
+  def get_user_by_id(user_id) do
+    case User.parse_user_id(user_id) do
+      {:ok, user_id} ->
+        case Teiserver.cache_get(:users_by_id, user_id) do
+          nil -> recache_user(user_id)
+          user -> user
+        end
+
+      {:error, _reason} ->
+        nil
+    end
+  end
+
+  @doc """
+  Identical to `get_user_by_id/1` but with a raise instead of a nil result in the event of
+  no user found in the database.
+  """
+  @spec get_user_by_id!(User.id() | String.t()) :: User.t()
+  def get_user_by_id!(user_id) do
+    get_user_by_id(user_id) || raise "No user of the ID #{inspect(user_id)}"
+  end
+
+  @spec get_userid_by_discord_id(integer() | nil) :: User.id() | nil
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
@@ -125,26 +151,30 @@ defmodule Teiserver.Account.UserCacheLib do
           nil
 
         %{id: id} ->
-          deprecated_recache_user(id)
+          recache_user(id)
           id
       end
     end)
   end
 
-  @spec deprecated_get_user_by_discord_id(String.t() | nil) :: T.user() | nil
-  def deprecated_get_user_by_discord_id(nil), do: nil
-  def deprecated_get_user_by_discord_id(""), do: nil
+  @spec get_user_by_discord_id(integer() | String.t() | nil) :: User.t() | nil
+  def get_user_by_discord_id(nil), do: nil
+  def get_user_by_discord_id(""), do: nil
 
-  def deprecated_get_user_by_discord_id(discord_id) do
-    discord_id
-    |> get_userid_by_discord_id()
-    |> deprecated_get_user_by_id()
+  def get_user_by_discord_id(discord_id) when is_binary(discord_id) do
+    int_parse(discord_id) |> get_user_by_discord_id()
   end
 
-  @spec deprecated_list_users(list) :: list
-  def deprecated_list_users(id_list) do
+  def get_user_by_discord_id(discord_id) do
+    discord_id
+    |> get_userid_by_discord_id()
+    |> get_user_by_id()
+  end
+
+  @spec list_users_by_ids(list) :: list
+  def list_users_by_ids(id_list) do
     id_list
-    |> Enum.map(&deprecated_get_user_by_id/1)
+    |> Enum.map(&get_user_by_id/1)
     |> Enum.filter(fn user -> user != nil end)
   end
 
@@ -152,10 +182,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def deprecated_recache_user(nil), do: :ok
 
   def deprecated_recache_user(%{id: id} = user) do
-    Teiserver.cache_delete(:account_user_cache, id)
-    Teiserver.cache_delete(:account_user_cache_bang, id)
-    Teiserver.cache_delete(:account_membership_cache, id)
-    Teiserver.cache_delete(:config_user_cache, id)
+    Teiserver.cache_delete(:deprecated_config_user_cache, id)
 
     Account.decache_relationships(id)
 
@@ -168,6 +195,31 @@ defmodule Teiserver.Account.UserCacheLib do
 
   def deprecated_recache_user(id) when is_integer(id) do
     Account.get_user(id) |> deprecated_recache_user()
+  end
+
+  @spec recache_user(User.id() | User.t() | nil) :: User.t() | nil
+  def recache_user(nil), do: nil
+
+  def recache_user(%User{id: id} = user) do
+    # Decache
+    Teiserver.cache_delete(:config_user_cache, id)
+
+    Account.decache_relationships(id)
+
+    # Recache
+    Teiserver.cache_put(:users_by_id, id, user)
+    Teiserver.cache_put(:users_lookup_id_with_name, cachename(user.name), id)
+    Teiserver.cache_put(:users_lookup_id_with_email, cachename(user.email), id)
+
+    if user.discord_id do
+      Teiserver.cache_put(:users_lookup_id_with_discord, user.discord_id, id)
+    end
+
+    user
+  end
+
+  def recache_user(id) when is_integer(id) do
+    Account.get_user(id) |> recache_user()
   end
 
   @doc """
@@ -263,7 +315,7 @@ defmodule Teiserver.Account.UserCacheLib do
           CacheUser.t() | map()
   def deprecated_update_user(user, opts \\ []) do
     persist = Keyword.get(opts, :persist, false)
-    Teiserver.cache_put(:users, user.id, user)
+    Teiserver.cache_put(:deprecated_users, user.id, user)
     if persist, do: persist_user(user)
     user
   end
@@ -272,7 +324,7 @@ defmodule Teiserver.Account.UserCacheLib do
   def update_cache_user(userid, data) do
     user = deprecated_get_user_by_id(userid)
     new_user = Map.merge(user, data)
-    Teiserver.cache_put(:users, user.id, new_user)
+    Teiserver.cache_put(:users_by_id, user.id, new_user)
     persist_user(new_user)
     new_user
   end
@@ -282,7 +334,8 @@ defmodule Teiserver.Account.UserCacheLib do
   and we want to ensure these caches are cleared correctly.
   """
   def decache_user_on_ok({:ok, %User{} = _new_user} = result, %User{} = old_user) do
-    Teiserver.cache_delete(:users, old_user.id)
+    Teiserver.cache_delete(:users_by_id, old_user.id)
+    Teiserver.cache_delete(:deprecated_users, old_user.id)
     Teiserver.cache_delete(:users_lookup_id_with_name, cachename(old_user.name))
     Teiserver.cache_delete(:users_lookup_id_with_email, cachename(old_user.email))
 
@@ -300,12 +353,7 @@ defmodule Teiserver.Account.UserCacheLib do
     user = deprecated_get_user_by_id(userid)
 
     if user do
-      # This is used by the UserLib, to prevent us having to have both functions
-      # call the other we instead have the UserLib call here and once this is removed
-      # we just need to remove the call to this.
       Teiserver.cache_delete(:users_by_id, user.id)
-
-      Teiserver.cache_delete(:users, user.id)
       Teiserver.cache_delete(:users_lookup_id_with_name, cachename(user.name))
       Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
 

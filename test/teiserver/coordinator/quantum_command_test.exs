@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.QuantumCommandTest do
 
     lobby_id = TeiserverTestLib.make_lobby()
     lobby = Lobby.get_lobby(lobby_id)
-    host = Account.deprecated_get_user_by_id(lobby.founder_id)
+    host = Account.get_user_by_id(lobby.founder_id)
 
     u1 =
       AccountFixtures.user_fixture(%{

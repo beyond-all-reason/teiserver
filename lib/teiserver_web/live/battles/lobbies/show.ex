@@ -4,7 +4,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.CacheUser
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.Parser, as: CoordinatorParser
   alias Teiserver.Helper.StylingHelper
@@ -122,7 +121,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   defp get_user_and_clients(id_list, consul_state) do
     users =
-      CacheUser.deprecated_list_users(id_list)
+      Account.list_users_by_ids(id_list)
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =

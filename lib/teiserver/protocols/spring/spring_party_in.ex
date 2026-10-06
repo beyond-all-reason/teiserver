@@ -2,7 +2,6 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Protocols.SpringOut
 
   require Logger
@@ -39,7 +38,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     cmd_id = "c.party.invite_to_party"
 
     with [username] <- String.split(data) |> Enum.map(&String.trim/1),
-         user when not is_nil(user) <- UserCacheLib.deprecated_get_user_by_name(username),
+         user when not is_nil(user) <- Account.get_user_by_name(username),
          # this check isn't great, it should be done in the party server
          # which is the source of truth for parties, but I'm taking a shortcut
          :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
@@ -126,7 +125,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     cmd_id = "c.party.cancel_invite_to_party"
 
     with [username] <- String.split(data) |> Enum.map(&String.trim/1),
-         user when not is_nil(user) <- UserCacheLib.deprecated_get_user_by_name(username),
+         user when not is_nil(user) <- Account.get_user_by_name(username),
          :ok <- if(state.party_id != nil, do: :ok, else: :not_in_party),
          :ok <- if(Account.client_exists?(user.id), do: :ok, else: :no_client) do
       party_id = state.party_id
@@ -209,7 +208,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         %{event: :updated_values, party_id: party_id, operation: {:member_added, userid}},
         state
       ) do
-    case UserCacheLib.deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil -> state
       user -> SpringOut.reply(:party, :member_added, {party_id, user.name}, message_id(), state)
     end
@@ -224,7 +223,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
       end
 
-      case UserCacheLib.deprecated_get_user_by_id(user_id) do
+      case Account.get_user_by_id(user_id) do
         nil ->
           state
 
@@ -240,7 +239,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         %{event: :updated_values, party_id: party_id, operation: {:member_removed, userid}},
         state
       ) do
-    case UserCacheLib.deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         state
 
@@ -253,7 +252,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
         %{event: :updated_values, party_id: party_id, operation: {:invite_created, userid}},
         state
       ) do
-    case UserCacheLib.deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         state
 
@@ -269,7 +268,7 @@ defmodule Teiserver.Protocols.Spring.PartyIn do
     :ok = PubSub.unsubscribe(Teiserver.PubSub, "teiserver_party:#{party_id}")
 
     # chobby would like to receive a member_left message when the last member leaves
-    case UserCacheLib.deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         state
 

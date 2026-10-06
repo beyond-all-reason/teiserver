@@ -20,7 +20,7 @@ defmodule Teiserver.Account.CalculateSmurfKeyTask do
     calculate_string_fingerprint(base)
   end
 
-  def calculate_apply_keys(stats, user) do
+  def calculate_apply_keys(stats, user_id) do
     for {keys, index} <-
           Enum.with_index(
             [
@@ -32,7 +32,7 @@ defmodule Teiserver.Account.CalculateSmurfKeyTask do
             1
           ) do
       hwkey = join_and_hash(stats, keys)
-      Account.create_smurf_key(user.id, "hw#{index}", hwkey)
+      Account.create_smurf_key(user_id, "hw#{index}", hwkey)
     end
   end
 end

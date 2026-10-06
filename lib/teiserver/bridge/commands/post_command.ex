@@ -107,7 +107,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
         "profile" ->
           name = args.value
 
-          case Account.deprecated_get_user_by_name(name) do
+          case Account.get_user_by_name(name) do
             nil ->
               "User \"#{name}\" not found"
 

@@ -276,7 +276,7 @@ defmodule Teiserver.CacheUser do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    existing_bot = deprecated_get_user_by_name(bot_name)
+    existing_bot = Account.get_user_by_name(bot_name)
 
     cond do
       allow?(bot_host_id, :moderator) == false ->
@@ -286,7 +286,7 @@ defmodule Teiserver.CacheUser do
         existing_bot
 
       true ->
-        host = deprecated_get_user_by_id(bot_host_id)
+        host = Account.get_user_by_id(bot_host_id)
 
         params =
           user_register_params_with_md5(bot_name, host.email, host.password, %{
@@ -394,9 +394,7 @@ defmodule Teiserver.CacheUser do
 
   @spec do_rename_user(User.id(), String.t()) :: :ok
   defp do_rename_user(userid, new_name) do
-    client = Account.get_client_by_id(userid)
-
-    user = deprecated_get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
     old_name = user.name
 
     set_flood_level(user.id, 10)
@@ -418,18 +416,10 @@ defmodule Teiserver.CacheUser do
     })
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
-    user = deprecated_get_user_by_id(userid)
-    decache_user(user.id)
+    user = Account.get_user_by_id(userid)
 
-    db_user = Account.get_user!(userid)
-    Account.update_user(db_user, %{"name" => new_name})
+    Account.update_user(user, %{"name" => new_name})
 
-    if client != nil do
-      :timer.sleep(5000)
-    end
-
-    Teiserver.cache_delete(:users_lookup_id_with_name, old_name)
-    deprecated_recache_user(userid)
     :ok
   end
 
@@ -453,7 +443,7 @@ defmodule Teiserver.CacheUser do
   def request_email_change(nil, _new_email), do: {:error, "no user"}
 
   def request_email_change(user, new_email) do
-    case deprecated_get_user_by_email(new_email) do
+    case Account.get_user_by_email(new_email) do
       nil ->
         code = :rand.uniform(899_999) + 100_000
         {:ok, deprecated_update_user(%{user | email_change_code: ["#{code}", new_email]})}
@@ -476,26 +466,14 @@ defmodule Teiserver.CacheUser do
   @spec get_username(User.id()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCacheLib
 
-  @spec get_userid(String.t()) :: integer() | nil
-  defdelegate get_userid(username), to: UserCacheLib
-
-  @spec deprecated_get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_name(username), to: UserCacheLib
-
-  @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_email(email), to: UserCacheLib
-
-  @spec deprecated_get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_discord_id(discord_id), to: UserCacheLib
+  @spec get_userid_from_name(String.t()) :: integer() | nil
+  defdelegate get_userid_from_name(username), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
   defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
-
-  @spec deprecated_list_users(list) :: list
-  defdelegate deprecated_list_users(id_list), to: UserCacheLib
 
   @spec deprecated_recache_user(Integer.t()) :: :ok
   defdelegate deprecated_recache_user(id), to: UserCacheLib
@@ -692,9 +670,9 @@ defmodule Teiserver.CacheUser do
     end
   end
 
-  @spec internal_client_login(User.id()) :: {:ok, T.user(), T.client()} | :error
+  @spec internal_client_login(User.id()) :: {:ok, User.t(), T.client()} | :error
   def internal_client_login(userid) do
-    case deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         :error
 
@@ -728,38 +706,36 @@ defmodule Teiserver.CacheUser do
       {:error, _bad_token} ->
         {:error, "token_login_failed"}
 
-      {:ok, db_user, _claims} ->
-        user = deprecated_get_user_by_id(db_user.id)
-
+      {:ok, user, _claims} ->
         cond do
           user.smurf_of_id != nil ->
-            Telemetry.log_complex_server_event(db_user.id, "Banned login", %{
+            Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Smurf"
             })
 
             {:error, @smurf_string}
 
-          not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
-          Account.restricted?(db_user, ["Permanently banned"]) ->
+          Account.restricted?(user, ["Permanently banned"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
-          Account.restricted?(db_user, ["Login"]) ->
+          Account.restricted?(user, ["Login"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
             {:error, @suspended_string}
 
-          not Auth.verified?(db_user) ->
+          not Auth.verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -786,7 +762,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              Auth.is_bot?(db_user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -796,7 +772,7 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not Auth.has_any_role?(db_user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
@@ -812,13 +788,11 @@ defmodule Teiserver.CacheUser do
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
 
-    case deprecated_get_user_by_name(username) do
+    case Account.get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
       user ->
-        db_user = Account.get_user(user.id)
-
         cond do
           user.smurf_of_id != nil ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
@@ -830,10 +804,10 @@ defmodule Teiserver.CacheUser do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          not Auth.is_bot?(db_user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(db_user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Rate limited?
@@ -845,7 +819,7 @@ defmodule Teiserver.CacheUser do
 
             {:error, "Flood protection"}
 
-          Account.verify_md5_password(md5_password, db_user.password) == false ->
+          Account.verify_md5_password(md5_password, user.password) == false ->
             if String.contains?(username, "@") do
               {:error,
                "Invalid password for username, check you are not using your email address as the name"}
@@ -853,21 +827,21 @@ defmodule Teiserver.CacheUser do
               {:error, "Invalid password"}
             end
 
-          Account.restricted?(db_user, ["Permanently banned"]) ->
+          Account.restricted?(user, ["Permanently banned"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Permanently banned"
             })
 
             {:error, "Banned account"}
 
-          Account.restricted?(db_user, ["Login"]) ->
+          Account.restricted?(user, ["Login"]) ->
             Telemetry.log_complex_server_event(user.id, "Banned login", %{
               error: "Suspended"
             })
 
             {:error, @suspended_string}
 
-          not Auth.verified?(db_user) ->
+          not Auth.verified?(user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
@@ -882,7 +856,7 @@ defmodule Teiserver.CacheUser do
           # This is also defined in UserLib but that imports CacheUser so we
           # repeat it here as we don't want a circular dependency and the plan is to remove
           # this module later.
-          not is_nil(db_user.gdpr_forget_after) ->
+          not is_nil(user.gdpr_forget_after) ->
             host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
             {:error, "You must login via the website to activate this account - #{host}/login"}
 
@@ -894,7 +868,7 @@ defmodule Teiserver.CacheUser do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              Auth.is_bot?(db_user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -904,7 +878,7 @@ defmodule Teiserver.CacheUser do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not Auth.has_any_role?(db_user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
@@ -920,9 +894,6 @@ defmodule Teiserver.CacheUser do
   def tachyon_login(user, ip, lobby_client) do
     lobby_hash = "tachyon_lobby_hash(maybe_useless)"
 
-    user = convert_user(user)
-    db_user = Account.get_user(user.id)
-
     cond do
       user.smurf_of_id != nil ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
@@ -937,7 +908,7 @@ defmodule Teiserver.CacheUser do
         :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{reason: :rate_limited})
         {:error, :rate_limited, "Flood protection - Please wait 20 seconds and try again"}
 
-      Account.restricted?(db_user, ["Permanently banned"]) ->
+      Account.restricted?(user, ["Permanently banned"]) ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Permanently banned"
         })
@@ -946,7 +917,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, "Banned account"}
 
-      Account.restricted?(db_user, ["Login"]) ->
+      Account.restricted?(user, ["Login"]) ->
         Telemetry.log_complex_server_event(user.id, "Banned login", %{
           error: "Suspended"
         })
@@ -955,7 +926,7 @@ defmodule Teiserver.CacheUser do
 
         {:error, @suspended_string}
 
-      not Auth.verified?(db_user) ->
+      not Auth.verified?(user) ->
         # Log them in to save some details we'd not otherwise get
         do_login(user, ip, lobby_client, lobby_hash)
 
@@ -972,7 +943,7 @@ defmodule Teiserver.CacheUser do
       # This is also defined in UserLib but that imports CacheUser so we
       # repeat it here as we don't want a circular dependency and the plan is to remove
       # this module later.
-      not is_nil(db_user.gdpr_forget_after) ->
+      not is_nil(user.gdpr_forget_after) ->
         host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
         {:error, "You must login via the website to activate this account - #{host}/login"}
 
@@ -1096,7 +1067,7 @@ defmodule Teiserver.CacheUser do
   def shadowbanned?(nil), do: true
 
   def shadowbanned?(userid) when is_integer(userid),
-    do: shadowbanned?(deprecated_get_user_by_id(userid))
+    do: shadowbanned?(Account.get_user_by_id(userid))
 
   def shadowbanned?(%{shadowbanned: true}), do: true
   def shadowbanned?(_user), do: false
@@ -1197,17 +1168,15 @@ defmodule Teiserver.CacheUser do
   def allow?(nil, _required), do: false
 
   def allow?(userid, required) when is_integer(userid),
-    do: allow?(deprecated_get_user_by_id(userid), required)
+    do: allow?(Account.get_user_by_id(userid), required)
 
-  def allow?(user, required) do
-    db_user = Account.get_user(user.id)
-
+  def allow?(%User{} = user, required) do
     case required do
       :moderator ->
-        Auth.admin?(db_user) or Auth.moderator?(db_user)
+        Auth.admin?(user) or Auth.moderator?(user)
 
       :bot ->
-        Auth.admin?(db_user) or Auth.moderator?(db_user) or Auth.is_bot?(db_user)
+        Auth.admin?(user) or Auth.moderator?(user) or Auth.is_bot?(user)
 
       required ->
         Enum.member?(user.permissions, required)

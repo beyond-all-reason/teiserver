@@ -4,7 +4,7 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   the development of anything requiring OAuth tokens like tachyon protocol.
   """
 
-  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account
   alias Teiserver.OAuth
   alias Teiserver.OAuth.ApplicationQueries
   alias Teiserver.OAuth.Token
@@ -35,9 +35,9 @@ defmodule Teiserver.OAuth.Tasks.GenToken do
   defp get_user(username_or_email) do
     user =
       if String.contains?(username_or_email, "@") do
-        UserCacheLib.deprecated_get_user_by_email(username_or_email)
+        Account.get_user_by_email(username_or_email)
       else
-        UserCacheLib.deprecated_get_user_by_name(username_or_email)
+        Account.get_user_by_name(username_or_email)
       end
 
     if is_nil(user) do

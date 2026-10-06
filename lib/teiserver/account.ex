@@ -2166,34 +2166,34 @@ defmodule Teiserver.Account do
   defdelegate get_username_by_id(userid), to: UserCacheLib
 
   @spec get_userid_from_name(String.t()) :: integer() | nil
-  def get_userid_from_name(name), do: UserCacheLib.get_userid(name)
+  def get_userid_from_name(name), do: UserCacheLib.get_userid_from_name(name)
 
-  @spec deprecated_get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_name(username), to: UserCacheLib
+  @spec get_user_by_name(String.t()) :: User.t() | nil
+  defdelegate get_user_by_name(username), to: UserCacheLib
 
-  @spec deprecated_get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_email(email), to: UserCacheLib
+  @spec get_user_by_email(String.t()) :: User.t() | nil
+  defdelegate get_user_by_email(email), to: UserCacheLib
 
-  @spec deprecated_get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_discord_id(discord_id), to: UserCacheLib
+  @spec get_user_by_discord_id(integer() | String.t()) :: User.t() | nil
+  defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_user_by_id(User.id()) :: User.t() | nil
-  defdelegate get_user_by_id(id), to: UserLib
+  defdelegate get_user_by_id(id), to: UserCacheLib
 
   @spec get_user_by_id!(User.id()) :: User.t()
-  defdelegate get_user_by_id!(id), to: UserLib
+  defdelegate get_user_by_id!(id), to: UserCacheLib
 
   @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
   defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
 
-  @spec list_users_from_cache(list) :: list
-  def list_users_from_cache(id_list), do: UserCacheLib.deprecated_list_users(id_list)
+  @spec list_users_by_ids(list) :: list
+  def list_users_by_ids(id_list), do: UserCacheLib.list_users_by_ids(id_list)
 
   @spec decache_user(User.t()) :: :ok
-  defdelegate decache_user(user_or_user_id), to: UserLib
+  defdelegate decache_user(user_or_user_id), to: UserCacheLib
 
   @spec deprecated_recache_user(User.id() | User.t()) :: :ok
   defdelegate deprecated_recache_user(id), to: UserCacheLib

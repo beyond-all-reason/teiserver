@@ -175,7 +175,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {userid, message} =
       case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
         [_full_match, username, remainder] ->
-          userid = CacheUser.get_userid(username) || userid
+          userid = Account.get_userid_from_name(username) || userid
           {userid, "g: #{remainder}"}
 
         _other ->

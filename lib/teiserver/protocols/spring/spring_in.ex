@@ -352,7 +352,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
-    case CacheUser.deprecated_get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
         state
@@ -509,11 +509,11 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  defp do_handle("GETUSERID", data, msg_id, state) do
+  defp do_handle("GETUSERID", username, msg_id, state) do
     if CacheUser.allow?(state.userid, :bot) do
-      target = CacheUser.deprecated_get_user_by_name(data)
-      hash = target.lobby_hash
-      reply(:user_id, {data, hash, target.id}, msg_id, state)
+      target = Account.get_user_by_name(username)
+      hash = Account.get_user_stat_data(target.id)["lobby_hash"]
+      reply(:user_id, {username, hash, target.id}, msg_id, state)
     else
       state
     end
@@ -667,7 +667,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "\t") do
       [target_name, _location_type, _location_id, reason] ->
         friend_list = Account.list_friend_ids_of_user(state.userid)
-        target_id = CacheUser.get_userid(target_name)
+        target_id = Account.get_userid_from_name(target_name)
 
         cond do
           Enum.member?(friend_list, target_id) ->
@@ -808,7 +808,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYPRIVATE", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/u, data) do
       [_full_match, to_name, msg] ->
-        to_id = CacheUser.get_userid(to_name)
+        to_id = Account.get_userid_from_name(to_name)
         CacheUser.send_direct_message(state.userid, to_id, msg)
         reply(:sent_direct_message, {to_id, msg}, msg_id, state)
 
@@ -993,7 +993,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("JOINBATTLEACCEPT", username, _msg_id, state) do
-    userid = CacheUser.get_userid(username)
+    userid = Account.get_userid_from_name(username)
     Lobby.accept_join_request(userid, state.lobby_id)
     state
   end
@@ -1005,7 +1005,7 @@ defmodule Teiserver.Protocols.SpringIn do
         [username] -> {username, "no reason given by lobby host user"}
       end
 
-    userid = CacheUser.get_userid(username)
+    userid = Account.get_userid_from_name(username)
     Lobby.deny_join_request(userid, state.lobby_id, reason)
     state
   end
@@ -1013,7 +1013,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("HANDICAP", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\d+)/, data) do
       [_full_match, username, value] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(value)
         Lobby.force_change_client(state.userid, client_id, %{handicap: value})
 
@@ -1082,7 +1082,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("KICKFROMBATTLE", username, _msg_id, state) do
     if Lobby.allow?(state.userid, :kickfrombattle, state.lobby_id) do
-      userid = CacheUser.get_userid(username)
+      userid = Account.get_userid_from_name(username)
       Lobby.kick_user_from_battle(userid, state.lobby_id)
     end
 
@@ -1093,7 +1093,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, player_number] ->
         if Lobby.allow?(state.userid, :player_number, state.lobby_id) do
-          client_id = CacheUser.get_userid(username)
+          client_id = Account.get_userid_from_name(username)
           value = int_parse(player_number)
           Lobby.force_change_client(state.userid, client_id, %{player_number: value})
         end
@@ -1108,7 +1108,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCEALLYNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, team_number] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(team_number)
         Lobby.force_change_client(state.userid, client_id, %{team_number: value})
 
@@ -1122,7 +1122,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCETEAMCOLOR", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, team_colour] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(team_colour)
         Lobby.force_change_client(state.userid, client_id, %{team_colour: value |> to_string()})
 
@@ -1134,7 +1134,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("FORCESPECTATORMODE", username, _msg_id, state) do
-    client_id = CacheUser.get_userid(username)
+    client_id = Account.get_userid_from_name(username)
     Lobby.force_change_client(state.userid, client_id, %{player: false})
 
     state
@@ -1295,7 +1295,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/u, data) do
       [_full_match, to_name, msg] ->
-        to_id = CacheUser.get_userid(to_name)
+        to_id = Account.get_userid_from_name(to_name)
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           msg_sliced =
@@ -1420,16 +1420,16 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("RING", data, _msg_id, state) do
     case String.split(data) do
       [sender, originator] ->
-        userid = CacheUser.get_userid(sender)
+        userid = Account.get_userid_from_name(sender)
         client = Client.get_client_by_id(state.userid)
 
         if client != nil and Auth.is_bot?(state.userid) do
-          originator_id = CacheUser.get_userid(originator)
+          originator_id = Account.get_userid_from_name(originator)
           CacheUser.ring(userid, originator_id)
         end
 
       _other ->
-        userid = CacheUser.get_userid(data)
+        userid = Account.get_userid_from_name(data)
         CacheUser.ring(userid, state.userid)
     end
 

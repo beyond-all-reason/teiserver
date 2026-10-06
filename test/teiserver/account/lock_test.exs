@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.UserCacheLibTest do
   alias Teiserver.Account
-  alias Teiserver.Account.UserCacheLib
 
   use Teiserver.DataCase, async: false
   import Teiserver.AccountFixtures, only: [user_fixture: 0]
@@ -15,7 +14,7 @@ defmodule Teiserver.Account.UserCacheLibTest do
         fn -> Account.get_userid_from_name(user.name) end
       ]
 
-      {deadlocks, at_round} = check_deadlocks(fn -> UserCacheLib.decache_user(user.id) end, fns)
+      {deadlocks, at_round} = check_deadlocks(fn -> Account.decache_user(user.id) end, fns)
 
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 
@@ -24,21 +23,21 @@ defmodule Teiserver.Account.UserCacheLibTest do
       assert Account.get_userid_from_name(user.name) == user.id
     end
 
-    test "get_username/1 and deprecated_get_user_by_email/" do
+    test "get_username/1 and get_user_by_email/" do
       user = user_fixture()
 
       fns = [
         fn -> Account.get_username(user.id) end,
-        fn -> Account.deprecated_get_user_by_email(user.email) end
+        fn -> Account.get_user_by_email(user.email) end
       ]
 
-      {deadlocks, at_round} = check_deadlocks(fn -> UserCacheLib.decache_user(user.id) end, fns)
+      {deadlocks, at_round} = check_deadlocks(fn -> Account.decache_user(user.id) end, fns)
 
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 
       # sanity check
       assert Account.get_username(user.id) == user.name
-      assert Account.deprecated_get_user_by_email(user.email).email == user.email
+      assert Account.get_user_by_email(user.email).email == user.email
     end
   end
 

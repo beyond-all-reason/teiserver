@@ -42,7 +42,7 @@ defmodule Teiserver.TeiserverTestLib do
   def new_user(name \\ nil, params \\ %{}) do
     name = name || new_user_name()
 
-    case CacheUser.deprecated_get_user_by_name(name) do
+    case Account.get_user_by_name(name) do
       nil ->
         {:ok, user} =
           CacheUser.user_register_params_with_md5(

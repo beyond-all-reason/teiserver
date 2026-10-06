@@ -46,9 +46,7 @@ defmodule Teiserver.Application do
 
         concache_sup(:lists),
         concache_sup(:codes),
-        concache_sup(:account_user_cache),
-        concache_sup(:account_user_cache_bang),
-        concache_sup(:account_membership_cache),
+        concache_sup(:config_user_cache),
         concache_sup(:account_friend_cache),
         concache_sup(:account_incoming_friend_request_cache),
         concache_sup(:account_outgoing_friend_request_cache),
@@ -65,7 +63,6 @@ defmodule Teiserver.Application do
         Teiserver.MetadataCache,
         Teiserver.Bridge.DiscordCacheSupervisor,
         concache_sup(:application_temp_cache),
-        concache_sup(:config_user_cache),
         Teiserver.General.RateLimit,
 
         # Teiserver stuff
@@ -98,14 +95,12 @@ defmodule Teiserver.Application do
         concache_sup(:teiserver_user_ratings, global_ttl: 60_000),
         concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
-        # New user caches
-        concache_perm_sup(:users_by_id),
-
         # Caches
         concache_perm_sup(:users_lookup_id_with_name),
         concache_perm_sup(:users_lookup_id_with_email),
         concache_perm_sup(:users_lookup_id_with_discord),
-        concache_perm_sup(:users),
+        concache_perm_sup(:users_by_id),
+        concache_perm_sup(:deprecated_users),
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),
         concache_sup(:user_mfa_active),

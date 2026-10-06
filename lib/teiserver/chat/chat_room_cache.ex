@@ -50,13 +50,13 @@ defmodule Teiserver.Room do
 
   @spec can_join_room?(User.id(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
-    user = Account.deprecated_get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
 
     cond do
       user == nil ->
         {false, "No user"}
 
-      Auth.admin?(userid) or Auth.moderator?(userid) == true ->
+      Auth.admin?(user) or Auth.moderator?(user) == true ->
         true
 
       true ->
