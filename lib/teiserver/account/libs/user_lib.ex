@@ -5,12 +5,14 @@ defmodule Teiserver.Account.UserLib do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserQueries
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.EmailHelper
@@ -405,6 +407,135 @@ defmodule Teiserver.Account.UserLib do
         |> UserCacheLib.decache_user_on_ok(user)
       end
     end)
+  end
+
+  @spec clean_name(String.t()) :: String.t()
+  def clean_name(name) do
+    ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
+    |> Regex.replace(name, "")
+  end
+
+  @spec check_symbol_limit(String.t()) :: boolean()
+  def check_symbol_limit(name) do
+    name
+    |> String.replace(~r/[[:alnum:]]/, "")
+    |> String.graphemes()
+    |> Enum.frequencies()
+    |> Enum.count(fn {_char, val} -> val > 2 end)
+    |> Kernel.>(0)
+  end
+
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
+  def rename_user(userid, new_name, admin_action \\ false) do
+    new_name = String.trim(new_name)
+    user = get_user(userid)
+
+    cond do
+      Account.restricted?(user, ["Community", "Renaming"]) ->
+        {:error, "Your account is restricted from renaming"}
+
+      admin_action == false and renamed_recently(userid) ->
+        {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
+
+      admin_action == false and Account.restricted?(user, ["All chat", "Renaming"]) ->
+        {:error, "Muted"}
+
+      true ->
+        case valid_name?(new_name, admin_action) do
+          :ok ->
+            do_rename_user(userid, new_name)
+            :success
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
+  def valid_name?(name, admin_action) do
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
+
+    cond do
+      admin_action == false and WordLib.reserved_name?(name) == true ->
+        {:error, "That name is in restricted for use by the server, please choose another"}
+
+      admin_action == false and WordLib.acceptable_name?(name) == false ->
+        {:error, "Not an acceptable name, please see section B3 of the code of conduct"}
+
+      clean_name(name) |> String.length() > max_username_length ->
+        {:error, "Max length #{max_username_length} characters"}
+
+      clean_name(name) != name ->
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
+
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
+
+      true ->
+        # TODO: create a unique index on lower(name) so that this check is fast
+        # (and also redundant)
+        users = query_users(search: [name_lower: name], select: [:name])
+
+        case users do
+          [] -> :ok
+          _users -> {:error, "Username already taken"}
+        end
+    end
+  end
+
+  @spec renamed_recently(User.id()) :: boolean()
+  defp renamed_recently(user_id) do
+    rename_log =
+      Account.get_user_stat_data(user_id)
+      |> Map.get("rename_log", [])
+
+    now = System.system_time(:second)
+    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd())
+    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd())
+
+    cond do
+      # VIPs ignore time based rename restrictions
+      Auth.vip?(user_id) -> false
+      # Can't rename more than 2 times in 5 days
+      since_rename_two < 60 * 60 * 24 * 5 -> true
+      # Can't rename more than 3 times in 30 days
+      since_rename_three < 60 * 60 * 24 * 30 -> true
+      true -> false
+    end
+  end
+
+  @spec do_rename_user(User.id(), String.t()) :: :ok
+  defp do_rename_user(userid, new_name) do
+    user = Account.get_user_by_id(userid)
+    old_name = user.name
+
+    Login.set_flood_level(user.id, 10)
+    Client.disconnect(userid, "Rename")
+    :timer.sleep(100)
+
+    # Log the current name in their history
+    user_stat_data = Account.get_user_stat_data(userid)
+
+    previous_names =
+      user_stat_data
+      |> Map.get("previous_names", [])
+
+    rename_log =
+      user_stat_data
+      |> Map.get("rename_log", [])
+
+    Account.update_user_stat(userid, %{
+      "rename_log" => [System.system_time(:second) | rename_log],
+      "previous_names" => Enum.uniq([old_name | previous_names])
+    })
+
+    # We need to re-get the user to ensure we don't overwrite our banned flag
+    user = Account.get_user_by_id(userid)
+
+    update_user(user, %{"name" => new_name})
+
+    :ok
   end
 
   @doc """

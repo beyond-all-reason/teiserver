@@ -408,7 +408,7 @@ defmodule Teiserver.Account.User do
   defp validate_name_change(%Changeset{} = changeset) do
     changeset
     |> validate_change(:name, fn :name, name ->
-      case Account.valid_name?(name, false) do
+      case Account.valid_name?(name) do
         :ok -> []
         {:error, reason} -> [{:name, reason}]
       end
