@@ -421,7 +421,7 @@ defmodule Teiserver.Account.Login do
         Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
           "??"
 
-        CacheUser.allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
+        Auth.has_any_role?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
           stats["bar_plus.flag"]
 
         stats["country_override"] != nil ->
