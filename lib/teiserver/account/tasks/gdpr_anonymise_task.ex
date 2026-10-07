@@ -82,20 +82,20 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
       roles: ["GDPR forgotten"],
       permissions: [],
       discord_id: nil,
-      steam_id: nil,
-      country: "??"
+      steam_id: nil
     }
 
-    # Update the in-memory user to ensure that is cleared too
-    Account.script_update_user(user.id, updated_attrs)
+    with {:ok, user} <-
+           user.id
+           |> Account.get_user!()
+           |> Account.script_update_user(updated_attrs) do
+      # Now clear the GDPR forget_after field as we have pseudo-anonymised them
+      user
+      |> User.clear_gdpr_forget_changeset()
+      |> Repo.update!()
 
-    # Now clear the GDPR forget_after field as we have pseudo-anonymised them
-    user.id
-    |> Account.get_user!()
-    |> User.clear_gdpr_forget_changeset()
-    |> Repo.update!()
-
-    :ok
+      :ok
+    end
   end
 
   # We remove a set of rows in other tables which could lead us to

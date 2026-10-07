@@ -1,7 +1,6 @@
 defmodule Teiserver.OAuth.CodeTest do
   alias Plug.Conn
   alias Plug.Test
-  alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Token

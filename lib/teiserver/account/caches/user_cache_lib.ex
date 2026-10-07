@@ -187,7 +187,6 @@ defmodule Teiserver.Account.UserCacheLib do
   """
   def decache_user_on_ok({:ok, %User{} = _new_user} = result, %User{} = old_user) do
     Teiserver.cache_delete(:users_by_id, old_user.id)
-    Teiserver.cache_delete(:deprecated_users, old_user.id)
     Teiserver.cache_delete(:users_lookup_id_with_name, cachename(old_user.name))
     Teiserver.cache_delete(:users_lookup_id_with_email, cachename(old_user.email))
 

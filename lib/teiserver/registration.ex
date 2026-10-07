@@ -131,7 +131,7 @@ defmodule Teiserver.Account.Registration do
     existing_bot = Account.get_user_by_name(bot_name)
 
     cond do
-      Auth.is_bot?(bot_host_id) == false ->
+      Auth.moderator?(bot_host_id) == false ->
         {:error, "no permission"}
 
       existing_bot != nil ->

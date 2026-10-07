@@ -1,7 +1,6 @@
 defmodule Teiserver.SpringTcpServerTest do
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
-  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Protocols.SpringOut

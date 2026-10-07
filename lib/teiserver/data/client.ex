@@ -6,6 +6,7 @@ defmodule Teiserver.Client do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.ClientLib
+  alias Teiserver.Account.User
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
@@ -259,7 +260,9 @@ defmodule Teiserver.Client do
     # If a test goes wrong this can bork things and make it harder to
     # identify what actually went wrong
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      Account.script_update_user(client.userid, %{last_logout: DateTime.utc_now()})
+      Account.get_user_by_id(client.userid)
+      |> Account.script_update_user(%{last_logout: DateTime.utc_now()})
+
       Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     end
 

@@ -3,6 +3,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   Helper methods for lobby policies
   """
 
+  alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
@@ -153,15 +154,17 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     if allow_bypass_rank_check?(user) do
       :ok
     else
+      rank = Account.get_user_stat_data(user.id)["rank"] || 0
+
       cond do
-        state.minimum_rank_to_play != nil and user.rank < state.minimum_rank_to_play ->
+        state.minimum_rank_to_play != nil and rank < state.minimum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(rank, state)
           {:error, msg}
 
-        state.maximum_rank_to_play != nil and user.rank > state.maximum_rank_to_play ->
+        state.maximum_rank_to_play != nil and rank > state.maximum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(rank, state)
           {:error, msg}
 
         true ->
