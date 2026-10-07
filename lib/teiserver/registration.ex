@@ -2,8 +2,8 @@ defmodule Teiserver.Account.Registration do
   @moduledoc false
 
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserCacheLib
-  alias Teiserver.CacheUser
   alias Teiserver.Data.Types, as: T
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
@@ -134,7 +134,7 @@ defmodule Teiserver.Account.Registration do
     existing_bot = Account.get_user_by_name(bot_name)
 
     cond do
-      CacheUser.allow?(bot_host_id, :moderator) == false ->
+      Auth.is_bot?(bot_host_id) == false ->
         {:error, "no permission"}
 
       existing_bot != nil ->

@@ -103,23 +103,4 @@ defmodule Teiserver.CacheUser do
 
   @spec decache_user(User.id()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCacheLib
-
-  @spec allow?(User.id() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
-  def allow?(nil, _required), do: false
-
-  def allow?(userid, required) when is_integer(userid),
-    do: allow?(Account.get_user_by_id(userid), required)
-
-  def allow?(%User{} = user, required) do
-    case required do
-      :moderator ->
-        Auth.admin?(user) or Auth.moderator?(user)
-
-      :bot ->
-        Auth.admin?(user) or Auth.moderator?(user) or Auth.is_bot?(user)
-
-      required ->
-        Enum.member?(user.permissions, required)
-    end
-  end
 end
