@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Chat.LobbyMessage
   alias Teiserver.Client

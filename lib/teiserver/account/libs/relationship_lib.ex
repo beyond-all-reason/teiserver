@@ -6,7 +6,6 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Config
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Repo
 
   @spec colour :: atom
@@ -334,8 +333,8 @@ defmodule Teiserver.Account.RelationshipLib do
   end
 
   @spec profile_view_permissions(
-          T.user(),
-          T.user(),
+          User.t(),
+          User.t(),
           nil | Account.Relationship,
           nil | Account.Friend,
           nil | Account.FriendRequest

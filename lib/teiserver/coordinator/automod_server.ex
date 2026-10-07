@@ -95,11 +95,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
       "hardware:macAddrHash" ->
         Account.create_smurf_key(msg.userid, "chobby_mac_hash", msg.value)
-        Account.update_cache_user(msg.userid, %{chobby_mac_hash: msg.value})
 
       "hardware:sysInfoHash" ->
         Account.create_smurf_key(msg.userid, "chobby_sysinfo_hash", msg.value)
-        Account.update_cache_user(msg.userid, %{chobby_sysinfo_hash: msg.value})
 
       _property_type_name ->
         :ok

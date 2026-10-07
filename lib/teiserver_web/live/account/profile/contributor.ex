@@ -86,8 +86,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
         "bar_plus.flag" => assigns.temp_country_code
       })
 
-      Account.deprecated_recache_user(assigns.user.id)
-
       {:noreply,
        socket
        |> assign(:country_code, assigns.temp_country_code)
@@ -116,7 +114,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
       end
 
     Account.set_hide_contributor_rank(assigns.user.id, boolean_value)
-    Account.deprecated_recache_user(assigns.user.id)
 
     {:noreply,
      socket

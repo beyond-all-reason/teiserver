@@ -2,7 +2,6 @@ defmodule Teiserver.Account.UserLib do
   @moduledoc false
 
   alias Ecto.Changeset
-  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Login
@@ -57,7 +56,7 @@ defmodule Teiserver.Account.UserLib do
     }
   end
 
-  @spec generate_user_icons(T.user()) :: map()
+  @spec generate_user_icons(User.t()) :: map()
   def generate_user_icons(user) do
     role_icons =
       user.roles
@@ -174,14 +173,12 @@ defmodule Teiserver.Account.UserLib do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_user()
   end
 
   def script_create_user(attrs \\ %{}, pass_type \\ :md5_password) do
     %User{}
     |> User.changeset(attrs, :script_create, pass_type)
     |> Repo.insert()
-    |> broadcast_create_user()
   end
 
   def register_user(attrs \\ %{}, pass_type, ip \\ nil) do
@@ -189,7 +186,6 @@ defmodule Teiserver.Account.UserLib do
       %User{}
       |> User.changeset(attrs, :register, pass_type)
       |> Repo.insert()
-      |> broadcast_create_user()
 
     case res do
       {:ok, user} -> {:ok, Registration.post_user_creation_actions(user, ip)}
@@ -210,23 +206,17 @@ defmodule Teiserver.Account.UserLib do
 
   """
   def update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :limited_with_data)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def update_user_plain_password(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :password)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -236,8 +226,6 @@ defmodule Teiserver.Account.UserLib do
   old and new emails will be informed of the change.
   """
   def update_user_email(%User{} = user, attrs, ip_address) do
-    Account.deprecated_recache_user(user.id)
-
     # We do everything as a transaction so we can revert the change if something goes wrong
     # with the email sending. Unfortunately there is no way to un-send the email to the old
     # address if something goes wrong with sending to the new address
@@ -249,7 +237,6 @@ defmodule Teiserver.Account.UserLib do
           Logging.add_audit_log(user.id, ip_address, "email_change_success", %{})
 
           {:ok, updated_user}
-          |> broadcast_update_user()
           |> cache_put_on_ok(:users_by_id)
           |> UserCacheLib.decache_user_on_ok(user)
         else
@@ -284,67 +271,49 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def admin_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :admin_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def senior_moderator_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :senior_moderator_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def moderator_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :moderator_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def server_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def script_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :script)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def password_reset_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :password_reset)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -353,7 +322,6 @@ defmodule Teiserver.Account.UserLib do
     user
     |> User.smurf_changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -362,7 +330,6 @@ defmodule Teiserver.Account.UserLib do
     user
     |> User.discord_id_changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -388,7 +355,6 @@ defmodule Teiserver.Account.UserLib do
                actual_timestamp: actual_timestamp
              }) do
         {:ok, updated_user}
-        |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
         |> UserCacheLib.decache_user_on_ok(user)
       end
@@ -405,7 +371,6 @@ defmodule Teiserver.Account.UserLib do
            {:ok, _any} <- EmailHelper.gdpr_forget_cleared(updated_user),
            %AuditLog{} <- add_audit_log(scope, "Clear GDPR forget", %{target_id: updated_user.id}) do
         {:ok, updated_user}
-        |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
         |> UserCacheLib.decache_user_on_ok(user)
       end
@@ -597,34 +562,6 @@ defmodule Teiserver.Account.UserLib do
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
-
-  def broadcast_create_user(u), do: broadcast_create_user(u, :create)
-
-  def broadcast_create_user({:ok, user}, reason) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "account_hooks",
-      {:account_hooks, :create_user, user, reason}
-    )
-
-    {:ok, user}
-  end
-
-  def broadcast_create_user(v, _reason), do: v
-
-  def broadcast_update_user(u), do: broadcast_update_user(u, :update)
-
-  def broadcast_update_user({:ok, user}, reason) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "account_hooks",
-      {:account_hooks, :update_user, user, reason}
-    )
-
-    {:ok, user}
-  end
-
-  def broadcast_update_user(v, _reason), do: v
 
   def merge_default_params(user_params) do
     Map.merge(
@@ -833,8 +770,7 @@ defmodule Teiserver.Account.UserLib do
       Repo.transact(fn ->
         with {:ok, _updated_user} <-
                update_user_smurf(smurf, %{smurf_of_id: actual_origin_id}),
-             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]),
-             :ok <- Account.deprecated_recache_user(smurf.id) do
+             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]) do
           add_audit_log(
             moderator_id,
             nil,

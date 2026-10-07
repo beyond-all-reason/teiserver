@@ -613,7 +613,6 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   <UserComponents.show_raw user={@user} />
   """
   attr :user, User
-  attr :cache_user, :map
 
   def show_raw(assigns) do
     json_user =
@@ -630,28 +629,15 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       ])
       |> Jason.encode!(pretty: true)
 
-    cache_user_json =
-      assigns[:cache_user]
-      |> Map.from_struct()
-      |> Map.drop([
-        :password
-      ])
-      |> Jason.encode!(pretty: true)
-
     assigns =
       assigns
       |> assign(json_user: json_user)
-      |> assign(cache_user_json: cache_user_json)
 
     ~H"""
     <div class="flex">
       <div class="flex-1">
         <h4>User JSON struct</h4>
         <textarea name="" id="" rows="40" class="form-control font-mono w-full">{@json_user}</textarea>
-      </div>
-      <div class="flex-1">
-        <h4>Cache user JSON struct</h4>
-        <textarea name="" id="" rows="40" class="form-control font-mono w-full">{@cache_user_json}</textarea>
       </div>
     </div>
     """

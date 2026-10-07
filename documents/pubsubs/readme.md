@@ -16,17 +16,6 @@ These items are due to be stripped out
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
 ## Teiserver
-#### account_hooks
-Used for hooking into account related activities such as updating users.
-
-Valid events
-```elixir
-  {:account_hooks, :create_user, user, :create}
-  {:account_hooks, :update_user, user, :update}
-
-  {:account_hooks, :create_report, report}
-  {:account_hooks, :update_report, report, :create | :respond | :update}
-```
 
 #### legacy_user_updates:#{userid}
 Information about a specific user such as friend related stuff.

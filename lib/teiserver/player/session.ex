@@ -10,7 +10,6 @@ defmodule Teiserver.Player.Session do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
@@ -52,7 +51,7 @@ defmodule Teiserver.Player.Session do
   end
 
   @impl GenServer
-  @spec init({:manual, pid(), T.user()} | {:snapshot, term()}) ::
+  @spec init({:manual, pid(), User.t()} | {:snapshot, term()}) ::
           {:ok, PT.Data.t()} | {:continue, term()}
   def init({:manual, conn_pid, user}) do
     Process.flag(:trap_exit, true)

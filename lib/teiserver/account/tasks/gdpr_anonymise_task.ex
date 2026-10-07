@@ -73,29 +73,21 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
   end
 
   defp forget_user_struct(%User{} = user) do
-    # Wipe all the user fields that contain PII, this new user
-    # is persisted via the update_cache_user call below which
-    # will call the relevant changeset and update any caches
-    # to prevent accidental re-population of data
-    # We put the role "gdpr-forgot" so anybody viewing
-    # the struct can see it has been pseudo-anonymised and we can
-    # audit the process if needed
-    new_user =
-      Map.merge(user, %{
-        name: StringHelper.random_name(),
-        email: "#{user.id}@#{user.id}.#{user.id}",
-        password: UserLib.make_bot_password(),
-        icon: "",
-        colour: "",
-        roles: ["GDPR forgotten"],
-        permissions: [],
-        discord_id: nil,
-        steam_id: nil,
-        country: "??"
-      })
+    updated_attrs = %{
+      name: StringHelper.random_name(),
+      email: "#{user.id}@#{user.id}.#{user.id}",
+      password: UserLib.make_bot_password(),
+      icon: "",
+      colour: "",
+      roles: ["GDPR forgotten"],
+      permissions: [],
+      discord_id: nil,
+      steam_id: nil,
+      country: "??"
+    }
 
     # Update the in-memory user to ensure that is cleared too
-    Account.update_cache_user(user.id, new_user)
+    Account.script_update_user(user.id, updated_attrs)
 
     # Now clear the GDPR forget_after field as we have pseudo-anonymised them
     user.id

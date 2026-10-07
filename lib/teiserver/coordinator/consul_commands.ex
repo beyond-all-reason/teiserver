@@ -8,7 +8,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Coordinator
@@ -61,7 +60,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     queue_string =
       queue
-      |> Enum.map_join(", ", &CacheUser.get_username/1)
+      |> Enum.map_join(", ", &Account.get_username_by_id/1)
 
     queue_size = Enum.count(queue)
 
@@ -75,12 +74,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Nobody is bossed"
 
         [boss_id] ->
-          "Host boss is: #{CacheUser.get_username(boss_id)}"
+          "Host boss is: #{Account.get_username_by_id(boss_id)}"
 
         boss_ids ->
           boss_names =
             boss_ids
-            |> Enum.map_join(", ", fn b -> CacheUser.get_username(b) end)
+            |> Enum.map_join(", ", fn b -> Account.get_username_by_id(b) end)
 
           "Host bosses are: #{boss_names}"
       end
@@ -141,19 +140,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           senderid
           |> RelationshipLib.list_userids_blocked_by_userid()
           |> Enum.filter(&Enum.member?(player_ids, &1))
-          |> Enum.map(&CacheUser.get_username/1)
+          |> Enum.map(&Account.get_username_by_id/1)
 
         avoids =
           senderid
           |> RelationshipLib.list_userids_avoided_by_userid()
           |> Enum.filter(&Enum.member?(player_ids, &1))
-          |> Enum.map(&CacheUser.get_username/1)
+          |> Enum.map(&Account.get_username_by_id/1)
 
         ignores =
           senderid
           |> RelationshipLib.list_userids_ignored_by_userid()
           |> Enum.filter(&Enum.member?(player_ids, &1))
-          |> Enum.map(&CacheUser.get_username/1)
+          |> Enum.map(&Account.get_username_by_id/1)
 
         [
           "---- Moderator info ----",
@@ -185,7 +184,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "roll", remaining: remaining, senderid: senderid} = _cmd, state) do
-    username = CacheUser.get_username(senderid)
+    username = Account.get_username_by_id(senderid)
 
     dice_regex = Regex.run(~r/^(\d+)[dD](\d+)$/, remaining)
     max_format = Regex.run(~r/^(\d+)$/, remaining)
@@ -291,9 +290,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Enum.sort_by(fn {_userid, seconds_ago} -> seconds_ago end, &<=/2)
         |> Enum.map(fn {userid, seconds_ago} ->
           if seconds_ago > max_diff_s do
-            "#{CacheUser.get_username(userid)} is almost certainly afk"
+            "#{Account.get_username_by_id(userid)} is almost certainly afk"
           else
-            "#{CacheUser.get_username(userid)} last seen #{seconds_ago}s ago"
+            "#{Account.get_username_by_id(userid)} last seen #{seconds_ago}s ago"
           end
         end)
 
@@ -318,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{split: nil} = state
       ) do
     ConsulServer.say_command(cmd, state)
-    sender_name = CacheUser.get_username(senderid)
+    sender_name = Account.get_username_by_id(senderid)
 
     min_players =
       case String.trim(rem) do
@@ -1493,7 +1492,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       target_id ->
         ConsulServer.say_command(cmd, state)
-        sender_name = CacheUser.get_username(senderid)
+        sender_name = Account.get_username_by_id(senderid)
 
         Lobby.sayex(
           state.coordinator_id,

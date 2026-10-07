@@ -88,7 +88,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     # Tell the host to re-rate some players
     usernames =
       match.members
-      |> Enum.map_join(" ", fn m -> Account.get_username(m.user_id) end)
+      |> Enum.map_join(" ", fn m -> Account.get_username_by_id(m.user_id) end)
 
     msg = "updateSkill #{usernames}"
     Coordinator.send_to_user(match.founder_id, msg)

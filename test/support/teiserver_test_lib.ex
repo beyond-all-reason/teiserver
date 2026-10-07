@@ -6,7 +6,6 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorServer
@@ -61,8 +60,6 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-        |> CacheUser.convert_user()
-        |> CacheUser.add_user()
 
       _existing ->
         new_user()
@@ -310,7 +307,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec conn_setup({:ok, list()}) :: {:ok, list()}
   def conn_setup({:ok, data}) do
     user = data[:user]
-    CacheUser.deprecated_recache_user(user.id)
+    Account.recache_user(user.id)
 
     {:ok, data}
   end

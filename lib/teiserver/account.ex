@@ -1691,8 +1691,8 @@ defmodule Teiserver.Account do
   defdelegate check_block_status(userid, userid_list), to: RelationshipLib
 
   @spec profile_view_permissions(
-          T.user(),
-          T.user(),
+          User.t(),
+          User.t(),
           nil | Account.Relationship,
           nil | Account.Friend,
           nil | Account.FriendRequest
@@ -2176,9 +2176,6 @@ defmodule Teiserver.Account do
 
   # User functions
 
-  @spec get_username(User.id()) :: String.t() | nil
-  defdelegate get_username(userid), to: UserCacheLib
-
   @spec get_username_by_id(User.id()) :: String.t() | nil
   defdelegate get_username_by_id(userid), to: UserCacheLib
 
@@ -2203,26 +2200,14 @@ defmodule Teiserver.Account do
   @spec get_user_by_id!(User.id()) :: User.t()
   defdelegate get_user_by_id!(id), to: UserCacheLib
 
-  @spec deprecated_get_user_by_id(User.id()) :: T.user() | nil
-  defdelegate deprecated_get_user_by_id(id), to: UserCacheLib
-
   @spec list_users_by_ids(list) :: list
   def list_users_by_ids(id_list), do: UserCacheLib.list_users_by_ids(id_list)
 
-  @spec decache_user(User.t()) :: :ok
+  @spec decache_user(User.id() | User.t()) :: :ok
   defdelegate decache_user(user_or_user_id), to: UserCacheLib
 
-  @spec deprecated_recache_user(User.id() | User.t()) :: :ok
-  defdelegate deprecated_recache_user(id), to: UserCacheLib
-
-  @spec convert_user(T.user()) :: T.user()
-  defdelegate convert_user(user), to: UserCacheLib
-
-  @spec add_user(T.user()) :: T.user()
-  defdelegate add_user(user), to: UserCacheLib
-
-  @spec update_cache_user(User.id(), map()) :: T.user()
-  def update_cache_user(userid, user), do: UserCacheLib.update_cache_user(userid, user)
+  @spec recache_user(User.id() | User.t() | nil) :: User.t() | nil
+  defdelegate recache_user(user_or_user_id), to: UserCacheLib
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib

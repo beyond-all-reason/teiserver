@@ -32,7 +32,7 @@ defmodule Teiserver.Account.PartyLib do
         nil
 
       %{leader: leader} ->
-        Account.get_username(leader)
+        Account.get_username_by_id(leader)
     end
   end
 

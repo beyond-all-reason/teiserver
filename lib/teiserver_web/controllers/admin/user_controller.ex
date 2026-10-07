@@ -10,7 +10,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
   alias Teiserver.EmailHelper
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
@@ -203,15 +202,6 @@ defmodule TeiserverWeb.Admin.UserController do
             :data
           ])
 
-        cache_user = Account.deprecated_get_user_by_id(user.id)
-
-        extra_cache_keys =
-          cache_user
-          |> Map.keys()
-          |> Enum.reject(fn cache_user_key ->
-            json_user |> Map.keys() |> Enum.member?(cache_user_key)
-          end)
-
         conn
         |> assign(:user, user)
         |> assign(:client, client)
@@ -220,8 +210,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")
         |> assign(:json_user, json_user)
-        |> assign(:cache_user, cache_user)
-        |> assign(:extra_cache_keys, extra_cache_keys)
         |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
@@ -504,7 +492,6 @@ defmodule TeiserverWeb.Admin.UserController do
           case action do
             "recache" ->
               RefreshUserRestrictionsTask.refresh_user(user.id)
-              CacheUser.deprecated_recache_user(user.id)
               {:ok, ""}
 
             "reset_flood_protection" ->
@@ -851,7 +838,6 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     RefreshUserRestrictionsTask.refresh_user(user.id)
-    CacheUser.deprecated_recache_user(user.id)
 
     # Now we update stats for the origin
     smurf_count =
