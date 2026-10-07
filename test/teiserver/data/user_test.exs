@@ -2,8 +2,9 @@ defmodule Teiserver.Data.UserTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Registration
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.UserLib
   alias Teiserver.TeiserverTestLib
+
   use Teiserver.ServerCase
 
   test "adding two bots with the same email" do
@@ -152,7 +153,7 @@ defmodule Teiserver.Data.UserTest do
     ]
 
     for {value, expected} <- data do
-      result = Account.check_symbol_limit(value)
+      result = UserLib.check_symbol_limit(value)
       assert result == expected, message: "Bad result for username '#{value}'"
     end
   end

@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Account.User
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
 
@@ -104,9 +105,9 @@ defmodule Teiserver.Bridge.BridgeServer do
           data,
         state
       ) do
-    username = CacheUser.get_username(data.sender_id)
+    username = Account.get_username_by_id(data.sender_id)
 
-    CacheUser.send_direct_message(
+    Chat.send_direct_message(
       state.userid,
       data.sender_id,
       "I don't currently handle messages, sorry #{username}"

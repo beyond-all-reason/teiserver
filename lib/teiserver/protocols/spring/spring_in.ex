@@ -15,6 +15,7 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Account.Registration
   alias Teiserver.Battle
   alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -673,7 +674,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         cond do
           Enum.member?(friend_list, target_id) ->
-            CacheUser.send_direct_message(
+            Chat.send_direct_message(
               Coordinator.get_coordinator_userid(),
               state.userid,
               "Your report has not been submitted, you can't report a friend."
@@ -811,7 +812,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case Regex.run(~r/(\S+) (.+)/u, data) do
       [_full_match, to_name, msg] ->
         to_id = Account.get_userid_from_name(to_name)
-        CacheUser.send_direct_message(state.userid, to_id, msg)
+        Chat.send_direct_message(state.userid, to_id, msg)
         reply(:sent_direct_message, {to_id, msg}, msg_id, state)
 
       _no_match_result ->

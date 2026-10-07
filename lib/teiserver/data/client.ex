@@ -6,7 +6,6 @@ defmodule Teiserver.Client do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.ClientLib
-  alias Teiserver.CacheUser
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby

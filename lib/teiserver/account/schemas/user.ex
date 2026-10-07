@@ -5,7 +5,6 @@ defmodule Teiserver.Account.User do
   alias Ecto.Changeset
   alias Teiserver.Account
   alias Teiserver.Account.User
-  alias Teiserver.CacheUser
   alias Teiserver.Helper.StylingHelper
 
   use TeiserverWeb, :schema

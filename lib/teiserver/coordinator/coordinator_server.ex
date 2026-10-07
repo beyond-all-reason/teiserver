@@ -10,7 +10,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Login
   alias Teiserver.Account.RecacheUserStatsTask
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -160,14 +160,14 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     case converted_message do
       ^warning_response ->
         Client.clear_awaiting_warn_ack(userid)
-        CacheUser.send_direct_message(state.userid, userid, "Thank you")
+        Chat.send_direct_message(state.userid, userid, "Thank you")
 
       _other_message ->
         user = Account.get_user_by_id(userid)
         Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
         if not Auth.is_bot?(user) do
-          CacheUser.send_direct_message(
+          Chat.send_direct_message(
             state.userid,
             userid,
             "I don't currently handle messages, sorry #{user.name}"

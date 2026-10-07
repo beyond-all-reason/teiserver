@@ -7,7 +7,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.TOTPLib
-  alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
