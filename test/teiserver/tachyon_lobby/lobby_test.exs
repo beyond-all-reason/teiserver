@@ -64,13 +64,28 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
   end
 
   test "create with defaults" do
+    AssetFixtures.create_map(%{
+      spring_name: "the map",
+      display_name: "the map",
+      thumbnail_url: "http://irrelevant.com",
+      modoptions: %{
+        mapmetadata_startpos: "ImNvdWNvdSIK",
+        mapmetadata_startboxes_set: "ImhlbGxvIgo="
+      }
+    })
+
     {:ok, _pid, details} =
       mk_start_params([1, 1])
+      |> Map.put(:map_name, "the map")
       |> Lobby.create()
 
     assert details.boss_enabled? == false
     assert details.bosses == MapSet.new()
-    assert details.game_options == %{}
+
+    assert details.game_options == %{
+             "mapmetadata_startpos" => "ImNvdWNvdSIK",
+             "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+           }
   end
 
   test "create lobby with game options" do
@@ -1634,6 +1649,35 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id,
                       {:updated,
                        %{game_options: %{"foo" => nil, "ranked" => "false", "blah" => "qux"}}}}
+    end
+
+    test "changing map also set polystartboxes" do
+      AssetFixtures.create_map(%{
+        spring_name: "new map",
+        display_name: "new map",
+        thumbnail_url: "http://irrelevant.com",
+        modoptions: %{
+          mapmetadata_startpos: "ImNvdWNvdSIK",
+          mapmetadata_startboxes_set: "ImhlbGxvIgo="
+        }
+      })
+
+      {:ok, _pid, %LT.Details{id: id}} =
+        mk_start_params([2, 2])
+        |> Map.put(:boss_enabled?, true)
+        |> Lobby.create()
+
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+
+      assert_receive {:lobby, ^id,
+                      {:updated,
+                       %{
+                         map_name: "new map",
+                         game_options: %{
+                           "mapmetadata_startpos" => "ImNvdWNvdSIK",
+                           "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+                         }
+                       }}}
     end
   end
 
