@@ -41,7 +41,7 @@ defmodule Teiserver.Account.Registration do
     email = String.trim(email)
 
     with :ok <- Account.valid_name?(name),
-         :ok <- CacheUser.valid_email?(email),
+         :ok <- Account.valid_email?(email),
          {:ok, _user} <-
            Account.register_user(
              %{

@@ -113,7 +113,7 @@ defmodule Teiserver.Account.User do
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -183,7 +183,7 @@ defmodule Teiserver.Account.User do
       |> validate_required([:email, :previous_emails])
       |> unique_constraint(:email)
       |> validate_change(:email, fn :email, email ->
-        case CacheUser.valid_email?(email) do
+        case Account.valid_email?(email) do
           :ok -> []
           {:error, reason} -> [{:email, reason}]
         end
@@ -259,7 +259,7 @@ defmodule Teiserver.Account.User do
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -299,7 +299,7 @@ defmodule Teiserver.Account.User do
     |> validate_name_change()
     |> validate_password()
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
