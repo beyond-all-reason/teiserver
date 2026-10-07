@@ -741,7 +741,10 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Repo.transaction()
     else
       Multi.new()
-      |> Multi.insert_all(:insert_all, RatingLog, all_ratings)
+      |> Multi.insert_all(:insert_all, RatingLog, all_ratings,
+        on_conflict: :nothing,
+        conflict_target: [:match_id, :user_id, :rating_type_id]
+      )
       |> Repo.transaction()
     end
   end
