@@ -23,6 +23,7 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Plugins
   alias Teiserver.Repo
 
+  use Plugins
   use TeiserverWeb, :library_newform
 
   import Teiserver.Helpers.CacheHelper,

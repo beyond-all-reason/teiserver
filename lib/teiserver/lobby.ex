@@ -9,7 +9,6 @@ defmodule Teiserver.Lobby do
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Battle.LobbyThrottle
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T

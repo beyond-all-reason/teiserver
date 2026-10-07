@@ -9,6 +9,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
@@ -347,7 +348,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     Lobby.list_lobby_players!(state.lobby_id)
     |> Enum.each(fn playerid ->
-      CacheUser.send_direct_message(state.coordinator_id, playerid, [
+      Chat.send_direct_message(state.coordinator_id, playerid, [
         @splitter,
         "#{sender_name} is moving to a new lobby, to follow them say $y.",
         "If you want to follow someone else then say $follow <name> and you will follow that user.",
@@ -357,7 +358,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ])
     end)
 
-    CacheUser.send_direct_message(state.coordinator_id, senderid, [
+    Chat.send_direct_message(state.coordinator_id, senderid, [
       "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby.",
       "If you choose a lobby yourself then anybody voting yes will follow you to that lobby.",
       @splitter
@@ -1367,7 +1368,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         if tips != nil do
           # Send coordinator message which can be long; appears on right
-          CacheUser.send_direct_message(state.coordinator_id, senderid, tips)
+          Chat.send_direct_message(state.coordinator_id, senderid, tips)
         end
 
         state
@@ -1458,7 +1459,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.each(fn userid ->
         CacheUser.ring(userid, state.coordinator_id)
 
-        CacheUser.send_direct_message(
+        Chat.send_direct_message(
           state.coordinator_id,
           userid,
           "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."

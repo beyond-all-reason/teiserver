@@ -12,6 +12,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
@@ -658,7 +659,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakdefs requires boss privileges"
@@ -674,7 +675,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakunits requires boss privileges"
@@ -910,12 +911,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         cond do
           rating_check_result != :ok ->
             {_status, msg} = rating_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           rank_check_result != :ok ->
             {_status, msg} = rank_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           true ->
@@ -1160,7 +1161,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn user_id ->
         Lobby.force_change_client(state.coordinator_id, user_id, %{player: false})
 
-        CacheUser.send_direct_message(
+        Chat.send_direct_message(
           state.coordinator_id,
           user_id,
           "You were AFK while waiting for a game and have been moved to spectators."

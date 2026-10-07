@@ -183,6 +183,9 @@ defmodule Teiserver.Account do
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
 
+  @spec clean_name(String.t()) :: String.t()
+  defdelegate clean_name(name), to: UserLib
+
   @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
   defdelegate valid_name?(name, admin_action \\ false), to: UserLib
 
