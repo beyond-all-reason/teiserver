@@ -14,12 +14,6 @@
       {error_tag(f, :name)}
     </div>
 
-    <div :if={allow?(@conn, "Senior moderator")} class="col-xl-4 col-lg-4">
-      {label(f, :email, class: "control-label")}
-      {text_input(f, :email, class: "form-control")}
-      {error_tag(f, :email)}
-    </div>
-
     <div class="col-xl-4 col-lg-4">
       <%= if assigns[:user].smurf_of_id do %>
         {link(raw("<i class='far fa-fw fa-link-slash'></i> Clear smurf link"),

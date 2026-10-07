@@ -64,6 +64,33 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       # Ensure it has changed over
       assert Account.get_user_by_id!(user.id).name == random_name
     end
+
+    test "change email", %{conn: conn} do
+      user = AccountFixtures.user_fixture()
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/email")
+
+      live
+      |> form("#user-email_change-form", user: %{email: "No at symbol"})
+      |> render_submit()
+
+      html = live |> render()
+      assert html =~ ~s(invalid email)
+
+      # Ensure nothing changed
+      assert Account.get_user_by_id!(user.id).email == user.email
+
+      new_email = "random_email@#{:rand.uniform(899_999_999) + 100_000_000}.com"
+
+      live
+      |> form("#user-email_change-form", user: %{email: new_email})
+      |> render_submit()
+
+      assert_patch(live, "/moderation/users/#{user.id}")
+
+      # Ensure it has changed over
+      assert Account.get_user_by_id!(user.id).email == new_email
+    end
   end
 
   describe "rendering data" do
@@ -98,7 +125,7 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
   end
 
   defp auth(_state) do
-    TeiserverTestLib.moderator_permissions()
+    TeiserverTestLib.senior_moderator_permissions()
     |> GeneralTestLib.conn_setup()
     |> TeiserverTestLib.conn_setup()
   end

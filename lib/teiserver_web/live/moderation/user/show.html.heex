@@ -98,6 +98,20 @@
 </.modal>
 
 <.modal
+  :if={@live_action == :edit_email and not is_nil(@user)}
+  id="user-edit_email-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormEmailComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+  />
+</.modal>
+
+<.modal
   :if={@live_action in [:new_note, :edit_note] and not is_nil(@user)}
   id="user-new_note-modal"
   show

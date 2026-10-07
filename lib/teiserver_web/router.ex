@@ -583,6 +583,7 @@ defmodule TeiserverWeb.Router do
 
       live "/users/:id", User.Show, :show
       live "/users/:id/edit/name", User.Show, :edit_name
+      live "/users/:id/edit/email", User.Show, :edit_email
       live "/users/:id/new/note", User.Show, :new_note
       live "/users/:id/edit/note/:user_note_id", User.Show, :edit_note
       live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget

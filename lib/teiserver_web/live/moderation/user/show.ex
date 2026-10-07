@@ -9,6 +9,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
+  alias TeiserverWeb.ModerationLive.User.FormEmailComponent
   alias TeiserverWeb.ModerationLive.User.FormNameComponent
   alias TeiserverWeb.ModerationLive.User.UserNoteFormComponent
   alias TeiserverWeb.ModerationLive.UserComponents
@@ -155,6 +156,11 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
           nil
       end
 
+    email_alert =
+      if UserLib.days_since_last_email_change(user) < 14 do
+        {"alert-warning", "Email changed within the last 14 days"}
+      end
+
     alerts =
       [
         Enum.member?(user.roles, "GDPR forgotten") &&
@@ -163,7 +169,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
           {"alert-error", "This user is set to be forgotten under the GDPR right to be forgotten"},
         mfa_warning? &&
           {"alert-warning", "User has an MFA blocked role but no active MFA"},
-        restriction_alert
+        restriction_alert,
+        email_alert
       ]
       |> Enum.reject(&is_nil/1)
 
@@ -255,6 +262,16 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     socket
     |> assign(:page_title, "New user note")
     |> assign(:user_note, %UserNote{})
+  end
+
+  defp apply_action(%Socket{} = socket, :edit_name, _params) do
+    socket
+    |> assign(:page_title, "Change user name")
+  end
+
+  defp apply_action(%Socket{} = socket, :edit_email, _params) do
+    socket
+    |> assign(:page_title, "Change user email")
   end
 
   defp apply_action(%Socket{} = socket, _any, _params), do: socket

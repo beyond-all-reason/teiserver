@@ -320,7 +320,12 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
-    ["Admin", "Moderator"] ++ staff_permissions()
+    ["Admin", "Senior moderator", "Moderator"] ++ staff_permissions()
+  end
+
+  @spec senior_moderator_permissions() :: [String.t()]
+  def senior_moderator_permissions do
+    ["Senior moderator"] ++ moderator_permissions()
   end
 
   @spec moderator_permissions() :: [String.t()]
