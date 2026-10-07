@@ -6,7 +6,6 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Account
   alias Teiserver.Account.Login
   alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.TachyonParser
@@ -37,11 +36,11 @@ defmodule Teiserver.Player.TachyonHandler do
 
   @type state ::
           %{
-            user: T.user(),
+            user: User.t(),
             status: :waiting
           }
           | %{
-              user: T.user(),
+              user: User.t(),
               status: :admitted,
               sess_monitor: reference(),
               pending_responses: Handler.pending_responses()
@@ -68,7 +67,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  @spec init(%{user: T.user()}) :: Handler.result()
+  @spec init(%{user: User.t()}) :: Handler.result()
   def init(initial_state) do
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
@@ -1226,7 +1225,7 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  @spec get_user(String.t()) :: {:ok, T.user()} | {:error, :invalid_user}
+  @spec get_user(String.t()) :: {:ok, User.t()} | {:error, :invalid_user}
   defp get_user(raw_id) do
     with {:ok, user_id} <- TachyonParser.parse_user_id(raw_id),
          user when not is_nil(user) <- Account.get_user(user_id) do

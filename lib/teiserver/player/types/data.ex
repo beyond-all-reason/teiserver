@@ -4,7 +4,6 @@ defmodule Teiserver.Player.Types.Data do
   """
 
   alias Teiserver.Account.User
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player.Types, as: PT
   alias Teiserver.TachyonLobby
@@ -29,7 +28,7 @@ defmodule Teiserver.Player.Types.Data do
           | {:pairing, PT.MmPairingState.t()}
 
   @type t :: %__MODULE__{
-          user: T.user(),
+          user: User.t(),
           monitors: MC.t(),
           conn_pid: pid() | nil,
           matchmaking: matchmaking_state(),

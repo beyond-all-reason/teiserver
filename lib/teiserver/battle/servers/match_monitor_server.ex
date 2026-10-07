@@ -12,7 +12,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.Match
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
@@ -299,7 +298,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Teiserver.CacheUser.t() | map()
+  @spec get_match_monitor_account() :: User.t() | map()
   def get_match_monitor_account do
     user =
       Account.get_user(nil,
@@ -326,7 +325,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.deprecated_recache_user(account.id)
+        Account.recache_user(account)
         account
 
       account ->

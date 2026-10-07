@@ -4,7 +4,7 @@ defmodule Teiserver.Moderation do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Scope
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.Helpers, as: LoggingHelper
   alias Teiserver.Moderation.Action
@@ -852,7 +852,7 @@ defmodule Teiserver.Moderation do
   end
 
   # Others
-  @spec unbridge_user(nil | T.user() | User.id(), String.t(), non_neg_integer(), String.t()) ::
+  @spec unbridge_user(nil | User.t() | User.id(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user(userid), message, flagged_word_count, location)

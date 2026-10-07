@@ -66,7 +66,6 @@ defmodule Teiserver.SpringTcpServerTest do
     user = Account.get_user_by_name(username)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     SQL.query(Repo, query, [])
-    UserCacheLib.deprecated_recache_user(user.id)
 
     _send_raw(
       socket,

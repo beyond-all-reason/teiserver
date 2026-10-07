@@ -14,7 +14,6 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Config

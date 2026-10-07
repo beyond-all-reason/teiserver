@@ -7,7 +7,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Bridge.CommandLib
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
@@ -183,7 +182,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     state
   end
 
-  @spec get_bridge_account() :: Teiserver.CacheUser.t() | map()
+  @spec get_bridge_account() :: User.t() | map()
   def get_bridge_account do
     user =
       Account.get_user(nil,
@@ -210,7 +209,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.deprecated_recache_user(account.id)
+        Account.recache_user(account)
         account
 
       account ->

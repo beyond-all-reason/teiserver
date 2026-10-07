@@ -211,8 +211,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       {:ok, _promoted_user} =
         Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
 
-      Account.deprecated_recache_user(user.id)
-
       resp =
         conn
         |> post(refresh_token_path(), %{"email" => user.email})

@@ -16,17 +16,18 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
   @match_cache_max_days 31
 
   @spec match_processed(map(), User.id()) :: no_return()
-  def match_processed(match, userid) do
+  def match_processed(match, user_id) do
     case match.game_type do
-      "Duel" -> do_match_processed_duel(userid)
-      "FFA" -> do_match_processed_duel(userid)
-      "Small Team" -> do_match_processed_team_small(userid)
-      "Large Team" -> do_match_processed_team_large(userid)
+      "Duel" -> do_match_processed_duel(user_id)
+      "FFA" -> do_match_processed_duel(user_id)
+      "Small Team" -> do_match_processed_team_small(user_id)
+      "Large Team" -> do_match_processed_team_large(user_id)
       _other -> :ok
     end
 
     # And now update the last_played timestamp
-    Account.update_cache_user(userid, %{last_played: match.started})
+    Account.get_user_by_id(user_id)
+    |> Account.script_update_user(%{last_played: match.started})
   end
 
   def do_match_processed_duel(userid) do

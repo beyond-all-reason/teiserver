@@ -100,7 +100,6 @@ defmodule Teiserver.Application do
         concache_perm_sup(:users_lookup_id_with_email),
         concache_perm_sup(:users_lookup_id_with_discord),
         concache_perm_sup(:users_by_id),
-        concache_perm_sup(:deprecated_users),
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),
         concache_sup(:user_mfa_active),

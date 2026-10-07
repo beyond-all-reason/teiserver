@@ -8,8 +8,6 @@ defmodule Teiserver.Account.Login do
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
   alias Teiserver.Account.User
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Data.Types, as: T
@@ -93,7 +91,7 @@ defmodule Teiserver.Account.Login do
   TODO: Remove this function and create something more appropriate for the test
   """
   @spec try_login(String.t(), String.t(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), User.id()}
+          {:ok, User.t()} | {:error, String.t()} | {:error, String.t(), User.id()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_startup()
 
@@ -179,7 +177,7 @@ defmodule Teiserver.Account.Login do
   end
 
   @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), integer()}
+          {:ok, User.t()} | {:error, String.t()} | {:error, String.t(), integer()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_startup()
 
@@ -284,8 +282,8 @@ defmodule Teiserver.Account.Login do
     end
   end
 
-  @spec tachyon_login(T.user(), String.t(), String.t()) ::
-          {:ok, T.user()} | {:error, String.t()} | {:error, :rate_limited, String.t()}
+  @spec tachyon_login(User.t(), String.t(), String.t()) ::
+          {:ok, User.t()} | {:error, String.t()} | {:error, :rate_limited, String.t()}
   def tachyon_login(user, ip, lobby_client) do
     lobby_hash = "tachyon_lobby_hash(maybe_useless)"
 
@@ -352,7 +350,7 @@ defmodule Teiserver.Account.Login do
   # TODO: once we got rid of spring, do_login should not accept the IP as a string
   # but as a :inet.ip_address which is what we get from the conn object
   # And then we need to stringify it as usual when storing in DB
-  @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
+  @spec do_login(User.t(), String.t(), String.t(), String.t()) :: {:ok, User.t()}
   def do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
     ip = Map.get(stats, "ip_override", ip)
@@ -380,9 +378,10 @@ defmodule Teiserver.Account.Login do
           lobby_client
       end
 
-    user = %{user | last_login: DateTime.utc_now()}
+    last_login = DateTime.utc_now()
+    user = %{user | last_login: last_login}
 
-    UserCacheLib.deprecated_update_user(user, persist: true)
+    Account.script_update_user(user, %{last_login: last_login})
 
     Account.update_user_stat(user.id, %{
       country: country,
@@ -411,7 +410,7 @@ defmodule Teiserver.Account.Login do
     {:ok, user}
   end
 
-  @spec get_country(T.user(), String.t()) :: String.t()
+  @spec get_country(User.t(), String.t()) :: String.t()
   @decorate Plugins.plugin(:get_country)
   def get_country(user, ip) do
     stats = Account.get_user_stat_data(user.id)

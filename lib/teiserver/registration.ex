@@ -3,8 +3,7 @@ defmodule Teiserver.Account.Registration do
 
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.UserCacheLib
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.User
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
   alias Teiserver.Moderation
@@ -79,7 +78,7 @@ defmodule Teiserver.Account.Registration do
   available instead of patching things up after the fact.
   That however is a bigger refactor than I'm willing to make now
   """
-  @spec post_user_creation_actions(user :: term(), String.t() | nil) :: T.user()
+  @spec post_user_creation_actions(User.t(), String.t() | nil) :: User.t()
   def post_user_creation_actions(user, ip \\ nil) do
     Account.update_user_stat(user.id, %{
       "first_ip" => ip,
@@ -109,9 +108,7 @@ defmodule Teiserver.Account.Registration do
     end
 
     # Now add them to the cache
-    user
-    |> UserCacheLib.convert_user()
-    |> UserCacheLib.add_user()
+    Account.recache_user(user.id)
 
     if not String.ends_with?(user.email, "@agents") do
       case EmailHelper.new_user(user) do
@@ -152,10 +149,7 @@ defmodule Teiserver.Account.Registration do
 
         case Account.script_create_user(params, :hash) do
           {:ok, user} ->
-            # Now add them to the cache
             user
-            |> UserCacheLib.convert_user()
-            |> UserCacheLib.add_user()
 
           {:error, changeset} ->
             Logger.error(

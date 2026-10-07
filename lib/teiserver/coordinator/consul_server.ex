@@ -207,7 +207,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq()
 
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply,
@@ -219,7 +219,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_left, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
@@ -235,7 +235,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_kicked, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     ChatLib.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
     player_count_changed(state)

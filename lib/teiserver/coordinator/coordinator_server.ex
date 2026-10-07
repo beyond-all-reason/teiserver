@@ -10,6 +10,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Login
   alias Teiserver.Account.RecacheUserStatsTask
+  alias Teiserver.Account.User
   alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Config
@@ -95,7 +96,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   # def handle_info({:new_message, userid, "coordinator", _message}, state) do
   #   # If it's us sending it, don't reply
   #   if userid != state.userid do
-  #     username = CacheUser.get_username(userid)
+  #     username = Account.get_username_by_id(userid)
   #     Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
   #   end
   #   {:noreply, state}
@@ -333,7 +334,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     account
   end
 
-  @spec get_coordinator_account() :: Teiserver.CacheUser.t() | map()
+  @spec get_coordinator_account() :: User.t() | map()
   def get_coordinator_account do
     Account.system_user()
   end

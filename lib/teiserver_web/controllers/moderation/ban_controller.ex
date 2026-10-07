@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Moderation.BanController do
       |> Enum.map(fn log -> log.details["target_user_id"] end)
       |> Enum.reject(&(&1 == nil))
       |> Map.new(fn userid ->
-        {userid, Account.get_username(userid)}
+        {userid, Account.get_username_by_id(userid)}
       end)
 
     conn

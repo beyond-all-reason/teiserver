@@ -133,7 +133,7 @@ defmodule Teiserver.Account.AuthLib do
   def allow?(%Scope{user: user} = _scope, permissions_required),
     do: allow?(user, permissions_required)
 
-  # User and CacheUser
+  # User
   def allow?(%{id: id, roles: roles}, permissions_required) do
     permissions_held = get_permissions_from_roles(roles)
 

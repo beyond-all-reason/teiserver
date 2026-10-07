@@ -6,11 +6,11 @@ defmodule Teiserver.Account.UserCacheLibTest do
 
   describe "deadlocks on cache population" do
     # see https://github.com/beyond-all-reason/teiserver/issues/1394
-    test "get_username/1 and get_userid_from_name/1" do
+    test "get_username_by_id/1 and get_userid_from_name/1" do
       user = user_fixture()
 
       fns = [
-        fn -> Account.get_username(user.id) end,
+        fn -> Account.get_username_by_id(user.id) end,
         fn -> Account.get_userid_from_name(user.name) end
       ]
 
@@ -19,15 +19,15 @@ defmodule Teiserver.Account.UserCacheLibTest do
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 
       # sanity check
-      assert Account.get_username(user.id) == user.name
+      assert Account.get_username_by_id(user.id) == user.name
       assert Account.get_userid_from_name(user.name) == user.id
     end
 
-    test "get_username/1 and get_user_by_email/" do
+    test "get_username_by_id/1 and get_user_by_email/" do
       user = user_fixture()
 
       fns = [
-        fn -> Account.get_username(user.id) end,
+        fn -> Account.get_username_by_id(user.id) end,
         fn -> Account.get_user_by_email(user.email) end
       ]
 
@@ -36,7 +36,7 @@ defmodule Teiserver.Account.UserCacheLibTest do
       assert deadlocks == [], "Deadlock detected on round #{at_round}"
 
       # sanity check
-      assert Account.get_username(user.id) == user.name
+      assert Account.get_username_by_id(user.id) == user.name
       assert Account.get_user_by_email(user.email).email == user.email
     end
   end
