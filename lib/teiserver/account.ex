@@ -183,6 +183,12 @@ defmodule Teiserver.Account do
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
 
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
+  defdelegate valid_name?(name, admin_action \\ false), to: UserLib
+
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: UserLib
+
   # User stat table
   @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
   def user_stat_query(args) do
@@ -2214,15 +2220,6 @@ defmodule Teiserver.Account do
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib
-
-  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
-  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
-
-  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, String.t()}
-  defdelegate valid_name?(new_name, admin_action), to: Teiserver.CacheUser
-
-  @spec system_change_user_name(User.id(), String.t()) :: :ok
-  defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
   # Client stuff
   @spec get_client_by_name(String.t()) :: nil | T.client()
