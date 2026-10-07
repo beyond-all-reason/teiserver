@@ -498,7 +498,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # SLDB commands
   defp do_handle("GETIP", username, msg_id, state) do
-    if Auth.is_bot?(state.userid) do
+    user = Account.get_user_by_id(state.userid)
+
+    if Auth.moderator?(user) or Auth.is_bot?(user) do
       case Client.get_client_by_name(username) do
         nil ->
           reply(:no, "GETIP", msg_id, state)
@@ -512,10 +514,17 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("GETUSERID", username, msg_id, state) do
-    if Auth.is_bot?(state.userid) do
-      target = Account.get_user_by_name(username)
-      hash = Account.get_user_stat_data(target.id)["lobby_hash"]
-      reply(:user_id, {username, hash, target.id}, msg_id, state)
+    user = Account.get_user_by_id(state.userid)
+
+    if Auth.moderator?(user) or Auth.is_bot?(user) do
+      case Account.get_user_by_name(username) do
+        nil ->
+          reply(:no, "GETUSERID", msg_id, state)
+
+        target ->
+          hash = Account.get_user_stat_data(target.id)["lobby_hash"]
+          reply(:user_id, {username, hash, target.id}, msg_id, state)
+      end
     else
       state
     end

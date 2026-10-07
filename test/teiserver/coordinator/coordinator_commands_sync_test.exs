@@ -1,7 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.UserLib
   alias Teiserver.BitParse
   alias Teiserver.TeiserverTestLib
 

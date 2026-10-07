@@ -3,7 +3,6 @@ defmodule Teiserver.SpringAuthTest do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
-  alias Teiserver.Account.UserCacheLib
   alias Teiserver.BitParse
   alias Teiserver.Client
   alias Teiserver.TeiserverTestLib

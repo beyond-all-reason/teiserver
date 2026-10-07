@@ -125,8 +125,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   end
 
   defp user_assigns(%{assigns: %{user: user}} = socket) do
-    country_code = user.country
     stats = Account.get_user_stat_data(user.id)
+    country_code = stats["country"] || "??"
 
     socket
     |> assign(:country_code, country_code)

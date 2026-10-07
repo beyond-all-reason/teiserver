@@ -132,7 +132,6 @@
   {"lib/teiserver_web/live/battles/match/chat.html.heex", :call},
   {"lib/teiserver_web/live/battles/match/index.ex", :no_return},
   {"lib/teiserver_web/live/battles/match/chat.ex", :call},
-  {"lib/teiserver_web/live/clients/show.ex", :call},
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :pattern_match},
   {"lib/teiserver_web/live/microblog/admin/tag/tag_form_component.ex", :pattern_match},
   {"lib/teiserver_web/live/microblog/blog/show.ex", :call},
