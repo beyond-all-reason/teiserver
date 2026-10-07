@@ -170,11 +170,6 @@ defmodule Teiserver.Account.UserQueries do
       where: "All chat" in users.restrictions
   end
 
-  def _where(query, :mod_action, "Shadowbanned") do
-    from users in query,
-      where: users.shadowbanned == true
-  end
-
   def _where(query, :mod_action, "Warned") do
     from users in query,
       where: "Warning reminder" in users.restrictions

@@ -57,7 +57,6 @@ defmodule Teiserver.AccountTest do
       Account.list_users(search: [mod_action: "Banned"])
       Account.list_users(search: [mod_action: "Not banned"])
       Account.list_users(search: [mod_action: "Muted"])
-      Account.list_users(search: [mod_action: "Shadowbanned"])
       Account.list_users(search: [mod_action: "Warned"])
       Account.list_users(search: [mod_action: "Any action"])
       Account.list_users(search: [mod_action: "Muted or banned"])

@@ -901,34 +901,4 @@ defmodule TeiserverWeb.Admin.UserController do
   defp should_show_exact_match?(page, users, search_term) do
     page == 0 && Enum.count(users) > 20 && search_term != ""
   end
-
-  @spec shadowban(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def shadowban(conn, %{"id" => id, "state" => state}) do
-    %User{} = user = Account.get_user_by_id(id)
-
-    case UserLib.has_access(user, conn) do
-      {true, _access} ->
-        message =
-          case state do
-            "true" ->
-              add_audit_log(conn, "Shadowban", %{target_id: user.id})
-              CacheUser.shadowban_user(user.id)
-              "has been shadowbanned"
-
-            "false" ->
-              add_audit_log(conn, "Unshadowban", %{target_id: user.id})
-              CacheUser.unshadowban_user(user.id)
-              "has been cleared of shadowban"
-          end
-
-        conn
-        |> put_flash(:success, "User #{user.name} #{message}")
-        |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to shadowban this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
 end

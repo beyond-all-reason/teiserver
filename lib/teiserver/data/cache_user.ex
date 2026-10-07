@@ -254,28 +254,6 @@ defmodule Teiserver.CacheUser do
     :ok
   end
 
-  @spec shadowbanned?(User.id() | T.user()) :: boolean()
-  def shadowbanned?(nil), do: true
-
-  def shadowbanned?(userid) when is_integer(userid),
-    do: shadowbanned?(Account.get_user_by_id(userid))
-
-  def shadowbanned?(%{shadowbanned: true}), do: true
-  def shadowbanned?(_user), do: false
-
-  @spec shadowban_user(User.id()) :: :ok
-  def shadowban_user(nil), do: :ok
-
-  def shadowban_user(userid) when is_integer(userid) do
-    Account.update_cache_user(userid, %{shadowbanned: true})
-    :ok
-  end
-
-  def unshadowban_user(userid) when is_integer(userid) do
-    Account.update_cache_user(userid, %{shadowbanned: false})
-    :ok
-  end
-
   @spec allow?(User.id() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
   def allow?(nil, _required), do: false
 
