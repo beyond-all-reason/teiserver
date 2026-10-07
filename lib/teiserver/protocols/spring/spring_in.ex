@@ -1428,12 +1428,12 @@ defmodule Teiserver.Protocols.SpringIn do
 
         if client != nil and Auth.is_bot?(state.userid) do
           originator_id = Account.get_userid_from_name(originator)
-          CacheUser.ring(userid, originator_id)
+          Lobby.ring(userid, originator_id)
         end
 
       _other ->
         userid = Account.get_userid_from_name(data)
-        CacheUser.ring(userid, state.userid)
+        Lobby.ring(userid, state.userid)
     end
 
     state

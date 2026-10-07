@@ -832,4 +832,26 @@ defmodule Teiserver.Lobby do
     ULID.generate()
     |> Base.encode32(padding: false)
   end
+
+  @spec ring(User.id(), User.id()) :: :ok
+  def ring(ringee_id, ringer_id) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "legacy_user_updates:#{ringee_id}",
+      {:action, {:ring, ringer_id}}
+    )
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "client_application:#{ringee_id}",
+      %{
+        channel: "client_application:#{ringee_id}",
+        event: :ring,
+        userid: ringee_id,
+        ringer_id: ringer_id
+      }
+    )
+
+    :ok
+  end
 end
