@@ -136,11 +136,10 @@ defmodule Teiserver.Room do
     end
 
     cond do
-      allow?(user.id) == false ->
+      Account.restricted?(user, ["All chat", "Room chat"]) ->
         nil
 
       not bot? and WordLib.blacklisted_phrase?(msg) ->
-        CacheUser.shadowban_user(user.id)
         nil
 
       true ->
@@ -163,11 +162,10 @@ defmodule Teiserver.Room do
     end
 
     cond do
-      allow?(user.id) == false ->
+      Account.restricted?(user, ["All chat", "Room chat"]) ->
         nil
 
       not bot? and WordLib.blacklisted_phrase?(msg) ->
-        CacheUser.shadowban_user(user.id)
         nil
 
       true ->
@@ -178,19 +176,5 @@ defmodule Teiserver.Room do
   @decorate Plugins.plugin(:send_chat_message_ex)
   defp do_send_message_ex(room_name, %{id: user_id}, msg) do
     RoomServer.send_message_ex(room_name, user_id, msg)
-  end
-
-  @spec allow?(User.id()) :: boolean()
-  def allow?(userid) do
-    cond do
-      CacheUser.shadowbanned?(userid) ->
-        false
-
-      Account.restricted?(userid, ["All chat", "Room chat"]) ->
-        false
-
-      true ->
-        true
-    end
   end
 end

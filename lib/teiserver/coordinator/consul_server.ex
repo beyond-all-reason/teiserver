@@ -991,9 +991,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
 
-      client.shadowbanned ->
-        {false, "Err"}
-
       block_status == :blocking ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
         {false, "You are blocking too many players in this lobby"}

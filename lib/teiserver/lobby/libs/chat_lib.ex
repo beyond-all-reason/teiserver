@@ -74,10 +74,6 @@ defmodule Teiserver.Lobby.ChatLib do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted, do: CacheUser.shadowban_user(user.id)
-
     allowed =
       cond do
         Account.restricted?(user, ["All chat", "Lobby chat"]) ->
@@ -86,7 +82,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        not bot? and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -139,10 +135,6 @@ defmodule Teiserver.Lobby.ChatLib do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted, do: CacheUser.shadowban_user(user.id)
-
     allowed =
       cond do
         Account.restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
@@ -151,7 +143,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        not bot? and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -200,12 +192,6 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     sender = Account.get_user(from_id)
 
-    blacklisted = Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted do
-      CacheUser.shadowban_user(from_id)
-    end
-
     allowed =
       cond do
         Account.restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
@@ -214,7 +200,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(sender, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -253,6 +239,128 @@ defmodule Teiserver.Lobby.ChatLib do
     else
       {:error, "Permission denied"}
     end
+  end
+
+  @spec send_direct_message(User.id(), User.id(), String.t()) :: :ok
+  def send_direct_message(from_id, to_id, "!joinas" <> s),
+    do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
+
+  @spec send_direct_message(User.id(), User.id(), list) :: :ok
+  def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
+    msg_str = Enum.join(message_parts, "\n")
+
+    sender_bot? = Auth.is_bot?(sender_id)
+    recipient_bot? = Auth.is_bot?(to_id)
+    blacklisted? = sender_bot? == false and WordLib.blacklisted_phrase?(msg_str)
+
+    allowed =
+      cond do
+        blacklisted? -> false
+        Account.restricted?(sender_id, ["All chat", "Direct chat"]) -> false
+        true -> true
+      end
+
+    if blacklisted? do
+      shadowban_user(sender_id)
+    end
+
+    if allowed do
+      save_message =
+        cond do
+          sender_bot? -> false
+          recipient_bot? and not persist_bot_dm?(msg_str) -> false
+          true -> true
+        end
+
+      # Persist message but not if a JSONRPC being sent to a bot or
+      # if the message was from a bot
+      if save_message do
+        Chat.create_direct_message(%{
+          to_id: to_id,
+          from_id: sender_id,
+          content: msg_str,
+          inserted_at: DateTime.utc_now(),
+          delivered: true
+        })
+      end
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "legacy_user_updates:#{to_id}",
+        {:direct_message, sender_id, message_parts}
+      )
+
+      PubSub.broadcast(
+        Teiserver.PubSub,
+        "teiserver_client_messages:#{to_id}",
+        %{
+          channel: "teiserver_client_messages:#{to_id}",
+          event: :received_direct_message,
+          sender_id: sender_id,
+          message_content: message_parts
+        }
+      )
+    end
+
+    :ok
+  end
+
+  def send_direct_message(_from_id, _to_id, nil), do: :ok
+
+  def send_direct_message(from_id, to_id, message) do
+    # Replace SPADS command (starting with !) with lowercase
+    # version to prevent bypassing with capitalised command names
+    # Ignore !# bot commands like !#JSONRPC
+    # Allow voting for joinas if there are AIs in the
+    # recipient's lobby, otherwise alias to spec
+    message =
+      if String.starts_with?(message, "!") and !String.starts_with?(message, "!#") do
+        command_parts =
+          message
+          |> String.trim()
+          |> String.downcase()
+          |> String.split()
+
+        case command_parts do
+          ["!cv", "joinas" | _rest] ->
+            has_ai =
+              case Client.get_client_by_id(to_id) do
+                %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
+                  Battle.get_bots(lobby_id) |> Enum.any?()
+
+                _client ->
+                  false
+              end
+
+            if has_ai, do: message, else: "!cv joinas spec"
+
+          ["!callvote", "joinas" | _rest] ->
+            has_ai =
+              case Client.get_client_by_id(to_id) do
+                %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
+                  Battle.get_bots(lobby_id) |> Enum.any?()
+
+                _client ->
+                  false
+              end
+
+            if has_ai, do: message, else: "!callvote joinas spec"
+
+          ["!joinas" | _rest] ->
+            "!joinas spec"
+
+          _other ->
+            message
+        end
+      else
+        message
+      end
+
+    send_direct_message(from_id, to_id, [message])
+  end
+
+  defp persist_bot_dm?(message) do
+    not String.starts_with?(message, "!#")
   end
 
   @spec persist_message(User.t(), String.t(), T.lobby_id(), atom) :: any

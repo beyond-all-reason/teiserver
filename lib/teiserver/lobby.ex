@@ -806,20 +806,18 @@ defmodule Teiserver.Lobby do
   end
 
   @spec allow_say?(User.id(), T.lobby_id()) :: boolean()
-  def allow_say?(userid, lobby_id) do
+  def allow_say?(user_id, lobby_id) do
     lobby = get_lobby(lobby_id)
+    user = Account.get_user_by_id(user_id)
 
     cond do
       lobby == nil ->
         false
 
-      CacheUser.shadowbanned?(userid) ->
-        false
-
-      lobby.founder_id == userid ->
+      lobby.founder_id == user_id ->
         true
 
-      Auth.admin?(userid) or Auth.moderator?(userid) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         true
 
       lobby.silence ->
