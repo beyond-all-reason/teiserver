@@ -11,7 +11,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
@@ -637,7 +636,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
-        CacheUser.ring(userid, state.coordinator_id)
+        Lobby.ring(userid, state.coordinator_id)
 
         ChatLib.sayprivateex(
           state.coordinator_id,

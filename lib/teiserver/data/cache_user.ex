@@ -4,7 +4,6 @@ defmodule Teiserver.CacheUser do
   """
 
   alias Argon2
-  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.User
@@ -104,28 +103,6 @@ defmodule Teiserver.CacheUser do
 
   @spec decache_user(User.id()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCacheLib
-
-  @spec ring(User.id(), User.id()) :: :ok
-  def ring(ringee_id, ringer_id) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "legacy_user_updates:#{ringee_id}",
-      {:action, {:ring, ringer_id}}
-    )
-
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "client_application:#{ringee_id}",
-      %{
-        channel: "client_application:#{ringee_id}",
-        event: :ring,
-        userid: ringee_id,
-        ringer_id: ringer_id
-      }
-    )
-
-    :ok
-  end
 
   @spec allow?(User.id() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
   def allow?(nil, _required), do: false

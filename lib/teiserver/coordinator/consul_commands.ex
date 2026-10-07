@@ -1306,7 +1306,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client = Account.get_client_by_id(player_id)
 
       if client.ready == false and client.player == true do
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
       end
     end)
@@ -1390,7 +1390,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client = Client.get_client_by_id(player_id)
 
       if client.ready == false and client.player == true do
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
       end
     end)
@@ -1404,7 +1404,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
 
       player_id ->
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
         ConsulServer.say_command(cmd, state)
     end
@@ -1457,7 +1457,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       afk_check_list
       |> Enum.each(fn userid ->
-        CacheUser.ring(userid, state.coordinator_id)
+        Lobby.ring(userid, state.coordinator_id)
 
         Chat.send_direct_message(
           state.coordinator_id,
