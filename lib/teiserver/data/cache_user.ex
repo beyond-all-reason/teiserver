@@ -294,30 +294,4 @@ defmodule Teiserver.CacheUser do
         Enum.member?(user.permissions, required)
     end
   end
-
-  @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
-  @decorate Plugins.plugin(:valid_email?)
-  def valid_email?(email) do
-    cond do
-      Application.get_env(:teiserver, Teiserver)[:accept_all_emails] ->
-        :ok
-
-      not String.contains?(email, "@") ->
-        {:error, "invalid email"}
-
-      not String.contains?(email, ".") ->
-        {:error, "invalid email"}
-
-      # TODO: create a unique index on lower(email) so that this check is fast
-      # (and also redundant)
-      Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
-        {:error, "Email already attached to a user"}
-
-      Moderation.banned_domain?(email) ->
-        {:error, "Due to frequent abuse, that email provider is not allowed."}
-
-      true ->
-        :ok
-    end
-  end
 end

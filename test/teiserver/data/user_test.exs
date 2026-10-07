@@ -132,7 +132,7 @@ defmodule Teiserver.Data.UserTest do
     ]
 
     for {value, expected} <- data do
-      result = CacheUser.valid_email?(value)
+      result = Account.valid_email?(value)
       assert result == expected, message: "Bad result for email '#{value}'"
     end
   end

@@ -189,6 +189,9 @@ defmodule Teiserver.Account do
   @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
   defdelegate rename_user(userid, new_name, admin_action \\ false), to: UserLib
 
+  @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
+  defdelegate valid_email?(email), to: UserLib
+
   # User stat table
   @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
   def user_stat_query(args) do
