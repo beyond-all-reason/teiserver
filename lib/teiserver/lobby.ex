@@ -815,7 +815,7 @@ defmodule Teiserver.Lobby do
       lobby.founder_id == user_id ->
         true
 
-      Auth.admin?(user_id) or Auth.moderator?(user_id) ->
+      Auth.moderator?(user_id) ->
         true
 
       lobby.silence ->
