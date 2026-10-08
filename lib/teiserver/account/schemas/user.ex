@@ -182,7 +182,6 @@ defmodule Teiserver.Account.User do
       )
       |> validate_required([:email, :previous_emails])
       |> unique_constraint(:email)
-      |> unique_constraint(:discord_id)
       |> validate_change(:email, fn :email, email ->
         case CacheUser.valid_email?(email) do
           :ok -> []
@@ -323,6 +322,32 @@ defmodule Teiserver.Account.User do
 
   def set_gdpr_forget_changeset(%User{} = user, attrs) do
     cast(user, attrs, [:gdpr_forget_after])
+  end
+
+  @doc """
+  Not for use by the user themselves, the normal email change changeset requires their password.
+  This changeset is intended for use only by privileged users.
+  """
+  def system_email_changeset(%User{} = user, new_email) do
+    new_previous_emails = [user.email | user.previous_emails || []]
+
+    user
+    |> cast(
+      %{
+        email: new_email,
+        previous_emails: new_previous_emails,
+        email_last_changed_at: DateTime.utc_now()
+      },
+      [:email, :previous_emails, :email_last_changed_at]
+    )
+    |> validate_required([:email])
+    |> unique_constraint(:email)
+    |> validate_change(:email, fn :email, email ->
+      case CacheUser.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
   end
 
   def rename_changeset(%User{} = user, new_name) do

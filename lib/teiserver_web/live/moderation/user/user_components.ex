@@ -516,10 +516,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/edit/email"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
+        <.button class="m-1 btn btn-primary">
           <Fontawesome.icon icon="fa-envelope" style="solid" /> Email
         </.button>
       </.link>
