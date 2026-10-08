@@ -213,6 +213,8 @@
   {"lib/teiserver_web/live/moderation/tools/gdpr_restore_perform.ex"},
   {"lib/teiserver/account/tasks/restore_anonymised_user_task.ex"},
   {"lib/teiserver_web/live/moderation/user/form_name_component.ex"},
+  {"lib/teiserver_web/live/moderation/user/form_email_component.ex"},
+  {"lib/teiserver_web/live/moderation/user/form_roles_component.ex"},
   {"lib/teiserver/moderation/tasks/delete_expired_anti_abuse_records_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]

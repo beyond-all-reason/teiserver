@@ -46,7 +46,7 @@
         user_id={@user_id}
       />
 
-      <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} />
+      <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} scope={@scope} />
 
       <UserComponents.show_raw
         :if={@tab1 == "raw" and allow?(@scope, "Server")}
@@ -70,7 +70,7 @@
         user_id={@user_id}
       />
 
-      <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} />
+      <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} scope={@scope} />
 
       <UserComponents.show_raw
         :if={@tab2 == "raw" and allow?(@scope, "Server")}
@@ -108,6 +108,22 @@
     id={@user.id}
     user={@user}
     scope={@scope}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action == :edit_roles and not is_nil(@user)}
+  id="user-edit_roles-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormRolesComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+    role_data={@role_data}
+    has_active_mfa?={@has_active_mfa?}
   />
 </.modal>
 

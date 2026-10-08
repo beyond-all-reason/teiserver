@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.User.FormNameComponent do
   alias Teiserver.Account
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserLib
 
   use TeiserverWeb, :live_component
 
@@ -109,7 +110,8 @@ defmodule TeiserverWeb.ModerationLive.User.FormNameComponent do
 
     result =
       Repo.transact(fn ->
-        with true <- allow?(scope, "Moderator"),
+        with true <- UserLib.can_access_user?(user, scope),
+             true <- allow?(scope, "Moderator"),
              %{valid?: true} <- User.rename_changeset(socket.assigns.user, new_name),
              :success <- Account.rename_user(user.id, new_name, admin_action),
              %{} <-

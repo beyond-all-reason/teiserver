@@ -91,6 +91,31 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       # Ensure it has changed over
       assert Account.get_user_by_id!(user.id).email == new_email
     end
+
+    test "change roles", %{conn: conn} do
+      user = AccountFixtures.user_fixture(%{roles: ["Verified", "Bot", "Contributor"]})
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/roles")
+
+      # We would like to use the `form` function for this submission but it doesn't work with
+      # the checkboxes.
+      # Here we:
+      # - Cannot set Admin but try to, it should stay false
+      # - Cannot set Bot but try to set it to false, it should stay true
+      # - Do not alter Contributor, it should stay True
+      # - Set trusted to true
+      # - Remove Verified
+      live
+      |> element("#user-roles_change-form")
+      |> render_submit(%{
+        roles: %{Admin: "true", Trusted: "true", Verified: "false", Bot: "false"}
+      })
+
+      assert_patch(live, "/moderation/users/#{user.id}")
+
+      # Ensure it has changed over
+      assert Account.get_user_by_id!(user.id).roles == ["Bot", "Contributor", "Trusted"]
+    end
   end
 
   describe "rendering data" do
