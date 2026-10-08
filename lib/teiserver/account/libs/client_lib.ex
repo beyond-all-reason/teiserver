@@ -20,7 +20,8 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_name(""), do: nil
 
   def get_client_by_name(name) do
-    Account.get_userid_from_name(name)
+    name
+    |> Account.get_userid_from_name()
     |> get_client_by_id()
   end
 
