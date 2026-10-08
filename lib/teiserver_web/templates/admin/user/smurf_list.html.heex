@@ -219,8 +219,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                             <i
                               class={"fa-fw fa-solid #{type_icons[type]} text-#{type_colours[type]}"}
                               title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}:\n#{user_key.value}"}
-                            >
-                            </i>
+                            ></i>
                             <span class="key-date">
                               {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
                                 user_key.last_updated,
@@ -298,8 +297,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                 <%= for {type_name, count} <- @key_count_by_type_name do %>
                   <tr>
                     <td>
-                      <i class={"fa-fw fa-solid #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
-                      </i>
+                      <i class={"fa-fw fa-solid #{type_icons[type_name]} text-#{type_colours[type_name]}"}></i>
                       &nbsp; {type_name}
                     </td>
                     <td>
@@ -327,8 +325,7 @@ is_moderator = allow?(@conn, "Moderator") %>
                   <%= for key <- @all_user_keys do %>
                     <tr>
                       <td>
-                        <i class={"fa-fw fa-solid #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
-                        </i>
+                        <i class={"fa-fw fa-solid #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}></i>
                         &nbsp; {key.type.name}
                       </td>
                       <td>
