@@ -260,7 +260,8 @@ defmodule Teiserver.Client do
     # If a test goes wrong this can bork things and make it harder to
     # identify what actually went wrong
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      Account.get_user_by_id(client.userid)
+      client.userid
+      |> Account.get_user_by_id()
       |> Account.script_update_user(%{last_logout: DateTime.utc_now()})
 
       Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
