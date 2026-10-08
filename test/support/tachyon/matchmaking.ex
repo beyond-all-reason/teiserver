@@ -17,7 +17,8 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
       team_count: 2,
       engines: ["spring", "recoil"],
       games: ["BAR test version", "BAR release version"],
-      maps: [map]
+      maps: [map],
+      algo: :ignore_os
     }
 
     Map.merge(defaults, overrides)
@@ -30,12 +31,19 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
       QueueServer.init_state(attrs)
 
     {:ok, pid} = QueueServer.start_link(initial_state)
-    %{state: initial_state, id: attrs.id, version: initial_state.queue.version, pid: pid}
+
+    %{
+      state: initial_state,
+      id: attrs.id,
+      version: initial_state.queue.version,
+      pid: pid,
+      attrs: attrs
+    }
   end
 
   defp stg_attr(id),
     do: %{
-      spring_name: "Supreme that glitters",
+      spring_name: "Supreme that glitters #{id}",
       display_name: "Supreme That Glitters",
       thumbnail_url: "https://www.beyondallreason.info/map/?!",
       matchmaking_queues: [id]

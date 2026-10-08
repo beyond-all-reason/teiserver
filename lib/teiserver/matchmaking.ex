@@ -83,6 +83,8 @@ defmodule Teiserver.Matchmaking do
   @spec get_stats(queue_id :: String.t()) :: {:ok, stats()} | {:error, :not_found}
   defdelegate get_stats(queue_id), to: Matchmaking.QueueServer
 
+  defdelegate setup_site_configs(), to: Matchmaking.Config
+
   @doc """
   Subscribe to matchmaking queue updates.
   The subscription will receive messages with the following structure:

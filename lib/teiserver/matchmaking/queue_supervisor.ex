@@ -4,25 +4,14 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   """
 
   alias Teiserver.Asset
+  alias Teiserver.Matchmaking.Config
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
   alias Teiserver.Matchmaking.QueueServer
 
   use DynamicSupervisor
 
-  def default_queues do
-    engines =
-      case Asset.get_engine(in_matchmaking: true) do
-        nil -> []
-        e -> [%{version: e.name}]
-      end
-
-    games =
-      case Asset.get_game(in_matchmaking: true) do
-        nil -> []
-        g -> [%{spring_game: g.name}]
-      end
-
+  def default_queues(engines, games) do
     [
       QueueServer.init_state(%{
         id: "1v1",
@@ -77,6 +66,41 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
     ]
   end
 
+  def test_queues(engines, games) do
+    [
+      QueueServer.init_state(%{
+        id: "test-1v1",
+        name: "Test 1v1",
+        team_size: 1,
+        team_count: 2,
+        engines: engines,
+        games: games,
+        maps: Asset.get_maps_for_queue("1v1"),
+        algo: :ignore_os
+      })
+    ]
+  end
+
+  def get_queues do
+    engines =
+      case Asset.get_engine(in_matchmaking: true) do
+        nil -> []
+        e -> [%{version: e.name}]
+      end
+
+    games =
+      case Asset.get_game(in_matchmaking: true) do
+        nil -> []
+        g -> [%{spring_game: g.name}]
+      end
+
+    if Config.test_queues_enabled?() do
+      default_queues(engines, games) ++ test_queues(engines, games)
+    else
+      default_queues(engines, games)
+    end
+  end
+
   def start_queue!(state) do
     case DynamicSupervisor.start_child(__MODULE__, {QueueServer, state}) do
       {:error, err} -> raise "Cannot start queue: #{inspect(err)}"
@@ -106,7 +130,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   def start_link(init_arg) do
     {:ok, sup} = DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
 
-    Enum.each(default_queues(), &start_queue!/1)
+    get_queues() |> setup_queues!()
 
     {:ok, sup}
   end
@@ -114,5 +138,20 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   @impl DynamicSupervisor
   def init(_init_arg) do
     DynamicSupervisor.init(strategy: :one_for_one)
+  end
+
+  def setup_queues!, do: get_queues() |> setup_queues!()
+
+  def setup_queues!(queues) do
+    running_queue_ids = QueueRegistry.list() |> Enum.map(&elem(&1, 0))
+    wanted_queue_ids = Enum.map(queues, fn q -> q.id end)
+
+    queues_to_start = Enum.filter(queues, fn q -> q.id not in running_queue_ids end)
+    queue_ids_to_stop = Enum.filter(running_queue_ids, fn q -> q not in wanted_queue_ids end)
+
+    Enum.each(queues_to_start, &start_queue!/1)
+    Enum.each(queue_ids_to_stop, &terminate_queue/1)
+
+    :ok
   end
 end
