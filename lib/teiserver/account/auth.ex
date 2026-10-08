@@ -163,8 +163,8 @@ defmodule Teiserver.Account.Auth do
   @doc """
   Performs a rate-limit check for a login attempt
   """
-  @spec can_login?(User.t() | map()) :: boolean()
-  def can_login?(%{id: id}) do
+  @spec can_login?(User.t()) :: boolean()
+  def can_login?(%User{id: id}) do
     key = "failed-login:#{id}"
     scale = :timer.minutes(1)
     limit = 4
