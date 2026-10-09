@@ -9,7 +9,6 @@ defmodule Teiserver.Lobby do
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Battle.LobbyThrottle
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
@@ -806,20 +805,17 @@ defmodule Teiserver.Lobby do
   end
 
   @spec allow_say?(User.id(), T.lobby_id()) :: boolean()
-  def allow_say?(userid, lobby_id) do
+  def allow_say?(user_id, lobby_id) do
     lobby = get_lobby(lobby_id)
 
     cond do
       lobby == nil ->
         false
 
-      CacheUser.shadowbanned?(userid) ->
-        false
-
-      lobby.founder_id == userid ->
+      lobby.founder_id == user_id ->
         true
 
-      Auth.admin?(userid) or Auth.moderator?(userid) ->
+      Auth.moderator?(user_id) ->
         true
 
       lobby.silence ->
@@ -834,5 +830,27 @@ defmodule Teiserver.Lobby do
   def new_script_password do
     ULID.generate()
     |> Base.encode32(padding: false)
+  end
+
+  @spec ring(User.id(), User.id()) :: :ok
+  def ring(ringee_id, ringer_id) do
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "legacy_user_updates:#{ringee_id}",
+      {:action, {:ring, ringer_id}}
+    )
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "client_application:#{ringee_id}",
+      %{
+        channel: "client_application:#{ringee_id}",
+        event: :ring,
+        userid: ringee_id,
+        ringer_id: ringer_id
+      }
+    )
+
+    :ok
   end
 end

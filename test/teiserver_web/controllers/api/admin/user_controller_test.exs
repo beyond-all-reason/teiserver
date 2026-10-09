@@ -143,7 +143,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "roles" => ["Verified"],
         "permissions" => ["Verified"],
         "restrictions" => [],
-        "shadowbanned" => false,
         "mu" => 1500,
         "sigma" => 100,
         "play_time" => 3600,
@@ -160,7 +159,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["user"]["roles"] == ["Verified"]
       assert resp["user"]["permissions"] == ["Verified"]
       assert resp["user"]["restrictions"] == []
-      assert resp["user"]["shadowbanned"] == false
       assert resp["credentials"]["access_token"]
       assert resp["credentials"]["refresh_token"]
     end
@@ -212,8 +210,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       # Promote a target user to a privileged role outside the API allowlist.
       {:ok, _promoted_user} =
         Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
-
-      Account.deprecated_recache_user(user.id)
 
       resp =
         conn

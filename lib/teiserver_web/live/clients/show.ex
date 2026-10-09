@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.ClientLive.Show do
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Login
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Client
 
   use TeiserverWeb, :live_view
@@ -159,7 +159,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   def handle_event("force-flood", _event, socket) do
-    CacheUser.set_flood_level(socket.assigns[:id], 100)
+    Login.set_flood_level(socket.assigns[:id], 100)
     Client.disconnect(socket.assigns[:id], "flood protection")
     {:noreply, socket |> redirect(to: ~p"/teiserver/admin/client")}
   end

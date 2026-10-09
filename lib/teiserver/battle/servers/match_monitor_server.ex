@@ -7,11 +7,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.Match
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
@@ -272,7 +272,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
 
-    {:ok, user, client} = CacheUser.internal_client_login(account.id)
+    {:ok, user, client} = Login.internal_client_login(account.id)
 
     rooms = ["autohosts"]
 
@@ -298,7 +298,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     state
   end
 
-  @spec get_match_monitor_account() :: Teiserver.CacheUser.t() | map()
+  @spec get_match_monitor_account() :: User.t() | map()
   def get_match_monitor_account do
     user =
       Account.get_user(nil,
@@ -317,19 +317,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             icon: "fa-solid fa-camera-cctv",
             colour: "#00AA66",
             password: Account.make_bot_password(),
-            roles: ["Bot", "Verified", "Server"],
-            data: %{
-              bot: true,
-              moderator: false,
-              lobby_client: "Teiserver Internal Process"
-            }
+            roles: ["Bot", "Verified", "Server"]
           })
 
         Account.update_user_stat(account.id, %{
+          lobby_client: "Teiserver Internal Process",
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.deprecated_recache_user(account.id)
+        Account.recache_user(account)
         account
 
       account ->
@@ -393,7 +389,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       true
     else
       Client.disconnect(user_id, "Abuse")
-      CacheUser.set_flood_level(user_id, 10)
+      Login.set_flood_level(user_id, 10)
       false
     end
   end

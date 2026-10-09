@@ -3,7 +3,6 @@ defmodule Teiserver.HookServer do
   alias Phoenix.PubSub
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Bridge.DiscordSystem
-  alias Teiserver.CacheUser
   alias Teiserver.Communication
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   use GenServer
@@ -72,35 +71,6 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  defp do_handle_info({:account_hooks, event, payload, _reason}, state) do
-    start_completed =
-      Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true
-
-    event = if start_completed, do: event, else: nil
-
-    case event do
-      nil ->
-        nil
-
-      :create_user ->
-        CacheUser.deprecated_recache_user(payload.id)
-
-      :update_user ->
-        CacheUser.deprecated_recache_user(payload.id)
-
-      :create_report ->
-        :ok
-
-      :update_report ->
-        :ok
-
-      _unhandled_event ->
-        throw("No HookServer account_hooks handler for event '#{event}'")
-    end
-
-    {:noreply, state}
-  end
-
   defp do_handle_info(%{channel: "application", event: app_event}, state) do
     case app_event do
       :started ->
@@ -135,7 +105,6 @@ defmodule Teiserver.HookServer do
     Logger.metadata(actor_type: :hook_server)
 
     if Application.get_env(:teiserver, Teiserver)[:enable_hooks] do
-      :ok = PubSub.subscribe(Teiserver.PubSub, "account_hooks")
       :ok = PubSub.subscribe(Teiserver.PubSub, "global_moderation")
       :ok = PubSub.subscribe(Teiserver.PubSub, "application")
     end

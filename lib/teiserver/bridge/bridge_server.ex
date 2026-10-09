@@ -4,9 +4,10 @@ defmodule Teiserver.Bridge.BridgeServer do
   """
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Bridge.CommandLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
 
@@ -103,9 +104,9 @@ defmodule Teiserver.Bridge.BridgeServer do
           data,
         state
       ) do
-    username = CacheUser.get_username(data.sender_id)
+    username = Account.get_username_by_id(data.sender_id)
 
-    CacheUser.send_direct_message(
+    Chat.send_direct_message(
       state.userid,
       data.sender_id,
       "I don't currently handle messages, sorry #{username}"
@@ -156,7 +157,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     Logger.info("Starting up Bridge server")
     account = get_bridge_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
-    {:ok, user, client} = CacheUser.internal_client_login(account.id)
+    {:ok, user, client} = Login.internal_client_login(account.id)
 
     state = %{
       ip: "127.0.0.1",
@@ -181,7 +182,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     state
   end
 
-  @spec get_bridge_account() :: Teiserver.CacheUser.t() | map()
+  @spec get_bridge_account() :: User.t() | map()
   def get_bridge_account do
     user =
       Account.get_user(nil,
@@ -200,19 +201,15 @@ defmodule Teiserver.Bridge.BridgeServer do
             icon: "fa-brands fa-discord",
             colour: "#0066AA",
             password: Account.make_bot_password(),
-            roles: ["Bot", "Verified", "Server"],
-            data: %{
-              bot: true,
-              moderator: false,
-              lobby_client: "Teiserver Internal Process"
-            }
+            roles: ["Bot", "Verified", "Server"]
           })
 
         Account.update_user_stat(account.id, %{
+          lobby_client: "Teiserver Internal Process",
           country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
         })
 
-        CacheUser.deprecated_recache_user(account.id)
+        Account.recache_user(account)
         account
 
       account ->

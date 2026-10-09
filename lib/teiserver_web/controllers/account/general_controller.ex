@@ -51,8 +51,6 @@ defmodule TeiserverWeb.Account.GeneralController do
       |> assign(:redirect, ~p"/teiserver/account/details")
       |> render("mfa_refresh.html")
     else
-      Account.decache_user(user.id)
-
       user_params = Map.put(user_params, "password", user_params["password_confirmation"])
 
       ip = LoggingPlug.get_ip_from_conn(conn)

@@ -7,11 +7,9 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.TOTPLib
-  alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
   alias Teiserver.EmailHelper
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
@@ -204,15 +202,6 @@ defmodule TeiserverWeb.Admin.UserController do
             :data
           ])
 
-        cache_user = Account.deprecated_get_user_by_id(user.id)
-
-        extra_cache_keys =
-          cache_user
-          |> Map.keys()
-          |> Enum.reject(fn cache_user_key ->
-            json_user |> Map.keys() |> Enum.member?(cache_user_key)
-          end)
-
         conn
         |> assign(:user, user)
         |> assign(:client, client)
@@ -221,8 +210,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:role_data, RoleLib.role_data())
         |> assign(:section_menu_active, "show")
         |> assign(:json_user, json_user)
-        |> assign(:cache_user, cache_user)
-        |> assign(:extra_cache_keys, extra_cache_keys)
         |> assign(:has_active_mfa?, has_active_mfa?(user.id))
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
@@ -505,7 +492,6 @@ defmodule TeiserverWeb.Admin.UserController do
           case action do
             "recache" ->
               RefreshUserRestrictionsTask.refresh_user(user.id)
-              CacheUser.deprecated_recache_user(user.id)
               {:ok, ""}
 
             "reset_flood_protection" ->
@@ -852,7 +838,6 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     RefreshUserRestrictionsTask.refresh_user(user.id)
-    CacheUser.deprecated_recache_user(user.id)
 
     # Now we update stats for the origin
     smurf_count =
@@ -900,35 +885,5 @@ defmodule TeiserverWeb.Admin.UserController do
 
   defp should_show_exact_match?(page, users, search_term) do
     page == 0 && Enum.count(users) > 20 && search_term != ""
-  end
-
-  @spec shadowban(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def shadowban(conn, %{"id" => id, "state" => state}) do
-    %User{} = user = Account.get_user_by_id(id)
-
-    case UserLib.has_access(user, conn) do
-      {true, _access} ->
-        message =
-          case state do
-            "true" ->
-              add_audit_log(conn, "Shadowban", %{target_id: user.id})
-              CacheUser.shadowban_user(user.id)
-              "has been shadowbanned"
-
-            "false" ->
-              add_audit_log(conn, "Unshadowban", %{target_id: user.id})
-              CacheUser.unshadowban_user(user.id)
-              "has been cleared of shadowban"
-          end
-
-        conn
-        |> put_flash(:success, "User #{user.name} #{message}")
-        |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to shadowban this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
   end
 end

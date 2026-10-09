@@ -1,8 +1,10 @@
 defmodule Teiserver.Data.UserTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.Registration
+  alias Teiserver.Account.UserLib
   alias Teiserver.TeiserverTestLib
+
   use Teiserver.ServerCase
 
   test "adding two bots with the same email" do
@@ -13,25 +15,29 @@ defmodule Teiserver.Data.UserTest do
     base_user = TeiserverTestLib.new_user("twobot_test_base")
     {:ok, base_user} = Auth.add_roles(base_user.id, ["Server", "Moderator"])
 
-    user1 = CacheUser.register_bot("twobot_test_base[01]", base_user.id)
-    user2 = CacheUser.register_bot("twobot_test_base[02]", base_user.id)
+    user1 = Registration.register_bot("twobot_test_base[01]", base_user.id)
+    user2 = Registration.register_bot("twobot_test_base[02]", base_user.id)
 
     # Now try to register them again
-    user1b = CacheUser.register_bot("twobot_test_base[01]", base_user.id)
+    user1b = Registration.register_bot("twobot_test_base[01]", base_user.id)
 
     assert user1.id == user1b.id
     assert user1.id != user2.id
   end
 
   test "registering a duplicate user" do
-    result = CacheUser.register_user_with_md5("dupe_name", "dupe@email.e", "md5_password", "ip")
+    result =
+      Registration.register_user_with_md5("dupe_name", "dupe@email.e", "md5_password", "ip")
+
     assert result == :success
 
-    result = CacheUser.register_user_with_md5("DUPE_NAME", "DUPE@email.e", "md5_password", "ip")
+    result =
+      Registration.register_user_with_md5("DUPE_NAME", "DUPE@email.e", "md5_password", "ip")
+
     assert result == {:error, "Username already taken"}
 
     result =
-      CacheUser.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
+      Registration.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
 
     assert result == {:error, "Email already attached to a user"}
   end
@@ -39,7 +45,12 @@ defmodule Teiserver.Data.UserTest do
   test "registering with empty password" do
     # 1B2M2Y8AsgTpgAmY7PhCfg== md5 hash of empty password Chobby sends
     result =
-      CacheUser.register_user_with_md5("name", "name@email.e", "1B2M2Y8AsgTpgAmY7PhCfg==", "ip")
+      Registration.register_user_with_md5(
+        "name",
+        "name@email.e",
+        "1B2M2Y8AsgTpgAmY7PhCfg==",
+        "ip"
+      )
 
     assert {:error, _reason} = result
   end
@@ -51,19 +62,19 @@ defmodule Teiserver.Data.UserTest do
   #     "player_minutes" => 60 * 60,
   #     "spectator_minutes" => 60 * 60
   #   })
-  #   assert CacheUser.calculate_rank(user.id) == 3
+  #   assert Login.calculate_rank(user.id) == 3
 
   #   Account.update_user_stat(user.id, %{
   #     "player_minutes" => 60 * 1,
   #     "spectator_minutes" => 60 * 1
   #   })
-  #   assert CacheUser.calculate_rank(user.id) == 0
+  #   assert Login.calculate_rank(user.id) == 0
 
   #   Account.update_user_stat(user.id, %{
   #     "player_minutes" => 60 * 240,
   #     "spectator_minutes" => 0
   #   })
-  #   assert CacheUser.calculate_rank(user.id) == 4
+  #   assert Login.calculate_rank(user.id) == 4
   # end
 
   test "renaming" do
@@ -72,30 +83,30 @@ defmodule Teiserver.Data.UserTest do
     expected_rename_error =
       {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
 
-    assert CacheUser.rename_user(user.id, "rename1") == :success
-    assert CacheUser.rename_user(user.id, "rename2") == :success
+    assert Account.rename_user(user.id, "rename1") == :success
+    assert Account.rename_user(user.id, "rename2") == :success
 
-    assert CacheUser.rename_user(user.id, "rename3") == expected_rename_error
+    assert Account.rename_user(user.id, "rename3") == expected_rename_error
 
     # Lets make it so they can do it again
     Account.update_user_stat(user.id, %{
       "rename_log" => [0]
     })
 
-    assert CacheUser.rename_user(user.id, "rename4") == :success
-    assert CacheUser.rename_user(user.id, "rename44") == :success
+    assert Account.rename_user(user.id, "rename4") == :success
+    assert Account.rename_user(user.id, "rename44") == :success
 
-    assert CacheUser.rename_user(user.id, "rename5") == expected_rename_error
+    assert Account.rename_user(user.id, "rename5") == expected_rename_error
 
     # What if they've done it many times before but nothing recent?
     Account.update_user_stat(user.id, %{
       "rename_log" => [0, 5, 10]
     })
 
-    assert CacheUser.rename_user(user.id, "rename6") == :success
-    assert CacheUser.rename_user(user.id, "rename66") == :success
+    assert Account.rename_user(user.id, "rename6") == :success
+    assert Account.rename_user(user.id, "rename66") == :success
 
-    assert CacheUser.rename_user(user.id, "rename7") == expected_rename_error
+    assert Account.rename_user(user.id, "rename7") == expected_rename_error
 
     # Nothing in the last 15 days but enough in the last 30
     now = System.system_time(:second)
@@ -109,7 +120,7 @@ defmodule Teiserver.Data.UserTest do
       ]
     })
 
-    assert CacheUser.rename_user(user.id, "rename8") == expected_rename_error
+    assert Account.rename_user(user.id, "rename8") == expected_rename_error
   end
 
   test "valid_email?" do
@@ -122,7 +133,7 @@ defmodule Teiserver.Data.UserTest do
     ]
 
     for {value, expected} <- data do
-      result = CacheUser.valid_email?(value)
+      result = Account.valid_email?(value)
       assert result == expected, message: "Bad result for email '#{value}'"
     end
   end
@@ -142,7 +153,7 @@ defmodule Teiserver.Data.UserTest do
     ]
 
     for {value, expected} <- data do
-      result = CacheUser.check_symbol_limit(value)
+      result = UserLib.check_symbol_limit(value)
       assert result == expected, message: "Bad result for username '#{value}'"
     end
   end

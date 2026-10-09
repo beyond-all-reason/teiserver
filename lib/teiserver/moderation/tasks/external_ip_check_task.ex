@@ -8,7 +8,9 @@ defmodule Teiserver.Moderation.Tasks.ExternalIPCheckTask do
 
   require Logger
 
-  @spec get_ban_reasons(ip :: String.t()) :: [atom()]
+  @spec get_ban_reasons(ip :: String.t() | nil) :: [atom()]
+  def get_ban_reasons(nil), do: []
+
   def get_ban_reasons(ip) do
     if Config.get_site_config_cache("teiserver.External IP check enabled") do
       case IpCheck.query_ip(ip) do

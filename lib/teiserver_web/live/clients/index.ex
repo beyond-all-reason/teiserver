@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
   alias Teiserver
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserLib
   alias Teiserver.Client
 
@@ -155,6 +156,10 @@ defmodule TeiserverWeb.ClientLive.Index do
   defp limited_user(nil), do: nil
 
   defp limited_user(user) do
-    Map.take(user, ~w(id bot moderator chobby_hash)a)
+    %{
+      id: user.id,
+      bot: Auth.is_bot?(user),
+      chobby_hash: Account.get_user_stat_data(user.id)["chobby_hash"]
+    }
   end
 end
