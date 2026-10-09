@@ -21,6 +21,13 @@ const liveSocket = new LiveSocket("/live", Socket, {
   }
 })
 
+// Copy the data-copy value of an element to the clipboard, triggered with
+// phx-click={JS.dispatch("phx:copy")}
+window.addEventListener("phx:copy", event => {
+  const text = event.target.dataset.copy
+  if (text) navigator.clipboard.writeText(text)
+})
+
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
