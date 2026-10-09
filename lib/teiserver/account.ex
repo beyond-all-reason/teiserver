@@ -115,18 +115,6 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user_email(user, attrs, ip), to: UserLib
 
-  @spec admin_update_user(User.t(), map) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate admin_update_user(user, attrs), to: UserLib
-
-  @spec senior_moderator_update_user(User.t(), map) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate senior_moderator_update_user(user, attrs), to: UserLib
-
-  @spec moderator_update_user(User.t(), map) ::
-          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate moderator_update_user(user, attrs), to: UserLib
-
   @spec server_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate server_update_user(user, attrs), to: UserLib
 

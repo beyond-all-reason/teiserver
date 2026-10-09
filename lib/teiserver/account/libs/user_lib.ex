@@ -270,30 +270,6 @@ defmodule Teiserver.Account.UserLib do
     end
   end
 
-  def admin_update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs, :admin_update_user)
-    |> Repo.update()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok(user)
-  end
-
-  def senior_moderator_update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs, :senior_moderator_update_user)
-    |> Repo.update()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok(user)
-  end
-
-  def moderator_update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs, :moderator_update_user)
-    |> Repo.update()
-    |> cache_put_on_ok(:users_by_id)
-    |> UserCacheLib.decache_user_on_ok(user)
-  end
-
   def server_update_user(%User{} = user, attrs) do
     user
     |> User.changeset(attrs)
