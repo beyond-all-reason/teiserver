@@ -210,7 +210,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   defp switch_tab(%Socket{assigns: %{user: user}} = socket, "audit", tabset) do
     audit_logs =
       AuditLogQueries.audit_logs()
-      |> AuditLogQueries.where_subject_id(user.id)
+      |> AuditLogQueries.where_subject_or_user_id(user.id)
       |> AuditLogQueries.load_user()
       |> AuditLogQueries.order_by_inserted_at(:desc)
       |> QueryHelpers.limit_query(50)
