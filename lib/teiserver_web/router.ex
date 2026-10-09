@@ -665,6 +665,16 @@ defmodule TeiserverWeb.Router do
       live "/tools/gdpr_restore/perform", Tools.GDPRRestorePerform
       live "/tools/gdpr_restore/success/:user_id", Tools.GDPRRestoreSuccess
     end
+
+    live_session :lobby_logs,
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "moderation"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      live "/lobby_logs", LobbyLog.List, :list
+    end
   end
 
   scope "/teiserver/admin", TeiserverWeb.Admin, as: :admin do

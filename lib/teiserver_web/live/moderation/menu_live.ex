@@ -90,6 +90,14 @@ defmodule TeiserverWeb.ModerationLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
+        :if={allow?(@scope, "Moderator")}
+        icon="door-open"
+        url={~p"/moderation/lobby_logs"}
+      >
+        Lobby logs
+      </.menu_page_link>
+
+      <.menu_page_link
         :if={allow?(@current_user, "Senior moderator")}
         icon="person-burst"
         url={~p"/moderation/anti-abuse-records"}

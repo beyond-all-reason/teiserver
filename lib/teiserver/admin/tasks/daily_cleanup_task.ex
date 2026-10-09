@@ -2,7 +2,6 @@ defmodule Teiserver.Admin.DailyCleanupTask do
   @moduledoc false
 
   alias Ecto.Adapters.SQL
-  alias Teiserver.Config
   alias Teiserver.Repo
 
   use Oban.Worker, queue: :cleanup
@@ -15,10 +14,9 @@ defmodule Teiserver.Admin.DailyCleanupTask do
     clear_previous_emails()
     clear_unlinked_audit_logs()
     clear_linked_audit_logs()
+    clear_lobby_logs()
 
-    if Config.get_site_config_cache("system.Use geoip") do
-      SQL.query!(Repo, "VACUUM ANALYZE;", [])
-    end
+    SQL.query!(Repo, "VACUUM ANALYZE;", [])
 
     :ok
   end
@@ -66,6 +64,19 @@ defmodule Teiserver.Admin.DailyCleanupTask do
         email_last_changed_at IS NOT NULL
         AND email_last_changed_at < $1
         AND cardinality(previous_emails) > 0
+    """
+
+    SQL.query(Repo, query, [timestamp])
+  end
+
+  defp clear_lobby_logs do
+    days = Application.get_env(:teiserver, Teiserver)[:retention][:lobby_logs]
+    timestamp = DateTime.utc_now() |> DateTime.shift(day: -days)
+
+    query = """
+      DELETE
+      FROM lobby_logs
+      WHERE inserted_at < $1
     """
 
     SQL.query(Repo, query, [timestamp])
