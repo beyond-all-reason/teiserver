@@ -79,7 +79,7 @@ defmodule TeiserverWeb.ModerationLive.User.UserNoteFormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "User note updated successfully")
-         |> push_patch(to: ~p"/moderation/users/#{socket.assigns.user_id}")}
+         |> push_patch(to: ~p"/moderation/users/#{socket.assigns.user_id}/notes")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -100,7 +100,7 @@ defmodule TeiserverWeb.ModerationLive.User.UserNoteFormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "User note created successfully")
-         |> push_patch(to: ~p"/moderation/users/#{socket.assigns.user_id}")}
+         |> push_patch(to: ~p"/moderation/users/#{socket.assigns.user_id}/notes")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

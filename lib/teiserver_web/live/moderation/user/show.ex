@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.RoleLib
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Account.UserNote
@@ -11,6 +12,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Logging.AuditLogQueries
   alias TeiserverWeb.ModerationLive.User.FormEmailComponent
   alias TeiserverWeb.ModerationLive.User.FormNameComponent
+  alias TeiserverWeb.ModerationLive.User.FormRolesComponent
   alias TeiserverWeb.ModerationLive.User.UserNoteFormComponent
   alias TeiserverWeb.ModerationLive.UserComponents
 
@@ -39,9 +41,18 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       |> UserLib.make_favourite()
       |> insert_recently(socket)
 
+      # Allows us to redirect to this page with a specific tab selected
+      tab1 = Map.get(params, "tab", @tab1_default)
+
       socket
-      |> assign(user: user, page_title: "User details: #{user.name}", user_id: id)
-      |> switch_tab(@tab1_default, "1")
+      |> assign(
+        user: user,
+        page_title: "User details: #{user.name}",
+        user_id: id,
+        has_active_mfa?: has_active_mfa?(user.id),
+        role_data: RoleLib.grouped_role_data()
+      )
+      |> switch_tab(tab1, "1")
       |> switch_tab(@tab2_default, "2")
       |> set_user_alerts()
       |> apply_action(socket.assigns.live_action, params)
@@ -272,6 +283,11 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   defp apply_action(%Socket{} = socket, :edit_email, _params) do
     socket
     |> assign(:page_title, "Change user email")
+  end
+
+  defp apply_action(%Socket{} = socket, :edit_roles, _params) do
+    socket
+    |> assign(:page_title, "Change user roles")
   end
 
   defp apply_action(%Socket{} = socket, _any, _params), do: socket

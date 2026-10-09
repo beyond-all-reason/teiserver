@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.User.FormEmailComponent do
   alias Teiserver.Account
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserLib
 
   use TeiserverWeb, :live_component
 
@@ -81,7 +82,8 @@ defmodule TeiserverWeb.ModerationLive.User.FormEmailComponent do
 
     result =
       Repo.transact(fn ->
-        with true <- allow?(scope, "Senior moderator"),
+        with true <- UserLib.can_access_user?(user, scope),
+             true <- allow?(scope, "Senior moderator"),
              %Changeset{valid?: true} = changeset <-
                User.system_email_changeset(socket.assigns.user, new_email),
              {:ok, %User{} = updated_user} <- Repo.update(changeset),

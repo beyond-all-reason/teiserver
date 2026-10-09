@@ -48,7 +48,7 @@ defmodule Teiserver.Account.UserLib do
       item_colour: user.colour,
       item_icon: user.icon,
       item_label: "#{user.name}",
-      url: "/teiserver/admin/user/#{user.id}"
+      url: "/moderation/user/#{user.id}"
     }
   end
 

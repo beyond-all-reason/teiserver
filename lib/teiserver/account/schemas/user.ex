@@ -357,6 +357,14 @@ defmodule Teiserver.Account.User do
     |> validate_name_change()
   end
 
+  def roles_changeset(%User{} = user, new_roles) do
+    new_roles = Enum.uniq(new_roles || [])
+
+    user
+    |> cast(%{roles: new_roles}, [:roles])
+    |> validate_required([:roles])
+  end
+
   def discord_id_changeset(user, attrs) do
     user
     |> cast(attrs, [:discord_id])

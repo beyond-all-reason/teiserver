@@ -206,3 +206,6 @@
   @apply dark:fill-neutral-content dark:text-neutral;
 }
 
+.btn-close {
+  cursor: pointer;
+}

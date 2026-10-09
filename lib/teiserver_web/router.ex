@@ -581,14 +581,16 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/users", User.List, :list
 
-      live "/users/:id", User.Show, :show
       live "/users/:id/edit/name", User.Show, :edit_name
       live "/users/:id/edit/email", User.Show, :edit_email
+      live "/users/:id/edit/roles", User.Show, :edit_roles
       live "/users/:id/new/note", User.Show, :new_note
       live "/users/:id/edit/note/:user_note_id", User.Show, :edit_note
       live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
       live "/users/:id/set_gdpr_forget", User.SetGDPRForget
       live "/users/:id/smurf_link", User.SmurfLink, :show
+      live "/users/:id", User.Show, :show
+      live "/users/:id/:tab", User.Show, :show
     end
 
     live_session :banned_ips,
@@ -824,7 +826,7 @@ defmodule TeiserverWeb.Router do
     get("/users/ratings_form/:id", UserController, :ratings_form)
     post("/users/ratings_post/:id", UserController, :ratings_post)
     get("/users/ratings/:id", UserController, :ratings)
-    resources("/user", UserController)
+    resources("/user", UserController, only: [:index, :show])
 
     resources("/badge_types", BadgeTypeController)
     get("/accolades/user/:user_id", AccoladeController, :user_show)

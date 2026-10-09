@@ -4,7 +4,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
-  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.TOTPLib
@@ -17,7 +16,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
-  alias Teiserver.Player
 
   use TeiserverWeb, :controller
 
@@ -233,176 +231,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> put_flash(:danger, "This is a restricted user")
         |> redirect(to: ~p"/teiserver/admin/user")
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def edit(conn, %{"id" => id}) do
-    current_user = conn.assigns.current_user
-    user = Account.get_user(id)
-
-    changeable_roles =
-      cond do
-        Enum.member?(current_user.roles, "Server") ->
-          RoleLib.allowed_role_management("Server")
-
-        Enum.member?(current_user.roles, "Admin") ->
-          RoleLib.allowed_role_management("Admin")
-
-        Enum.member?(current_user.roles, "Senior moderator") ->
-          RoleLib.allowed_role_management("Senior moderator")
-
-        Enum.member?(current_user.roles, "Moderator") ->
-          RoleLib.allowed_role_management("Moderator")
-
-        true ->
-          []
-      end
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        changeset = Account.change_user(user)
-
-        conn
-        |> assign(:user, user)
-        |> assign(:changeset, changeset)
-        |> assign(:management_roles, RoleLib.management_roles())
-        |> assign(:moderation_roles, RoleLib.moderation_roles())
-        |> assign(:staff_roles, RoleLib.staff_roles())
-        |> assign(:community_roles, RoleLib.community_roles())
-        |> assign(:privileged_roles, RoleLib.privileged_roles())
-        |> assign(:property_roles, RoleLib.property_roles())
-        |> assign(:role_data, RoleLib.role_data())
-        |> assign(:has_active_mfa?, has_active_mfa?(user.id))
-        |> assign(:changeable_roles, changeable_roles)
-        |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
-        |> render("edit.html")
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def update(conn, %{"id" => id, "user" => user_params}) do
-    current_user = conn.assigns.current_user
-    user = Account.get_user!(id)
-
-    # We decache now and later to ensure we decache data as it stands too
-    Account.decache_user(user.id)
-
-    changeable_roles =
-      cond do
-        Enum.member?(current_user.roles, "Server") ->
-          RoleLib.allowed_role_management("Server")
-
-        Enum.member?(current_user.roles, "Admin") ->
-          RoleLib.allowed_role_management("Admin")
-
-        Enum.member?(current_user.roles, "Senior moderator") ->
-          RoleLib.allowed_role_management("Senior moderator")
-
-        Enum.member?(current_user.roles, "Moderator") ->
-          RoleLib.allowed_role_management("Moderator")
-
-        true ->
-          []
-      end
-
-    # Go through all roles, any we're not allowed to change
-    # we leave as they are, any we are we do stuff with
-    new_roles =
-      RoleLib.all_role_names()
-      |> Enum.map(fn role_name ->
-        selected =
-          if Enum.member?(changeable_roles, role_name) do
-            user_params[role_name] == "true"
-          else
-            Enum.member?(user.roles, role_name)
-          end
-
-        if selected do
-          role_name
-        end
-      end)
-      |> Enum.reject(&(&1 == nil))
-      |> Enum.uniq()
-
-    roles_changed = MapSet.new(new_roles) != MapSet.new(user.roles)
-
-    permissions =
-      new_roles
-      |> Enum.map(fn role_name ->
-        %Role{} = role_def = RoleLib.role_data(role_name)
-        [role_name | role_def.contains]
-      end)
-      |> List.flatten()
-      |> Enum.uniq()
-
-    data =
-      Map.merge(user.data || %{}, %{
-        "bot" => Enum.member?(permissions, "Bot"),
-        "moderator" => Enum.member?(permissions, "Moderator"),
-        "roles" => new_roles
-      })
-
-    user_params =
-      Map.merge(user_params, %{
-        "data" => data,
-        "permissions" => permissions,
-        "roles" => new_roles
-      })
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        change_result =
-          cond do
-            allow?(conn, "Server") ->
-              Account.server_update_user(user, user_params)
-
-            allow?(conn, "Admin") ->
-              Account.admin_update_user(user, user_params)
-
-            allow?(conn, "Senior moderator") ->
-              Account.senior_moderator_update_user(user, user_params)
-
-            allow?(conn, "Moderator") ->
-              Account.moderator_update_user(user, user_params)
-          end
-
-        case change_result do
-          {:ok, user} ->
-            Account.decache_user(user.id)
-
-            if roles_changed do
-              Player.update_user_roles(user.id, user.roles)
-            end
-
-            conn
-            |> put_flash(:info, "User updated successfully.")
-            # |> redirect(to: ~p"/teiserver/admin/user")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            conn
-            |> assign(:management_roles, RoleLib.management_roles())
-            |> assign(:moderation_roles, RoleLib.moderation_roles())
-            |> assign(:staff_roles, RoleLib.staff_roles())
-            |> assign(:community_roles, RoleLib.community_roles())
-            |> assign(:privileged_roles, RoleLib.privileged_roles())
-            |> assign(:property_roles, RoleLib.property_roles())
-            |> assign(:role_data, RoleLib.role_data())
-            |> assign(:has_active_mfa?, has_active_mfa?(user.id))
-            |> assign(:changeable_roles, changeable_roles)
-            |> render("edit.html", user: user, changeset: changeset)
-        end
 
       _no_access ->
         conn
