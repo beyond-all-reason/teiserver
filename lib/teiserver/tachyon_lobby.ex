@@ -134,8 +134,9 @@ defmodule Teiserver.TachyonLobby do
               ),
               to: Lobby
 
-  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
-  defdelegate remove_bot(lobby_id, bot_id), to: Lobby
+  @spec remove_bot(id(), User.id(), bot_id :: String.t()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  defdelegate remove_bot(lobby_id, user_id, bot_id), to: Lobby
 
   @type bot_update_data :: Lobby.bot_update_data()
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}

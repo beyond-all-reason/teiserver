@@ -7,6 +7,7 @@ defmodule Teiserver.ModerationFixtures do
   alias Teiserver.Account.Scope
   alias Teiserver.AccountFixtures
   alias Teiserver.Moderation
+  alias Teiserver.TachyonLobby
 
   @doc """
   Generate a banned_domain.
@@ -78,5 +79,18 @@ defmodule Teiserver.ModerationFixtures do
       |> Moderation.create_anti_abuse_record(attrs[:scope])
 
     anti_abuse_record
+  end
+
+  def lobby_log_fixture(attrs \\ %{}) do
+    {:ok, lobby_log} =
+      attrs
+      |> Enum.into(%{
+        lobby_id: attrs[:lobby_id] || TachyonLobby.gen_id(),
+        event_type: attrs[:event_type] || :join_lobby,
+        user_id: attrs[:user_id] || AccountFixtures.user_fixture().id
+      })
+      |> Moderation.create_lobby_log()
+
+    lobby_log
   end
 end

@@ -1,0 +1,43 @@
+<LobbyLogComponents.section_menu active="list" scope={@scope} />
+
+<h1 class="text-2xl font-bold">
+  Lobby logs
+</h1>
+<div class="heading-subtitle">{@record_count} records found</div>
+
+<LobbyLogComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.table
+  id="lobby-logs-table"
+  rows={@records}
+  table_class="table-sm table-zebra mt-4"
+>
+  <:col :let={log} label="Lobby">
+    <span
+      class="font-mono text-xs cursor-pointer"
+      title={"Click to copy #{log.lobby_id}"}
+      data-copy={log.lobby_id}
+      phx-click={JS.dispatch("phx:copy")}
+    >
+      {String.slice(log.lobby_id, 0, 7)}
+    </span>
+  </:col>
+  <:col :let={log} label="Event">{log.event_type}</:col>
+  <:col :let={log} label="User">{log.user && log.user.name}</:col>
+  <:col :let={log} label="Target">{log.target && log.target.name}</:col>
+  <:col :let={log} label="Details">
+    <span class="font-mono text-xs">{details_text(log.details)}</span>
+  </:col>
+  <:col :let={log} label="Time">
+    {Calendar.strftime(log.inserted_at, "%Y-%m-%d %H:%M:%S")}
+  </:col>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>

@@ -19,12 +19,15 @@ defmodule Teiserver.Moderation do
   alias Teiserver.Moderation.LoadBannedDomainsTask
   alias Teiserver.Moderation.LoadBannedIPsTask
   alias Teiserver.Moderation.LoadBannedPhrasesTask
+  alias Teiserver.Moderation.LobbyLog
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Moderation.Report
   alias Teiserver.Moderation.ReportLib
   alias Teiserver.Moderation.Response
   alias Teiserver.Moderation.ResponseLib
   alias Teiserver.Repo
+
+  require Logger
 
   import Ecto.Query, warn: false
   import Teiserver.Logging.Helpers, only: [add_audit_log: 4]
@@ -1394,5 +1397,38 @@ defmodule Teiserver.Moderation do
   def log_anti_abuse_record_access(piped_value, %Scope{} = scope, action) do
     LoggingHelper.add_audit_log(scope, "Anti-abuse record fallback", %{action: action})
     piped_value
+  end
+
+  @doc """
+  Creates a lobby_log.
+
+  ## Examples
+
+      iex> create_lobby_log(%{field: value})
+      {:ok, %LobbyLog{}}
+
+      iex> create_lobby_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_lobby_log(attrs \\ %{}) do
+    %LobbyLog{}
+    |> LobbyLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec create_lobby_log_async(map()) :: :ok
+  def create_lobby_log_async(attrs) do
+    Task.Supervisor.start_child(Teiserver.TaskSupervisor, fn ->
+      case create_lobby_log(attrs) do
+        {:ok, _lobby_log} ->
+          :ok
+
+        {:error, reason} ->
+          Logger.error("Error while creating lobby log #{inspect(attrs)}: #{inspect(reason)}")
+      end
+    end)
+
+    :ok
   end
 end
