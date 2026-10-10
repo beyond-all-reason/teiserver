@@ -249,7 +249,6 @@ if enable_discord_bridge do
       :guild_messages,
       :guild_message_reactions,
       :direct_messages,
-      :message_content,
       :direct_message_reactions
     ],
     log_full_events: true,
