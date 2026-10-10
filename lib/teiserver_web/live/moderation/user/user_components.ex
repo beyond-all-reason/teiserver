@@ -556,6 +556,16 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
+        href={~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}"}
+        method="delete"
+        phx-click={JS.push_focus()}
+      >
+        <.button class={["m-1 btn btn-primary", is_nil(assigns[:user].smurf_of_id) && " btn-disabled"]}>
+          <Fontawesome.icon icon="fa-link-slash" style="solid" /> Clear smurf link
+        </.button>
+      </.link>
+
+      <.link
         navigate={~p"/moderation/users/#{@user.id}"}
         phx-click={JS.push_focus()}
       >

@@ -728,11 +728,14 @@ defmodule TeiserverWeb.Admin.UserController do
               Auth.remove_roles(origin_user_id, ["Smurfer"])
             end
 
-            Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
+            # If we call this URL without the person being a smurf it can cause
+            # an error, this is a temporary fix and will be resolved as a priority.
+            origin_user_id &&
+              Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
 
             conn
             |> put_flash(:info, "Smurf link broken.")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user.id}")
+            |> redirect(to: ~p"/moderation/users/#{user.id}")
 
           {:error, %Ecto.Changeset{} = changeset} ->
             render(conn, "edit.html", user: user, changeset: changeset)
