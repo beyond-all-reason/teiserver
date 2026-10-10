@@ -1167,6 +1167,9 @@ defmodule Teiserver.CacheUser do
   def allow?(userid, required) when is_integer(userid),
     do: allow?(Account.get_user_by_id(userid), required)
 
+  def allow?(%CacheUser{} = user, required),
+    do: allow?(Account.get_user_by_id(user.id), required)
+
   def allow?(%User{} = user, required) do
     case required do
       :moderator ->
