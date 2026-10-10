@@ -138,7 +138,8 @@ config :teiserver, Teiserver,
     linked_audit_logs: 365,
     unlinked_audit_logs: 365,
     unverified_users: 14,
-    previous_emails: 14
+    previous_emails: 14,
+    lobby_logs: 90
   },
   require_mfa_for_privileged_roles: true
 

@@ -1063,7 +1063,7 @@ defmodule Teiserver.Player.Session do
       do: {:reply, {:error, :not_in_lobby}, state}
 
   def handle_call({:lobby, :remove_bot, bot_id}, _from, %PT.Data{} = state) do
-    {:reply, TachyonLobby.remove_bot(state.lobby.id, bot_id), state}
+    {:reply, TachyonLobby.remove_bot(state.lobby.id, state.user.id, bot_id), state}
   end
 
   def handle_call({:lobby, :update_bot, _data}, _from, %PT.Data{} = state)
