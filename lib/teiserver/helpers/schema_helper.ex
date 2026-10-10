@@ -1,5 +1,6 @@
 defmodule Teiserver.Helper.SchemaHelper do
   @moduledoc false
+  alias Ecto.Changeset
 
   @spec trim_strings(map(), List.t()) :: map()
   def trim_strings(params, names) do
@@ -123,6 +124,20 @@ defmodule Teiserver.Helper.SchemaHelper do
         false ->
           {k, v}
       end
+    end)
+  end
+
+  @doc """
+  Validates the given field(s) have changed as part of the changeset
+  """
+  def validate_changes_present(%Changeset{changes: change_map} = changeset, fields, error \\ nil) do
+    change_keys = Map.keys(change_map)
+
+    fields
+    |> List.wrap()
+    |> Enum.reject(&Enum.member?(change_keys, &1))
+    |> Enum.reduce(changeset, fn field, acc_changeset ->
+      Changeset.add_error(acc_changeset, field, error || "field not changed")
     end)
   end
 end

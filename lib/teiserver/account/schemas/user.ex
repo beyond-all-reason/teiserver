@@ -127,36 +127,6 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
-  def changeset(user, attrs, :admin_update_user) do
-    user
-    |> cast(
-      attrs,
-      ~w(name email icon colour data roles permissions)a
-    )
-    |> validate_required([:name])
-    |> validate_name_change()
-  end
-
-  def changeset(user, attrs, :senior_moderator_update_user) do
-    user
-    |> cast(
-      attrs,
-      ~w(name email icon colour data roles permissions)a
-    )
-    |> validate_required([:name])
-    |> validate_name_change()
-  end
-
-  def changeset(user, attrs, :moderator_update_user) do
-    user
-    |> cast(
-      attrs,
-      ~w(name icon colour data roles permissions)a
-    )
-    |> validate_required([:name])
-    |> validate_name_change()
-  end
-
   def changeset(user, attrs, :limited_with_data) do
     user
     |> cast(attrs, ~w(name icon colour data)a)
@@ -182,12 +152,14 @@ defmodule Teiserver.Account.User do
       )
       |> validate_required([:email, :previous_emails])
       |> unique_constraint(:email)
+      # And is valid as an email
       |> validate_change(:email, fn :email, email ->
         case CacheUser.valid_email?(email) do
           :ok -> []
           {:error, reason} -> [{:email, reason}]
         end
       end)
+      |> validate_changes_present([:email])
     else
       user
       |> cast(attrs, [:email])
