@@ -32,6 +32,8 @@ defmodule Teiserver.Account.UserLib do
 
   @gdpr_forget_cooldown_days 30
 
+  @valid_email_regex ~r/.@./
+
   # Functions
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-user"
@@ -514,6 +516,9 @@ defmodule Teiserver.Account.UserLib do
         {:error, "invalid email"}
 
       not String.contains?(email, ".") ->
+        {:error, "invalid email"}
+
+      not String.match?(email, @valid_email_regex) ->
         {:error, "invalid email"}
 
       # TODO: create a unique index on lower(email) so that this check is fast

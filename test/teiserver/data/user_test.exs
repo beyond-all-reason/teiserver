@@ -123,21 +123,6 @@ defmodule Teiserver.Data.UserTest do
     assert Account.rename_user(user.id, "rename8") == expected_rename_error
   end
 
-  test "valid_email?" do
-    data = [
-      {"name@domain.com", :ok},
-      {"name.name@domain.co.uk", :ok},
-      {"name@domain", {:error, "invalid email"}},
-      {"name.domain", {:error, "invalid email"}},
-      {"name", {:error, "invalid email"}}
-    ]
-
-    for {value, expected} <- data do
-      result = Account.valid_email?(value)
-      assert result == expected, message: "Bad result for email '#{value}'"
-    end
-  end
-
   test "username symbol restrictions" do
     data = [
       {"abc123", false},

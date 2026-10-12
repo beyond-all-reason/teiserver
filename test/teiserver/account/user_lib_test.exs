@@ -29,6 +29,21 @@ defmodule Teiserver.Account.UserLibTest do
     end
   end
 
+  describe "valid_email?/1" do
+    test "valid" do
+      assert UserLib.valid_email?("name@domain.com") == :ok
+      assert UserLib.valid_email?("name.name@domain.co.uk") == :ok
+    end
+
+    test "invalid" do
+      assert UserLib.valid_email?("name@domain") == {:error, "invalid email"}
+      assert UserLib.valid_email?("name.domain") == {:error, "invalid email"}
+      assert UserLib.valid_email?("name") == {:error, "invalid email"}
+      assert UserLib.valid_email?("@domain") == {:error, "invalid email"}
+      assert UserLib.valid_email?("@domain.com") == {:error, "invalid email"}
+    end
+  end
+
   describe "update_user_email/3" do
     setup do
       user = AccountFixtures.user_fixture()
