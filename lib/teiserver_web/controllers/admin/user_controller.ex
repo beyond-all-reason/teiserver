@@ -482,37 +482,6 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
-  @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def perform_action(conn, %{"id" => id, "action" => action}) do
-    user = Account.get_user!(id)
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        result =
-          case action do
-            "recache" ->
-              RefreshUserRestrictionsTask.refresh_user(user.id)
-              {:ok, ""}
-
-            "reset_flood_protection" ->
-              ConCache.put(:teiserver_login_count, user.id, 0)
-              {:ok, ""}
-          end
-
-        case result do
-          {:ok, tab} ->
-            conn
-            |> put_flash(:info, "Action performed.")
-            |> redirect(to: ~p"/teiserver/admin/users/applying/#{user.id}?tab=#{tab}")
-        end
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
   @spec smurf_search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def smurf_search(conn, %{"id" => id}) do
     user = Account.get_user!(id)
