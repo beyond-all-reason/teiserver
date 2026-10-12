@@ -79,7 +79,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
       password: UserLib.make_bot_password(),
       icon: "",
       colour: "",
-      roles: ["GDPR forgotten"],
+      roles: ["GDPR forgotten", "Verified"],
       permissions: [],
       discord_id: nil,
       steam_id: nil

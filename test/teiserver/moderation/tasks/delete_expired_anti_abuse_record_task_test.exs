@@ -4,7 +4,7 @@ defmodule Teiserver.Moderation.DeleteExpiredAntiAbuseRecordTaskTest do
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Moderation.AntiAbuseRecordQueries
-  alias Teiserver.Moderation.DeleteExpiredAARTaskTask
+  alias Teiserver.Moderation.DeleteExpiredAARTask
   alias Teiserver.ModerationFixtures
 
   use Teiserver.DataCase, async: false
@@ -17,7 +17,7 @@ defmodule Teiserver.Moderation.DeleteExpiredAntiAbuseRecordTaskTest do
 
   describe "DeleteExpiredAntiAbuseRecordTask" do
     test "no records" do
-      :ok = DeleteExpiredAARTaskTask.perform(%{})
+      :ok = DeleteExpiredAARTask.perform(%{})
 
       count =
         AntiAbuseRecordQueries.anti_abuse_records()
@@ -29,7 +29,7 @@ defmodule Teiserver.Moderation.DeleteExpiredAntiAbuseRecordTaskTest do
     test "no expired records", %{scope: scope} do
       record = ModerationFixtures.anti_abuse_record_fixture(scope)
 
-      :ok = DeleteExpiredAARTaskTask.perform(%{})
+      :ok = DeleteExpiredAARTask.perform(%{})
 
       aar_count =
         AntiAbuseRecordQueries.anti_abuse_records()
@@ -47,7 +47,7 @@ defmodule Teiserver.Moderation.DeleteExpiredAntiAbuseRecordTaskTest do
           expires_at: DateTime.utc_now() |> DateTime.shift(day: -1)
         })
 
-      :ok = DeleteExpiredAARTaskTask.perform(%{})
+      :ok = DeleteExpiredAARTask.perform(%{})
 
       aar_count =
         AntiAbuseRecordQueries.anti_abuse_records()

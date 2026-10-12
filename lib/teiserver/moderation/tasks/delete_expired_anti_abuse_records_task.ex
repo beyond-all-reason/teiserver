@@ -1,4 +1,4 @@
-defmodule Teiserver.Moderation.DeleteExpiredAARTaskTask do
+defmodule Teiserver.Moderation.DeleteExpiredAARTask do
   @moduledoc """
   Deletes all expired AntiAbuseRecords along with the user entry referenced by them.
   """

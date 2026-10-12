@@ -218,7 +218,7 @@ config :teiserver, Oban,
 
        # 1:07 am
        {"7 1 * * *", Teiserver.Account.DeleteUnverifiedUsersTask},
-       {"7 1 * * *", Teiserver.Moderation.DeleteExpiredAARTaskTask},
+       {"7 1 * * *", Teiserver.Moderation.DeleteExpiredAARTask},
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
        {"7 1 * * *", Teiserver.OAuth.Tasks.Cleanup},
 
