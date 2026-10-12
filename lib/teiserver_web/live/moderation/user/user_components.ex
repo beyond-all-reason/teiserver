@@ -578,6 +578,15 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
+        navigate={~p"/moderation/report_user/#{@user.id}"}
+        phx-click={JS.push_focus()}
+      >
+        <.button class="m-1 btn btn-primary">
+          <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> Report form
+        </.button>
+      </.link>
+
+      <.link
         navigate={~p"/moderation/users/#{@user.id}"}
         phx-click={JS.push_focus()}
       >
