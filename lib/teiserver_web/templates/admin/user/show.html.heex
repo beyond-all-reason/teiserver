@@ -56,20 +56,6 @@
               See origin
             </a>
           <% end %>
-
-          <%= if allow?(@conn, "Admin") do %>
-            <% class =
-              if @client != nil do
-                "btn btn-#{bsname}"
-              else
-                "btn btn-outline-#{bsname}"
-              end %>
-            <a href={~p"/teiserver/admin/client/#{@user.id}"} class={class} id="section-menu-new">
-              <Fontawesome.icon icon={Teiserver.Account.ClientLib.icon()} style="regular" />
-              &nbsp;
-              Client view
-            </a>
-          <% end %>
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
