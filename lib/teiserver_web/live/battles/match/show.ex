@@ -424,8 +424,14 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   defp get_match_rating_status(match) do
     # Expecting to return an error explaining current match rating status
     # Unprocessed matches and matches with existing rating logs won't be rated again
-    case MatchRatingLib.rate_match(match) do
+    case MatchRatingLib.rateable(match) do
       :ok ->
+        # Match is rateable at the moment but wasn't rated in the past for some reason
+        # This can happen if the match is older and its data and tags got deleted during
+        # cleanup so we no longer know that it was unrated or had cheating enabled
+        {"info", "Match not rated"}
+
+      {:error, :already_rated} ->
         {"success", "Match rated successfully"}
 
       {:error, :invalid_game_type} ->
@@ -449,14 +455,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
       {:error, :unranked_tag} ->
         {"info", "Match not rated due to unrated modoption!"}
 
-      {:error, :already_rated} ->
-        {"success", "Match rated successfully"}
-
       {:error, :cheating_enabled} ->
         {"warning", "Match not rated due to cheating enabled!"}
-
-      {:error, :no_match} ->
-        {"danger", "No match!"}
 
       _other ->
         {"danger", "Unexpected result, match may or may not have been rated."}

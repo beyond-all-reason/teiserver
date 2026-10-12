@@ -10,6 +10,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.Match
   alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Game
@@ -46,19 +47,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
   end
 
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, atom}
-  def rate_match(match), do: rate_match(match, false)
-
-  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) ::
-          :ok | {:error, atom}
-  def rate_match(match_id, rerate?) when is_integer(match_id) do
-    Battle.get_match(match_id, preload: [:members])
-    |> rate_match(rerate?)
-  end
-
-  def rate_match(nil, _rerate?), do: {:error, :no_match}
-
-  def rate_match(match, rerate?) do
+  @spec rateable(Match.t()) :: :ok | {:error, atom}
+  def rateable(%Match{} = match) do
     logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
 
     sizes =
@@ -92,10 +82,6 @@ defmodule Teiserver.Game.MatchRatingLib do
       Map.get(match.tags || %{}, "game/modoptions/ranked_game", "1") == "0" ->
         {:error, :unranked_tag}
 
-      # If rerate? is set to true we skip the next few checks
-      rerate? ->
-        do_rate_match(match, rerate?: true)
-
       not Enum.empty?(logs) ->
         {:error, :already_rated}
 
@@ -103,11 +89,36 @@ defmodule Teiserver.Game.MatchRatingLib do
         {:error, :cheating_enabled}
 
       true ->
-        do_rate_match(match)
+        :ok
     end
   end
 
-  @spec do_rate_match(Teiserver.Battle.Match.t(), any()) :: :ok
+  @spec rate_match(non_neg_integer() | Match.t()) :: :ok | {:error, atom}
+  def rate_match(match), do: rate_match(match, false)
+
+  @spec rate_match(non_neg_integer() | Match.t(), boolean()) ::
+          :ok | {:error, atom}
+  def rate_match(match_id, rerate?) when is_integer(match_id) do
+    Battle.get_match(match_id, preload: [:members])
+    |> rate_match(rerate?)
+  end
+
+  def rate_match(nil, _rerate?), do: {:error, :no_match}
+
+  def rate_match(%Match{} = match, rerate?) do
+    case rateable(match) do
+      :ok ->
+        do_rate_match(match)
+
+      {:error, :already_rated} ->
+        if rerate?, do: do_rate_match(match, rerate?: true), else: {:error, :already_rated}
+
+      error ->
+        error
+    end
+  end
+
+  @spec do_rate_match(Match.t(), any()) :: :ok
   defp do_rate_match(match, opts \\ [])
 
   # The algorithm has not been implemented for FFA correctly so we have a clause for
