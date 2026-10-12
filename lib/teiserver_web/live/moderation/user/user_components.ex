@@ -537,14 +537,9 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
       <br /><br />
       <h3 class="font-bold text-lg">Actions</h3>
-      <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
-        phx-click={JS.push_focus()}
-      >
-        <.button class="m-1 btn btn-primary btn-disabled">
-          <Fontawesome.icon icon="fa-person-drowning" style="solid" /> Reset flood protection
-        </.button>
-      </.link>
+      <.button class="m-1 btn btn-primary" phx-click="refresh-user">
+        <Fontawesome.icon icon="fa-sync" style="solid" /> Refresh user
+      </.button>
 
       <.link
         navigate={~p"/moderation/users/#{@user.id}"}

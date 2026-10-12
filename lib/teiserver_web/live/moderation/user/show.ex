@@ -9,6 +9,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias TeiserverWeb.ModerationLive.User.FormEmailComponent
   alias TeiserverWeb.ModerationLive.User.FormNameComponent
   alias TeiserverWeb.ModerationLive.User.FormRolesComponent
@@ -88,6 +89,16 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   def handle_event("switch-tab", %{"tab" => tab, "tabset" => tabset}, %Socket{} = socket) do
     socket
     |> switch_tab(tab, tabset)
+    |> noreply()
+  end
+
+  def handle_event("refresh-user", _params, %Socket{} = socket) do
+    %{user: user} = socket.assigns
+
+    ConCache.put(:teiserver_login_count, user.id, 0)
+    RefreshUserRestrictionsTask.refresh_user(user.id)
+
+    socket
     |> noreply()
   end
 

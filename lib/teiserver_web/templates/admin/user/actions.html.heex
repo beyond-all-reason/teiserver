@@ -1,12 +1,4 @@
 <div class="dropdown-menu">
-  <a
-    class="dropdown-item"
-    href={~p"/teiserver/admin/users/action/#{@user.id}/recache"}
-  >
-    <Fontawesome.icon icon="fa-sync" style="solid" /> &nbsp;
-    Recache
-  </a>
-
   <a class="dropdown-item" href={~p"/moderation/report_user/#{@user.id}"}>
     <Fontawesome.icon icon={Teiserver.Moderation.ReportLib.icon()} style="solid" /> &nbsp;
     Report form
@@ -18,14 +10,6 @@
   </a>
 
   <hr />
-
-  <a
-    class="dropdown-item"
-    href={~p"/teiserver/admin/users/action/#{@user.id}/reset_flood_protection"}
-  >
-    <Fontawesome.icon icon="fa-water-arrow-down" style="solid" /> &nbsp;
-    Reset flood protection
-  </a>
 
   <a
     class="dropdown-item"
