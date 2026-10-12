@@ -99,7 +99,7 @@ defmodule Teiserver.Account.AuthPlug do
 
   defp banned_user?(%User{} = user) do
     cond do
-      Account.restricted?(user.id, ["Login"]) ->
+      Account.restricted?(user, ["Login"]) ->
         true
 
       user.smurf_of_id != nil ->
