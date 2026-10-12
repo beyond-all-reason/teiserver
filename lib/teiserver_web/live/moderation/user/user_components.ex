@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserStat
   alias Teiserver.Client
   alias Teiserver.Moderation.ActionLib
 
@@ -27,13 +28,20 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   """
   attr :params, :map, required: true
   attr :changed?, :boolean, default: false
+  attr :preferences, :map, required: true
 
-  def search_form(%{params: params} = assigns) do
+  def search_form(%{params: params, preferences: preferences} = assigns) do
     form = to_form(params)
+
+    search_mode =
+      case preferences do
+        %{search_mode: search_mode} -> search_mode
+        _any -> "Basic"
+      end
 
     assigns =
       assigns
-      |> assign(form: form)
+      |> assign(form: form, search_mode: search_mode)
 
     ~H"""
     <.simple_form
@@ -47,7 +55,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           <.input_tw
             type="text"
             field={@form[:name]}
-            label="Name/ID"
+            label="Name (contains) / ID"
           />
         </div>
 
@@ -55,7 +63,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           <.input_tw
             type="text"
             field={@form[:email]}
-            label="Email"
+            label="Email (contains)"
           />
         </div>
 
@@ -91,6 +99,54 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
               {"Playing", "All lobbies"},
               {"Banned", "Login"}
             ]}
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:cpu]}
+            label="CPU"
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:gpu]}
+            label="GPU"
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:ram]}
+            label="RAM"
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:operating_system]}
+            label="Operating system (case sensitive)"
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:screen]}
+            label="Screen"
+          />
+        </div>
+
+        <div :if={@search_mode == "Advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:ip]}
+            label="IP (contains)"
           />
         </div>
 
@@ -306,6 +362,17 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         phx-value-tabset={@set}
       >
         Audit
+      </a>
+
+      <a
+        :if={allow?(@scope, "Admin")}
+        role="tab"
+        class={["tab", @tab == "extra_data" && "tab-active"]}
+        phx-click="switch-tab"
+        phx-value-tab="extra_data"
+        phx-value-tabset={@set}
+      >
+        Extra data
       </a>
 
       <a
@@ -627,6 +694,29 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
     <div :if={Enum.member?(@user.roles, "GDPR forgotten")} class="mt-4">
       This user has been GDPR anonymised, you cannot perform any actions on their account.
+    </div>
+    """
+  end
+
+  @doc """
+  <UserComponents.show_raw user={@user} />
+  """
+  attr :user, User
+  attr :user_stats, UserStat
+
+  def show_extra_data(assigns) do
+    rows = assigns[:user_stats] |> Enum.sort()
+
+    assigns = assign(assigns, rows: rows)
+
+    ~H"""
+    <div class="flex">
+      <div class="flex-1">
+        <.table id="user_stat-table" rows={@rows} table_class="table-sm table-hover">
+          <:col :let={{key, _value}} label="">{key}</:col>
+          <:col :let={{_key, value}} label="">{inspect(value)}</:col>
+        </.table>
+      </div>
     </div>
     """
   end

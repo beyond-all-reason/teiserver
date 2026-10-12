@@ -1,5 +1,12 @@
 <% bsname = view_colour() %>
 
+<div class="alert alert-warning mt-4">
+  This form is being deprecated in favour of the new form. If there is an error with the new form let Teifion know about it because this is being deprecated.
+  <br />
+
+  <a href={~p"/moderation/users"} class="btn btn-warning">New form</a>
+</div>
+
 <form
   action={~p"/teiserver/admin/users/data_search"}
   method="post"

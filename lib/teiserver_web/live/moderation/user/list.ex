@@ -2,6 +2,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   @moduledoc false
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
+  alias Teiserver.Account.UserStatQueries
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias TeiserverWeb.ModerationLive.UserComponents
@@ -144,11 +145,22 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
   defp convert_search_params(params) do
     %{
+      # User entity
       "name" => params["name"],
       "email" => params["email"],
       "role" => params["role"],
       "without_role" => params["without_role"],
-      "restriction" => params["restriction"],
+      "restriction" => params["restriction"] || "",
+
+      # UserStat entity
+      "cpu" => params["cpu"],
+      "gpu" => params["gpu"],
+      "ram" => params["ram"],
+      "operating_system" => params["operating_system"],
+      "screen" => params["screen"],
+      "ip" => params["ip"],
+
+      # Metadata
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
     }
@@ -161,9 +173,14 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> UserQueries.where_has_role(search["role"] || "")
     |> UserQueries.where_not_has_role(search["without_role"] || "")
     |> UserQueries.where_has_restriction(search["restriction"] || "")
+    |> UserQueries.join_user_stats()
+    |> UserStatQueries.where_data_equal("hardware:cpuinfo", search["cpu"])
+    |> UserStatQueries.where_data_equal("hardware:raminfo", search["ram"])
+    |> UserStatQueries.where_data_equal("hardware:gpuinfo", search["gpu"])
+    |> UserStatQueries.where_data_equal("hardware:displaymax", search["screen"])
+    |> UserStatQueries.where_data_like("last_ip", search["ip"])
 
     # TODO: Possible extra filters to add
-    # IP
     # PreviousNames
   end
 
