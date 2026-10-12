@@ -5,7 +5,6 @@ defmodule Teiserver.Room do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.User
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
   alias Teiserver.Chat.RoomServer
@@ -115,7 +114,7 @@ defmodule Teiserver.Room do
 
   @spec send_message(User.id() | User.t(), String.t(), String.t() | [String.t()]) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
-    CacheUser.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
+    Chat.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
   def send_message(from_id, room_name, messages) when is_list(messages) do
@@ -136,11 +135,10 @@ defmodule Teiserver.Room do
     end
 
     cond do
-      allow?(user.id) == false ->
+      Account.restricted?(user, ["All chat", "Room chat"]) ->
         nil
 
       not bot? and WordLib.blacklisted_phrase?(msg) ->
-        CacheUser.shadowban_user(user.id)
         nil
 
       true ->
@@ -163,11 +161,10 @@ defmodule Teiserver.Room do
     end
 
     cond do
-      allow?(user.id) == false ->
+      Account.restricted?(user, ["All chat", "Room chat"]) ->
         nil
 
       not bot? and WordLib.blacklisted_phrase?(msg) ->
-        CacheUser.shadowban_user(user.id)
         nil
 
       true ->
@@ -178,19 +175,5 @@ defmodule Teiserver.Room do
   @decorate Plugins.plugin(:send_chat_message_ex)
   defp do_send_message_ex(room_name, %{id: user_id}, msg) do
     RoomServer.send_message_ex(room_name, user_id, msg)
-  end
-
-  @spec allow?(User.id()) :: boolean()
-  def allow?(userid) do
-    cond do
-      CacheUser.shadowbanned?(userid) ->
-        false
-
-      Account.restricted?(userid, ["All chat", "Room chat"]) ->
-        false
-
-      true ->
-        true
-    end
   end
 end

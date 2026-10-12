@@ -1,7 +1,6 @@
 defmodule Teiserver.OAuth.CodeTest do
   alias Plug.Conn
   alias Plug.Test
-  alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Token
@@ -11,9 +10,6 @@ defmodule Teiserver.OAuth.CodeTest do
 
   setup do
     user = TeiserverTestLib.new_user()
-    # because the o_auth logic expects a %User{} but new_user returns a
-    # CacheUser, and that is getting deprecated
-    user = Account.get_user!(user.id)
 
     {:ok, app} =
       OAuth.create_application(%{

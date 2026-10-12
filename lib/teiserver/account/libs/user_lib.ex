@@ -2,23 +2,27 @@ defmodule Teiserver.Account.UserLib do
   @moduledoc false
 
   alias Ecto.Changeset
-  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
+  alias Teiserver.Account.Registration
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserQueries
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat.WordLib
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.EmailHelper
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Logging
   alias Teiserver.Logging.AuditLog
+  alias Teiserver.Moderation
+  alias Teiserver.Plugins
   alias Teiserver.Repo
 
+  use Plugins
   use TeiserverWeb, :library_newform
 
   import Teiserver.Helpers.CacheHelper,
@@ -52,7 +56,7 @@ defmodule Teiserver.Account.UserLib do
     }
   end
 
-  @spec generate_user_icons(T.user()) :: map()
+  @spec generate_user_icons(User.t()) :: map()
   def generate_user_icons(user) do
     role_icons =
       user.roles
@@ -60,7 +64,7 @@ defmodule Teiserver.Account.UserLib do
       |> Map.new(fn r -> {r, 1} end)
 
     %{
-      "play_time_rank" => user.rank
+      "play_time_rank" => Account.get_user_stat_data(user.id)["rank"] || 0
     }
     |> Map.merge(role_icons)
   end
@@ -169,14 +173,12 @@ defmodule Teiserver.Account.UserLib do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
-    |> broadcast_create_user()
   end
 
   def script_create_user(attrs \\ %{}, pass_type \\ :md5_password) do
     %User{}
     |> User.changeset(attrs, :script_create, pass_type)
     |> Repo.insert()
-    |> broadcast_create_user()
   end
 
   def register_user(attrs \\ %{}, pass_type, ip \\ nil) do
@@ -184,10 +186,9 @@ defmodule Teiserver.Account.UserLib do
       %User{}
       |> User.changeset(attrs, :register, pass_type)
       |> Repo.insert()
-      |> broadcast_create_user()
 
     case res do
-      {:ok, user} -> {:ok, CacheUser.post_user_creation_actions(user, ip)}
+      {:ok, user} -> {:ok, Registration.post_user_creation_actions(user, ip)}
       err -> err
     end
   end
@@ -205,23 +206,17 @@ defmodule Teiserver.Account.UserLib do
 
   """
   def update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :limited_with_data)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def update_user_plain_password(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :password)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -231,8 +226,6 @@ defmodule Teiserver.Account.UserLib do
   old and new emails will be informed of the change.
   """
   def update_user_email(%User{} = user, attrs, ip_address) do
-    Account.deprecated_recache_user(user.id)
-
     # We do everything as a transaction so we can revert the change if something goes wrong
     # with the email sending. Unfortunately there is no way to un-send the email to the old
     # address if something goes wrong with sending to the new address
@@ -244,7 +237,6 @@ defmodule Teiserver.Account.UserLib do
           Logging.add_audit_log(user.id, ip_address, "email_change_success", %{})
 
           {:ok, updated_user}
-          |> broadcast_update_user()
           |> cache_put_on_ok(:users_by_id)
           |> UserCacheLib.decache_user_on_ok(user)
         else
@@ -279,67 +271,49 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def admin_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :admin_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def senior_moderator_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :senior_moderator_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def moderator_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :moderator_update_user)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def server_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def script_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :script)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
 
   def password_reset_update_user(%User{} = user, attrs) do
-    Account.deprecated_recache_user(user.id)
-
     user
     |> User.changeset(attrs, :password_reset)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -348,7 +322,6 @@ defmodule Teiserver.Account.UserLib do
     user
     |> User.smurf_changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -357,7 +330,6 @@ defmodule Teiserver.Account.UserLib do
     user
     |> User.discord_id_changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_user()
     |> cache_put_on_ok(:users_by_id)
     |> UserCacheLib.decache_user_on_ok(user)
   end
@@ -383,7 +355,6 @@ defmodule Teiserver.Account.UserLib do
                actual_timestamp: actual_timestamp
              }) do
         {:ok, updated_user}
-        |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
         |> UserCacheLib.decache_user_on_ok(user)
       end
@@ -400,11 +371,162 @@ defmodule Teiserver.Account.UserLib do
            {:ok, _any} <- EmailHelper.gdpr_forget_cleared(updated_user),
            %AuditLog{} <- add_audit_log(scope, "Clear GDPR forget", %{target_id: updated_user.id}) do
         {:ok, updated_user}
-        |> broadcast_update_user()
         |> cache_put_on_ok(:users_by_id)
         |> UserCacheLib.decache_user_on_ok(user)
       end
     end)
+  end
+
+  @spec clean_name(String.t()) :: String.t()
+  def clean_name(name) do
+    ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
+    |> Regex.replace(name, "")
+  end
+
+  @spec check_symbol_limit(String.t()) :: boolean()
+  def check_symbol_limit(name) do
+    name
+    |> String.replace(~r/[[:alnum:]]/, "")
+    |> String.graphemes()
+    |> Enum.frequencies()
+    |> Enum.count(fn {_char, val} -> val > 2 end)
+    |> Kernel.>(0)
+  end
+
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
+  def rename_user(userid, new_name, admin_action \\ false) do
+    new_name = String.trim(new_name)
+    user = get_user(userid)
+
+    cond do
+      Account.restricted?(user, ["Community", "Renaming"]) ->
+        {:error, "Your account is restricted from renaming"}
+
+      admin_action == false and renamed_recently(userid) ->
+        {:error, "Rename limit reached (2 times in 5 days or 3 times in 30 days)"}
+
+      admin_action == false and Account.restricted?(user, ["All chat", "Renaming"]) ->
+        {:error, "Muted"}
+
+      true ->
+        case valid_name?(new_name, admin_action) do
+          :ok ->
+            do_rename_user(userid, new_name)
+            :success
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
+  end
+
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
+  def valid_name?(name, admin_action) do
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
+
+    cond do
+      admin_action == false and WordLib.acceptable_name?(name) == false ->
+        {:error, "Not an acceptable name, please see section B3 of the code of conduct"}
+
+      clean_name(name) |> String.length() > max_username_length ->
+        {:error, "Max length #{max_username_length} characters"}
+
+      clean_name(name) != name ->
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
+
+      check_symbol_limit(name) ->
+        {:error, "Too many repeated symbols in name"}
+
+      true ->
+        # TODO: create a unique index on lower(name) so that this check is fast
+        # (and also redundant)
+        users = query_users(search: [name_lower: name], select: [:name])
+
+        case users do
+          [] -> :ok
+          _users -> {:error, "Username already taken"}
+        end
+    end
+  end
+
+  @spec renamed_recently(User.id()) :: boolean()
+  defp renamed_recently(user_id) do
+    rename_log =
+      Account.get_user_stat_data(user_id)
+      |> Map.get("rename_log", [])
+
+    now = System.system_time(:second)
+    since_rename_two = now - ((Enum.slice(rename_log, 1..1) ++ [0, 0, 0]) |> hd())
+    since_rename_three = now - ((Enum.slice(rename_log, 2..2) ++ [0, 0, 0]) |> hd())
+
+    cond do
+      # VIPs ignore time based rename restrictions
+      Auth.vip?(user_id) -> false
+      # Can't rename more than 2 times in 5 days
+      since_rename_two < 60 * 60 * 24 * 5 -> true
+      # Can't rename more than 3 times in 30 days
+      since_rename_three < 60 * 60 * 24 * 30 -> true
+      true -> false
+    end
+  end
+
+  @spec do_rename_user(User.id(), String.t()) :: :ok
+  defp do_rename_user(userid, new_name) do
+    user = Account.get_user_by_id(userid)
+    old_name = user.name
+
+    Login.set_flood_level(user.id, 10)
+    Client.disconnect(userid, "Rename")
+    :timer.sleep(100)
+
+    # Log the current name in their history
+    user_stat_data = Account.get_user_stat_data(userid)
+
+    previous_names =
+      user_stat_data
+      |> Map.get("previous_names", [])
+
+    rename_log =
+      user_stat_data
+      |> Map.get("rename_log", [])
+
+    Account.update_user_stat(userid, %{
+      "rename_log" => [System.system_time(:second) | rename_log],
+      "previous_names" => Enum.uniq([old_name | previous_names])
+    })
+
+    # We need to re-get the user to ensure we don't overwrite our banned flag
+    user = Account.get_user_by_id(userid)
+
+    update_user(user, %{"name" => new_name})
+
+    :ok
+  end
+
+  @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
+  @decorate Plugins.plugin(:valid_email?)
+  def valid_email?(email) do
+    cond do
+      Application.get_env(:teiserver, Teiserver)[:accept_all_emails] ->
+        :ok
+
+      not String.contains?(email, "@") ->
+        {:error, "invalid email"}
+
+      not String.contains?(email, ".") ->
+        {:error, "invalid email"}
+
+      # TODO: create a unique index on lower(email) so that this check is fast
+      # (and also redundant)
+      Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
+        {:error, "Email already attached to a user"}
+
+      Moderation.banned_domain?(email) ->
+        {:error, "Due to frequent abuse, that email provider is not allowed."}
+
+      true ->
+        :ok
+    end
   end
 
   @doc """
@@ -437,34 +559,6 @@ defmodule Teiserver.Account.UserLib do
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
-
-  def broadcast_create_user(u), do: broadcast_create_user(u, :create)
-
-  def broadcast_create_user({:ok, user}, reason) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "account_hooks",
-      {:account_hooks, :create_user, user, reason}
-    )
-
-    {:ok, user}
-  end
-
-  def broadcast_create_user(v, _reason), do: v
-
-  def broadcast_update_user(u), do: broadcast_update_user(u, :update)
-
-  def broadcast_update_user({:ok, user}, reason) do
-    PubSub.broadcast(
-      Teiserver.PubSub,
-      "account_hooks",
-      {:account_hooks, :update_user, user, reason}
-    )
-
-    {:ok, user}
-  end
-
-  def broadcast_update_user(v, _reason), do: v
 
   def merge_default_params(user_params) do
     Map.merge(
@@ -673,8 +767,7 @@ defmodule Teiserver.Account.UserLib do
       Repo.transact(fn ->
         with {:ok, _updated_user} <-
                update_user_smurf(smurf, %{smurf_of_id: actual_origin_id}),
-             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]),
-             :ok <- Account.deprecated_recache_user(smurf.id) do
+             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]) do
           add_audit_log(
             moderator_id,
             nil,

@@ -5,7 +5,6 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Helper.DateHelper
@@ -96,15 +95,11 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       end
     end
 
-    # There was a bug where not all users were refreshed correctly
-    # but the changes made after the fix didn't come into effect
-    # until after they were recached
-    CacheUser.deprecated_recache_user(user_id)
+    Account.recache_user(user_id)
+    :ok
   end
 
   defp update_client_with_restrictions(client, new_restrictions) do
-    Account.deprecated_recache_user(client.userid)
-
     if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
       Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
     end

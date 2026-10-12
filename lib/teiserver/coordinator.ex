@@ -1,7 +1,8 @@
 defmodule Teiserver.Coordinator do
   @moduledoc false
+
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Throttles
 
@@ -261,7 +262,7 @@ defmodule Teiserver.Coordinator do
     lobby = Battle.get_lobby(lobby_id)
 
     if lobby do
-      CacheUser.send_direct_message(from_id, lobby.founder_id, msg)
+      Chat.send_direct_message(from_id, lobby.founder_id, msg)
     end
 
     :ok
@@ -269,7 +270,7 @@ defmodule Teiserver.Coordinator do
 
   @spec send_to_user(User.id(), String.t()) :: :ok
   def send_to_user(userid, msg) do
-    CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+    Chat.send_direct_message(get_coordinator_userid(), userid, msg)
   end
 
   @spec get_team_config(integer(), timeout()) :: map()

@@ -5,7 +5,6 @@ defmodule Teiserver.Lobby.ChatLib do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Chat
   alias Teiserver.Chat.WordLib
   alias Teiserver.Coordinator
@@ -74,10 +73,6 @@ defmodule Teiserver.Lobby.ChatLib do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted, do: CacheUser.shadowban_user(user.id)
-
     allowed =
       cond do
         Account.restricted?(user, ["All chat", "Lobby chat"]) ->
@@ -86,7 +81,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        not bot? and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -139,10 +134,6 @@ defmodule Teiserver.Lobby.ChatLib do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    blacklisted = not bot? and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted, do: CacheUser.shadowban_user(user.id)
-
     allowed =
       cond do
         Account.restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) ->
@@ -151,7 +142,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(user, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        not bot? and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -200,12 +191,6 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     sender = Account.get_user(from_id)
 
-    blacklisted = Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg)
-
-    if blacklisted do
-      CacheUser.shadowban_user(from_id)
-    end
-
     allowed =
       cond do
         Account.restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) ->
@@ -214,7 +199,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(sender, ["Host commands"]) ->
           false
 
-        blacklisted ->
+        Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(

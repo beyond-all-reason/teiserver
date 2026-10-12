@@ -7,10 +7,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
@@ -206,7 +207,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq()
 
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply,
@@ -218,7 +219,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_left, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
@@ -234,7 +235,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_kicked, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     ChatLib.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
     player_count_changed(state)
@@ -631,11 +632,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
-        CacheUser.set_flood_level(userid, 100)
+        Login.set_flood_level(userid, 100)
         Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
-        CacheUser.ring(userid, state.coordinator_id)
+        Lobby.ring(userid, state.coordinator_id)
 
         ChatLib.sayprivateex(
           state.coordinator_id,
@@ -657,7 +658,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakdefs requires boss privileges"
@@ -673,7 +674,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakunits requires boss privileges"
@@ -780,7 +781,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         player_count = Battle.get_lobby_player_count(state.lobby_id)
 
         if player_count >= 7 do
-          if user.chobby_hash == nil do
+          if Account.get_user_stat_data(user.id)["chobby_hash"] == nil do
             %{new_client | player: false}
           else
             new_client
@@ -909,12 +910,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         cond do
           rating_check_result != :ok ->
             {_status, msg} = rating_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           rank_check_result != :ok ->
             {_status, msg} = rank_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           true ->
@@ -989,9 +990,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       ban_state == :banned ->
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
-
-      client.shadowbanned ->
-        {false, "Err"}
 
       block_status == :blocking ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
@@ -1162,7 +1160,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn user_id ->
         Lobby.force_change_client(state.coordinator_id, user_id, %{player: false})
 
-        CacheUser.send_direct_message(
+        Chat.send_direct_message(
           state.coordinator_id,
           user_id,
           "You were AFK while waiting for a game and have been moved to spectators."

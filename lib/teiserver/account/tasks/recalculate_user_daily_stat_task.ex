@@ -57,7 +57,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
         )
         |> Enum.filter(fn {userid, _data_rows} ->
           if Enum.member?(user_ids, userid) do
-            Account.get_username(userid) != nil
+            Account.get_username_by_id(userid) != nil
           end
         end)
         |> Enum.each(fn {userid, data_rows} ->

@@ -2,7 +2,6 @@ defmodule Teiserver.Admin.DeleteUserTask do
   @moduledoc false
   alias Ecto.Adapters.SQL
   alias Teiserver.Account
-  alias Teiserver.CacheUser
   alias Teiserver.Repo
 
   @doc """
@@ -81,6 +80,6 @@ defmodule Teiserver.Admin.DeleteUserTask do
 
     # Delete our cache of them
     id_list
-    |> Enum.each(fn userid -> CacheUser.decache_user(userid) end)
+    |> Enum.each(fn userid -> Account.decache_user(userid) end)
   end
 end

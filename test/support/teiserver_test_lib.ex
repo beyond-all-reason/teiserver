@@ -4,7 +4,8 @@ defmodule Teiserver.TeiserverTestLib do
   alias ExUnit.Callbacks
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.Login
+  alias Teiserver.Account.Registration
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorServer
@@ -45,7 +46,7 @@ defmodule Teiserver.TeiserverTestLib do
     case Account.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          CacheUser.user_register_params_with_md5(
+          Registration.user_register_params_with_md5(
             name,
             "#{name}@email.com",
             Account.spring_md5_password("password"),
@@ -59,8 +60,6 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-        |> CacheUser.convert_user()
-        |> CacheUser.add_user()
 
       _existing ->
         new_user()
@@ -71,9 +70,9 @@ defmodule Teiserver.TeiserverTestLib do
   def async_auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
-    token = CacheUser.create_token(user)
+    token = Login.create_token(user)
 
-    case CacheUser.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
+    case Login.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
       {:ok, _user} -> :ok
       value -> raise "Error setting up user - #{Kernel.inspect(value)}"
     end
@@ -308,7 +307,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec conn_setup({:ok, list()}) :: {:ok, list()}
   def conn_setup({:ok, data}) do
     user = data[:user]
-    CacheUser.deprecated_recache_user(user.id)
+    Account.recache_user(user.id)
 
     {:ok, data}
   end

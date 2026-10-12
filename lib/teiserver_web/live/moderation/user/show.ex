@@ -3,7 +3,6 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
-  alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserNoteQueries
@@ -199,11 +198,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     |> assign_tabset("actions", tabset)
   end
 
-  defp switch_tab(%Socket{assigns: assigns} = socket, "raw", tabset) do
-    cache_user = UserCacheLib.deprecated_get_user_by_id(assigns.user.id)
-
+  defp switch_tab(socket, "raw", tabset) do
     socket
-    |> assign(cache_user: cache_user)
     |> assign_tabset("raw", tabset)
   end
 

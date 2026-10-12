@@ -20,8 +20,9 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_name(""), do: nil
 
   def get_client_by_name(name) do
-    userid = Account.get_userid_from_name(name)
-    get_client_by_id(userid)
+    name
+    |> Account.get_userid_from_name()
+    |> get_client_by_id()
   end
 
   @spec get_client_by_id(nil) :: nil
@@ -293,7 +294,7 @@ defmodule Teiserver.Account.ClientLib do
       client
       | userid: user.id,
         name: user.name,
-        rank: user.rank,
+        rank: stats["rank"] || 0,
         moderator: Auth.moderator?(user),
         bot: Auth.is_bot?(user),
         ip: stats["last_ip"],

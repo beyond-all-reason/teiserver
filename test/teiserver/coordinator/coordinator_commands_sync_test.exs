@@ -1,9 +1,7 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.UserLib
   alias Teiserver.BitParse
-  alias Teiserver.CacheUser
   alias Teiserver.TeiserverTestLib
 
   use Teiserver.ServerCase, async: false
@@ -41,9 +39,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
 
       user.id
       |> Account.get_user!()
-      |> UserLib.script_update_user(%{roles: ["Admin"]})
+      |> Auth.add_roles(["Admin"])
 
-      CacheUser.deprecated_recache_user(user.id)
+      Account.recache_user(user)
 
       _send_raw(socket, "SAYPRIVATE coordinator $website\n")
       reply = _recv_until(socket)

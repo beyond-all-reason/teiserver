@@ -6,7 +6,7 @@ defmodule Teiserver.Client do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.ClientLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.User
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
@@ -49,7 +49,6 @@ defmodule Teiserver.Client do
         country: nil,
         lobby_client: nil,
         app_status: nil,
-        shadowbanned: false,
         awaiting_warn_ack: false,
         warned: false,
         muted: false,
@@ -82,10 +81,9 @@ defmodule Teiserver.Client do
     }
   end
 
-  @spec login(T.user(), atom(), String.t() | nil) :: T.client()
+  @spec login(User.t(), atom(), String.t() | nil) :: T.client()
   def login(user, protocol, ip \\ nil, token_id \\ nil) do
     stats = Account.get_user_stat_data(user.id)
-    db_user = Account.get_user(user.id)
 
     client =
       create(%{
@@ -93,16 +91,15 @@ defmodule Teiserver.Client do
         userid: user.id,
         name: user.name,
         tcp_pid: self(),
-        rank: user.rank,
-        moderator: Auth.moderator?(db_user) or Auth.is_event_organizer?(db_user),
-        bot: Auth.is_bot?(db_user),
+        rank: stats["rank"] || 0,
+        moderator: Auth.moderator?(user) or Auth.is_event_organizer?(user),
+        bot: Auth.is_bot?(user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
-        shadowbanned: CacheUser.shadowbanned?(user),
-        muted: Account.has_mute?(db_user),
+        muted: Account.has_mute?(user),
         awaiting_warn_ack: false,
         warned: false,
         token_id: token_id,
@@ -263,7 +260,10 @@ defmodule Teiserver.Client do
     # If a test goes wrong this can bork things and make it harder to
     # identify what actually went wrong
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      Account.update_cache_user(client.userid, %{last_logout: DateTime.utc_now()})
+      client.userid
+      |> Account.get_user_by_id()
+      |> Account.script_update_user(%{last_logout: DateTime.utc_now()})
+
       Telemetry.log_simple_server_event(client.userid, "disconnect:#{reason}")
     end
 
