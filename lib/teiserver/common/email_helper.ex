@@ -14,6 +14,13 @@ defmodule Teiserver.EmailHelper do
 
   defp privacy_email, do: Application.get_env(:teiserver, Teiserver)[:privacy_email]
 
+  defp from_noreply do
+    name = Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name] || "Beyond All Reason"
+    address = Mailer.noreply_address()
+
+    {name, address}
+  end
+
   def new_user(user) do
     case Config.get_site_config_cache("teiserver.Require email verification") do
       true ->
@@ -119,10 +126,7 @@ defmodule Teiserver.EmailHelper do
     email =
       Email.new()
       |> Email.to({user.name, user.email})
-      |> Email.from(
-        {Application.get_env(:teiserver, Teiserver.Mailer)[:noreply_name],
-         Mailer.noreply_address()}
-      )
+      |> Email.from(from_noreply())
       |> Email.subject(subject)
       |> Email.header("Date", date)
       |> Email.header("Message-Id", message_id)
@@ -170,7 +174,7 @@ defmodule Teiserver.EmailHelper do
 
     Email.new()
     |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from(from_noreply())
     |> Email.subject("BAR - New account")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
@@ -226,7 +230,7 @@ defmodule Teiserver.EmailHelper do
 
     Email.new()
     |> Email.to({user.name, old_email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from(from_noreply())
     |> Email.subject("BAR - Your Beyond All Reason email address was changed")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
@@ -269,7 +273,7 @@ defmodule Teiserver.EmailHelper do
 
     Email.new()
     |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from(from_noreply())
     |> Email.subject("BAR - Your Beyond All Reason email address was changed")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
@@ -318,7 +322,7 @@ defmodule Teiserver.EmailHelper do
 
     Email.new()
     |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from(from_noreply())
     |> Email.subject("BAR - Your Beyond All Reason account is scheduled for deletion")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
@@ -357,7 +361,7 @@ defmodule Teiserver.EmailHelper do
 
     Email.new()
     |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.from(from_noreply())
     |> Email.subject("BAR - Your Beyond All Reason account deletion was cancelled")
     |> Email.header("Date", date)
     |> Email.header("Message-Id", message_id)
