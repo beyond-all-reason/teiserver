@@ -9,6 +9,7 @@ defmodule Teiserver.Account.AuthPlug do
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
   alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.User
 
   use TeiserverWeb, :verified_routes
 
@@ -42,22 +43,32 @@ defmodule Teiserver.Account.AuthPlug do
         _user -> TOTPLib.get_user_totp_status(user.id)
       end
 
-    conn =
-      conn
-      |> assign(:user_token, user_token)
-      |> assign(:current_user, user)
-      |> assign(:totp_status, totp_status)
+    cond do
+      # If we have a user but no token then we have a cookie issue
+      # and we want to force a re-login
+      user != nil and user_token == nil ->
+        conn
+        |> assign(:current_user, nil)
+        |> assign(:user_token, nil)
+        |> assign(:totp_status, nil)
+        |> Controller.put_flash(:info, "There was an error logging you in, please try again.")
+        |> GuardianPlug.sign_out(clear_remember_me: true)
+        |> Controller.redirect(to: ~p"/logout")
 
-    if banned_user?(conn) do
-      conn
-      |> assign(:current_user, nil)
-      |> assign(:user_token, nil)
-      |> assign(:totp_status, nil)
-      |> Controller.put_flash(:danger, "You are banned")
-      |> GuardianPlug.sign_out(clear_remember_me: true)
-      |> Controller.redirect(to: ~p"/logout")
-    else
-      conn
+      banned_user?(user) ->
+        conn
+        |> assign(:current_user, nil)
+        |> assign(:user_token, nil)
+        |> assign(:totp_status, nil)
+        |> Controller.put_flash(:danger, "You are banned")
+        |> GuardianPlug.sign_out(clear_remember_me: true)
+        |> Controller.redirect(to: ~p"/logout")
+
+      true ->
+        conn
+        |> assign(:user_token, user_token)
+        |> assign(:current_user, user)
+        |> assign(:totp_status, totp_status)
     end
   end
 
@@ -73,28 +84,25 @@ defmodule Teiserver.Account.AuthPlug do
       Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
     end
 
-    socket =
-      socket
-      |> Utils.assign(:current_user, user)
-
-    if banned_user?(socket) do
+    if banned_user?(user) do
       socket
       |> Utils.assign(:current_user, nil)
       |> Utils.assign(:user_token, nil)
       |> LiveView.redirect(to: ~p"/logout")
     else
       socket
+      |> Utils.assign(:current_user, user)
     end
   end
 
-  defp banned_user?(%{assigns: %{current_user: nil}}), do: false
+  defp banned_user?(nil), do: false
 
-  defp banned_user?(%{assigns: %{current_user: current_user}} = _conn_or_socket) do
+  defp banned_user?(%User{} = user) do
     cond do
-      Account.restricted?(current_user.id, ["Login"]) ->
+      Account.restricted?(user, ["Login"]) ->
         true
 
-      current_user.smurf_of_id != nil ->
+      user.smurf_of_id != nil ->
         true
 
       true ->
