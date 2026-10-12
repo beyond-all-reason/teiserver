@@ -58,7 +58,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
-      assert updated_user.roles == ["GDPR forgotten"]
+      assert updated_user.roles == ["GDPR forgotten", "Verified"]
 
       # AAR created
       assert record =
@@ -138,7 +138,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
-      assert updated_user.roles == ["GDPR forgotten"]
+      assert updated_user.roles == ["GDPR forgotten", "Verified"]
 
       # AAR created
       assert record =
