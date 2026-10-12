@@ -569,10 +569,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
+        navigate={~p"/moderation/ban/new_with_user?teiserver_user=#{@user.id}"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
+        <.button class="m-1 btn btn-primary">
           <Fontawesome.icon icon="fa-gavel" style="solid" /> Ban
         </.button>
       </.link>

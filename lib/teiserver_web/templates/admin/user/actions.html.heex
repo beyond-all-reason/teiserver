@@ -19,23 +19,6 @@
     Send password reset email
   </a>
 
-  <a
-    :if={allow?(@conn, "Moderator")}
-    class="dropdown-item"
-    href={~p"/moderation/users/#{@user.id}/smurf_link"}
-  >
-    <Fontawesome.icon icon="fa-link" style="solid" /> &nbsp;
-    Mark as smurf of
-  </a>
-
-  <a
-    class="dropdown-item"
-    href={~p"/moderation/ban/new_with_user?teiserver_user=#{@user.id}"}
-  >
-    <Fontawesome.icon icon={Teiserver.Moderation.BanLib.icon()} style="solid" /> &nbsp;
-    Add ban
-  </a>
-
   <.link
     :if={allow?(@current_user, "Moderator") && @client_totp == :active}
     href={~p"/teiserver/admin/users/#{@user.id}/disable_totp"}
