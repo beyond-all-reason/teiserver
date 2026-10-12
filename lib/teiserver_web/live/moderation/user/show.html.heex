@@ -46,7 +46,12 @@
         user_id={@user_id}
       />
 
-      <UserComponents.show_actions :if={@tab1 == "actions"} user={@user} scope={@scope} />
+      <UserComponents.show_actions
+        :if={@tab1 == "actions"}
+        user={@user}
+        scope={@scope}
+        client={@client}
+      />
 
       <UserComponents.show_raw
         :if={@tab1 == "raw" and allow?(@scope, "Server")}
@@ -69,7 +74,12 @@
         user_id={@user_id}
       />
 
-      <UserComponents.show_actions :if={@tab2 == "actions"} user={@user} scope={@scope} />
+      <UserComponents.show_actions
+        :if={@tab2 == "actions"}
+        user={@user}
+        scope={@scope}
+        client={@client}
+      />
 
       <UserComponents.show_raw
         :if={@tab2 == "raw" and allow?(@scope, "Server")}

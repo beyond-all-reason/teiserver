@@ -43,9 +43,14 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       # Allows us to redirect to this page with a specific tab selected
       tab1 = Map.get(params, "tab", @tab1_default)
 
+      user_stats = Account.get_user_stat_data(user.id)
+      client = Account.get_client_by_id(user.id)
+
       socket
       |> assign(
         user: user,
+        user_stats: user_stats,
+        client: client,
         page_title: "User details: #{user.name}",
         user_id: id,
         has_active_mfa?: has_active_mfa?(user.id),

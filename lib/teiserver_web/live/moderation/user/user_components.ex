@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   alias Teiserver.Account.Auth
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Client
   alias Teiserver.Moderation.ActionLib
 
   use TeiserverWeb, :component
@@ -445,6 +446,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   <UserComponents.show_actions user={@user} />
   """
   attr :user, User
+  attr :client, Client
   attr :scope, Scope
 
   def show_actions(assigns) do
@@ -502,6 +504,12 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       >
         <.button class="m-1 btn btn-primary btn-soft btn-disabled">
           <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
+        </.button>
+      </.link>
+
+      <.link :if={allow?(@scope, "Admin")} href={~p"/teiserver/admin/client/#{@user.id}"}>
+        <.button class={["m-1 btn btn-primary btn-soft ", is_nil(@client) && "btn-disabled"]}>
+          <Fontawesome.icon icon={Teiserver.Account.ClientLib.icon()} style="solid" /> Client view
         </.button>
       </.link>
       <br /><br />
