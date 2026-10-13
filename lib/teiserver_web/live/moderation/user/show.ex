@@ -214,6 +214,11 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
     |> assign_tabset("actions", tabset)
   end
 
+  defp switch_tab(socket, "extra_data", tabset) do
+    socket
+    |> assign_tabset("extra_data", tabset)
+  end
+
   defp switch_tab(socket, "raw", tabset) do
     socket
     |> assign_tabset("raw", tabset)

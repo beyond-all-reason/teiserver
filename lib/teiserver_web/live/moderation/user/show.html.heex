@@ -46,6 +46,12 @@
         user_id={@user_id}
       />
 
+      <UserComponents.show_extra_data
+        :if={@tab1 == "extra_data" and allow?(@scope, "Admin")}
+        user_stats={@user_stats}
+        user={@user}
+      />
+
       <UserComponents.show_actions
         :if={@tab1 == "actions"}
         user={@user}
@@ -72,6 +78,12 @@
         user_notes={@streams.user_notes}
         scope={@scope}
         user_id={@user_id}
+      />
+
+      <UserComponents.show_extra_data
+        :if={@tab2 == "extra_data" and allow?(@scope, "Admin")}
+        user_stats={@user_stats}
+        user={@user}
       />
 
       <UserComponents.show_actions

@@ -516,12 +516,23 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   # Joins
+  def join_user_stats(query) do
+    if has_named_binding?(query, :user_stats) do
+      query
+    else
+      from [users: users] in query,
+        left_join: user_stats in UserStat,
+        as: :user_stats,
+        on: user_stats.user_id == users.id
+    end
+  end
+
+  # Preloads
   @spec load_user_stat(t()) :: t()
   def load_user_stat(query) do
-    from users in query,
-      left_join: user_stats in UserStat,
-      as: :user_stats,
-      on: user_stats.user_id == users.id,
+    query = join_user_stats(query)
+
+    from [users: users, user_stats: user_stats] in query,
       preload: [user_stat: user_stats]
   end
 

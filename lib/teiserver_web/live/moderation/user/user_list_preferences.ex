@@ -108,6 +108,15 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
               label="Table styling"
             />
           </div>
+
+          <div class="m-2">
+            <.input_tw
+              type="select"
+              field={@form[:search_mode]}
+              options={["Basic", "Advanced"]}
+              label="Search mode"
+            />
+          </div>
         </div>
       </.simple_form>
     </div>
@@ -176,7 +185,8 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
       :client?,
       :hw?,
       :ip?,
-      :table_class
+      :table_class,
+      :search_mode
     ]
     |> Map.new(fn key ->
       value = get_user_config_cache(user.id, "#{@prefix}.#{key}")

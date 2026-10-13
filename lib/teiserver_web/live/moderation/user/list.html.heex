@@ -7,7 +7,11 @@
 </.header>
 <div class="heading-subtitle">{format_number(@user_count)} users found</div>
 
-<UserComponents.search_form params={@search} changed?={@search_changed?} />
+<UserComponents.search_form
+  params={@search}
+  changed?={@search_changed?}
+  preferences={@preferences}
+/>
 
 <.live_component
   :if={@preferences}
