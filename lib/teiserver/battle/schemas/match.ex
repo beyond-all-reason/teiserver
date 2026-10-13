@@ -21,6 +21,7 @@ defmodule Teiserver.Battle.Match do
 
     field :team_count, :integer
     field :team_size, :integer
+    field :player_count, :integer
 
     field :passworded, :boolean
     field :processed, :boolean, default: false
@@ -52,7 +53,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(server_uuid uuid game_id map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id game_duration)a
+      ~w(server_uuid uuid game_id map data tags team_count player_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id rating_type_id game_duration)a
     )
     |> validate_required(~w(map tags team_count team_size passworded game_type bots started)a)
   end
@@ -62,7 +63,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(server_uuid uuid game_id map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
+      ~w(server_uuid uuid game_id map data tags team_count player_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a
     )
     |> validate_required(~w(founder_id)a)
   end
@@ -72,7 +73,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(map engine_version game_version team_count team_size passworded matchmaking game_type tags bots started)a
+      ~w(map engine_version game_version team_count team_size player_count passworded matchmaking game_type tags bots started)a
     )
     |> validate_required(
       ~w(map engine_version game_version team_count team_size matchmaking game_type)a
@@ -84,7 +85,7 @@ defmodule Teiserver.Battle.Match do
     struct
     |> cast(
       params,
-      ~w(map engine_version game_version team_count team_size passworded matchmaking game_type tags bots started finished game_duration processed winning_team)a
+      ~w(map engine_version game_version team_count player_count team_size passworded matchmaking game_type tags bots started finished game_duration processed winning_team)a
     )
     |> validate_required(
       ~w(map engine_version game_version team_count team_size matchmaking game_type)a
