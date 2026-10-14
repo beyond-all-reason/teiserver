@@ -102,7 +102,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:cpu]}
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:gpu]}
@@ -118,7 +118,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:ram]}
@@ -126,7 +126,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:operating_system]}
@@ -134,7 +134,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:screen]}
@@ -142,7 +142,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
-        <div :if={@search_mode == "Advanced"} class="m-2">
+        <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
             field={@form[:ip]}
