@@ -113,7 +113,7 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
             <.input_tw
               type="select"
               field={@form[:search_mode]}
-              options={["Basic", "Advanced"]}
+              options={[{"Basic", "basic"}, {"Advanced", "advanced"}]}
               label="Search mode"
             />
           </div>
