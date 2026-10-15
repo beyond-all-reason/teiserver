@@ -192,6 +192,7 @@ defmodule Teiserver.Game.MatchRatingsExport do
           server_uuid: match.server_uuid,
           team_count: match.team_count,
           team_size: match.team_size,
+          player_count: match.player_count,
           winning_team: match.winning_team,
           game_duration: match.game_duration,
           game_type: match.game_type,
