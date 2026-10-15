@@ -202,7 +202,6 @@ defmodule TeiserverWeb.Moderation.BanController do
             target_id: ban.source_id,
             reason: ban.reason,
             restrictions: ["Login"],
-            score_modifier: 0,
             expires: DateTime.shift(DateTime.utc_now(), year: 1000)
           })
 
