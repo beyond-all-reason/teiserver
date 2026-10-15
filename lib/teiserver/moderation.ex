@@ -622,6 +622,33 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action(v), do: v
 
+  @spec expire_warning_reminders(User.id()) ::
+          {:ok, [Action.t()]} | {:error, Ecto.Changeset.t()}
+  def expire_warning_reminders(user_id) do
+    result =
+      Repo.transaction(fn ->
+        list_actions(
+          search: [
+            target_id: user_id,
+            expiry: "Unexpired only",
+            in_restrictions: "Warning reminder"
+          ],
+          limit: :infinity
+        )
+        |> Enum.map(fn action ->
+          case action |> Action.changeset(%{"expires" => DateTime.utc_now()}) |> Repo.update() do
+            {:ok, updated} -> updated
+            {:error, changeset} -> Repo.rollback(changeset)
+          end
+        end)
+      end)
+
+    with {:ok, updated_actions} <- result do
+      Enum.each(updated_actions, &broadcast_update_action({:ok, &1}))
+      {:ok, updated_actions}
+    end
+  end
+
   # Used to remove all references to a given action prior to the deletion
   # of the action
   defp dereference_action_from_reports_query(%Action{id: action_id}) do
