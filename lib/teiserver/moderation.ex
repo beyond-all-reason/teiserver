@@ -622,8 +622,10 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action(v), do: v
 
-  @spec expire_warning_reminders(User.id()) ::
+  @spec expire_warning_reminders(User.id() | nil) ::
           {:ok, [Action.t()]} | {:error, Ecto.Changeset.t()}
+  def expire_warning_reminders(nil), do: {:ok, []}
+
   def expire_warning_reminders(user_id) do
     result =
       Repo.transaction(fn ->
