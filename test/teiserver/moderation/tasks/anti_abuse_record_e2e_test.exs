@@ -28,8 +28,7 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
           target_id: user.id,
           reason: "reason",
           restrictions: ["Login"],
-          expires: DateTime.utc_now() |> DateTime.shift(year: 1),
-          score_modifier: 0
+          expires: DateTime.utc_now() |> DateTime.shift(year: 1)
         })
 
       RefreshUserRestrictionsTask.refresh_user(user.id)
@@ -143,8 +142,7 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
         target_id: user.id,
         reason: "reason",
         restrictions: ["Login"],
-        expires: DateTime.utc_now() |> DateTime.shift(year: 1),
-        score_modifier: 0
+        expires: DateTime.utc_now() |> DateTime.shift(year: 1)
       })
 
     RefreshUserRestrictionsTask.refresh_user(user.id)

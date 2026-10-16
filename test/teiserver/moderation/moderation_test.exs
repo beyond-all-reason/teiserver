@@ -79,13 +79,11 @@ defmodule Teiserver.ModerationTest do
     @valid_attrs %{
       "reason" => "some reason",
       "restrictions" => ["r1", "r2"],
-      "score_modifier" => "1000",
       "expires" => DateTime.utc_now()
     }
     @update_attrs %{
       "reason" => "some updated reason",
       "restrictions" => ["u1", "u2"],
-      "score_modifier" => "1500",
       "expires" => DateTime.utc_now()
     }
     @invalid_attrs %{"reason" => nil}
