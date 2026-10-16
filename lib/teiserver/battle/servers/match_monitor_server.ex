@@ -478,7 +478,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # match-chat <SomeUser> g: A message to the game
   # match-chat <SomeUser> d123: A direct message of some sort, in theory shouldn't appear
   defp handle_direct_message(from_id, "match-chat " <> data, _state) do
-    case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
+    case Regex.run(~r/<(.*?)> (dallies|dspectators|d252|d253): (.+)$/, data) do
       [_all, username, to, msg] ->
         host = Client.get_client_by_id(from_id)
         user = Account.get_user_by_name(username)
@@ -488,10 +488,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             # Bad message, host or user is nil so we're not doing anything with that
             :ok
 
-          to == "d" ->
-            # We don't persist this as it's already persisted elsewhere
-            # ChatLib.persist_message(user, "g: #{msg}", host.lobby_id, :say)
-            :ok
+          to == "d252" ->
+            ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+            )
 
           to == "dallies" ->
             ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
@@ -500,6 +504,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
               Teiserver.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
               {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+            )
+
+          to == "d253" ->
+            ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+
+            PubSub.broadcast(
+              Teiserver.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
 
           to == "dspectators" ->
@@ -518,7 +531,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_direct_message(from_id, "match-chat-name " <> data, state) do
-    case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
+    case Regex.run(~r/<(.*?)>:<(.*?)> (dallies|dspectators|d252|d253): (.+)$/, data) do
       [_all, username, _user_num, to, msg] ->
         host = Client.get_client_by_id(from_id)
         user = Account.get_user_by_name(username)
@@ -532,9 +545,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           {:noreply, state}
         else
           case to do
-            "d" ->
-              # We don't persist this as it's already persisted elsewhere
-              :ok
+            "d252" ->
+              # As per https://github.com/beyond-all-reason/spads_config_bar/pull/233
+              ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+              )
 
             "dallies" ->
               ChatLib.persist_message(user, "a: #{msg}", host.lobby_id, :say)
@@ -543,6 +562,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
                 Teiserver.PubSub,
                 "teiserver_liveview_lobby_chat:#{host.lobby_id}",
                 {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
+              )
+
+            "d253" ->
+              ChatLib.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+
+              PubSub.broadcast(
+                Teiserver.PubSub,
+                "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+                {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
               )
 
             "dspectators" ->
