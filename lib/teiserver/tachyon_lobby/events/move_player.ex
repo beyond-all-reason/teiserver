@@ -21,6 +21,14 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MovePla
   alias Teiserver.TachyonLobby.Types, as: LT
 
   def apply_event(%MovePlayer{} = ev, %LT.Aggregate{} = agg) do
+    {ally_team, team, player} = ev.team
+
+    agg =
+      LT.Aggregate.add_log(agg, "join_team", %{
+        user_id: ev.player_id,
+        details: %{ally_team: ally_team, team: team, player: player}
+      })
+
     data = put_in(agg.data, [Access.key!(:players), ev.player_id, Access.key!(:team)], ev.team)
 
     changes =

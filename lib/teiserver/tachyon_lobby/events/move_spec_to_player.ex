@@ -48,5 +48,9 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MoveSpe
     overview_changes = Map.put(agg.overview_changes, :player_count, map_size(data.players))
 
     %{agg | data: data, changes: changes, overview_changes: overview_changes}
+    |> LT.Aggregate.add_log("join_team", %{
+      user_id: ev.user_id,
+      details: %{ally_team: elem(ev.player_data.team, 0)}
+    })
   end
 end
