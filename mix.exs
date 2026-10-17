@@ -77,7 +77,7 @@ defmodule Teiserver.MixProject do
       {:floki, ">= 0.37.0"},
       {:phoenix_live_dashboard, "~> 0.8"},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:swoosh, "~> 1.26"},
+      {:swoosh, "~> 1.29"},
       {:gen_smtp, "~> 1.3.0"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
