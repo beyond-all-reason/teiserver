@@ -218,9 +218,17 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _data, msg_id, state) do
-    reply(:okay, "STLS", msg_id, state)
-    new_state = SpringTcpServer.upgrade_connection(state)
-    reply(:welcome, nil, msg_id, new_state)
+    if SpringTcpServer.can_use_tls?() do
+      reply(:okay, "STLS", msg_id, state)
+      new_state = SpringTcpServer.upgrade_connection(state)
+      reply(:welcome, nil, msg_id, new_state)
+    else
+      # there isn't really a way to notify the client about what went wrong
+      # exactly. We also don't support these clients, and the whole spring
+      # protocol is getting replaced, so it's a bit whatever.
+      Logger.info("STLS request from #{state.userid}")
+      send(self(), :terminate)
+    end
   end
 
   defp do_handle("c.battles.list_ids", _data, msg_id, state) do
@@ -316,6 +324,7 @@ defmodule Teiserver.Protocols.SpringIn do
           SpringOut.do_login_accepted(state, user, optimisation_level)
           |> Map.put(:party_id, nil)
 
+        IO.inspect(new_state, label: "state in spring in?")
         new_state
 
       {:error, "Banned" <> _reason} ->
