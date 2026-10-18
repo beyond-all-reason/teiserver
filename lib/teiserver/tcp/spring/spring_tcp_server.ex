@@ -1235,6 +1235,11 @@ defmodule Teiserver.SpringTcpServer do
   #   end
   # end
 
+  @spec can_use_tls?() :: boolean()
+  def can_use_tls? do
+    Application.get_env(:teiserver, Teiserver.SpringTcpServer)[:listeners][:tcp] != nil
+  end
+
   # Example of how gen-smtp handles upgrading the connection
   # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720
   @spec upgrade_connection(map()) :: map()
