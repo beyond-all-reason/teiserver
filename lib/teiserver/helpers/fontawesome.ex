@@ -75,7 +75,7 @@ defmodule Fontawesome do
   defp fa_prefix(s), do: "fa-" <> s
 
   # Used to make the styling of icons limited to the free version
-  defp free_style("fa-brand"), do: "fa-brand"
+  defp free_style("fa-brands"), do: "fa-brands"
   defp free_style(""), do: ""
   defp free_style(nil), do: nil
   defp free_style(_any), do: "fa-solid"

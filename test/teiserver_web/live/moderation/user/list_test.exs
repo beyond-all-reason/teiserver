@@ -70,7 +70,9 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
                "HW",
                "IP",
                "Roles",
-               "Registered"
+               "Last login",
+               "Registered",
+               "Actions"
              ]
 
       # There will always be at least 5 users at this stage but it's possible

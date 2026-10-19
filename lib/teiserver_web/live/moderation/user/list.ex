@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.Account.UserStatQueries
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias TeiserverWeb.ModerationLive.UserComponents
@@ -149,6 +150,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       "name" => params["name"],
       "email" => params["email"],
       "role" => params["role"],
+      "last_login" => params["last_login"],
       "without_role" => params["without_role"],
       "restriction" => params["restriction"] || "",
 
@@ -167,9 +169,12 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   end
 
   defp user_query(%Socket{assigns: %{search: search}} = _socket) do
+    last_login = DateHelper.parse_ymd(search["last_login"]) || ""
+
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
     |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_logged_in_after(last_login)
     |> UserQueries.where_has_role(search["role"] || "")
     |> UserQueries.where_not_has_role(search["without_role"] || "")
     |> UserQueries.where_has_restriction(search["restriction"] || "")

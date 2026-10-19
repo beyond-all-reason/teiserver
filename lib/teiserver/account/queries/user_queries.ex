@@ -459,6 +459,18 @@ defmodule Teiserver.Account.UserQueries do
       where: ilike(users.email, ^uemail)
   end
 
+  # Logged in after
+  def where_logged_in_after(query, ""), do: query
+
+  def where_logged_in_after(query, %Date{} = date) do
+    where_logged_in_after(query, DateTime.new!(date, ~T[00:00:00], "Etc/UTC"))
+  end
+
+  def where_logged_in_after(query, %DateTime{} = datetime) do
+    from users in query,
+      where: users.last_login >= ^datetime
+  end
+
   # Where role
   def where_has_role(query, ""), do: query
 

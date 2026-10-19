@@ -29,7 +29,10 @@
   id="users-table"
   rows={@users}
   table_class={["table-sm mt-4 ", @preferences.table_class]}
-  row_click={fn user -> JS.navigate(~p"/moderation/users/#{user}") end}
+  row_click={
+    String.contains?(@preferences.show_link, "row-click") &&
+      fn user -> JS.navigate(~p"/moderation/users/#{user}") end
+  }
 >
   <:col :let={user} label="User">{user.name}</:col>
   <:col :let={user} :if={@is_moderator?} label="Email">
@@ -49,9 +52,20 @@
     {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
     {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
   </:col>
+  <:col :let={user} :if={@preferences.last_login?} label="Last login">
+    {user.last_login && Calendar.strftime(user.last_login, "%Y-%m-%d")}
+  </:col>
   <:col :let={user} label="Registered">
     {Calendar.strftime(user.inserted_at, "%Y-%m-%d")}
   </:col>
+  <:action :let={user}>
+    <div class={[
+      not String.contains?(@preferences.show_link, "button") && "sr-only",
+      "btn btn-info btn-outline btn-xs me-2"
+    ]}>
+      <.link navigate={~p"/moderation/users/#{user}"}>Show</.link>
+    </div>
+  </:action>
 </.table>
 
 <div class="grid place-items-center mt-4">
