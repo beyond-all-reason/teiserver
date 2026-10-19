@@ -3,7 +3,6 @@
     <tr>
       <th>Reason</th>
       <th>Actions</th>
-      <th>Modifier</th>
 
       <th>Started</th>
       <th>Expires</th>
@@ -17,7 +16,6 @@
       <tr>
         <td>{action.reason}</td>
         <td>{action.restrictions |> Enum.join(", ")}</td>
-        <td>{action.score_modifier}</td>
 
         <td>{action.inserted_at |> date_to_str(format: :hms_or_ymd)}</td>
         <%= if action.expires do %>

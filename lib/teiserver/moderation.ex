@@ -896,7 +896,6 @@ defmodule Teiserver.Moderation do
           target_id: user.id,
           reason: "Automod detected flagged words in '#{message}'",
           restrictions: ["Bridging"],
-          score_modifier: 100,
           hidden: true,
           expires: DateTime.shift(DateTime.utc_now(), year: 1200)
         })
