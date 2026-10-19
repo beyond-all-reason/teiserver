@@ -1296,18 +1296,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
     # some events have an impact on the state, like vote timeout for example
     # this isn't ideal since each event need to make a decision whether it
     # should also apply on the replicas, but for now™ it'll do
-    {logs, side_effects} =
-      Enum.split_with(final_aggregate.side_effects, &match?({:log, _event_type, _extra}, &1))
-
-    if primary? do
-      logs
-      |> Enum.reverse()
-      |> Enum.each(fn {:log, event_type, extra_data} ->
-        log_event(data, event_type, Map.put_new(extra_data, :user_id, opts[:caller_id]))
-      end)
-    end
-
-    Enum.each(side_effects, &process_event_action(&1, primary?, final_aggregate.data))
+    Enum.each(
+      final_aggregate.side_effects,
+      &process_event_action(
+        &1,
+        [primary?: primary?, caller_id: opts[:caller_id]],
+        final_aggregate.data
+      )
+    )
 
     final_aggregate
   end
@@ -1639,27 +1635,38 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp update_property(prop, _value, _state, _user_id),
     do: {:error, "update #{prop} is not supported"}
 
-  defp process_event_action({:vote_ended, vote, outcome}, primary?, fsm_data) do
-    if primary? do
+  defp process_event_action({:vote_ended, vote, outcome}, opts, fsm_data) do
+    if opts[:primary?] do
       broadcast_to_members(fsm_data, nil, {:lobby, fsm_data.id, {:vote_ended, vote.id, outcome}})
     end
   end
 
-  defp process_event_action({:send_after, time, message}, _primary?, _fsm_data) do
+  defp process_event_action({:send_after, time, message}, _opts, _fsm_data) do
     :timer.send_after(time, message)
   end
 
-  defp process_event_action({:send_to_user, pid, message}, primary?, _fsm_data) do
-    if primary?, do: send(pid, message)
+  defp process_event_action({:send_to_user, pid, message}, opts, _fsm_data) do
+    if opts[:primary?], do: send(pid, message)
   end
 
   defp process_event_action(
          {:kicked, user_id, reason},
-         primary?,
+         opts,
          %LT.Data{} = fsm_data
        ) do
-    if primary? do
+    if opts[:primary?] do
       Teiserver.Player.notify_left_lobby(user_id, fsm_data.id, reason)
+    end
+  end
+
+  defp process_event_action(
+         {:log, event_type, extra_data},
+         opts,
+         %LT.Data{} = fsm_data
+       ) do
+    if opts[:primary?] do
+      extra_data = Map.put_new(extra_data, :user_id, opts[:caller_id])
+      log_event(fsm_data, event_type, extra_data)
     end
   end
 
