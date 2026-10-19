@@ -156,25 +156,6 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("index.html")
   end
 
-  @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def data_search(conn, params) do
-    users =
-      if params["data_search"] == nil do
-        []
-      else
-        UserLib.list_users_by_data(params["data_search"])
-      end
-
-    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
-
-    conn
-    |> add_breadcrumb(name: "Data search", url: conn.request_path)
-    |> assign(:params, params["data_search"])
-    |> assign(:data_search, true)
-    |> assign(:users, Enum.zip(users, user_stats))
-    |> render("index.html")
-  end
-
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)

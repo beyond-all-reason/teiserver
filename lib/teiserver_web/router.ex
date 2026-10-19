@@ -817,8 +817,6 @@ defmodule TeiserverWeb.Router do
     delete("/users/delete_smurf_key/:id", UserController, :delete_smurf_key)
     get("/users/search", UserController, :index)
     post("/users/set_stat", UserController, :set_stat)
-    get("/users/data_search", UserController, :data_search)
-    post("/users/data_search", UserController, :data_search)
     post("/users/search", UserController, :search)
     get("/users/applying/:id", UserController, :applying)
     get("/users/ratings_form/:id", UserController, :ratings_form)

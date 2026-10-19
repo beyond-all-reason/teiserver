@@ -333,59 +333,6 @@ defmodule Teiserver.Account.UserQueries do
       preload: [reports_responded: reports_responded]
   end
 
-  @spec user_search_by_data(%{String.t() => String.t()}) :: {:ok, t()} | {:error, String.t()}
-  def user_search_by_data(values) do
-    # When submitting from the web, a blank value is an empty string so
-    # we need to filter that out as if it was a nil value
-    search_params =
-      %{
-        "hardware:gpuinfo" => values["gpu"],
-        "hardware:cpuinfo" => values["cpu"],
-        "hardware:osinfo" => values["os"],
-        "hardware:raminfo" => values["ram"],
-        "hardware:displaymax" => values["screen"],
-        values["custom_field"] => values["custom_value"]
-      }
-      |> Map.filter(fn {_k, v} ->
-        v != "" and v != nil
-      end)
-
-    # IP is handled differently because we're not searching in the same
-    # way so can't put it with the rest
-    ip_value = values["ip"] || ""
-
-    if Enum.empty?(search_params) and ip_value == "" do
-      {:error, "No valid search parameters"}
-    else
-      # The query with the join
-      base_query =
-        from users in User,
-          as: :users,
-          inner_join: user_stats in assoc(users, :user_stat),
-          as: :user_stats
-
-      # The majority of search parameters are applied here
-      query =
-        search_params
-        |> Enum.reduce(base_query, fn {key, value}, query ->
-          from [user_stats: user_stats] in query,
-            where: fragment("? ->> ? = ?", user_stats.data, ^key, ^value)
-        end)
-
-      # We want to treat IP slightly differently so we do that here
-      query =
-        if ip_value != "" do
-          from [user_stats: user_stats] in query,
-            where:
-              like(fragment("(? ->> ?)::text", user_stats.data, "last_ip"), ^(ip_value <> "%"))
-        else
-          query
-        end
-
-      {:ok, query}
-    end
-  end
-
   # New query style
   @spec users() :: t()
   def users do
