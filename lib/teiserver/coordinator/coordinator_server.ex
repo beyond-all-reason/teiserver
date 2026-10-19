@@ -160,8 +160,22 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
     case converted_message do
       ^warning_response ->
-        Client.clear_awaiting_warn_ack(userid)
-        Chat.send_direct_message(state.userid, userid, "Thank you")
+        case Moderation.expire_warning_reminders(userid) do
+          {:ok, _resolved_actions} ->
+            Client.clear_awaiting_warn_ack(userid)
+            Chat.send_direct_message(state.userid, userid, "Thank you")
+
+          {:error, changeset} ->
+            Logger.error(
+              "Failed to resolve warnings on acknowledgement for user #{userid}: #{inspect(changeset.errors)}"
+            )
+
+            Chat.send_direct_message(
+              state.userid,
+              userid,
+              "Something went wrong, please open a bug report."
+            )
+        end
 
       _other_message ->
         user = Account.get_user_by_id(userid)
