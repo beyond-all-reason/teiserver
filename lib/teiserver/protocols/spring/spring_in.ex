@@ -129,6 +129,7 @@ defmodule Teiserver.Protocols.SpringIn do
           else
             start = :erlang.monotonic_time(:millisecond)
 
+            IO.inspect(state, label: "Staaaaaate")
             state = do_handle(command, data, msg_id, state)
 
             elapsed = :erlang.monotonic_time(:millisecond) - start
@@ -226,8 +227,12 @@ defmodule Teiserver.Protocols.SpringIn do
       # there isn't really a way to notify the client about what went wrong
       # exactly. We also don't support these clients, and the whole spring
       # protocol is getting replaced, so it's a bit whatever.
-      Logger.error("STLS request from #{state.userid}")
+      # also, the STLS message is usually sent before any login which makes sense
+      # so if we want to have some idea of who is doing that, we can't rely
+      # on user/username.
+      Logger.error("STLS request from #{state.ip}")
       send(self(), :terminate)
+      state
     end
   end
 
