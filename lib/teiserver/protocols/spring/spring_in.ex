@@ -228,6 +228,7 @@ defmodule Teiserver.Protocols.SpringIn do
       # protocol is getting replaced, so it's a bit whatever.
       Logger.error("STLS request from #{state.userid}")
       send(self(), :terminate)
+      state
     end
   end
 
