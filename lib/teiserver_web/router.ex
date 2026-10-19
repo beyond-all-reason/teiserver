@@ -803,7 +803,6 @@ defmodule TeiserverWeb.Router do
 
     get("/metrics", GeneralController, :metrics)
 
-    get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/relationships/:id", UserController, :relationships)
     get("/users/smurf_search/:id", UserController, :smurf_search)
     post("/users/create_smurf_key/:userid", UserController, :create_smurf_key)

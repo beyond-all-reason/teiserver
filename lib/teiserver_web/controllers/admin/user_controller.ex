@@ -10,7 +10,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.EmailHelper
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -223,40 +222,6 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def reset_password(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-
-    case UserLib.has_access(user, conn) do
-      {false, :not_found} ->
-        conn
-        |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-
-      {false, :no_access} ->
-        conn
-        |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-
-      {true, _role} ->
-        case EmailHelper.send_password_reset(user) do
-          :ok ->
-            conn
-            |> put_flash(:success, "Password reset email sent to user")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
-
-          {:error, error} ->
-            Logger.error(
-              "Failed to send password reset email to user at #{user.email}: #{inspect(error)}"
-            )
-
-            conn
-            |> put_flash(:error, "Oops, something went wrong resetting the password")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
-        end
     end
   end
 

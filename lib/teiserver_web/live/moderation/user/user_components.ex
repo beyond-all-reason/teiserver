@@ -632,19 +632,21 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         <Fontawesome.icon icon="fa-sync" style="solid" /> Refresh user
       </.button>
 
-      <.link
+      <span
         navigate={~p"/moderation/users/#{@user.id}"}
-        phx-click={JS.push_focus()}
+        phx-click="send-password-reset-email"
+        data-confirm="Are you sure you want to send a password reset email?"
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
+        <.button class="m-1 btn btn-primary">
           <Fontawesome.icon icon="fa-shield-alt" style="solid" /> Send password reset email
         </.button>
-      </.link>
+      </span>
 
       <.link
         href={~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}"}
         method="delete"
         phx-click={JS.push_focus()}
+        data-confirm="Are you sure you want to clear the smurf link?"
       >
         <.button class={["m-1 btn btn-primary", is_nil(assigns[:user].smurf_of_id) && " btn-disabled"]}>
           <Fontawesome.icon icon="fa-link-slash" style="solid" /> Clear smurf link

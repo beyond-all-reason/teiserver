@@ -8,6 +8,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserNoteQueries
   alias Teiserver.Account.UserQueries
+  alias Teiserver.EmailHelper
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -18,6 +19,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias TeiserverWeb.ModerationLive.UserComponents
 
   use TeiserverWeb, :live_view
+
+  require Logger
 
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
 
@@ -179,6 +182,44 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       {:error, _error} ->
         socket
         |> put_flash(:error, "Unable to disable user MFA")
+        |> noreply()
+    end
+  end
+
+  def handle_event(
+        "send-password-reset-email",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+
+    result =
+      Repo.transact(fn ->
+        with :ok <- EmailHelper.send_password_reset(user),
+             %{} <-
+               add_audit_log(scope, "Sent password reset email", %{
+                 user_id: user.id
+               }) do
+          {:ok, :success}
+        else
+          error ->
+            Logger.error(
+              "Failed to send password reset email to user at #{user.email}: #{inspect(error)}"
+            )
+
+            {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> put_flash(:success, "Password reset email sent")
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to send password reset email")
         |> noreply()
     end
   end
