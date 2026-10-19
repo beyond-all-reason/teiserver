@@ -71,7 +71,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       if user do
         add_audit_log(socket.assigns.scope, "User access attempt", %{
           user_id: user && user.id,
-          page: "gdpr_restore/perform"
+          page: "moderation/users/#{user.id}"
         })
       end
 

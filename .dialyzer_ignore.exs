@@ -199,6 +199,7 @@
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"},
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"},
+  {"lib/teiserver_web/live/moderation/user/smurf_search.ex"},
   {"lib/teiserver_web/live/moderation/user/show.ex"},
   {"lib/teiserver_web/live/moderation/user/set_gdpr_forget.ex"},
   {"lib/teiserver_web/live/moderation/user/clear_gdpr_forget.ex"},

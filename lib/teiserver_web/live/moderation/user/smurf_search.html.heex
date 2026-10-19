@@ -1,0 +1,353 @@
+<UserComponents.section_menu active="smurf_search" user={@user} scope={@scope}>
+  <UserComponents.quick_search />
+</UserComponents.section_menu>
+
+<style type="text/css">
+  .key-date {
+    display: none;
+  }
+
+  .selected-user-row td {
+    border-bottom-width: 0px;
+  }
+
+  .under-selected-user-row td {
+    border-bottom-width: 4px;
+  }
+</style>
+
+<.header>
+  Smurf search
+</.header>
+
+<div :if={@user} class="">
+  <h3 class="mt-4">Previous names for {@user.name}</h3>
+  {(@user_stats["previous_names"] || []) |> Enum.join(", ")}
+
+  <h3 class="mt-4">Listing matches for {@user.name}</h3>
+
+  <% type_colours = %{
+    "hw1" => "danger",
+    "hw2" => "danger",
+    "hw3" => "danger",
+    "hw4" => "danger",
+    "client_app_hash" => "warning",
+    "wb1" => "success",
+    "chobby_hash" => "info",
+    "chobby_sysinfo_hash" => "info",
+    "chobby_mac_hash" => "info",
+    "ip" => "info"
+  }
+
+  type_icons = %{
+    "hw1" => "fa-computer",
+    "hw2" => "fa-computer",
+    "hw3" => "fa-computer",
+    "hw4" => "fa-computer",
+    "client_app_hash" => "fa-code",
+    "wb1" => "fa-globe",
+    "chobby_hash" => "fa-computer",
+    "chobby_sysinfo_hash" => "fa-laptop-code",
+    "chobby_mac_hash" => "fa-laptop-file",
+    "ip" => "fa-network-wired"
+  }
+
+  short_name = %{
+    "chobby_hash" => "chobby",
+    "chobby_mac_hash" => "mac",
+    "chobby_sysinfo_hash" => "sysinfo",
+    "client_app_hash" => "client"
+  } %>
+
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th colspan="2">Name/Domain</th>
+        <th>Client</th>
+        <th>Status</th>
+
+        <th>Winrate</th>
+        <th>Recents</th>
+        <th>Play time</th>
+        <th>games allied</th>
+        <th>games vs</th>
+
+        <%= for type <- @key_types do %>
+          <th>{short_name[type] || type}</th>
+        <% end %>
+
+        <th>Last login</th>
+        <th>Registered</th>
+
+        <%= if @moderator? do %>
+          <th colspan="3">&nbsp;</th>
+        <% else %>
+          <th>&nbsp;</th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="selected-user-row">
+        <td>{@user.name}</td>
+        <td>{@user.email}</td>
+        <td>{@user.data["lobby_client"]}</td>
+
+        <td>
+          <TeiserverWeb.UserComponents.status_icon user={@user} />
+        </td>
+
+        <td>{@user_stats["win_rate.team"]}</td>
+        <td>{@user_stats["recent_count.team"]}</td>
+        <% hours = ((@user_stats["player_minutes"] || 0) / 60) |> round() %>
+        <td>
+          {"#{hours}h"}
+        </td>
+
+        <td>-</td>
+        <td>-</td>
+
+        <%= for _type <- @key_types do %>
+          <td>
+            -
+          </td>
+        <% end %>
+
+        <td>
+          {date_to_str(@user.last_login,
+            format: :hms_or_ymd,
+            tz: @tz
+          )}
+        </td>
+
+        <td>
+          {date_to_str(@user.inserted_at, format: :hms_or_ymd)}
+        </td>
+
+        <td>
+          <a
+            href={~p"/moderation/users/#{@user.id}"}
+            class="btn btn-secondary btn-xs"
+          >
+            Show
+          </a>
+        </td>
+      </tr>
+
+      <tr class="under-selected-user-row">
+        <td colspan="18" style="height: 5px;"></td>
+      </tr>
+
+      <%= for user <- @users do %>
+        <% user_stats = @stats_map[user.id]
+        games_allied = @games_allied[user.id]
+        games_vs = @games_vs[user.id] %>
+
+        <tr>
+          <td>{user.name}</td>
+          <td>{user.email}</td>
+          <td>{user.data["lobby_client"]}</td>
+
+          <td>
+            <TeiserverWeb.UserComponents.status_icon user={user} />
+          </td>
+
+          <td>{user_stats["win_rate.team"]}</td>
+          <td>{user_stats["recent_count.team"]}</td>
+          <% hours = ((user_stats["player_minutes"] || 0) / 60) |> round() %>
+          <td>
+            {"#{hours}h"}
+          </td>
+
+          <td>{games_allied}</td>
+          <td>{games_vs}</td>
+
+          <%= for type <- @key_types do %>
+            <td>
+              <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
+                <% match = @key_lookup[{type, user.id}]
+                user_key = @user_key_lookup[match.value] %>
+
+                <i
+                  class={"fa-fw fa-solid #{type_icons[type]} text-#{type_colours[type]}"}
+                  title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}:\n#{user_key.value}"}
+                >
+                </i>
+                <span class="key-date">
+                  {date_to_str(match.last_updated, format: :ymd)}/{date_to_str(
+                    user_key.last_updated,
+                    format: :ymd
+                  )}
+                </span>
+              <% end %>
+            </td>
+          <% end %>
+
+          <td>
+            {date_to_str(user.last_login,
+              format: :hms_or_ymd,
+              tz: @tz
+            )}
+          </td>
+
+          <td>
+            {date_to_str(user.inserted_at, format: :hms_or_ymd)}
+          </td>
+
+          <td>
+            <a
+              href={~p"/moderation/users/#{user.id}"}
+              class="btn btn-secondary btn-xs"
+            >
+              Show
+            </a>
+          </td>
+
+          <td>
+            <a
+              href={~p"/moderation/tools/time_compare?user1=#{@user.id}&user2=#{user.id}"}
+              class="btn btn-secondary btn-xs"
+            >
+              <Fontawesome.icon icon="fa-code-compare" style="regular" /> Compare
+            </a>
+          </td>
+
+          <%= if @moderator? and user.smurf_of_id == nil and @user.smurf_of_id == nil do %>
+            <td>
+              {link(raw("<i class='fa-solid fa-fw fa-link'></i> Mark as smurf of"),
+                to: ~p"/teiserver/admin/users/mark_as_smurf_of/#{@user.id}/#{user.id}",
+                method: "put",
+                class: "btn btn-xs btn-warning"
+              )}
+            </td>
+          <% else  # TODO if @user.smurf_of_id == nil, link to parent? %>
+            <td></td>
+          <% end %>
+          <!-- TODO auto-bump or at least propose smurf warning number based on number of linked accounts? -->
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="mt-4">
+    <h4>Key counts</h4>
+    A high number of keys here can increase the chances of a false positive
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {type_name, count} <- @key_count_by_type_name do %>
+          <tr>
+            <td>
+              <i class={"fa-fw fa-solid #{type_icons[type_name]} text-#{type_colours[type_name]}"}>
+              </i>
+              &nbsp; {type_name}
+            </td>
+            <td>
+              {count}
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div :if={@moderator?} class="mt-4">
+    <h4>Key list</h4>
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Value</th>
+            <th>Updated</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for key <- @all_user_keys do %>
+            <tr>
+              <td>
+                <i class={"fa-fw fa-solid #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}>
+                </i>
+                &nbsp; {key.type.name}
+              </td>
+              <td>
+                <%= if String.length(key.value) > 50 do %>
+                  {key.value |> String.slice(0, 50)}...
+                <% else %>
+                  {key.value}
+                <% end %>
+              </td>
+              <td>
+                {date_to_str(key.last_updated, format: :hms_or_ymd)}
+              </td>
+              <td :if={allow?(@scope, "Server")}>
+                {link("Delete",
+                  to: ~p"/teiserver/admin/users/delete_smurf_key/#{key.id}",
+                  class: "btn btn-error btn-xs",
+                  method: "delete",
+                  data: [confirm: "Are you sure?"]
+                )}
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div :if={@user} class="row mt-4">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Occurrences in playerbase</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% keys =
+        @user_stats
+        |> Map.filter(fn {key, _val} ->
+          String.contains?(key, "hardware") or
+            key in ["last_ip", "country", "lobby_client", "lobby_hash"]
+        end)
+        |> Map.keys()
+        |> Enum.sort() %>
+      <%= for key <- keys do %>
+        <% value = @user_stats[key] %>
+        <tr>
+          <td>{key}</td>
+          <td>{Kernel.inspect(value)}</td>
+          <td>
+            {Teiserver.Account.list_user_stats(
+              search: [data_equal: {key, value}],
+              select: [:user_id],
+              limit: :infinity
+            )
+            |> Enum.count()
+            |> format_number()}
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <form action={~p"/moderation/users"} method="get" class="">
+    <input type="hidden" name="cpu" value={@user_stats["hardware:cpuinfo"]} />
+    <input type="hidden" name="gpu" value={@user_stats["hardware:gpuinfo"]} />
+    <input type="hidden" name="ram" value={@user_stats["hardware:raminfo"]} />
+    <input type="hidden" name="os" value={@user_stats["hardware:osinfo"]} />
+    <input type="hidden" name="ip" value={@user_stats["last_ip"]} />
+    <input type="hidden" name="screen" value={@user_stats["hardware:displaymax"]} />
+
+    <button type="submit" class="btn btn-primary">
+      <i class="fa-fw fa-solid fa-search"></i> Search for this hardware
+    </button>
+  </form>
+</div>
