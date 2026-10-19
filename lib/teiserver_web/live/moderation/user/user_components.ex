@@ -582,10 +582,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/smurf_search"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-disabled">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
         </.button>
       </.link>

@@ -559,12 +559,12 @@ defmodule TeiserverWeb.Admin.UserController do
       {:ok, _smurf_key} ->
         conn
         |> put_flash(:info, "Key added successfully.")
-        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
+        |> redirect(to: ~p"/moderation/users/smurf_search/#{userid}")
 
       {:error, %Ecto.Changeset{} = _changeset} ->
         conn
         |> put_flash(:info, "Unable to add that key")
-        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
+        |> redirect(to: ~p"/moderation/users/smurf_search/#{userid}")
     end
   end
 
@@ -577,7 +577,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       conn
       |> put_flash(:success, "Key deleted")
-      |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{key.user_id}")
+      |> redirect(to: ~p"/moderation/users/smurf_search/#{key.user_id}")
     else
       conn
       |> put_flash(:info, "Unable to find that key")

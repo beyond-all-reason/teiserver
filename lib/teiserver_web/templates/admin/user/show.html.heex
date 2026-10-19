@@ -25,18 +25,6 @@
         <hr />
 
         <div class="float-end">
-          <div class="dropdown" style="display: inline-block;">
-            <div
-              class={"btn btn-#{bsname} dropdown-toggle"}
-              data-bs-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-              Actions
-            </div>
-            {render("actions.html", assigns)}
-          </div>
-
           <a
             href={~p"/moderation/users/#{@user.id}"}
             class={"btn btn-outline-#{bsname}"}
