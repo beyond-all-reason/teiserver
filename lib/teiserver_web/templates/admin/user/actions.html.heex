@@ -13,15 +13,4 @@
     <Fontawesome.icon icon="fa-shield-alt" style="solid" /> &nbsp;
     Send password reset email
   </a>
-
-  <.link
-    :if={allow?(@current_user, "Moderator") && @client_totp == :active}
-    href={~p"/teiserver/admin/users/#{@user.id}/disable_totp"}
-    data-confirm="Are you sure?"
-    method="put"
-    class="dropdown-item bg-danger_transparent"
-  >
-    <Fontawesome.icon icon="broom-wide" style="solid" /> &nbsp;
-    Disable MFA
-  </.link>
 </div>

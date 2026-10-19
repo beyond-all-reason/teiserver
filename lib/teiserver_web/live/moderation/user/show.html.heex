@@ -22,6 +22,28 @@
 
 <.header :if={@user}>
   {@user.name}
+
+  <span class="ml-4">
+    <span :if={@has_active_mfa?} class="badge badge-success">
+      <Fontawesome.icon icon="lock" style="regular" /> MFA
+    </span>
+
+    <span :if={not @has_active_mfa?} class="badge badge-error">
+      No MFA
+    </span>
+
+    <span :if={@has_mfa_role?} class="badge badge-info">
+      Privileged user
+    </span>
+
+    <span :if={@user.discord_id} class="badge badge-primary">
+      <Fontawesome.icon icon="discord" style="fa-brands" />
+    </span>
+
+    <span :if={@user.steam_id} class="badge badge-neutral">
+      <Fontawesome.icon icon="steam" style="fa-brands" />
+    </span>
+  </span>
 </.header>
 
 <div :if={not Enum.empty?(@alerts)} class="my-2 flex">
@@ -57,6 +79,7 @@
         user={@user}
         scope={@scope}
         client={@client}
+        has_active_mfa?={@has_active_mfa?}
       />
 
       <UserComponents.show_raw
@@ -91,6 +114,7 @@
         user={@user}
         scope={@scope}
         client={@client}
+        has_active_mfa?={@has_active_mfa?}
       />
 
       <UserComponents.show_raw
