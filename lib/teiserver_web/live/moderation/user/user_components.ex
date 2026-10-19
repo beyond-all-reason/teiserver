@@ -102,6 +102,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
+        <div class="m-2">
+          <.input_tw
+            type="date"
+            field={@form[:last_login]}
+            label="Logged in on/after"
+          />
+        </div>
+
         <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
@@ -411,6 +419,11 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <:item title="Email">{@user.email}</:item>
       <:item title="Roles">
         <div :for={role <- @user.roles} class="badge badge-soft badge-primary mx-1">{role}</div>
+      </:item>
+      <:item title="Restrictions">
+        <div :for={restriction <- @user.restrictions} class="badge badge-soft badge-error mx-1">
+          {restriction}
+        </div>
       </:item>
       <:item title="Registered">
         {@user.inserted_at && Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}

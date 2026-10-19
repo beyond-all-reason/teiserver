@@ -11,9 +11,11 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
     add_preference("col_pref.admin_discord_channels.show_link", "row-click")
 
     # Moderation; user list
+    add_preference("col_pref.mod_users.show_link", "row-click")
     add_preference("col_pref.mod_users.search_mode", "advanced")
     add_preference("col_pref.mod_users.table_class", "table-zebra")
     add_preference("col_pref.mod_users.email", "partial")
+    add_preference("col_pref.mod_users.last_login?", true)
     add_preference("col_pref.mod_users.client?", true)
     add_preference("col_pref.mod_users.hw?", true)
     add_preference("col_pref.mod_users.ip?", true)

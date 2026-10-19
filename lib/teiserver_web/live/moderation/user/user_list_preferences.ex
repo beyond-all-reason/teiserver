@@ -101,6 +101,15 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
           </div>
 
           <div class="m-2">
+            <br />
+            <.input_tw
+              type="checkbox"
+              field={@form[:last_login?]}
+              label="Last login column"
+            />
+          </div>
+
+          <div class="m-2">
             <.input_tw
               type="select"
               field={@form[:table_class]}
@@ -115,6 +124,19 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
               field={@form[:search_mode]}
               options={[{"Basic", "basic"}, {"Advanced", "advanced"}]}
               label="Search mode"
+            />
+          </div>
+
+          <div class="m-2">
+            <.input_tw
+              type="select"
+              field={@form[:show_link]}
+              options={[
+                {"Row click", "row-click"},
+                {"Row click and button", "row-click + button"},
+                {"Just button", "button"}
+              ]}
+              label="Click to show"
             />
           </div>
         </div>
@@ -185,8 +207,10 @@ defmodule TeiserverWeb.ModerationLive.UserListPreferences do
       :client?,
       :hw?,
       :ip?,
+      :last_login?,
       :table_class,
-      :search_mode
+      :search_mode,
+      :show_link
     ]
     |> Map.new(fn key ->
       value = get_user_config_cache(user.id, "#{@prefix}.#{key}")
