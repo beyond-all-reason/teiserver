@@ -22,6 +22,7 @@ defmodule TeiserverWeb.LoggingLive.AuditLogComponents do
   """
   attr :params, :map, required: true
   attr :changed?, :boolean, default: false
+  attr :audit_log_types, :list
 
   def search_form(%{params: params} = assigns) do
     form = to_form(params)
@@ -51,9 +52,10 @@ defmodule TeiserverWeb.LoggingLive.AuditLogComponents do
 
         <div class="m-2">
           <.input_tw
-            type="text"
+            type="select"
             field={@form[:action]}
             label="Action"
+            options={@audit_log_types}
           />
         </div>
 

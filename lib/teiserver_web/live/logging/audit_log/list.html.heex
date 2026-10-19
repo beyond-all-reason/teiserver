@@ -5,7 +5,11 @@
 </.header>
 <div class="heading-subtitle">{format_number(@audit_log_count)} Audit Logs found</div>
 
-<AuditLogComponents.search_form params={@search} changed?={@search_changed?} />
+<AuditLogComponents.search_form
+  params={@search}
+  audit_log_types={@audit_log_types}
+  changed?={@search_changed?}
+/>
 
 <.table
   id="audit_logs-table"
@@ -14,11 +18,11 @@
   row_click={fn {_id, audit_log} -> JS.navigate(~p"/logging/audit_logs/#{audit_log.id}") end}
 >
   <:col :let={{_id, audit_log}} label="ID">{audit_log.id}</:col>
+  <:col :let={{_id, audit_log}} label="User">{audit_log.user_id && audit_log.user.name}</:col>
+  <:col :let={{_id, audit_log}} label="Action">{audit_log.action}</:col>
   <:col :let={{_id, audit_log}} label="Timestamp">
     {Calendar.strftime(audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}
   </:col>
-  <:col :let={{_id, audit_log}} label="Action">{audit_log.action}</:col>
-  <:col :let={{_id, audit_log}} label="User">{audit_log.user_id && audit_log.user.name}</:col>
 </.table>
 
 <div class="grid place-items-center mt-4">

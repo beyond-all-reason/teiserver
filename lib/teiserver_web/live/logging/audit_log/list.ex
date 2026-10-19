@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.LoggingLive.AuditLog.List do
   @moduledoc false
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Logging.AuditLogLib
   alias Teiserver.Logging.AuditLogQueries
   alias Teiserver.Repo
   alias TeiserverWeb.LoggingLive.AuditLogComponents
@@ -14,8 +15,10 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
 
   @impl LiveView
   def mount(params, _session, %Socket{} = socket) when is_connected?(socket) do
+    audit_log_types = AuditLogLib.list_audit_types()
+
     socket
-    |> assign(page: 0)
+    |> assign(page: 0, audit_log_types: audit_log_types)
     |> init_search_params(params)
     |> get_audit_logs()
     |> get_audit_log_count()
@@ -24,7 +27,14 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
 
   def mount(_params, _session, %Socket{} = socket) do
     socket
-    |> assign(audit_log_count: 0, page: 0, page_count: 1, search: %{}, search_changed?: false)
+    |> assign(
+      audit_log_count: 0,
+      page: 0,
+      page_count: 1,
+      search: %{},
+      search_changed?: false,
+      audit_log_types: []
+    )
     |> stream(:audit_logs, [])
     |> ok()
   end
@@ -64,7 +74,7 @@ defmodule TeiserverWeb.LoggingLive.AuditLog.List do
       |> MapSet.new()
 
     contains_update_keys? =
-      MapSet.new(["order_by", "page_size", "user_id"])
+      MapSet.new(["order_by", "page_size", "user_id", "action"])
       |> MapSet.intersection(diff_keys)
       |> Enum.empty?()
       |> Kernel.not()

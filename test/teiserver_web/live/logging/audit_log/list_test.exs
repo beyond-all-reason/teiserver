@@ -63,9 +63,9 @@ defmodule TeiserverWeb.Logging.AuditLogLive.ListTest do
       # Should have an empty table as we have no records at this time
       assert table.headers == [
                "ID",
-               "Timestamp",
+               "User",
                "Action",
-               "User"
+               "Timestamp"
              ]
 
       assert Enum.count(table.rows) == 3
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Logging.AuditLogLive.ListTest do
         |> render()
         |> table_to_map()
 
-      assert Enum.count(table.rows) == 25
+      assert Enum.count(table.rows) == 1
 
       # But then we limit what we're searching for
       live
