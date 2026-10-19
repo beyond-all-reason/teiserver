@@ -417,6 +417,8 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
     <.list>
       <:item title="Name">{@user.name}</:item>
       <:item title="Email">{@user.email}</:item>
+      <:item :if={@user.discord_id} title="Discord ID"><pre>{@user.discord_id}</pre></:item>
+      <:item :if={@user.steam_id} title="Steam ID"><pre>{@user.steam_id}</pre></:item>
       <:item title="Roles">
         <div :for={role <- @user.roles} class="badge badge-soft badge-primary mx-1">{role}</div>
       </:item>
@@ -528,6 +530,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   attr :user, User
   attr :client, Client
   attr :scope, Scope
+  attr :has_active_mfa?, :boolean
 
   def show_actions(assigns) do
     ~H"""
@@ -666,14 +669,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         </.button>
       </.link>
 
-      <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
-        phx-click={JS.push_focus()}
+      <span
+        phx-click="disable-mfa"
+        data-confirm="Are you sure you want to disable this user's MFA?"
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
-          <Fontawesome.icon icon="fa-broom" style="solid" /> Reset MFA
+        <.button class={["m-1 btn btn-primary ", not @has_active_mfa? && "btn-disabled"]}>
+          <Fontawesome.icon icon="fa-broom" style="solid" /> Deactivate MFA
         </.button>
-      </.link>
+      </span>
 
       <.link
         navigate={~p"/moderation/users/#{@user.id}/smurf_link"}

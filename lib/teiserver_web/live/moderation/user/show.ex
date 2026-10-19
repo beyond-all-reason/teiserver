@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserNoteQueries
@@ -55,6 +56,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         page_title: "User details: #{user.name}",
         user_id: id,
         has_active_mfa?: has_active_mfa?(user.id),
+        has_mfa_role?: AuthLib.contains_mfa_role?(user.roles),
         role_data: RoleLib.grouped_role_data()
       )
       |> switch_tab(tab1, "1")
@@ -145,16 +147,47 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         |> put_flash(:error, "Unable to delete user note")
         |> noreply()
     end
+  end
 
-    socket
-    |> noreply()
+  def handle_event(
+        "disable-mfa",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+
+    result =
+      Repo.transact(fn ->
+        with :ok <- TOTPLib.disable_totp(user.id),
+             %{} <-
+               add_audit_log(scope, "Disable MFA", %{
+                 user_id: user.id
+               }) do
+          {:ok, :success}
+        else
+          _error -> {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+        |> put_flash(:success, "User MFA disabled")
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to disable user MFA")
+        |> noreply()
+    end
   end
 
   defp set_user_alerts(%Socket{assigns: %{user: nil}} = socket), do: socket
 
-  defp set_user_alerts(%Socket{assigns: %{user: user}} = socket) do
+  defp set_user_alerts(%Socket{assigns: %{user: user, has_mfa_role?: has_mfa_role?}} = socket) do
     mfa_warning? =
-      AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
+      AuthLib.mfa_required?() and has_mfa_role? and
         not has_active_mfa?(user.id)
 
     restriction_alert =

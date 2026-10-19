@@ -260,16 +260,6 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
-  @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def disable_totp(conn, %{"id" => id}) do
-    user = Account.get_user(id)
-    TOTPLib.disable_totp(user.id)
-
-    conn
-    |> put_flash(:info, "Disabled MFA for #{user.name}")
-    |> redirect(to: ~p"/teiserver/admin/user/#{user}")
-  end
-
   @spec ratings(Plug.Conn.t(), map) :: Plug.Conn.t()
   def ratings(conn, %{"id" => id} = params) do
     user = Account.get_user(id)

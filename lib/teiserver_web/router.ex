@@ -805,7 +805,6 @@ defmodule TeiserverWeb.Router do
 
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/relationships/:id", UserController, :relationships)
-    put("/users/:id/disable_totp", UserController, :disable_totp)
     get("/users/smurf_search/:id", UserController, :smurf_search)
     post("/users/create_smurf_key/:userid", UserController, :create_smurf_key)
 
