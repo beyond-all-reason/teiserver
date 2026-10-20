@@ -85,9 +85,9 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@scope, ~w(Server))}
+        :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.Config.SiteConfigLib.icon()}
-        url={~p"/teiserver/admin/site"}
+        url={~p"/admin/site_config"}
       >
         Site config
       </.menu_page_link>

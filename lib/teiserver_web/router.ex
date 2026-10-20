@@ -675,9 +675,6 @@ defmodule TeiserverWeb.Router do
     # Codes
     resources("/codes", CodeController)
     put("/codes/extend/:id/:hours", CodeController, :extend)
-
-    # Config
-    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
   scope "/chat", TeiserverWeb.Communication do
@@ -771,6 +768,19 @@ defmodule TeiserverWeb.Router do
 
       live "/discord_channels/:id", DiscordChannel.Show, :show
       live "/discord_channels/:id/show/edit", DiscordChannel.Show, :edit
+    end
+
+    live_session :admin_site_configs,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "admin"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/site_config", SiteConfig.List, :list
+      live "/site_config/:key/edit", SiteConfig.List, :edit
+
+      live "/site_config/:key/history", SiteConfig.Show, :show
     end
   end
 
