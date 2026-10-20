@@ -25,8 +25,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     socket
     |> assign(page: 0, is_moderator?: is_moderator?, preferences: preferences)
     |> init_search_params(params)
-    |> get_users()
     |> get_user_count()
+    |> get_users()
     |> ok()
   end
 
@@ -272,7 +272,11 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         })
       end)
 
-    if Enum.count(users) == 1 do
+    # Only jump to the user when the whole search has a single result, not when
+    # the current page happens to show one (e.g. page 2 of 6 results with a
+    # page size of 5). user_count can be 0 when the only result is an exact
+    # id match as that is not part of the counted query.
+    if Enum.count(users) == 1 and socket.assigns.user_count <= 1 do
       user = hd(users)
 
       socket
