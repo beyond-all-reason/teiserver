@@ -406,6 +406,18 @@ defmodule Teiserver.Account.UserQueries do
       where: ilike(users.email, ^uemail)
   end
 
+  @spec where_name_or_email_like(t(), String.t()) :: t()
+  def where_name_or_email_like(query, ""), do: query
+
+  def where_name_or_email_like(query, raw_search_term) do
+    search_term = "%" <> raw_search_term <> "%"
+
+    from users in query,
+      where:
+        ilike(users.email, ^search_term) or
+          ilike(users.name, ^search_term)
+  end
+
   # Logged in after
   def where_logged_in_after(query, ""), do: query
 
