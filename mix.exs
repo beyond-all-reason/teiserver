@@ -66,11 +66,11 @@ defmodule Teiserver.MixProject do
       {:phoenix, "~> 1.7.24"},
       {:phoenix_ecto, "~> 4.6"},
       {:ecto_sql, "~> 3.14"},
-      {:postgrex, ">= 0.22.2"},
+      {:postgrex, ">= 0.22.4"},
       {:phoenix_html, "~> 4.2"},
       {:phoenix_live_reload, "~> 1.5", only: :dev},
       {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
-      {:phoenix_live_view, "~> 1.1"},
+      {:phoenix_live_view, "~> 1.1.30"},
       {:lazy_html, ">= 0.1.0", only: :test},
       # see https://hexdocs.pm/phoenix_html/changelog.html#v4-0-0-2023-12-19
       {:phoenix_html_helpers, "~> 1.0"},
@@ -85,7 +85,7 @@ defmodule Teiserver.MixProject do
       {:peep, "~> 3.5.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug, "~> 1.19.2"},
+      {:plug, "~> 1.20.3"},
       {:bandit, "~> 1.12"},
 
       # Temporary deps while we transition away from views
@@ -97,7 +97,7 @@ defmodule Teiserver.MixProject do
       {:logger_json, "~> 7.0"},
       {:ecto_psql_extras, "~> 0.8"},
       {:breadcrumble, "~> 1.0.0"},
-      {:guardian, "~> 2.1"},
+      {:guardian, "~> 2.5"},
       {:argon2_elixir, "~> 4.1"},
       {:bodyguard, "~> 2.4"},
       {:oban, "~> 2.15"},
@@ -128,7 +128,7 @@ defmodule Teiserver.MixProject do
        git: "https://github.com/beyond-all-reason/openskill.ex.git", branch: "master"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
-      {:mdex, "~> 0.2"},
+      {:mdex, "~> 0.14.2"},
       {:ranch, "~> 1.8"},
       {:etop, "~> 0.7.0"},
       {:json_xema, "~> 0.3"},
@@ -139,6 +139,7 @@ defmodule Teiserver.MixProject do
       {:decimal, "~> 3.0", override: true},
       {:hackney, "~> 4.0", override: true},
       {:quic, "~> 1.4.4", override: true},
+      {:mint, "~> 1.11", override: true},
 
       # gun is a transitive dependency of nostrum. The version 2.1.0 works,
       # while the next one, 2.2.0 produces the following error when starting
@@ -164,9 +165,9 @@ defmodule Teiserver.MixProject do
       # So pin this down
       {:gun, "== 2.1.0"},
 
-      # nostrum and hackney both depends on certifi, but they resolve to diffenrent
+      # nostrum and hackney both depends on certifi, but they resolve to different
       # versions, which screws over elixir-ls.
-      {:certifi, "~> 2.13.0", override: true},
+      {:certifi, "~> 2.17.0", override: true},
       {:websocket_sync_client,
        git: "https://github.com/geekingfrog/websocket_sync_client.git",
        ref: "d655018589f9ade836afb8df8ed5f45f53500173",
