@@ -46,6 +46,35 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
       assert path == ~p"/moderation/users/#{user.id}"
     end
 
+    test "no jump when only one user on the page", %{conn: conn} do
+      for i <- 1..6 do
+        AccountFixtures.user_fixture(%{name: "PagedPerson#{i}"})
+      end
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users")
+
+      live
+      |> form("#user-search-form")
+      |> render_submit(%{"name" => "PagedPerson", "page_size" => "5"})
+
+      # The second page only has one user but the search found six
+      # so we should stay on the list
+      html =
+        live
+        |> element(".paginate-next")
+        |> render_click()
+
+      assert is_binary(html)
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      assert Enum.count(table.rows) == 1
+    end
+
     test "with records", %{conn: conn} do
       AccountFixtures.user_fixture()
       AccountFixtures.user_fixture()
