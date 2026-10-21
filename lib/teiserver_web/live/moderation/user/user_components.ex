@@ -798,7 +798,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <.input_tw
         type="text"
         value=""
-        name="name"
+        name="name_or_email"
         placeholder="Search by id/username"
         class="input input-sm"
         fieldset?={false}

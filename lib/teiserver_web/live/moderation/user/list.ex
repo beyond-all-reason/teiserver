@@ -149,6 +149,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       # User entity
       "name" => params["name"],
       "email" => params["email"],
+      "name_or_email" => params["name_or_email"],
       "role" => params["role"],
       "last_login" => params["last_login"],
       "without_role" => params["without_role"],
@@ -175,9 +176,12 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   defp user_query(%Socket{assigns: %{search: search}} = _socket) do
     last_login = DateHelper.parse_ymd(search["last_login"]) || ""
 
+    name_or_email = (search["name_or_email"] || "") |> String.trim()
+
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
     |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_name_or_email_like(name_or_email)
     |> UserQueries.where_logged_in_after(last_login)
     |> UserQueries.where_has_role(search["role"] || "")
     |> UserQueries.where_not_has_role(search["without_role"] || "")
@@ -206,7 +210,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       ])
 
     exact_user_by_id =
-      case Integer.parse(search["name"] || "") do
+      case Integer.parse(search["name"] || search["name_or_email"] || "") do
         {id, _rem} ->
           UserQueries.users()
           |> UserQueries.where_id(id)
