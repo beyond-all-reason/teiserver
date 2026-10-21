@@ -162,6 +162,10 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       "screen" => params["screen"],
       "ip" => params["ip"],
 
+      # Custom UserStat data
+      "custom_key" => params["custom_key"],
+      "custom_value" => params["custom_value"],
+
       # Metadata
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
@@ -183,6 +187,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> UserStatQueries.where_data_equal("hardware:raminfo", search["ram"])
     |> UserStatQueries.where_data_equal("hardware:gpuinfo", search["gpu"])
     |> UserStatQueries.where_data_equal("hardware:displaymax", search["screen"])
+    |> UserStatQueries.where_data_equal(search["custom_key"], search["custom_value"])
     |> UserStatQueries.where_data_like("last_ip", search["ip"])
 
     # TODO: Possible extra filters to add

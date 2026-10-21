@@ -158,6 +158,22 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
+        <div :if={@search_mode == "advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:custom_key]}
+            label="Custom data key"
+          />
+        </div>
+
+        <div :if={@search_mode == "advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:custom_value]}
+            label="Custom data value"
+          />
+        </div>
+
         <div class="m-2">
           <.input_tw
             type="select"
