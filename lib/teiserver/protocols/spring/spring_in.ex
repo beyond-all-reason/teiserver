@@ -129,7 +129,6 @@ defmodule Teiserver.Protocols.SpringIn do
           else
             start = :erlang.monotonic_time(:millisecond)
 
-            IO.inspect(state, label: "Staaaaaate")
             state = do_handle(command, data, msg_id, state)
 
             elapsed = :erlang.monotonic_time(:millisecond) - start

@@ -208,7 +208,7 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
            )
 
     # Dry run restore, full tests for post-processing exist in
-    # Teiserver.Account.GDPRAnonymiseTaskTest
+    # Teiserver.Account.GDPRPseudoAnonymiseTaskTest
     {:ok, restore_data} =
       RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
