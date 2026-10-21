@@ -4,8 +4,8 @@ defmodule Teiserver.Communication.TextCallbackLib do
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Communication
   alias Teiserver.Communication.TextCallback
+
   use TeiserverWeb, :library
-  require Logger
 
   @minimum_repeat_time 60
 

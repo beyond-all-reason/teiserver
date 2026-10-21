@@ -207,8 +207,8 @@ defmodule TeiserverWeb.PaginationComponents do
               </div>
             </div>
           <% end %>
-          
-    <!-- Go to Page Input -->
+
+          <!-- Go to Page Input -->
           <%= if @show_go_to and @total_pages > 5 do %>
             <div class="me-3">
               <div class="input-group input-group-sm" style="width: 160px;">
@@ -231,8 +231,8 @@ defmodule TeiserverWeb.PaginationComponents do
               </div>
             </div>
           <% end %>
-          
-    <!-- Pagination Navigation -->
+
+          <!-- Pagination Navigation -->
           <%= if @total_pages > 1 do %>
             <nav aria-label="Page navigation">
               <ul class="pagination pagination-sm mb-0">
@@ -259,8 +259,8 @@ defmodule TeiserverWeb.PaginationComponents do
                     </span>
                   <% end %>
                 </li>
-                
-    <!-- Page Numbers -->
+
+                <!-- Page Numbers -->
                 <%= for page_num <- @page_range do %>
                   <%= if page_num == :ellipsis do %>
                     <li class="page-item disabled">
@@ -293,8 +293,8 @@ defmodule TeiserverWeb.PaginationComponents do
                     </li>
                   <% end %>
                 <% end %>
-                
-    <!-- Next Button -->
+
+                <!-- Next Button -->
                 <li class={"page-item #{if @page >= @total_pages - 1, do: "disabled"}"}>
                   <%= if @page < @total_pages - 1 do %>
                     <.link
