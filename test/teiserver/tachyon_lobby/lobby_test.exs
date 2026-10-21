@@ -837,7 +837,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       {:ok, _pid, %LT.Details{id: id}} =
         mk_start_params([2, 2]) |> Lobby.create()
 
-      {:error, :invalid_bot_id} = Lobby.remove_bot(id, "lolnope")
+      {:error, :invalid_bot_id} = Lobby.remove_bot(id, @default_user_id, "lolnope")
     end
 
     test "remove_bot works" do
@@ -846,7 +846,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, bot_id} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
       assert_receive {:lobby, ^id, {:updated, _}}
-      :ok = Lobby.remove_bot(id, bot_id)
+      :ok = Lobby.remove_bot(id, @default_user_id, bot_id)
       assert_receive {:lobby, ^id, {:updated, update}}
       %{bots: %{^bot_id => nil}} = update
     end
@@ -859,7 +859,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert_receive {:lobby, ^id, {:updated, _}}
       {:ok, bot_id2} = Lobby.add_bot(id, @default_user_id, 1, "bot short name")
       assert_receive {:lobby, ^id, {:updated, _}}
-      :ok = Lobby.remove_bot(id, bot_id1)
+      :ok = Lobby.remove_bot(id, @default_user_id, bot_id1)
 
       assert_receive {:lobby, ^id, {:updated, update}}
       %{bots: %{^bot_id1 => nil, ^bot_id2 => %{team: {1, 0, 0}}}} = update
@@ -882,7 +882,7 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       %{spectators: %{"other-user-id" => %{join_queue_position: 1}}} = update
 
       # Act
-      :ok = Lobby.remove_bot(id, bot_id)
+      :ok = Lobby.remove_bot(id, @default_user_id, bot_id)
 
       # Assert
       assert_receive {:lobby, ^id, {:updated, update}}

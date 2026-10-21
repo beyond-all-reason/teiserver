@@ -61,7 +61,13 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.VoteEnd
       })
 
     side_effects = [{:vote_ended, ev.vote, ev.outcome} | agg.side_effects]
-    agg = %{agg | data: data, changes: changes, side_effects: side_effects}
+
+    agg =
+      %{agg | data: data, changes: changes, side_effects: side_effects}
+      |> LT.Aggregate.add_log("vote_end", %{
+        user_id: ev.vote.initiator,
+        details: %{vote_id: ev.vote.id, outcome: ev.outcome}
+      })
 
     apply_outcome(agg, ev.outcome, ev.vote.action)
   end
