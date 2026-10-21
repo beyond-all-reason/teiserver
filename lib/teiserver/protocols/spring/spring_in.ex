@@ -690,48 +690,36 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, _location_type, _location_id, reason] ->
-        friend_list = Account.list_friend_ids_of_user(state.userid)
         target_id = Account.get_userid_from_name(target_name)
 
-        cond do
-          Enum.member?(friend_list, target_id) ->
-            Chat.send_direct_message(
-              Coordinator.get_coordinator_userid(),
-              state.userid,
-              "Your report has not been submitted, you can't report a friend."
-            )
+        if Account.restricted?(state.userid, ["Community", "Reporting"]) do
+          reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
+        else
+          client = Client.get_client_by_id(state.userid)
 
-            reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
+          {:ok, code} =
+            Account.create_code(%{
+              value: ULID.generate(),
+              purpose: "one_time_login",
+              expires: DateTime.shift(DateTime.utc_now(), minute: 30),
+              user_id: state.userid,
+              metadata: %{
+                ip: client.ip,
+                redirect: "/moderation/report_user/#{target_id}",
+                reason: reason
+              }
+            })
 
-          Account.restricted?(state.userid, ["Community", "Reporting"]) ->
-            reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
+          host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+          url = "https://#{host}/one_time_login/#{code.value}"
 
-          true ->
-            client = Client.get_client_by_id(state.userid)
+          Coordinator.send_to_user(state.userid, [
+            "To complete your report, please use the form on this link: #{url}",
+            "The link will expire in 30 minutes.",
+            "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
+          ])
 
-            {:ok, code} =
-              Account.create_code(%{
-                value: ULID.generate(),
-                purpose: "one_time_login",
-                expires: DateTime.shift(DateTime.utc_now(), minute: 30),
-                user_id: state.userid,
-                metadata: %{
-                  ip: client.ip,
-                  redirect: "/moderation/report_user/#{target_id}",
-                  reason: reason
-                }
-              })
-
-            host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-            url = "https://#{host}/one_time_login/#{code.value}"
-
-            Coordinator.send_to_user(state.userid, [
-              "To complete your report, please use the form on this link: #{url}",
-              "The link will expire in 30 minutes.",
-              "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
-            ])
-
-            reply(:okay, nil, msg_id, state)
+          reply(:okay, nil, msg_id, state)
         end
 
       _other ->
