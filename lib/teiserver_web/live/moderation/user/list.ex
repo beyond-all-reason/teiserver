@@ -27,6 +27,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> init_search_params(params)
     |> get_users()
     |> get_user_count()
+    |> generate_cmd_palette_commands()
     |> ok()
   end
 
@@ -107,6 +108,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> assign(search: new_search, search_changed?: false, page: 0)
     |> get_user_count()
     |> get_users()
+    |> generate_cmd_palette_commands()
     |> noreply()
   end
 
@@ -115,6 +117,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> init_search_params(%{})
     |> get_user_count()
     |> get_users()
+    |> generate_cmd_palette_commands()
     |> noreply()
   end
 
@@ -282,7 +285,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       end)
 
     socket
-    |> assign(users: users)
+    |> assign(users: users, exact_matches: exact_matches)
   end
 
   defp get_user_count(%Socket{assigns: assigns} = socket) do
@@ -303,13 +306,37 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     page_count = :math.ceil(user_count / assigns.search["page_size"]) |> round()
 
     socket
-    |> assign(user_count: user_count)
-    |> assign(page_count: page_count)
+    |> assign(user_count: user_count, page_count: page_count)
   end
 
   defp maybe_load_user_stat(query, %{skip_user_stat?: true}), do: query
 
   defp maybe_load_user_stat(query, _any) do
     UserQueries.load_user_stat(query)
+  end
+
+  defp generate_cmd_palette_commands(%Socket{assigns: assigns} = socket) do
+    first_user =
+      if Enum.empty?(assigns.exact_matches) do
+        hd(assigns.users)
+      else
+        hd(assigns.exact_matches)
+      end
+
+    goto_user = %{
+      id: "goto:first_user",
+      cmd: :goto,
+      label: "View user: #{first_user.name}",
+      path: ~p"/moderation/users/#{first_user.id}"
+    }
+
+    extra_commands =
+      [
+        goto_user
+      ]
+      |> Enum.reject(&is_nil/1)
+
+    socket
+    |> assign(extra_commands: extra_commands)
   end
 end

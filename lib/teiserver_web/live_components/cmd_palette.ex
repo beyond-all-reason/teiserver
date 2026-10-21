@@ -6,6 +6,7 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
     module={TeiserverWeb.LiveComponents.CmdPalette}
     id="cmd-palette"
     scope={@scope}
+    extra_commands={[]}
   />
 
   TODO:
@@ -200,7 +201,7 @@ defmodule TeiserverWeb.LiveComponents.CmdPalette do
     >
       <div
         :if={@palette_open}
-        class="fixed inset-0 bg-black/50"
+        class="fixed inset-0 bg-black/50 z-1000"
         phx-click="close"
         phx-target={@myself}
       >
