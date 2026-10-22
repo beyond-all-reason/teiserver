@@ -209,7 +209,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     try_exact_search? =
       Enum.any?([
         search["name"] && search["name"] != "",
-        search["email"] && search["email"] != ""
+        search["email"] && search["email"] != "",
+        search["name_or_email"] && search["name_or_email"] != ""
       ])
 
     exact_user_by_id =
@@ -230,6 +231,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         UserQueries.users()
         |> UserQueries.where_name_lower(search["name"] || "")
         |> UserQueries.where_email_lower(search["email"] || "")
+        |> UserQueries.where_name_or_email_lower(search["name_or_email"] || "")
         |> UserQueries.load_user_stat()
         |> QueryHelpers.limit_query(1)
         |> Repo.one()
