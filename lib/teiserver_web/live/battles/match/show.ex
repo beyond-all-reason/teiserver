@@ -457,9 +457,6 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
       {:error, :cheating_enabled} ->
         {"warning", "Match not rated due to cheating enabled!"}
-
-      _other ->
-        {"danger", "Unexpected result, match may or may not have been rated."}
     end
   end
 

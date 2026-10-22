@@ -18,8 +18,6 @@ defmodule Teiserver.Account.Login do
 
   use Plugins
 
-  require Logger
-
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @timer_sleep 500

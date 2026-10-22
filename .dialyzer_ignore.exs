@@ -189,7 +189,6 @@
   {"lib/teiserver/game/libs/match_rating_lib.ex"},
   {"lib/teiserver/logging/tasks/persist_match_day_task.ex"},
   {"test/support/fixtures/moderation_fixtures.ex"},
-  {"lib/teiserver_web/live/battles/match/show.ex"},
   {"lib/teiserver/moderation/tasks/create_anti_abuse_record_task.ex"},
   {"lib/teiserver/moderation.ex"},
   {"lib/teiserver_web/live/moderation/user/smurf_link.ex"},
