@@ -14,8 +14,6 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party.Types, as: PT
   alias Teiserver.Player
 
-  require Logger
-
   @behaviour :gen_statem
 
   @default_call_timeout 5000
