@@ -777,7 +777,7 @@ defmodule TeiserverWeb.CoreComponents do
       </.list>
   """
   slot :item, required: true do
-    attr :title, :string, required: true
+    attr :title, :string
   end
 
   def list(assigns) do
@@ -785,7 +785,7 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
-          <dt class="list-title-item">
+          <dt :if={item[:title]} class="list-title-item">
             {item.title}
           </dt>
           <dd class="list-content-item">

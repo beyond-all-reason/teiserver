@@ -144,16 +144,6 @@
       Open Skill
     </.menu_card>
   <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Moderation.ActivityReport.icon()}
-      url={~p"/teiserver/reports/show/moderation_activity"}
-    >
-      Moderation
-    </.menu_card>
-  <% end %>
 </div>
 
 <div class="row mt-2">

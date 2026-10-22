@@ -117,6 +117,14 @@ defmodule TeiserverWeb.ModerationLive.Menu do
 
       <.menu_page_link
         :if={allow?(@scope, "Moderator")}
+        icon="chart-line"
+        url={~p"/moderation/tools/volume_chart"}
+      >
+        Volume chart
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow?(@scope, "Moderator")}
         icon="question"
         url={~p"/moderation/tools/gdpr_restore"}
       >

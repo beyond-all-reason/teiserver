@@ -206,6 +206,14 @@
   @apply dark:fill-neutral-content dark:text-neutral;
 }
 
+.apexchart-container {
+  @apply w-full h-100 mb-8;
+}
+
+.data-explain {
+  @apply rounded-md bg-info/25 p-4;
+}
+
 .btn-close {
   cursor: pointer;
 }
