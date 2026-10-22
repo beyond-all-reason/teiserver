@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.AccountLive.Manage.GDPRAnonymise do
+defmodule TeiserverWeb.AccountLive.Manage.GDPRPseudoAnonymise do
   @moduledoc false
   alias Teiserver.Account.UserLib
 

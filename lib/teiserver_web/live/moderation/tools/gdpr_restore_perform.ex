@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.ModerationLive.Tools.GDPRRestorePerform do
   @moduledoc false
   alias Teiserver.Account
-  alias Teiserver.Account.RestoreAnonymisedUserTask
+  alias Teiserver.Account.RestorePseudoAnonymisedUserTask
   alias Teiserver.Helpers.EnumHelper
   alias Teiserver.Moderation.ActionQueries
   alias Teiserver.Repo
@@ -64,7 +64,7 @@ defmodule TeiserverWeb.ModerationLive.Tools.GDPRRestorePerform do
       end
 
     if type do
-      record = RestoreAnonymisedUserTask.find_record_from_identifier(type, identifier)
+      record = RestorePseudoAnonymisedUserTask.find_record_from_identifier(type, identifier)
 
       if record do
         add_audit_log(socket.assigns.scope, "GDPR Restore retrieve record", %{
@@ -103,7 +103,7 @@ defmodule TeiserverWeb.ModerationLive.Tools.GDPRRestorePerform do
     })
 
     restore_result =
-      RestoreAnonymisedUserTask.restore_from_record(
+      RestorePseudoAnonymisedUserTask.restore_from_record(
         record,
         scope,
         identifier_type,

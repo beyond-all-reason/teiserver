@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.AccountLive.Manage.GDPRAnonymiseTest do
+defmodule TeiserverWeb.AccountLive.Manage.GDPRPseudoAnonymiseTest do
   alias Teiserver.Account
   alias Teiserver.Helpers.GeneralTestLib
 

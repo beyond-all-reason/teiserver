@@ -99,10 +99,12 @@ defmodule Teiserver.Logging.AuditLogQueries do
 
   @spec order_by_inserted_at(t(), :asc | :desc) :: t()
   def order_by_inserted_at(query, direction \\ :asc) do
+    # If two audit logs share the same timestamp their ordering
+    # will not be consistent without also ordering by ID
     if direction == :asc do
-      from(audit_logs in query, order_by: [asc: audit_logs.inserted_at])
+      from(audit_logs in query, order_by: [asc: audit_logs.inserted_at, asc: audit_logs.id])
     else
-      from(audit_logs in query, order_by: [desc: audit_logs.inserted_at])
+      from(audit_logs in query, order_by: [desc: audit_logs.inserted_at, desc: audit_logs.id])
     end
   end
 
