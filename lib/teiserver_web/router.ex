@@ -104,7 +104,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "account"}}},
         {UserAuthentication, :ensure_authenticated}
       ] do
-      live "/gdpr-self-service", Manage.GDPRAnonymise
+      live "/gdpr-self-service", Manage.GDPRPseudoAnonymise
     end
   end
 

@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.RestoreAnonymisedUserTask do
+defmodule Teiserver.Account.RestorePseudoAnonymisedUserTask do
   @moduledoc """
   The flip side of CreateAntiAbuseRecordTask, given an anti-abuse record
   restore soome of the user details using the decryption key.

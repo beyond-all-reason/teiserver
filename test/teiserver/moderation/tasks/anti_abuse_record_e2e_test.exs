@@ -1,6 +1,6 @@
-defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
+defmodule Teiserver.Moderation.GDPRPseudoAnonymiseAndRestoreTest do
   alias Teiserver.Account
-  alias Teiserver.Account.RestoreAnonymisedUserTask
+  alias Teiserver.Account.RestorePseudoAnonymisedUserTask
   alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
@@ -77,12 +77,18 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
 
       # Next up, we need to ensure we can find the record
       assert is_nil(
-               RestoreAnonymisedUserTask.find_record_from_identifier(:discord_id, user.email)
+               RestorePseudoAnonymisedUserTask.find_record_from_identifier(
+                 :discord_id,
+                 user.email
+               )
              )
 
-      assert is_nil(RestoreAnonymisedUserTask.find_record_from_identifier(:steam_id, user.email))
+      assert is_nil(
+               RestorePseudoAnonymisedUserTask.find_record_from_identifier(:steam_id, user.email)
+             )
 
-      found_record = RestoreAnonymisedUserTask.find_record_from_identifier(:email, user.email)
+      found_record =
+        RestorePseudoAnonymisedUserTask.find_record_from_identifier(:email, user.email)
 
       # The items are not identical because the record hashes uses atoms for keys as it
       # is from the changeset, both having the same ID is acceptable as a check because we use UUIDs
@@ -97,7 +103,12 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
 
       # Now can we restore it?
       restore_data =
-        RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
+        RestorePseudoAnonymisedUserTask.restore_from_record(
+          found_record,
+          scope,
+          :email,
+          user.email
+        )
 
       assert restore_data ==
                {:ok,
@@ -190,11 +201,15 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
            )
 
     # Next up, we need to ensure we can find the record
-    assert is_nil(RestoreAnonymisedUserTask.find_record_from_identifier(:discord_id, user.email))
+    assert is_nil(
+             RestorePseudoAnonymisedUserTask.find_record_from_identifier(:discord_id, user.email)
+           )
 
-    assert is_nil(RestoreAnonymisedUserTask.find_record_from_identifier(:steam_id, user.email))
+    assert is_nil(
+             RestorePseudoAnonymisedUserTask.find_record_from_identifier(:steam_id, user.email)
+           )
 
-    found_record = RestoreAnonymisedUserTask.find_record_from_identifier(:email, user.email)
+    found_record = RestorePseudoAnonymisedUserTask.find_record_from_identifier(:email, user.email)
 
     # The items are not identical because the record hashes uses atoms for keys as it
     # is from the changeset, both having the same ID is acceptable as a check because we use UUIDs
@@ -210,7 +225,7 @@ defmodule Teiserver.Moderation.GDPRAnonymiseAndRestoreTest do
     # Dry run restore, full tests for post-processing exist in
     # Teiserver.Account.GDPRPseudoAnonymiseTaskTest
     {:ok, restore_data} =
-      RestoreAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
+      RestorePseudoAnonymisedUserTask.restore_from_record(found_record, scope, :email, user.email)
 
     data_keys = restore_data |> Map.keys() |> Enum.sort()
     assert data_keys == ["post_ids", "smurf_key_ids", "upload_ids", "user_notes"]

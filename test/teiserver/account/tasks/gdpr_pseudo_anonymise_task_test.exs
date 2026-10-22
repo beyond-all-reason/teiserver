@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
   alias Teiserver.Account
   alias Teiserver.Account.GDPRPseudoAnonymiseTask
-  alias Teiserver.Account.RestoreAnonymisedUserTask
+  alias Teiserver.Account.RestorePseudoAnonymisedUserTask
   alias Teiserver.Account.SmurfKeyQueries
   alias Teiserver.Account.User
   alias Teiserver.Account.UserNoteQueries
@@ -41,7 +41,8 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
       assert updated_user.name == user.name
 
       # No AAR created
-      assert RestoreAnonymisedUserTask.find_record_from_identifier(:email, user.email) == nil
+      assert RestorePseudoAnonymisedUserTask.find_record_from_identifier(:email, user.email) ==
+               nil
     end
 
     test "empty user" do
@@ -63,11 +64,11 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
       # AAR created
       assert record =
                %AntiAbuseRecord{} =
-               RestoreAnonymisedUserTask.find_record_from_identifier(:email, user.email)
+               RestorePseudoAnonymisedUserTask.find_record_from_identifier(:email, user.email)
 
       # Try a dry-run
       {:ok, dry_run_result} =
-        RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email)
+        RestorePseudoAnonymisedUserTask.restore_from_record(record, scope, :email, user.email)
 
       assert dry_run_result == %{
                "post_ids" => [],
@@ -78,7 +79,13 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
 
       # Try a restore, nothing should change but we want to ensure there's not an error when we do it
       result =
-        RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email, true)
+        RestorePseudoAnonymisedUserTask.restore_from_record(
+          record,
+          scope,
+          :email,
+          user.email,
+          true
+        )
 
       assert result == {:ok, :success}
     end
@@ -143,7 +150,7 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
       # AAR created
       assert record =
                %AntiAbuseRecord{} =
-               RestoreAnonymisedUserTask.find_record_from_identifier(:email, user.email)
+               RestorePseudoAnonymisedUserTask.find_record_from_identifier(:email, user.email)
 
       # No smurf keys, posts or uploads
       key_count =
@@ -176,7 +183,7 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
 
       # Try a dry-run
       {:ok, dry_run_result} =
-        RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email)
+        RestorePseudoAnonymisedUserTask.restore_from_record(record, scope, :email, user.email)
 
       # No promise the keys are in order so we need to sort them
       assert Enum.sort(dry_run_result["post_ids"]) == Enum.sort([user_post1.id, user_post2.id])
@@ -188,7 +195,13 @@ defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
 
       # Try a restore, the result should be :ok and then we verify other changes were made correctly
       result =
-        RestoreAnonymisedUserTask.restore_from_record(record, scope, :email, user.email, true)
+        RestorePseudoAnonymisedUserTask.restore_from_record(
+          record,
+          scope,
+          :email,
+          user.email,
+          true
+        )
 
       assert result == {:ok, :success}
 
