@@ -209,7 +209,7 @@ config :teiserver, Oban,
 
        # Every day at 6am
        {"0 6 * * *", Teiserver.Account.DataExpiryTask},
-       {"0 6 * * *", Teiserver.Account.GDPRAnonymiseTask},
+       {"0 6 * * *", Teiserver.Account.GDPRPseudoAnonymiseTask},
 
        # Every day at 8am
        {"0 8 * * *", Teiserver.Admin.DailyCleanupTask},

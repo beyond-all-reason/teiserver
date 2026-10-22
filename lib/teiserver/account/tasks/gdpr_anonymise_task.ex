@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.GDPRAnonymiseTask do
+defmodule Teiserver.Account.GDPRPseudoAnonymiseTask do
   @moduledoc """
   The purpose of this task is to clean all PII from an account (at minimum
   what GDPR requires but we want to get rid of as much as possible) without
@@ -32,7 +32,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_job) do
-    now = DateTime.utc_now() |> DateTime.shift(day: -30)
+    now = DateTime.utc_now()
 
     UserQueries.users()
     |> UserQueries.where_gdpr_forget_before(now)

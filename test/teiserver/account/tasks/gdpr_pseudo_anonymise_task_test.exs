@@ -1,6 +1,6 @@
-defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
+defmodule Teiserver.Account.GDPRPseudoAnonymiseTaskTest do
   alias Teiserver.Account
-  alias Teiserver.Account.GDPRAnonymiseTask
+  alias Teiserver.Account.GDPRPseudoAnonymiseTask
   alias Teiserver.Account.RestoreAnonymisedUserTask
   alias Teiserver.Account.SmurfKeyQueries
   alias Teiserver.Account.User
@@ -21,7 +21,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
   @old_forget_datetime DateTime.utc_now() |> DateTime.shift(year: -1)
 
   # A date within the cooldown window
-  @recent_forget_datetime DateTime.utc_now() |> DateTime.shift(day: -1)
+  @recent_forget_datetime DateTime.utc_now() |> DateTime.shift(day: 1)
 
   setup do
     CoordinatorServer.make_and_cache_coordinator_account()
@@ -35,7 +35,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> User.set_gdpr_forget_changeset(%{gdpr_forget_after: @recent_forget_datetime})
         |> Repo.update!()
 
-      :ok = GDPRAnonymiseTask.perform(%{})
+      :ok = GDPRPseudoAnonymiseTask.perform(%{})
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name == user.name
@@ -54,7 +54,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
         |> User.set_gdpr_forget_changeset(%{gdpr_forget_after: @old_forget_datetime})
         |> Repo.update!()
 
-      :ok = GDPRAnonymiseTask.perform(%{})
+      :ok = GDPRPseudoAnonymiseTask.perform(%{})
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
@@ -134,7 +134,7 @@ defmodule Teiserver.Account.GDPRAnonymiseTaskTest do
 
       assert user_note_count == 2
 
-      :ok = GDPRAnonymiseTask.perform(%{})
+      :ok = GDPRPseudoAnonymiseTask.perform(%{})
 
       updated_user = Account.get_user!(user.id)
       assert updated_user.name != user.name
