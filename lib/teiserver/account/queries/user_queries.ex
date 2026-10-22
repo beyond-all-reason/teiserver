@@ -406,6 +406,16 @@ defmodule Teiserver.Account.UserQueries do
       where: ilike(users.email, ^uemail)
   end
 
+  @spec where_name_or_email_lower(t(), String.t()) :: t()
+  def where_name_or_email_lower(query, ""), do: query
+
+  def where_name_or_email_lower(query, search_term) do
+    from users in query,
+      where:
+        lower(users.email) == ^String.downcase(search_term) or
+          lower(users.name) == ^String.downcase(search_term)
+  end
+
   @spec where_name_or_email_like(t(), String.t()) :: t()
   def where_name_or_email_like(query, ""), do: query
 
