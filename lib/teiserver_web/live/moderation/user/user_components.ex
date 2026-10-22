@@ -557,7 +557,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         phx-click={JS.push_focus()}
       >
         <.button class="m-1 btn btn-primary btn-soft">
-          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
+          <Fontawesome.icon icon={Teiserver.Chat.SpringLobbyMessageLib.icon()} style="solid" /> Chat
         </.button>
       </.link>
 

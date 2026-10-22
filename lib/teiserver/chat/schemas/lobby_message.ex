@@ -1,10 +1,16 @@
 defmodule Teiserver.Chat.LobbyMessage do
-  @moduledoc false
+  @moduledoc """
+  Messages sent in a Tachyon lobby. A lobby can live through several matches,
+  so messages always belong to a lobby and are only linked to a match when
+  one is running.
+  """
   use TeiserverWeb, :schema
 
-  typed_schema "teiserver_lobby_messages" do
+  @primary_key {:id, Ecto.UUID, autogenerate: [version: 7, precision: :monotonic]}
+  typed_schema "lobby_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
+    field :lobby_id, Ecto.UUID
     belongs_to :user, Teiserver.Account.User
     belongs_to :match, Teiserver.Battle.Match
   end
@@ -19,11 +25,9 @@ defmodule Teiserver.Chat.LobbyMessage do
       |> trim_strings([:content])
 
     struct
-    |> cast(params, ~w(content inserted_at match_id user_id)a)
-    |> validate_required(~w(content inserted_at user_id)a)
+    |> cast(params, ~w(content inserted_at match_id lobby_id user_id)a)
+    |> validate_required(~w(content inserted_at user_id lobby_id)a)
+    |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:match_id)
   end
-
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _params), do: allow?(conn, "Reviewer")
-  def authorize(_action, conn, _params), do: allow?(conn, "Moderator")
 end

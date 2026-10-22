@@ -83,10 +83,16 @@ defmodule Teiserver.Account.DataExpiryTask do
       {"user_notes", :creator_id},
 
       # Messages
+      {"spring_direct_messages", :from_id},
+      {"spring_direct_messages", :to_id},
+      {"spring_lobby_messages", :user_id},
+      {"spring_room_messages", :user_id},
       {"direct_messages", :from_id},
       {"direct_messages", :to_id},
-      {"teiserver_lobby_messages", :user_id},
-      {"teiserver_room_messages", :user_id},
+      {"lobby_messages", :user_id},
+      {"party_messages", :user_id},
+      {"battle_messages", :from_id},
+      {"battle_messages", :to_id},
 
       # Moderation
       {"moderation_actions", :target_id},

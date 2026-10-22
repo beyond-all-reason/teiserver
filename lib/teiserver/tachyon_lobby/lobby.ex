@@ -824,6 +824,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
         :erlang.monotonic_time(:micro_seconds)
       )
 
+    match_id = if data.current_battle != nil, do: data.current_battle.match_id
+
+    Messaging.persist_lobby_message(msg, match_id)
+
     Enum.concat(data.players, data.spectators)
     |> Enum.each(fn {id, _data} ->
       if id != from_id, do: Messaging.send(msg, {:player, id})
@@ -1038,8 +1042,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
           do: Player.lobby_join_battle(p_id, battle_data, start_data, p.password)
 
       now = DateTime.utc_now()
+      match_id = TachyonBattle.get_match_id(battle_id)
 
-      battle = %LT.CurrentBattle{id: battle_id, pid: battle_pid, started_at: now}
+      battle = %LT.CurrentBattle{
+        id: battle_id,
+        pid: battle_pid,
+        match_id: match_id,
+        started_at: now
+      }
 
       data =
         %{data | current_battle: battle}

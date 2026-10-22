@@ -68,7 +68,7 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        icon={Teiserver.Chat.RoomMessageLib.icon()}
+        icon={Teiserver.Chat.SpringRoomMessageLib.icon()}
         url={~p"/chat"}
       >
         Chat
