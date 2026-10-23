@@ -320,23 +320,25 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   defp generate_cmd_palette_commands(%Socket{assigns: assigns} = socket) do
     first_user =
       if Enum.empty?(assigns.exact_matches) do
-        hd(assigns.users)
+        Enum.at(assigns.users, 0)
       else
-        hd(assigns.exact_matches)
+        Enum.at(assigns.exact_matches, 0)
       end
 
-    goto_user = %{
-      id: "goto:first_user",
-      cmd: :goto,
-      label: "View user: #{first_user.name}",
-      path: ~p"/moderation/users/#{first_user.id}"
-    }
-
     extra_commands =
-      [
-        goto_user
-      ]
-      |> Enum.reject(&is_nil/1)
+      if first_user == nil do
+        []
+      else
+        [
+          %{
+            id: "goto:first_user",
+            cmd: :goto,
+            label: "View user: #{first_user.name}",
+            path: ~p"/moderation/users/#{first_user.id}"
+          }
+        ]
+        |> Enum.reject(&is_nil/1)
+      end
 
     socket
     |> assign(extra_commands: extra_commands)
