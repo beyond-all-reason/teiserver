@@ -116,6 +116,19 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
 
       assert Enum.count(table.rows) == 2
 
+      # Searching for non-existent user returns an empty list
+      live
+      |> form("#user-search-form")
+      |> render_submit(%{"name" => "some_non-existent_string"})
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      assert Enum.empty?(table.rows)
+
       # Remove that filter
       live
       |> form("#user-search-form")
