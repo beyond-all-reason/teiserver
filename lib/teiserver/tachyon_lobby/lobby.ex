@@ -1495,13 +1495,20 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp log_event(%LT.Data{primary?: false}, _event_type, _attrs), do: :ok
 
   defp log_event(%LT.Data{} = data, event_type, attrs) do
-    attrs
-    |> Map.merge(%{
-      lobby_id: data.id,
-      event_type: event_type,
-      inserted_at: DateTime.utc_now()
-    })
-    |> TachyonLobby.create_lobby_log_async()
+    attrs =
+      Map.merge(attrs, %{
+        lobby_id: data.id,
+        event_type: event_type,
+        inserted_at: DateTime.utc_now()
+      })
+
+    case TachyonLobby.create_lobby_log(attrs) do
+      {:ok, _lobby_log} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.error("Error while creating lobby log #{inspect(attrs)}: #{inspect(reason)}")
+    end
   end
 
   defp gen_password, do: :crypto.strong_rand_bytes(16) |> Base.encode16()
