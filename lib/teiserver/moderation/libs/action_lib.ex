@@ -204,10 +204,15 @@ defmodule Teiserver.Moderation.ActionLib do
 
     if action do
       until =
-        if action.expires do
-          "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
-        else
-          "**Permanent**"
+        cond do
+          action.restrictions == ["Warning reminder"] ->
+            []
+
+          action.expires ->
+            "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
+
+          true ->
+            "**Permanent**"
         end
 
       restriction_list = action.restrictions |> Enum.join(", ")
