@@ -15,7 +15,7 @@ defmodule Teiserver.Moderation.ActionQueries do
 
   @spec where_id(t(), Action.id()) :: t()
   def where_id(query, id) do
-    from actions in query,
+    from [actions: actions] in query,
       where: actions.id == ^id
   end
 
@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.ActionQueries do
   def where_target_id(query, nil), do: query
 
   def where_target_id(query, target_id) do
-    from actions in query,
+    from [actions: actions] in query,
       where: actions.target_id == ^target_id
   end
 
@@ -32,7 +32,7 @@ defmodule Teiserver.Moderation.ActionQueries do
   def where_expired(query, timestamp \\ nil) do
     timestamp = timestamp || DateTime.utc_now()
 
-    from actions in query,
+    from [actions: actions] in query,
       where: actions.expires < ^timestamp
   end
 
@@ -40,13 +40,20 @@ defmodule Teiserver.Moderation.ActionQueries do
   def where_not_expired(query, timestamp \\ nil) do
     timestamp = timestamp || DateTime.utc_now()
 
-    from actions in query,
+    from [actions: actions] in query,
       where: actions.expires > ^timestamp
+  end
+
+  def without_restrictions(query, nil), do: query
+
+  def without_restrictions(query, restrictions) do
+    from [actions: actions] in query,
+      where: not array_overlap_a_in_b(actions.restrictions, ^List.wrap(restrictions))
   end
 
   @spec load_target(t()) :: t()
   def load_target(query) do
-    from actions in query,
+    from [actions: actions] in query,
       left_join: targets in User,
       as: :record_targets,
       on: actions.target_id == targets.id,
@@ -56,18 +63,18 @@ defmodule Teiserver.Moderation.ActionQueries do
   @spec order_by_inserted_at(t(), :asc | :desc) :: t()
   def order_by_inserted_at(query, direction \\ :asc) do
     if direction == :asc do
-      from(actions in query, order_by: [asc: actions.inserted_at])
+      from([actions: actions] in query, order_by: [asc: actions.inserted_at])
     else
-      from(actions in query, order_by: [desc: actions.inserted_at])
+      from([actions: actions] in query, order_by: [desc: actions.inserted_at])
     end
   end
 
   @spec order_by_expires(t(), :asc | :desc) :: t()
   def order_by_expires(query, direction \\ :asc) do
     if direction == :asc do
-      from(actions in query, order_by: [asc: actions.expires])
+      from([actions: actions] in query, order_by: [asc: actions.expires])
     else
-      from(actions in query, order_by: [desc: actions.expires])
+      from([actions: actions] in query, order_by: [desc: actions.expires])
     end
   end
 

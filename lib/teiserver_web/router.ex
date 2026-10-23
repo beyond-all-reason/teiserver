@@ -663,6 +663,7 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do
       live "/tools/time_compare", Tools.TimeCompare, :show
+      live "/tools/volume_chart", Tools.ModerationVolumeChart, :show
       live "/tools/gdpr_restore", Tools.GDPRRestoreWarning
       live "/tools/gdpr_restore/perform", Tools.GDPRRestorePerform
       live "/tools/gdpr_restore/success/:user_id", Tools.GDPRRestoreSuccess
