@@ -154,15 +154,6 @@
       Moderation
     </.menu_card>
   <% end %>
-
-  <.menu_card
-    :if={allow?(@current_user, Teiserver.Communication.MicroblogReport.permissions())}
-    icon={Teiserver.Communication.MicroblogReport.icon()}
-    url={~p"/teiserver/reports/show/microblog"}
-    size={:small}
-  >
-    Microblog
-  </.menu_card>
 </div>
 
 <div class="row mt-2">

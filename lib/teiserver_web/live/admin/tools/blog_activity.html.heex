@@ -1,0 +1,38 @@
+<ToolsComponents.section_menu
+  active="blog_activity"
+  scope={@scope}
+/>
+
+<.header>
+  Blog activity
+</.header>
+<div class="heading-subtitle">{@post_count} posts found</div>
+
+<div class="flex">
+  <div class="flex-1">
+    <.table
+      :if={@connected?}
+      id="posts-table"
+      rows={@streams.post_data}
+      table_class="table-sm table-zebra mt-4"
+    >
+      <:col :let={{_id, post}} label="Name">{post.title}</:col>
+      <:col :let={{_id, post}} label="Poster">{post.poster.name}</:col>
+      <:col :let={{_id, post}} label="Alias">{post.poster_alias}</:col>
+      <:col :let={{_id, post}} label="View count">{post.view_count}</:col>
+      <:col :let={{_id, post}} label="Posted">
+        {Calendar.strftime(post.inserted_at, "%Y-%m-%d")}
+      </:col>
+      <:col :let={{_id, post}} label="">
+        <a
+          href={~p"/microblog/show/#{post.id}"}
+          class="btn btn-secondary btn-outline btn-xs"
+        >
+          Show
+        </a>
+      </:col>
+    </.table>
+  </div>
+</div>
+
+<.back navigate={~p"/admin"}>Back to Admin</.back>
