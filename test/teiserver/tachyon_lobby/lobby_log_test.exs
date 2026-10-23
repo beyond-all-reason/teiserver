@@ -9,7 +9,6 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
   use Teiserver.DataCase
 
   import Teiserver.Support.LobbyHelpers, only: [mk_start_params: 2]
-  import Teiserver.Support.Polling, only: [poll_until: 2]
 
   @moduletag :tachyon
 
@@ -25,24 +24,18 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     %{id: id, host: host, user: user}
   end
 
-  # Logs are written asynchronously
-  defp logs(lobby_id, expected_count) do
-    poll_until(
-      fn ->
-        LobbyLogQueries.lobby_logs()
-        |> LobbyLogQueries.where_lobby_id(lobby_id)
-        |> LobbyLogQueries.order_by_inserted_at(:asc)
-        |> Repo.all()
-      end,
-      &(length(&1) >= expected_count)
-    )
+  defp logs(lobby_id) do
+    LobbyLogQueries.lobby_logs()
+    |> LobbyLogQueries.where_lobby_id(lobby_id)
+    |> LobbyLogQueries.order_by_inserted_at(:asc)
+    |> Repo.all()
   end
 
   test "lobby", %{id: id, host: host} do
     # Leaving the lobby will result in it closing
     :ok = Lobby.leave(id, host.id)
 
-    [lobby_open, _lobby_leave, _boss_remove, lobby_close] = logs(id, 4)
+    [lobby_open, _lobby_leave, _boss_remove, lobby_close] = logs(id)
 
     assert lobby_open.event_type == "lobby_open"
     assert lobby_open.user_id == host.id
@@ -56,7 +49,7 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     :ok = Lobby.spectate(id, user.id)
     :ok = Lobby.leave(id, user.id)
 
-    [_lobby_open, lobby_join, join_team, join_spectators, lobby_leave] = logs(id, 5)
+    [_lobby_open, lobby_join, join_team, join_spectators, lobby_leave] = logs(id)
 
     assert lobby_join.event_type == "lobby_join"
     assert lobby_join.user_id == user.id
@@ -76,7 +69,7 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     {:ok, bot_id} = Lobby.add_bot(id, host.id, 1, "bot short name")
     :ok = Lobby.remove_bot(id, host.id, bot_id)
 
-    assert [_lobby_open, bot_add, bot_remove] = logs(id, 3)
+    assert [_lobby_open, bot_add, bot_remove] = logs(id)
 
     assert bot_add.event_type == "bot_add"
     assert bot_add.user_id == host.id
@@ -93,7 +86,7 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     :ok = Lobby.appoint_boss(id, host.id, user.id)
     :ok = Lobby.unboss(id, host.id, user.id)
 
-    [_lobby_open, _lobby_join, boss_add, boss_remove] = logs(id, 4)
+    [_lobby_open, _lobby_join, boss_add, boss_remove] = logs(id)
 
     assert boss_add.event_type == "boss_add"
     assert boss_add.user_id == host.id
@@ -108,7 +101,7 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     {:ok, _pid, _details} = Lobby.join(id, %LT.PlayerJoinData{id: user.id, name: user.name})
     :ok = Lobby.kickban(id, host.id, user.id)
 
-    [_lobby_open, _lobby_join, kickban, lobby_leave] = logs(id, 4)
+    [_lobby_open, _lobby_join, kickban, lobby_leave] = logs(id)
 
     assert kickban.event_type == "kickban"
     assert kickban.user_id == host.id
@@ -146,7 +139,7 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
       vote_end,
       kickban,
       lobby_leave
-    ] = logs(id, 11)
+    ] = logs(id)
 
     assert vote_start.event_type == "vote_start"
     assert vote_start.user_id == host.id
@@ -171,6 +164,6 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
 
   test "rejected actions are not logged", %{id: id, user: user} do
     {:error, :not_in_lobby} = Lobby.kickban(id, user.id, user.id)
-    assert [%{event_type: "lobby_open"}] = logs(id, 1)
+    assert [%{event_type: "lobby_open"}] = logs(id)
   end
 end

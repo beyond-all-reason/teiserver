@@ -15,8 +15,6 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.TachyonLobby.Registry
   alias Teiserver.TachyonLobby.Types, as: LT
 
-  require Logger
-
   @type id :: LT.Types.id()
   @type overview :: LT.ListOverview.t()
   @type team :: LT.Types.team()
@@ -207,20 +205,5 @@ defmodule Teiserver.TachyonLobby do
     %LobbyLog{}
     |> LobbyLog.changeset(attrs)
     |> Repo.insert()
-  end
-
-  @spec create_lobby_log_async(map()) :: :ok
-  def create_lobby_log_async(attrs) do
-    Task.Supervisor.start_child(Teiserver.TaskSupervisor, fn ->
-      case create_lobby_log(attrs) do
-        {:ok, _lobby_log} ->
-          :ok
-
-        {:error, reason} ->
-          Logger.error("Error while creating lobby log #{inspect(attrs)}: #{inspect(reason)}")
-      end
-    end)
-
-    :ok
   end
 end
