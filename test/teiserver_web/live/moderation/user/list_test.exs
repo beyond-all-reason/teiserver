@@ -127,7 +127,7 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
         |> render()
         |> table_to_map()
 
-      assert Enum.count(table.rows) == 0
+      assert Enum.empty?(table.rows)
 
       # Remove that filter
       live
