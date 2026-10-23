@@ -326,7 +326,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       end
 
     extra_commands =
-      if first_user == nil do
+      if is_nil(first_user) do
         []
       else
         [
@@ -337,7 +337,6 @@ defmodule TeiserverWeb.ModerationLive.User.List do
             path: ~p"/moderation/users/#{first_user.id}"
           }
         ]
-        |> Enum.reject(&is_nil/1)
       end
 
     socket
