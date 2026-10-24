@@ -424,6 +424,8 @@ defmodule Teiserver.Party.Server do
             :erlang.monotonic_time(:micro_seconds)
           )
 
+        Messaging.persist_party_message(msg)
+
         for id <- Map.keys(data.members), id != from_id do
           Messaging.send(msg, {:player, id})
         end

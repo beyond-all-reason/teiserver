@@ -1,14 +1,14 @@
-defmodule Teiserver.Chat.DirectMessageLib do
+defmodule Teiserver.Chat.SpringDirectMessageLib do
   @moduledoc false
 
-  alias Teiserver.Chat.DirectMessage
+  alias Teiserver.Chat.SpringDirectMessage
   alias Teiserver.Chat.TermSearch
   use TeiserverWeb, :library
 
   # Queries
-  @spec query_direct_messages() :: Ecto.Query.t()
-  def query_direct_messages do
-    from(direct_messages in DirectMessage)
+  @spec query_spring_direct_messages() :: Ecto.Query.t()
+  def query_spring_direct_messages do
+    from(spring_direct_messages in SpringDirectMessage)
   end
 
   @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
@@ -26,32 +26,33 @@ defmodule Teiserver.Chat.DirectMessageLib do
   def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
-    from direct_messages in query,
-      where: direct_messages.id == ^id
+    from spring_direct_messages in query,
+      where: spring_direct_messages.id == ^id
   end
 
   def _search(query, :member_id_in, []), do: query
 
   def _search(query, :member_id_in, [id]) do
-    from direct_messages in query,
-      where: direct_messages.from_id == ^id or direct_messages.to_id == ^id
+    from spring_direct_messages in query,
+      where: spring_direct_messages.from_id == ^id or spring_direct_messages.to_id == ^id
   end
 
   def _search(query, :member_id_in, [id1, id2]) do
-    from direct_messages in query,
+    from spring_direct_messages in query,
       where:
-        (direct_messages.from_id == ^id1 and direct_messages.to_id == ^id2) or
-          (direct_messages.from_id == ^id2 and direct_messages.to_id == ^id1)
+        (spring_direct_messages.from_id == ^id1 and spring_direct_messages.to_id == ^id2) or
+          (spring_direct_messages.from_id == ^id2 and spring_direct_messages.to_id == ^id1)
   end
 
   def _search(query, :member_id_in, id_list) do
-    from direct_messages in query,
-      where: direct_messages.from_id in ^id_list and direct_messages.to_id in ^id_list
+    from spring_direct_messages in query,
+      where:
+        spring_direct_messages.from_id in ^id_list and spring_direct_messages.to_id in ^id_list
   end
 
   def _search(query, :id_list, id_list) do
-    from direct_messages in query,
-      where: direct_messages.id in ^id_list
+    from spring_direct_messages in query,
+      where: spring_direct_messages.id in ^id_list
   end
 
   def _search(query, :term, ref) when is_binary(ref) do
@@ -63,26 +64,26 @@ defmodule Teiserver.Chat.DirectMessageLib do
   end
 
   def _search(query, :inserted_after, timestamp) do
-    from direct_messages in query,
-      where: direct_messages.inserted_at >= ^timestamp
+    from spring_direct_messages in query,
+      where: spring_direct_messages.inserted_at >= ^timestamp
   end
 
   def _search(query, :inserted_before, timestamp) do
-    from direct_messages in query,
-      where: direct_messages.inserted_at < ^timestamp
+    from spring_direct_messages in query,
+      where: spring_direct_messages.inserted_at < ^timestamp
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
   def order_by(query, "Newest first") do
-    from direct_messages in query,
-      order_by: [desc: direct_messages.inserted_at, desc: direct_messages.id]
+    from spring_direct_messages in query,
+      order_by: [desc: spring_direct_messages.inserted_at, desc: spring_direct_messages.id]
   end
 
   def order_by(query, "Oldest first") do
-    from direct_messages in query,
-      order_by: [asc: direct_messages.inserted_at, asc: direct_messages.id]
+    from spring_direct_messages in query,
+      order_by: [asc: spring_direct_messages.inserted_at, asc: spring_direct_messages.id]
   end
 
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
@@ -96,9 +97,9 @@ defmodule Teiserver.Chat.DirectMessageLib do
   end
 
   defp _preload(query, :users) do
-    from direct_messages in query,
-      left_join: tos in assoc(direct_messages, :to),
-      left_join: froms in assoc(direct_messages, :from),
+    from spring_direct_messages in query,
+      left_join: tos in assoc(spring_direct_messages, :to),
+      left_join: froms in assoc(spring_direct_messages, :from),
       preload: [to: tos, from: froms]
   end
 end

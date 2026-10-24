@@ -1,8 +1,8 @@
-defmodule Teiserver.Chat.RoomMessage do
+defmodule Teiserver.Chat.SpringRoomMessage do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  typed_schema "teiserver_room_messages" do
+  typed_schema "spring_room_messages" do
     field :content, :string
     field :chat_room, :string
     field :inserted_at, :utc_datetime
@@ -23,5 +23,5 @@ defmodule Teiserver.Chat.RoomMessage do
     |> validate_required([:content, :chat_room, :inserted_at, :user_id])
   end
 
-  defdelegate authorize(action, conn, params), to: Teiserver.Chat.LobbyMessage
+  defdelegate authorize(action, conn, params), to: Teiserver.Chat.SpringLobbyMessage
 end

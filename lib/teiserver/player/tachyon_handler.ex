@@ -416,7 +416,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case message_target_from_tachyon(msg["data"]["target"]) do
       {:ok, target} ->
         case target do
-          {:player, _user_id} ->
+          {:player, user_id} ->
             msg =
               Messaging.new(
                 msg["data"]["message"],
@@ -425,8 +425,12 @@ defmodule Teiserver.Player.TachyonHandler do
               )
 
             case Messaging.send(msg, target) do
-              :ok -> {:response, state}
-              {:error, :invalid_recipient} -> {:error_response, :invalid_target, state}
+              :ok ->
+                Messaging.persist_direct_message(msg, user_id)
+                {:response, state}
+
+              {:error, :invalid_recipient} ->
+                {:error_response, :invalid_target, state}
             end
 
           :party ->
