@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Algo
+  alias Teiserver.Matchmaking.Algo.Env
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
@@ -656,7 +657,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     {alg_module, alg_state} = state.queue.algo
 
-    apply(alg_module, :get_matches, [state.members, alg_state])
+    apply(alg_module, :get_matches, [state.members, alg_state, Env.default_env()])
   end
 
   defp demonitor_players(player_ids, monitors) do
