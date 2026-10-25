@@ -43,17 +43,18 @@ defmodule Teiserver.Support.SumStatem do
   def lookup(id), do: {__MODULE__, id} |> Registry.lookup()
   def add(id, count \\ 1), do: call_process(id, {:add, count})
   def get(id), do: call_process(id, :get)
+  def get_data(id), do: call_process(id, :get_data)
 
   @impl DistributedGenStatem
   def init(initial_count) do
-    {:ok, :running, initial_count}
+    {:ok, :running, %{count: initial_count, replication_count: 0}}
   end
 
   @impl DistributedGenStatem
-  def init_from_seed(_state, count) do
+  def init_from_seed(_state, data) do
     # this is completely arbitrary, but it allows an easy way to trigger
     # a failure in remote initialisation
-    if count < 0,
+    if data.count < 0,
       do: {:error, :nope},
       else: :ok
   end
@@ -65,12 +66,27 @@ defmodule Teiserver.Support.SumStatem do
   def name(id), do: Registry.via_tuple({__MODULE__, id})
 
   @impl DistributedGenStatem
-  def handle_event({:call, from}, {:add, n}, _state, count) do
-    {:keep_state, count + n, [{:reply, from, :ok}]}
+  def handle_event({:call, from}, {:add, n}, _state, data) do
+    {:replicate_state_and_data,
+     {:keep_state, %{data | count: data.count + n}, [{:reply, from, :ok}]}}
   end
 
-  def handle_event({:call, from}, :get, _state, count) do
-    {:keep_state_and_data, [{:reply, from, count}]}
+  def handle_event({:call, from}, :get, _state, data) do
+    {:keep_state_and_data, [{:reply, from, data.count}]}
+  end
+
+  def handle_event({:call, from}, :get_data, _state, data) do
+    {:keep_state_and_data, [{:reply, from, data}]}
+  end
+
+  @impl DistributedGenStatem
+  def handle_replicate_state_and_data(from, peer_state, peer_data, state, _data) do
+    new_data = %{peer_data | replication_count: peer_data.replication_count + 1}
+    actions = [{:reply, from, :ok}]
+
+    if peer_state == state,
+      do: {:keep_state, new_data, actions},
+      else: {:next_state, peer_state, new_data, actions}
   end
 
   defp call_process(id, msg) do

@@ -87,6 +87,22 @@ defmodule Teiserver.Cluster.DistributedGenStatemTest do
     end
   end
 
+  describe "replication" do
+    test "can replicate whole state and data" do
+      %{node: node, server_pid: server_pid} = start_node(:peer1)
+      id = id_for_node(node)
+      {:ok, pid} = SumStatem.start(id, 42)
+      :ok = SumStatem.add(id, 2)
+      ref = Process.monitor(pid)
+
+      :ok = :peer.stop(server_pid)
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
+
+      44 = SumStatem.get(id)
+      assert SumStatem.get_data(id).replication_count == 1
+    end
+  end
+
   defp id_for_node(node) do
     Stream.from_index()
     |> Stream.map(fn i -> "sumid-#{i}" end)
