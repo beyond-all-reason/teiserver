@@ -60,6 +60,33 @@ defmodule Teiserver.Cluster.DistributedGenStatemTest do
     43 = SumStatem.get(id)
   end
 
+  describe "init callback from seed" do
+    test "works" do
+      node_name = :peer1
+      # this maps to :peer1 once started
+      id = "sumid-0"
+      {:ok, pid} = SumStatem.start(id, 42)
+      ref = Process.monitor(pid)
+
+      %{node: node} = start_node(node_name)
+      42 = SumStatem.get(id)
+      refute_receive({:DOWN, ^ref, :process, _pid, _reason})
+      assert is_pid(:erpc.call(node, SumStatem, :lookup, [id], 100))
+    end
+
+    test "kill all process when fails" do
+      node_name = :peer1
+      # this maps to :peer1 once started
+      id = "sumid-0"
+      {:ok, pid} = SumStatem.start(id, -5)
+      ref = Process.monitor(pid)
+
+      %{} = start_node(node_name)
+      {:error, :invalid_sum} = SumStatem.get(id)
+      assert_receive({:DOWN, ^ref, :process, _pid, _reason})
+    end
+  end
+
   defp id_for_node(node) do
     Stream.from_index()
     |> Stream.map(fn i -> "sumid-#{i}" end)

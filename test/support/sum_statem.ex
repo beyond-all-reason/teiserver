@@ -50,6 +50,15 @@ defmodule Teiserver.Support.SumStatem do
   end
 
   @impl DistributedGenStatem
+  def init_from_seed(_state, count) do
+    # this is completely arbitrary, but it allows an easy way to trigger
+    # a failure in remote initialisation
+    if count < 0,
+      do: {:error, :nope},
+      else: :ok
+  end
+
+  @impl DistributedGenStatem
   def supervisor, do: SumTestSupervisor
 
   @impl DistributedGenStatem

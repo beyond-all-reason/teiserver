@@ -33,6 +33,14 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
               :gen_statem.init_result(state_type :: term(), data :: term())
 
   @doc """
+  An optional callback to give the wrapped module a chance to run
+  some logic when it starts from state and data coming from an existing
+  process living on another node.
+  This can happens when a new node is added to the cluster
+  """
+  @callback init_from_seed(state :: term(), data :: term()) :: :ok | {:error, reason :: term()}
+
+  @doc """
   Optional callback to customize the routing key used with rendez vous hashing
   to determine which node is the primary, and which nodes are the replica.
   defaults to {wrapped_module, id}
@@ -49,7 +57,7 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
               data :: term()
             ) :: :gen_statem.event_handler_result(term())
 
-  @optional_callbacks [routing_key: 1]
+  @optional_callbacks [init_from_seed: 2, routing_key: 1]
 
   @doc """
   the internal data used by the wrapper module
@@ -127,32 +135,26 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
     # instead get the primary and all the replica + 1 (ordered by the hash)
     nodes = Cluster.get_nodes() |> Enum.reject(&(&1 == Node.self()))
 
-    args = [mod.name(id), :seed_process, :timer.seconds(5)]
+    case nodes do
+      [] ->
+        {:error, {:seed_error, :no_node}}
 
-    # TODO: make this multicall into an async operation, so that it cannot
-    # deadlock when this process receives a :gen_statem.call while waiting
-    # for a response to its :seed_process call itself
-    {state, %__MODULE__{} = data} =
-      :erpc.multicall(nodes, :gen_statem, :call, args, :timer.seconds(5))
-      |> Enum.reduce(nil, fn {:ok, {state, data}}, final_result ->
-        case final_result do
-          nil ->
-            {state, data}
-
-          {_state, final_data} ->
-            if final_data.version >= data.version do
-              final_result
-            else
-              {state, data}
-            end
-        end
-      end)
-
-    {:ok, state, data}
+      nodes ->
+        args = [mod.name(id), :seed_process, :timer.seconds(5)]
+        init_on_nodes(nodes, mod, args)
+    end
   end
 
-  def init({_mod, _id, {:init_replica, state, data}}) do
-    {:ok, state, data}
+  def init({mod, _id, {:init_replica, state, data}}) do
+    result =
+      if function_exported?(mod, :init_from_seed, 2),
+        do: mod.init_from_seed(state, data.module_data),
+        else: :ok
+
+    case result do
+      :ok -> {:ok, state, data}
+      {:error, reason} -> {:error, {:seed_error, reason}}
+    end
   end
 
   def init({mod, id, init_args}) do
@@ -192,8 +194,33 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
     end
   end
 
-  @impl :gen_statem
+  defp init_on_nodes(nodes, mod, args) do
+    # TODO: make this multicall into an async operation, so that it cannot
+    # deadlock when this process receives a :gen_statem.call while waiting
+    # for a response to its :seed_process call itself
+    {state, %__MODULE__{} = data} =
+      :erpc.multicall(nodes, :gen_statem, :call, args, :timer.seconds(5))
+      |> Enum.reduce(nil, fn {:ok, {state, data}}, final_result ->
+        case final_result do
+          nil ->
+            {state, data}
 
+          {_state, final_data} ->
+            if final_data.version >= data.version do
+              final_result
+            else
+              {state, data}
+            end
+        end
+      end)
+
+    case mod.init_from_seed(state, data.module_data) do
+      :ok -> {:ok, state, data}
+      {:error, reason} -> {:error, {:seed_error, reason}}
+    end
+  end
+
+  @impl :gen_statem
   def handle_event({:call, from}, :seed_process, state, data) do
     {:keep_state_and_data, [{:reply, from, {state, data}}]}
   end
@@ -245,8 +272,20 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
 
         _more_nodes ->
           # TODO: handle the case where this fails
-          {:ok, pid} = mod.start(id, :create_replica)
-          :gen_statem.call(pid, request, timeout)
+          case mod.start(id, :create_replica) do
+            {:ok, pid} ->
+              :gen_statem.call(pid, request, timeout)
+
+            {:error, {:already_started, pid}} ->
+              :gen_statem.call(pid, request, timeout)
+
+            {:error, {:seed_error, reason}} ->
+              kill_all(mod, id)
+              exit({:noproc, {:seed_error, reason}})
+
+            err ->
+              err
+          end
       end
   end
 
@@ -264,4 +303,33 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
         :ok
     end
   end
+
+  defp kill_all(mod, id) do
+    # send the request to kill on *all* nodes. We are likely to replicate on all
+    # nodes anyway. Otherwise, we can restrict to primary + replicas + 1
+    # though this call should rarely happen, so it's likely to be irrelevant
+    Cluster.get_nodes()
+    |> :erpc.multicall(__MODULE__, :kill_process, [mod, id], :timer.seconds(5))
+  end
+
+  def kill_process(mod, id) do
+    case whereis(mod.name(id)) do
+      pid when is_pid(pid) ->
+        Process.exit(pid, :kill)
+
+      nil ->
+        nil
+    end
+  end
+
+  defp whereis(name) when is_atom(name), do: Process.whereis(name)
+
+  defp whereis({:via, reg, {reg_name, key}}) do
+    case reg.lookup(reg_name, key) do
+      [{pid, _val}] -> pid
+      _other -> nil
+    end
+  end
+
+  defp whereis(name), do: raise("unsupported name: #{inspect(name)}")
 end
