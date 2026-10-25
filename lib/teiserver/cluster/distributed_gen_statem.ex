@@ -54,13 +54,15 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   @doc """
   the internal data used by the wrapper module
   """
-  @enforce_keys [:mod, :id, :module_data]
+  @enforce_keys [:mod, :id, :version, :module_data]
   defstruct [
     # the wrapped gen_statem
     :mod,
     # unique ID for the wrapped module. Also used to derive a name
     # (typically a via tuple)
     :id,
+    # versionning of the underlying module data
+    :version,
     # the wrapped data
     :module_data
   ]
@@ -119,23 +121,65 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   def callback_mode, do: :handle_event_function
 
   @impl :gen_statem
+  def init({mod, id, :create_replica}) do
+    # this is fine since we are replicating on all nodes. If we ever
+    # create replica on only a subset of nodes, this will need to change to
+    # instead get the primary and all the replica + 1 (ordered by the hash)
+    nodes = Cluster.get_nodes() |> Enum.reject(&(&1 == Node.self()))
+
+    args = [mod.name(id), :seed_process, :timer.seconds(5)]
+
+    # TODO: make this multicall into an async operation, so that it cannot
+    # deadlock when this process receives a :gen_statem.call while waiting
+    # for a response to its :seed_process call itself
+    {state, %__MODULE__{} = data} =
+      :erpc.multicall(nodes, :gen_statem, :call, args, :timer.seconds(5))
+      |> Enum.reduce(nil, fn {:ok, {state, data}}, final_result ->
+        case final_result do
+          nil ->
+            {state, data}
+
+          {_state, final_data} ->
+            if final_data.version >= data.version do
+              final_result
+            else
+              {state, data}
+            end
+        end
+      end)
+
+    {:ok, state, data}
+  end
+
+  def init({_mod, _id, {:init_replica, state, data}}) do
+    {:ok, state, data}
+  end
+
   def init({mod, id, init_args}) do
     case mod.init(init_args) do
       {:ok, state, data} ->
-        {:ok, state,
-         %__MODULE__{
-           mod: mod,
-           id: id,
-           module_data: data
-         }}
+        data = %__MODULE__{
+          mod: mod,
+          id: id,
+          version: 0,
+          module_data: data
+        }
+
+        create_replicas(state, data)
+
+        {:ok, state, data}
 
       {:ok, state, data, actions} ->
-        {:ok, state,
-         %__MODULE__{
-           mod: mod,
-           id: id,
-           module_data: data
-         }, actions}
+        data = %__MODULE__{
+          mod: mod,
+          id: id,
+          version: 0,
+          module_data: data
+        }
+
+        create_replicas(state, data)
+
+        {:ok, state, data, actions}
 
       :ignore ->
         :ignore
@@ -149,22 +193,27 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   end
 
   @impl :gen_statem
+
+  def handle_event({:call, from}, :seed_process, state, data) do
+    {:keep_state_and_data, [{:reply, from, {state, data}}]}
+  end
+
   def handle_event(event_type, event_data, state, %__MODULE__{} = data) do
     case data.mod.handle_event(event_type, event_data, state, data.module_data) do
       {:next_state, new_state, new_data} ->
-        wrapped_data = %{data | module_data: new_data}
+        wrapped_data = %{data | version: data.version + 1, module_data: new_data}
         {:next_state, new_state, wrapped_data}
 
       {:next_state, new_state, new_data, actions} ->
-        wrapped_data = %{data | module_data: new_data}
+        wrapped_data = %{data | version: data.version + 1, module_data: new_data}
         {:next_state, new_state, wrapped_data, actions}
 
       {typ, new_data} when typ in [:keep_state, :repeat_state] ->
-        wrapped_data = %{data | module_data: new_data}
+        wrapped_data = %{data | version: data.version + 1, module_data: new_data}
         {:keep_state, wrapped_data}
 
       {typ, new_data, actions} when typ in [:keep_state, :repeat_state] ->
-        wrapped_data = %{data | module_data: new_data}
+        wrapped_data = %{data | version: data.version + 1, module_data: new_data}
         {:keep_state, wrapped_data, actions}
 
       # the other possible actions are :repeat_state_and data, which doesn't
@@ -188,5 +237,31 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
   def call({mod, id}, request, timeout \\ :timer.seconds(5)) do
     mfa = {:gen_statem, :call, [mod.name(id), request, timeout]}
     mod.routing_key(id) |> Cluster.primary_apply(mfa)
+  catch
+    :exit, {:exception, {:noproc, reason}} ->
+      case Cluster.get_nodes() do
+        [_node] ->
+          exit({:noproc, reason})
+
+        _more_nodes ->
+          # TODO: handle the case where this fails
+          {:ok, pid} = mod.start(id, :create_replica)
+          :gen_statem.call(pid, request, timeout)
+      end
+  end
+
+  defp create_replicas(state, %__MODULE__{} = data) do
+    {_primary, replicas} = data.mod.routing_key(data.id) |> Cluster.split_nodes()
+
+    case replicas do
+      [] ->
+        :ok
+
+      replicas ->
+        sup = data.mod.supervisor()
+        args = [sup, {data.mod, {data.id, {:init_replica, state, data}}}]
+        :erpc.multicall(replicas, DynamicSupervisor, :start_child, args)
+        :ok
+    end
   end
 end

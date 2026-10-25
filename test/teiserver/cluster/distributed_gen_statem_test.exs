@@ -7,12 +7,19 @@ defmodule Teiserver.Cluster.DistributedGenStatemTest do
   use Teiserver.DataCase
 
   setup_all {ClusterHelpers, :setup_distribution}
+  setup [:sumstatem_setup, :ensure_single_node]
+
+  def sumstatem_setup(_ctx) do
+    SumStatem.setup()
+    :ok
+  end
 
   describe "single node" do
-    setup [:ensure_single_node]
+    test "no process" do
+      {:error, :invalid_sum} = SumStatem.get(:nothing)
+    end
 
     test "basic wrapper test" do
-      SumStatem.setup()
       [_self] = Cluster.get_nodes()
       {:ok, _pid} = SumStatem.start(:sumid, 42)
 
@@ -23,15 +30,34 @@ defmodule Teiserver.Cluster.DistributedGenStatemTest do
     end
   end
 
-  test "starts process on the primary" do
-    %{node: node} = start_node(:peer1)
+  test "create all replica at creation" do
+    %{node: node, server_pid: server_pid} = start_node(:peer1)
     id = id_for_node(node)
-    SumStatem.setup()
-    SumStatem.start(id, 42)
+    {:ok, pid} = SumStatem.start(id, 42)
+
+    assert is_pid(SumStatem.lookup(id))
+    assert is_pid(:erpc.call(node, SumStatem, :lookup, [id]))
 
     42 = SumStatem.get(id)
-    refute is_pid(SumStatem.lookup(id))
-    assert is_pid(:erpc.call(node, SumStatem, :lookup, [id]))
+
+    ref = Process.monitor(pid)
+    :peer.stop(server_pid)
+    assert_receive {:DOWN, ^ref, :process, _pid, _reason}
+
+    # still works
+    42 = SumStatem.get(id)
+  end
+
+  test "setup primary on new node on call" do
+    node_name = :peer1
+    # this maps to :peer1 once started
+    id = "sumid-0"
+    SumStatem.start(id, 42)
+
+    %{} = start_node(node_name)
+    42 = SumStatem.get(id)
+    SumStatem.add(id, 1)
+    43 = SumStatem.get(id)
   end
 
   defp id_for_node(node) do

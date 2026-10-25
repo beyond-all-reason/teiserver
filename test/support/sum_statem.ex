@@ -66,5 +66,7 @@ defmodule Teiserver.Support.SumStatem do
 
   defp call_process(id, msg) do
     DistributedGenStatem.call({__MODULE__, id}, msg, 10)
+  catch
+    :exit, {:noproc, _details} -> {:error, :invalid_sum}
   end
 end
