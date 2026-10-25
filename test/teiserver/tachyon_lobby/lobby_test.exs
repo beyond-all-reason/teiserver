@@ -1338,6 +1338,20 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       assert data.bosses == %{"2" => %{}}
     end
 
+    test "cannot appoint boss when a vote is already in progress" do
+      %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
+      :ok = Lobby.unboss(id, @default_user_id, @default_user_id)
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.appoint_boss(id, @default_user_id, "2")
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      {:error, :vote_in_progress} = Lobby.appoint_boss(id, @default_user_id, "3")
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.current_vote.id == vote.id
+      assert details.current_vote.action == {:appoint_boss, "2"}
+    end
+
     test "leaving lobby unboss" do
       %{id: id} = setup_full_lobby([1, 1], boss_enabled?: true)
       :ok = Lobby.appoint_boss(id, @default_user_id, "2")
@@ -1943,6 +1957,20 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
       }
 
       assert_receive {:lobby, ^id, {:vote_ended, _vote_id, :cancelled}}
+    end
+
+    test "cannot kickban when a vote is already in progress" do
+      %{id: id} = setup_full_lobby([1, 1])
+      :ok = Lobby.join_queue(id, "2")
+      :ok = Lobby.update_properties(id, @default_user_id, %{map_name: "new map"})
+      assert_receive {:lobby, ^id, {:updated, %{current_vote: vote}}}
+
+      {:error, :vote_in_progress} = Lobby.kickban(id, @default_user_id, "3")
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.current_vote.id == vote.id
+      assert details.current_vote.action == {:change_map, "new map"}
+      assert is_map_key(details.spectators, "3")
     end
 
     test "expired ban allows rejoin lobby" do
