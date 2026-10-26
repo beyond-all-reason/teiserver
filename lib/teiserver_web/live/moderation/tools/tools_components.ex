@@ -49,6 +49,14 @@ defmodule TeiserverWeb.ModerationLive.ToolsComponents do
         </.section_menu_link>
 
         <.section_menu_link
+          icon="fa-chart-line"
+          url={~p"/moderation/tools/volume_chart"}
+          active={@active == "moderation_volume_chart"}
+        >
+          Volume chart
+        </.section_menu_link>
+
+        <.section_menu_link
           icon="fa-question"
           url={~p"/moderation/tools/gdpr_restore"}
           active={@active == "gdpr_restore"}
