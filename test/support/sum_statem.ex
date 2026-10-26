@@ -42,6 +42,7 @@ defmodule Teiserver.Support.SumStatem do
 
   def lookup(id), do: {__MODULE__, id} |> Registry.lookup()
   def add(id, count \\ 1), do: call_process(id, {:add, count})
+  def sub(id, count \\ 1), do: call_process(id, {:sub, count})
   def get(id), do: call_process(id, :get)
   def get_data(id), do: call_process(id, :get_data)
 
@@ -71,6 +72,11 @@ defmodule Teiserver.Support.SumStatem do
      {:keep_state, %{data | count: data.count + n}, [{:reply, from, :ok}]}}
   end
 
+  def handle_event({:call, from}, {:sub, n}, _state, data) do
+    resp = {:keep_state, %{data | count: data.count - n}, [{:reply, from, :ok}]}
+    {:replicate_events, [{:sub, n}], resp}
+  end
+
   def handle_event({:call, from}, :get, _state, data) do
     {:keep_state_and_data, [{:reply, from, data.count}]}
   end
@@ -87,6 +93,12 @@ defmodule Teiserver.Support.SumStatem do
     if peer_state == state,
       do: {:keep_state, new_data, actions},
       else: {:next_state, peer_state, new_data, actions}
+  end
+
+  @impl DistributedGenStatem
+  def handle_replicate_events(from, [{:sub, count}], _state, data) do
+    new_data = %{data | count: data.count - count}
+    {:keep_state, new_data, [{:reply, from, :ok}]}
   end
 
   defp call_process(id, msg) do
