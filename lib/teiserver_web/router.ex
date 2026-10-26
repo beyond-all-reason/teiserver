@@ -764,6 +764,7 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/tools/mfa_usage", Tools.MFAUsage, :show
       live "/tools/blog_activity", Tools.BlogActivity, :show
+      live "/tools/population", Tools.Population, :show
     end
 
     live_session :admin_discord_channels,
