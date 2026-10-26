@@ -83,14 +83,6 @@ being overridden according to the current environment: `config/{dev,test,prod}.e
 After compilation and just before the application starts `config/runtime.exs`
 also executes.
 
-### Diagnostic log access
-
-Admins can assign the **Technician** role in the user roles form under **Staff**.
-Technicians can list, view, search, and download uploaded infologs, but cannot
-delete them or access other telemetry tools. The role requires MFA when MFA is
-enforced for privileged roles. Admin and Server users also have access and can
-delete infologs.
-
 ## Running a release build locally
 
 It's useful to run the release build locally to best reproduce a "production"
