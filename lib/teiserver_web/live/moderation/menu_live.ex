@@ -35,7 +35,7 @@ defmodule TeiserverWeb.ModerationLive.Menu do
 
       <.menu_page_link
         :if={allow_any?(@current_user, ~w(Reviewer))}
-        icon={Teiserver.Chat.LobbyMessageLib.icon()}
+        icon={Teiserver.Chat.SpringLobbyMessageLib.icon()}
         url={~p"/admin/chat"}
       >
         Chat

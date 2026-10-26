@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Chat
-  alias Teiserver.Chat.RoomMessage
-  alias Teiserver.Chat.RoomMessageLib
+  alias Teiserver.Chat.SpringRoomMessage
+  alias Teiserver.Chat.SpringRoomMessageLib
   alias Teiserver.Room
   use TeiserverWeb, :live_view
 
@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
     socket =
       socket
       |> assign(:site_menu_active, "communication")
-      |> assign(:view_colour, RoomMessageLib.colours())
+      |> assign(:view_colour, SpringRoomMessageLib.colours())
       |> assign(:usernames, %{})
       |> assign(:last_poster_id, nil)
       |> assign(:message_changeset, nil)
@@ -190,8 +190,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Room do
   end
 
   defp new_message_changeset do
-    %RoomMessage{}
-    |> RoomMessage.changeset(%{
+    %SpringRoomMessage{}
+    |> SpringRoomMessage.changeset(%{
       "room" => "",
       "user_id" => 1,
       "inserted_at" => DateTime.utc_now(),

@@ -1,7 +1,7 @@
-defmodule Teiserver.Chat.LobbyMessageLib do
+defmodule Teiserver.Chat.SpringLobbyMessageLib do
   @moduledoc false
 
-  alias Teiserver.Chat.LobbyMessage
+  alias Teiserver.Chat.SpringLobbyMessage
   alias Teiserver.Chat.TermSearch
   use TeiserverWeb, :library
 
@@ -13,9 +13,9 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   def colours, do: :primary2
 
   # Queries
-  @spec query_lobby_messages() :: Ecto.Query.t()
-  def query_lobby_messages do
-    from(lobby_messages in LobbyMessage)
+  @spec query_spring_lobby_messages() :: Ecto.Query.t()
+  def query_spring_lobby_messages do
+    from(spring_lobby_messages in SpringLobbyMessage)
   end
 
   @spec search(Ecto.Query.t(), map() | nil) :: Ecto.Query.t()
@@ -33,40 +33,40 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   def _search(query, _key, nil), do: query
 
   def _search(query, :id, id) do
-    from lobby_messages in query,
-      where: lobby_messages.id == ^id
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.id == ^id
   end
 
   def _search(query, :user_id, user_id) do
-    from lobby_messages in query,
-      where: lobby_messages.user_id == ^user_id
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.user_id == ^user_id
   end
 
   def _search(query, :user_id_in, []), do: query
 
   def _search(query, :user_id_in, id_list) do
-    from lobby_messages in query,
-      where: lobby_messages.user_id in ^id_list
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.user_id in ^id_list
   end
 
   def _search(query, :user_id_not_in, id_list) do
-    from lobby_messages in query,
-      where: lobby_messages.user_id not in ^id_list
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.user_id not in ^id_list
   end
 
   def _search(query, :match_id, match_id) do
-    from lobby_messages in query,
-      where: lobby_messages.match_id == ^match_id
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.match_id == ^match_id
   end
 
   def _search(query, :match_id_in, match_ids) do
-    from lobby_messages in query,
-      where: lobby_messages.match_id in ^match_ids
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.match_id in ^match_ids
   end
 
   def _search(query, :id_list, id_list) do
-    from lobby_messages in query,
-      where: lobby_messages.id in ^id_list
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.id in ^id_list
   end
 
   def _search(query, :term, ref) when is_binary(ref) do
@@ -78,36 +78,36 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   def _search(query, :inserted_after, timestamp) do
-    from lobby_messages in query,
-      where: lobby_messages.inserted_at >= ^timestamp
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.inserted_at >= ^timestamp
   end
 
   def _search(query, :inserted_before, timestamp) do
-    from lobby_messages in query,
-      where: lobby_messages.inserted_at < ^timestamp
+    from spring_lobby_messages in query,
+      where: spring_lobby_messages.inserted_at < ^timestamp
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
   def order_by(query, "Name (A-Z)") do
-    from lobby_messages in query,
-      order_by: [asc: lobby_messages.name]
+    from spring_lobby_messages in query,
+      order_by: [asc: spring_lobby_messages.name]
   end
 
   def order_by(query, "Name (Z-A)") do
-    from lobby_messages in query,
-      order_by: [desc: lobby_messages.name]
+    from spring_lobby_messages in query,
+      order_by: [desc: spring_lobby_messages.name]
   end
 
   def order_by(query, "Newest first") do
-    from lobby_messages in query,
-      order_by: [desc: lobby_messages.inserted_at, desc: lobby_messages.id]
+    from spring_lobby_messages in query,
+      order_by: [desc: spring_lobby_messages.inserted_at, desc: spring_lobby_messages.id]
   end
 
   def order_by(query, "Oldest first") do
-    from lobby_messages in query,
-      order_by: [asc: lobby_messages.inserted_at, asc: lobby_messages.id]
+    from spring_lobby_messages in query,
+      order_by: [asc: spring_lobby_messages.inserted_at, asc: spring_lobby_messages.id]
   end
 
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
@@ -119,8 +119,8 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   def _preload_users(query) do
-    from lobby_messages in query,
-      left_join: users in assoc(lobby_messages, :user),
+    from spring_lobby_messages in query,
+      left_join: users in assoc(spring_lobby_messages, :user),
       preload: [user: users]
   end
 end

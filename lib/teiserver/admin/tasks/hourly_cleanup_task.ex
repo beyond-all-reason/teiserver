@@ -17,26 +17,23 @@ defmodule Teiserver.Admin.HourlyCleanupTask do
   end
 
   defp chat_log_cleanup do
-    days = Application.get_env(:teiserver, Teiserver)[:retention][:room_chat]
+    chat_tables = [
+      {"spring_room_messages", :room_chat},
+      {"spring_lobby_messages", :lobby_chat},
+      {"spring_direct_messages", :direct_messages},
+      {"lobby_messages", :lobby_chat},
+      {"direct_messages", :direct_messages},
+      {"party_messages", :party_chat},
+      {"battle_messages", :battle_chat}
+    ]
 
-    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
+    for {table, retention_key} <- chat_tables do
+      before_timestamp =
+        DateTime.shift(DateTime.utc_now(),
+          day: -Application.get_env(:teiserver, Teiserver)[:retention][retention_key]
+        )
 
-    query = """
-          DELETE FROM teiserver_room_messages
-          WHERE inserted_at < $1
-    """
-
-    SQL.query!(Repo, query, [before_timestamp])
-
-    days = Application.get_env(:teiserver, Teiserver)[:retention][:lobby_chat]
-
-    before_timestamp = DateTime.shift(DateTime.utc_now(), day: -days)
-
-    query = """
-          DELETE FROM teiserver_lobby_messages
-          WHERE inserted_at < $1
-    """
-
-    SQL.query!(Repo, query, [before_timestamp])
+      SQL.query!(Repo, "DELETE FROM #{table} WHERE inserted_at < $1", [before_timestamp])
+    end
   end
 end

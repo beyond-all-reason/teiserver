@@ -2,10 +2,10 @@ defmodule Teiserver.Chat.DirectMessage do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  @primary_key {:id, Ecto.UUID, autogenerate: [version: 7, precision: :monotonic]}
   typed_schema "direct_messages" do
     field :content, :string
     field :inserted_at, :utc_datetime
-    field :delivered, :boolean, default: false
     belongs_to :from, Teiserver.Account.User
     belongs_to :to, Teiserver.Account.User
   end
@@ -20,10 +20,9 @@ defmodule Teiserver.Chat.DirectMessage do
       |> trim_strings([:content])
 
     struct
-    |> cast(params, ~w(content inserted_at from_id to_id delivered)a)
-    |> validate_required(~w(content inserted_at from_id to_id delivered)a)
+    |> cast(params, ~w(content inserted_at from_id to_id)a)
+    |> validate_required(~w(content inserted_at from_id to_id)a)
+    |> foreign_key_constraint(:from_id)
+    |> foreign_key_constraint(:to_id)
   end
-
-  @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(:index, conn, _params), do: allow?(conn, "Moderator")
 end

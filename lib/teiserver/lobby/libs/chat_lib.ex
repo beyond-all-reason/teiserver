@@ -273,7 +273,7 @@ defmodule Teiserver.Lobby.ChatLib do
           _other_type -> content
         end
 
-      Chat.create_lobby_message(%{
+      Chat.create_spring_lobby_message(%{
         content: content,
         match_id: Battle.get_lobby_match_id(lobby_id),
         inserted_at: DateTime.utc_now(),
@@ -283,7 +283,7 @@ defmodule Teiserver.Lobby.ChatLib do
   end
 
   def persist_system_message(content, lobby_id) do
-    Chat.create_lobby_message(%{
+    Chat.create_spring_lobby_message(%{
       content: "system: #{content}",
       match_id: Battle.get_lobby_match_id(lobby_id),
       inserted_at: DateTime.utc_now(),

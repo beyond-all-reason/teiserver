@@ -1,5 +1,9 @@
 defmodule TeiserverWeb.Tachyon.MessagingTest do
   alias Teiserver.AssetFixtures
+  alias Teiserver.Chat.DirectMessageQueries
+  alias Teiserver.Chat.LobbyMessageQueries
+  alias Teiserver.Chat.PartyMessageQueries
+  alias Teiserver.Repo
   alias Teiserver.Support.Tachyon
   use TeiserverWeb.ConnCase, async: false
 
@@ -153,6 +157,19 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
                Tachyon.recv_message!(ctx.receiver_client)
     end
 
+    test "direct messages are persisted", ctx do
+      assert %{"status" => "success"} =
+               Tachyon.send_dm!(ctx.sender_client, "GL HF", ctx.receiver.id)
+
+      assert [msg] =
+               DirectMessageQueries.direct_messages()
+               |> DirectMessageQueries.where_from_id(ctx.sender.id)
+               |> DirectMessageQueries.where_to_id(ctx.receiver.id)
+               |> Repo.all()
+
+      assert msg.content == "GL HF"
+    end
+
     test "messaging in party", ctx do
       {:ok, invited} = Tachyon.setup_client()
       assert %{"status" => "success"} = Tachyon.subscribe_messaging!(ctx.receiver_client)
@@ -184,6 +201,14 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
              }
 
       assert {:error, :timeout} = Tachyon.recv_message(invited[:client])
+
+      assert [msg] =
+               PartyMessageQueries.party_messages()
+               |> PartyMessageQueries.where_user_id(ctx.sender.id)
+               |> PartyMessageQueries.where_party_id(party_id)
+               |> Repo.all()
+
+      assert msg.content == "hello party"
     end
 
     test "messaging in lobby must be in lobby", ctx do
@@ -222,6 +247,15 @@ defmodule TeiserverWeb.Tachyon.MessagingTest do
                "type" => "lobby",
                "userId" => to_string(ctx.sender.id)
              }
+
+      assert [msg] =
+               LobbyMessageQueries.lobby_messages()
+               |> LobbyMessageQueries.where_lobby_id(lobby_id)
+               |> LobbyMessageQueries.where_user_id(ctx.sender.id)
+               |> Repo.all()
+
+      assert msg.content == "hello lobby"
+      assert msg.match_id == nil
     end
   end
 end

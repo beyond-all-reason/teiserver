@@ -60,7 +60,7 @@ defmodule Teiserver.Chat.TermSearchTest do
   end
 
   defp contents(search) do
-    Chat.list_lobby_messages(search: search, limit: 100)
+    Chat.list_spring_lobby_messages(search: search, limit: 100)
     |> Enum.map(& &1.content)
     |> Enum.sort()
   end
