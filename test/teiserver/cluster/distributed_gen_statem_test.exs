@@ -101,6 +101,20 @@ defmodule Teiserver.Cluster.DistributedGenStatemTest do
       44 = SumStatem.get(id)
       assert SumStatem.get_data(id).replication_count == 1
     end
+
+    test "can replicate events" do
+      %{node: node, server_pid: server_pid} = start_node(:peer1)
+      id = id_for_node(node)
+      {:ok, pid} = SumStatem.start(id, 42)
+      :ok = SumStatem.sub(id, 2)
+      ref = Process.monitor(pid)
+
+      :ok = :peer.stop(server_pid)
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
+
+      40 = SumStatem.get(id)
+      assert SumStatem.get_data(id).replication_count == 0
+    end
   end
 
   defp id_for_node(node) do

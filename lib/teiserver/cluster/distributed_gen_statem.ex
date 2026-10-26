@@ -61,6 +61,7 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
             ) ::
               :gen_statem.event_handler_result(term())
               | {:replicate_state_and_data, :gen_statem.event_handler_result(term())}
+              | {:replicate_events, events :: [term()], :gen_statem.event_handler_result(term())}
 
   @doc """
   optional callback for the wrapped module to do arbitrary things when asked
@@ -87,7 +88,30 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
             ) ::
               :gen_statem.event_handler_result(term())
 
-  @optional_callbacks [init_from_seed: 2, routing_key: 1, handle_replicate_state_and_data: 5]
+  @doc """
+  In some cases, transmitting the entire state across replica can be
+  costly, and replica may need much more effort to figure out what to do
+  by diffing the received data against their own.
+  When the wrapped process uses an event sourcing approach to manage its
+  own state, then it is very useful to only replicate the events.
+
+  This optional callback is there for such a use case. It is only invoked
+  on replicas when the primary returned something with the shape
+  {:replicate_events, events, gen_statem_response}
+  """
+  @callback handle_replicate_events(
+              from :: :gen_statem.from(),
+              events :: [term()],
+              state :: term(),
+              data :: term()
+            ) :: :gen_statem.event_handler_result(term())
+
+  @optional_callbacks [
+    init_from_seed: 2,
+    routing_key: 1,
+    handle_replicate_state_and_data: 5,
+    handle_replicate_events: 4
+  ]
 
   @doc """
   the internal data used by the wrapper module
@@ -300,6 +324,40 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
     end
   end
 
+  def handle_event(
+        {:call, from},
+        {:replicate_events, events},
+        state,
+        data
+      ) do
+    if not function_exported?(data.mod, :handle_replicate_events, 4) do
+      raise "wrapped module #{inspect(data.mod)} doesn't provide a handle_replicate_events/4 function"
+    end
+
+    response = data.mod.handle_replicate_events(from, events, state, data.module_data)
+
+    case response do
+      {:next_state, new_state, new_data} ->
+        wrapped_data = %{data | module_data: new_data}
+        {:next_state, new_state, wrapped_data}
+
+      {:next_state, new_state, new_data, actions} ->
+        wrapped_data = %{data | module_data: new_data}
+        {:next_state, new_state, wrapped_data, actions}
+
+      {typ, new_data} when typ in [:keep_state, :repeat_state] ->
+        wrapped_data = %{data | module_data: new_data}
+        {:keep_state, wrapped_data}
+
+      {typ, new_data, actions} when typ in [:keep_state, :repeat_state] ->
+        wrapped_data = %{data | module_data: new_data}
+        {:keep_state, wrapped_data, actions}
+
+      other ->
+        other
+    end
+  end
+
   def handle_event(event_type, event_data, state, %__MODULE__{} = data) do
     case data.mod.handle_event(event_type, event_data, state, data.module_data) do
       {:replicate_state_and_data, response} ->
@@ -315,6 +373,19 @@ defmodule Teiserver.Cluster.DistributedGenStatem do
             args = [data.mod.name(data.id), {:replicate_state_and_data, state, data}]
             :erpc.multicall(nodes, :gen_statem, :call, args, :timer.seconds(5))
             final_response
+        end
+
+      {:replicate_events, events, response} ->
+        other_nodes = Cluster.get_nodes() |> Enum.reject(&(&1 == Node.self()))
+
+        case other_nodes do
+          [] ->
+            handle_gen_statem_response(response, state, data)
+
+          nodes ->
+            args = [data.mod.name(data.id), {:replicate_events, events}]
+            :erpc.multicall(nodes, :gen_statem, :call, args, :timer.seconds(5))
+            response
         end
 
       gen_statem_resp ->
