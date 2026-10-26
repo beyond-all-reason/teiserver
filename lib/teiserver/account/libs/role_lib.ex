@@ -155,10 +155,10 @@ defmodule Teiserver.Account.RoleLib do
       icon: "fa-solid fa-gear",
       contains: [
         "Admin",
-        "Technician",
         "Senior moderator",
         "Moderator",
         "Reviewer",
+        "Technician",
         "Contributor",
         "Overwatch",
         "BAR+",
@@ -175,10 +175,10 @@ defmodule Teiserver.Account.RoleLib do
       colour: "#204A88",
       icon: "fa-solid fa-user-tie",
       contains: [
-        "Technician",
         "Senior moderator",
         "Moderator",
         "Reviewer",
+        "Technician",
         "Contributor",
         "Overwatch",
         "BAR+",

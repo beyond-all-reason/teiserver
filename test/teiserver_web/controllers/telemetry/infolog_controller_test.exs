@@ -60,7 +60,9 @@ defmodule TeiserverWeb.Telemetry.InfologControllerTest do
     infolog: infolog
   } do
     {:ok, _view, home} = live(conn, ~p"/")
-    assert home =~ ~p"/telemetry/infolog"
+    home = Floki.parse_document!(home)
+    assert Floki.find(home, ~s(a[href="/telemetry"])) != []
+    assert Floki.find(home, ~s(a[href="/telemetry/infolog"])) == []
 
     telemetry_home = get(conn, ~p"/telemetry") |> html_response(200)
     assert telemetry_home =~ ~p"/telemetry/infolog"

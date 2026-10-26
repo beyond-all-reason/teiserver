@@ -1,9 +1,11 @@
 <% bsname = view_colour() %>
+
 <TeiserverWeb.Telemetry.TelemetryComponents.sub_menu
   active="infologs"
   view_colour={view_colour()}
   current_user={@current_user}
 />
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -15,7 +17,9 @@
             show_search: false,
             active: "show"
           })
-        )} <hr />
+        )}
+        <hr />
+
         <div class="float-end">
           <a href={~p"/telemetry/infolog/download/#{@infolog.id}"} class="btn btn-secondary">
             <i class="fa-fw fa-solid fa-download"></i> Download
@@ -46,7 +50,8 @@
             metadata_line_count =
               encoded_metadata
               |> String.split("\n")
-              |> Enum.count() %> <textarea
+              |> Enum.count() %>
+            <textarea
               rows={metadata_line_count + 1}
               class="form-control"
               style="font-family: monospace;"

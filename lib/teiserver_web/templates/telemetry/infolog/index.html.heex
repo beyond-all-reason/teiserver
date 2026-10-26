@@ -1,4 +1,5 @@
 <% bsname = view_colour() %>
+
 <script type="text/javascript" charset="utf-8">
   $(function() {
     <%= if @conn.params["search"] != nil do %>
@@ -17,6 +18,7 @@
   view_colour={view_colour()}
   current_user={@current_user}
 />
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -34,6 +36,7 @@
               end
           })
         )}
+
         <%= if @conn.params["search"] != nil do %>
           {render(TeiserverWeb.Telemetry.InfologView, "search.html", assigns)}
         <% else %>
@@ -47,25 +50,18 @@
             <thead>
               <tr>
                 <th colspan="2">User</th>
-
                 <th>Type</th>
-
                 <th>Engine</th>
-
                 <th>Game</th>
-
                 <th>Size</th>
-
                 <th>Timestamp</th>
 
                 <th colspan="2">&nbsp;</th>
-
                 <%= if allow?(@conn, "Admin") do %>
                   <th>&nbsp;</th>
                 <% end %>
               </tr>
             </thead>
-
             <tbody>
               <%= for log <- @infologs do %>
                 <tr>
@@ -73,20 +69,15 @@
                     <td style={"background-color: #{log.user.colour}; color: #FFF;"} width="22">
                       <Fontawesome.icon icon={log.user.icon} style="regular" />
                     </td>
-
                     <td>{log.user.name}</td>
                   <% else %>
                     <td colspan="2">Anonymous</td>
                   <% end %>
 
                   <td>{log.log_type}</td>
-
                   <td>{log.metadata["engineversion"]}</td>
-
                   <td>{log.metadata["gameversion"]}</td>
-
                   <td>{log.size |> normalize()}</td>
-
                   <td>{date_to_str(log.timestamp, format: :ymd_hms)}</td>
 
                   <td>
@@ -94,7 +85,6 @@
                       Show
                     </a>
                   </td>
-
                   <td>
                     <a
                       href={~p"/telemetry/infolog/download/#{log.id}"}
@@ -103,7 +93,6 @@
                       <i class="fa-fw far fa-download"></i> Download
                     </a>
                   </td>
-
                   <%= if allow?(@conn, "Admin") do %>
                     <td>
                       {link("Delete",
