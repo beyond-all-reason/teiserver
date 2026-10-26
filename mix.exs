@@ -86,7 +86,7 @@ defmodule Teiserver.MixProject do
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:plug, "~> 1.20.3"},
-      {:bandit, "~> 1.12"},
+      {:bandit, "~> 1.14"},
 
       # Temporary deps while we transition away from views
       {:phoenix_view, "~> 2.0"},
