@@ -19,7 +19,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Coordinator.Parser
   alias Teiserver.Lobby
   alias Teiserver.Moderation
-  alias Teiserver.Moderation.ActionLib
   alias Teiserver.Room
   alias Teiserver.Telemetry
 
@@ -281,7 +280,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
                 ""
               end
 
-            " - #{ActionLib.format_reason_for_coordinator(action.reason)}#{expires}"
+            " - #{action.reason}#{expires}"
           end)
 
         if not Enum.empty?(reasons) do

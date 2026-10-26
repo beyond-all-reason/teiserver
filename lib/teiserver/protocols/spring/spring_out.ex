@@ -465,6 +465,7 @@ defmodule Teiserver.Protocols.SpringOut do
       from_name = Account.get_username_by_id(from_id)
 
       messages
+      |> Enum.flat_map(&String.split(&1, ~r/\R/u))
       |> Enum.map_join("", fn msg ->
         "SAIDPRIVATE #{from_name} #{msg}\n"
       end)

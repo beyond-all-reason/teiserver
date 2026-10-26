@@ -14,11 +14,6 @@ defmodule Teiserver.Moderation.ActionLib do
   @spec colour :: atom
   def colour, do: :primary
 
-  @spec format_reason_for_coordinator(String.t()) :: String.t()
-  def format_reason_for_coordinator(reason) do
-    String.replace(reason, ~r/\R+/u, " ")
-  end
-
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
   def action_icon("Report expired"), do: "fa-solid fa-clock"

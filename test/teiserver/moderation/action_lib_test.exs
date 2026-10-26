@@ -6,32 +6,6 @@ defmodule Teiserver.Moderation.ActionLibTest do
 
   use ExUnit.Case, async: true
 
-  describe "format_reason_for_coordinator/1" do
-    test "keeps multiline reasons in a single message line" do
-      for newline <- ["\n", "\r\n", "\r", "\u0085", "\u2028", "\u2029", "\n\n"] do
-        reason =
-          "CoC A1 - Respect is mandatory.#{newline}CoC B5 - Do not provide advice as a spectator."
-
-        assert ActionLib.format_reason_for_coordinator(reason) ==
-                 "CoC A1 - Respect is mandatory. CoC B5 - Do not provide advice as a spectator."
-      end
-    end
-
-    test "preserves non-ASCII characters while replacing newlines" do
-      reason = "Polish: \u0105\nCyrillic: \u0445"
-      result = ActionLib.format_reason_for_coordinator(reason)
-
-      assert result == "Polish: \u0105 Cyrillic: \u0445"
-      assert String.valid?(result)
-    end
-
-    test "leaves single-line reasons unchanged" do
-      for reason <- ["Please follow the rules", "Polish: \u0105, Cyrillic: \u0445", ""] do
-        assert ActionLib.format_reason_for_coordinator(reason) == reason
-      end
-    end
-  end
-
   describe "generate_discord_message_text/1" do
     test "warnings omit expiry information" do
       for expires <- [~N[2026-10-24 12:00:00], nil] do
