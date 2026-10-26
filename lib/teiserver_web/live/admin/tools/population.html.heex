@@ -1,0 +1,88 @@
+<ToolsComponents.section_menu
+  active="population"
+  scope={@scope}
+/>
+<.header>
+  Population
+</.header>
+
+<div class="heading-subtitle">{@user_count} users found</div>
+  
+<.simple_form
+  :if={@connected?}
+  for={@form}
+  id="user-search-form"
+  phx-change="update"
+  phx-submit="update" 
+  >
+
+    <div class="md:flex-row flex-col flex my-2">
+        <div class="flex-1 m-2">
+        <.input_tw
+            field={@form[:metric]} 
+            type="select" 
+            label="Metric:" 
+            options={@metric_options}
+            />
+        </div>
+
+    <div class="flex-2 m-2">
+      <.input_tw
+        field={@form[:last_login]}
+        type="select"
+        label="Last Login:"
+        options={@login_presets}
+        value={@form[:last_login].value}
+      />
+    </div>
+
+    <div class="flex-2 m-2">
+      <.input_tw
+        field={@form[:registered]}
+        type="select"
+        label="Registered:"
+        options={@register_presets}
+        value={@form[:registered].value}
+      />
+    </div>
+    <div class="flex-2 m-2">
+      <.input_tw
+        field={@form[:exclude_bots]}
+        type="checkbox"
+        label="Exclude bots"
+        value={@form[:exclude_bots].value}
+     
+
+        
+      />
+    </div>
+
+
+  </div>
+</.simple_form>
+<div :if={@connected? and @user_count == 0} class="alert alert-info mt-20" id="no-results-alert">
+  No users found
+</div>
+<div class="flex">
+
+  <div class="flex-1">
+    <.table
+      :if={@connected?}
+      id="users-table"
+      rows={@user_data}
+      table_class="table-sm table-zebra mt-4"
+    >
+      <:col :let={population} label={@form[:metric].value}>{maybe_mark_as_na(Map.get(population, :field))}</:col>
+      <:col :let={population} label={"Count"}>{Map.get(population, :count)}</:col>
+      <:col :let={population} label={"Percentage"}>{"#{Float.round((Map.get(population, :count) / @user_count) * 100)} %"}</:col>
+
+    
+
+ 
+
+    </.table>
+    <div class="flex-1">
+    </div>
+  </div>
+</div>
+<.back navigate={~p"/admin"}>Back to Admin</.back>
