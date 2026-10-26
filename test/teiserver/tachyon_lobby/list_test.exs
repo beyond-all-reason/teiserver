@@ -1,4 +1,5 @@
 defmodule Teiserver.TachyonLobby.ListTest do
+  alias Teiserver.AccountFixtures
   alias Teiserver.Support.Polling
   alias Teiserver.TachyonLobby, as: Lobby
   alias Teiserver.TachyonLobby.Types, as: LT
@@ -66,8 +67,9 @@ defmodule Teiserver.TachyonLobby.ListTest do
       id = details.id
       initial_list = Lobby.list()
 
-      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player("user2"))
-      {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
+      user2 = AccountFixtures.user_fixture()
+      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player(user2))
+      {:ok, _team_details} = Lobby.join_ally_team(details.id, user2.id, 1)
       final_list = Polling.poll_until(&Lobby.list/0, &(&1[id].player_count == 2))
       assert final_list[id].counter > initial_list[id].counter
     end
@@ -92,8 +94,9 @@ defmodule Teiserver.TachyonLobby.ListTest do
     test "lobby changes are broadcasted" do
       {:ok, _pid, details} = mk_start_params([1, 1]) |> Lobby.create()
       list = Lobby.subscribe_updates()
-      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player("user2"))
-      {:ok, _team_details} = Lobby.join_ally_team(details.id, "user2", 1)
+      user2 = AccountFixtures.user_fixture()
+      {:ok, _lobby_pid, _join_details} = Lobby.join(details.id, mk_player(user2))
+      {:ok, _team_details} = Lobby.join_ally_team(details.id, user2.id, 1)
 
       id = details.id
       assert_receive %{event: :update_lobby, changes: changes, counter: counter, lobby_id: ^id}
@@ -154,7 +157,7 @@ defmodule Teiserver.TachyonLobby.ListTest do
     end
   end
 
-  defp mk_player(user_id) do
-    %LT.PlayerJoinData{id: user_id, name: "name-#{user_id}"}
+  defp mk_player(user) do
+    %LT.PlayerJoinData{id: user.id, name: user.name}
   end
 end
