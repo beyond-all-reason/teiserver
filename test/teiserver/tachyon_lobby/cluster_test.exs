@@ -9,6 +9,12 @@ defmodule Teiserver.TachyonLobby.ClusterTest do
 
   @moduletag :tachyon
 
+  # Any test involving multiple node runs into the problem that the SQL sandbox
+  # doesn't span multiple node. So if a test user is created on a node and
+  # required by some code running on another node, then it's not going to
+  # work. I haven't found a solution for that yet
+  @moduletag :needs_attention
+
   setup_all {ClusterHelpers, :setup_distribution}
 
   test "create lobby on all connected nodes" do

@@ -728,6 +728,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
+        {:update_properties, user_id, _data},
+        _state,
+        %LT.Data{} = fsm_data
+      )
+      when not is_map_key(fsm_data.players, user_id) and
+             not is_map_key(fsm_data.spectators, user_id),
+      do: {:keep_state, fsm_data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event(
+        {:call, from},
         {:update_properties, _user_id, data},
         _state,
         %LT.Data{} = fsm_data
@@ -1517,7 +1527,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         :ok
 
       {:error, reason} ->
-        Logger.error("Error while creating lobby log #{inspect(attrs)}: #{inspect(reason)}")
+        Logger.error("Error while creating lobby log #{event_type} #{inspect(attrs)}: #{inspect(reason)}")
         {:error, reason}
     end
   end
