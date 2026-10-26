@@ -21,6 +21,7 @@ defmodule Teiserver.Account.AuthLib do
     [
       "Server",
       "Admin",
+      "Technician",
       "Senior moderator",
       "Moderator",
       "Reviewer",

@@ -19,15 +19,13 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Dashboard
       </.menu_page_link>
-
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Server Engine))}
+        :if={allow?(@current_user, "Technician")}
         icon={Teiserver.Telemetry.TelemetryLib.icon()}
         url={~p"/telemetry"}
       >
         Telemetry
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@current_user, ~w(Admin))}
         icon="fa-solid fa-users"
@@ -35,7 +33,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Matchmaking
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Server))}
         icon={Teiserver.Communication.DiscordChannelLib.icon()}
@@ -43,7 +40,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Discord channels
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.OAuth.ApplicationLib.icon()}
@@ -51,7 +47,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         OAuth applications
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.BotLib.icon()}
@@ -59,7 +54,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Bots
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.AssetLib.icon()}
@@ -67,7 +61,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Engine & game versions
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.Account.BadgeTypeLib.icon()}
@@ -75,7 +68,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Badge types
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Server))}
         icon={Teiserver.Account.CodeLib.icon()}
@@ -83,7 +75,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Codes
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.Config.SiteConfigLib.icon()}
@@ -101,7 +92,6 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         MFA Usage
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon="fa-envelope"
@@ -112,9 +102,7 @@ defmodule TeiserverWeb.AdminLive.Menu do
     </div>
 
     <div class="menu-grid">
-      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"}>
-        Back
-      </.menu_page_link>
+      <.menu_page_link icon={StylingHelper.icon(:back)} url={~p"/"}>Back</.menu_page_link>
     </div>
     """
   end

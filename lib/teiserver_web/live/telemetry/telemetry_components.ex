@@ -22,9 +22,8 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Telemetry home
       </.sub_menu_button>
-
       <.sub_menu_button
-        :if={allow?(@current_user, "Engine")}
+        :if={allow?(@current_user, "Technician")}
         bsname={@view_colour}
         icon={Teiserver.Telemetry.InfologLib.icon()}
         active={@active == "infologs"}
@@ -32,7 +31,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Infologs
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={allow?(@current_user, "Server")}
         bsname={@view_colour}
@@ -42,7 +40,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Properties
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_client_events")}
         bsname={@view_colour}
@@ -52,7 +49,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Simple client events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_client_events")}
         bsname={@view_colour}
@@ -62,7 +58,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Complex client events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_server_events")}
         bsname={@view_colour}
@@ -72,7 +67,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Simple server events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_server_events")}
         bsname={@view_colour}
@@ -82,7 +76,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Complex client events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_match_events")}
         bsname={@view_colour}
@@ -92,7 +85,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Simple match events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_match_events")}
         bsname={@view_colour}
@@ -102,7 +94,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Complex match events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_lobby_events")}
         bsname={@view_colour}
@@ -112,7 +103,6 @@ defmodule TeiserverWeb.Telemetry.TelemetryComponents do
       >
         Simple lobby events
       </.sub_menu_button>
-
       <.sub_menu_button
         :if={String.contains?(@active, "_lobby_events")}
         bsname={@view_colour}

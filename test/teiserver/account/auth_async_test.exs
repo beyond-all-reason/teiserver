@@ -1,4 +1,6 @@
 defmodule Teiserver.Account.AuthAsyncTest do
+  alias Teiserver.Account.RoleLib
+
   use Teiserver.DataCase, async: true
 
   import Teiserver.Account.AuthLib, only: [allow?: 2]
@@ -9,6 +11,7 @@ defmodule Teiserver.Account.AuthAsyncTest do
 
       assert allow?(user, "Server")
       assert allow?(user, "Admin")
+      assert allow?(user, "Technician")
       assert allow?(user, "Senior moderator")
       assert allow?(user, "Moderator")
       assert allow?(user, "Overwatch")
@@ -26,6 +29,7 @@ defmodule Teiserver.Account.AuthAsyncTest do
 
       refute allow?(user, "Server")
       assert allow?(user, "Admin")
+      assert allow?(user, "Technician")
       assert allow?(user, "Senior moderator")
       assert allow?(user, "Moderator")
       assert allow?(user, "Overwatch")
@@ -42,6 +46,7 @@ defmodule Teiserver.Account.AuthAsyncTest do
 
       refute allow?(user, "Server")
       refute allow?(user, "Admin")
+      refute allow?(user, "Technician")
       refute allow?(user, "Senior moderator")
       assert allow?(user, "Moderator")
       assert allow?(user, "Overwatch")
@@ -51,6 +56,24 @@ defmodule Teiserver.Account.AuthAsyncTest do
       assert allow?(user, "Trusted")
 
       refute allow?(user, "NotARole")
+    end
+
+    test "Technician Role" do
+      user = %{id: 123, roles: ["Technician"]}
+
+      assert allow?(user, "Technician")
+
+      for role <- ["Server", "Admin", "Moderator", "Contributor", "Engine"] do
+        refute allow?(user, role)
+      end
+    end
+
+    test "Technician is selectable in the staff group and managed by admins" do
+      role = RoleLib.role_data("Technician")
+
+      assert role in RoleLib.grouped_role_data()[:staff]
+      assert role.edit_permission == "Admin"
+      assert role.contains == []
     end
   end
 end

@@ -34,7 +34,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Admin
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow?(@scope, "Overwatch")}
         icon={Teiserver.Moderation.icon()}
@@ -42,7 +41,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Moderation
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow?(@scope, "Staff")}
         icon="fa-user-tie"
@@ -50,7 +48,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Staff
       </.menu_page_link>
-
       <.menu_page_link
         :if={allow?(@scope, "Admin")}
         icon={Teiserver.Logging.icon()}
@@ -58,7 +55,13 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Logging
       </.menu_page_link>
-
+      <.menu_page_link
+        :if={allow?(@scope, "Technician")}
+        icon={Teiserver.Telemetry.InfologLib.icon()}
+        url={~p"/telemetry/infolog"}
+      >
+        Infologs
+      </.menu_page_link>
       <.menu_page_link
         :if={allow?(@scope, "Contributor")}
         icon={StylingHelper.icon(:summary)}
@@ -66,40 +69,33 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       >
         Reports
       </.menu_page_link>
-
       <.menu_page_link
         icon={Teiserver.Chat.SpringRoomMessageLib.icon()}
         url={~p"/chat"}
       >
         Chat
       </.menu_page_link>
-
       <.menu_page_link icon={Teiserver.Lobby.icon()} url={~p"/battle/lobbies"}>
         Lobbies
       </.menu_page_link>
-
       <.menu_page_link icon={Teiserver.Battle.MatchLib.icon()} url={~p"/battle"}>
         Matches
       </.menu_page_link>
-
       <.menu_page_link icon={Teiserver.Microblog.icon()} url={~p"/microblog"}>
         Microblog
       </.menu_page_link>
-
       <.menu_page_link
         icon={Teiserver.Account.UserLib.icon()}
         url={~p"/profile"}
       >
         Account
       </.menu_page_link>
-
       <.menu_page_link
         icon={Teiserver.Account.RelationshipLib.icon()}
         url={~p"/account/relationship"}
       >
         Relationships
       </.menu_page_link>
-
       <.menu_page_link
         icon="list"
         url={~p"/palette"}

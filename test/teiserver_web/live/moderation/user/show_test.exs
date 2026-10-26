@@ -1,7 +1,9 @@
 defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
+  alias Teiserver.Repo
 
   use TeiserverWeb.ConnCase, async: true
 
@@ -97,6 +99,8 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
 
       {:ok, live, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/roles")
 
+      refute has_element?(live, ~s(input[name="roles[Technician]"]))
+
       # We would like to use the `form` function for this submission but it doesn't work with
       # the checkboxes.
       # Here we:
@@ -108,13 +112,62 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       live
       |> element("#user-roles_change-form")
       |> render_submit(%{
-        roles: %{Admin: "true", Trusted: "true", Verified: "false", Bot: "false"}
+        roles: %{
+          Admin: "true",
+          Technician: "true",
+          Trusted: "true",
+          Verified: "false",
+          Bot: "false"
+        }
       })
 
       assert_patch(live, "/moderation/users/#{user.id}")
 
       # Ensure it has changed over
       assert Account.get_user_by_id!(user.id).roles == ["Bot", "Contributor", "Trusted"]
+    end
+  end
+
+  describe "Technician role management" do
+    for role <- ["Admin", "Server"] do
+      test "#{role} can assign and remove Technician" do
+        {:ok, data} = GeneralTestLib.conn_setup([unquote(role)])
+        conn = data[:conn]
+        user = AccountFixtures.user_fixture(%{roles: ["Verified"]})
+
+        {:ok, view, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/roles")
+        assert has_element?(view, ~s(input[name="roles[Technician]"]))
+
+        view
+        |> element("#user-roles_change-form")
+        |> render_submit(%{roles: %{Technician: "true"}})
+
+        assert_patch(view, "/moderation/users/#{user.id}")
+        assert "Technician" in Repo.get!(User, user.id).roles
+
+        {:ok, view, _html} = live(conn, ~p"/moderation/users/#{user.id}/edit/roles")
+
+        view
+        |> element("#user-roles_change-form")
+        |> render_submit(%{roles: %{Technician: "false"}})
+
+        assert_patch(view, "/moderation/users/#{user.id}")
+        assert Repo.get!(User, user.id).roles == ["Verified"]
+      end
+    end
+
+    test "Senior moderator cannot remove an existing Technician role" do
+      {:ok, data} = GeneralTestLib.conn_setup(["Senior moderator"])
+      user = AccountFixtures.user_fixture(%{roles: ["Technician"]})
+
+      {:ok, view, _html} = live(data[:conn], ~p"/moderation/users/#{user.id}/edit/roles")
+
+      view
+      |> element("#user-roles_change-form")
+      |> render_submit(%{roles: %{Technician: "false"}})
+
+      assert_patch(view, "/moderation/users/#{user.id}")
+      assert Repo.get!(User, user.id).roles == ["Technician"]
     end
   end
 
