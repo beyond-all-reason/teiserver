@@ -313,7 +313,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
                 acknowledge_prompt =
                   Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
 
-                msg ++ [@dispute_string, acknowledge_prompt]
+                msg ++ @dispute_string ++ [acknowledge_prompt]
 
               true ->
                 msg ++ @dispute_string

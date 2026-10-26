@@ -1,4 +1,10 @@
 defmodule Teiserver.SpringOutTest do
+  alias Teiserver.Account
+  alias Teiserver.Client
+  alias Teiserver.Config
+  alias Teiserver.Coordinator
+  alias Teiserver.Coordinator.CoordinatorServer
+  alias Teiserver.Moderation
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.TeiserverTestLib
 
@@ -70,5 +76,49 @@ defmodule Teiserver.SpringOutTest do
       SpringOut.reply(:direct_message, {sender.id, message, state.user}, nil, state)
       assert_receive ^expected
     end
+  end
+
+  test "Coordinator warning reminders serialize reasons, dispute text, and acknowledgement", %{
+    state: state
+  } do
+    TeiserverTestLib.start_coordinator!()
+    user = Account.recache_user(%{state.user | restrictions: ["Warning reminder"]})
+    Client.login(user, :test, "127.0.0.1")
+
+    {:ok, _action} =
+      Moderation.create_action(%{
+        target_id: user.id,
+        reason: "First reason\nSecond reason",
+        restrictions: ["Warning reminder"],
+        expires: DateTime.add(DateTime.utc_now(), 86_400)
+      })
+
+    Phoenix.PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    coordinator_id = Coordinator.get_coordinator_userid()
+
+    header =
+      "This is a reminder that you received one or more formal moderation actions as listed below:"
+
+    assert {:noreply, %{}} =
+             CoordinatorServer.handle_info({:do_client_inout, :login, user.id}, %{})
+
+    assert_receive {:direct_message, ^coordinator_id, [^header | _remaining_messages] = messages}
+    assert Enum.all?(messages, &is_binary/1)
+    assert Client.get_client_by_id(user.id).awaiting_warn_ack
+
+    SpringOut.reply(:direct_message, {coordinator_id, messages, user}, nil, state)
+    assert_receive output when is_binary(output)
+
+    coordinator_name = Account.get_username_by_id(coordinator_id)
+    prefix = "SAIDPRIVATE #{coordinator_name} "
+    lines = String.split(output, "\n", trim: true)
+    assert Enum.all?(lines, &String.starts_with?(&1, prefix))
+    assert (prefix <> " - First reason") in lines
+    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "Second reason, expires "))
+    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "If you feel"))
+    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "Attempting to circumvent"))
+
+    assert List.last(lines) ==
+             prefix <> Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
   end
 end
