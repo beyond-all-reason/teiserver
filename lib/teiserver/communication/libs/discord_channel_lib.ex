@@ -2,6 +2,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
   @moduledoc false
 
   alias Nostrum.Api.Channel
+  alias Nostrum.Api.Interaction
   alias Nostrum.Api.Message
   alias Nostrum.Api.User, as: NostrumUser
   alias Teiserver.Account
@@ -218,15 +219,33 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
-  @spec new_interaction_response(String.t(), non_neg_integer()) :: map
-  def new_interaction_response(message, flag \\ 0) do
+  #  @spec new_interaction_response(String.t(), non_neg_integer()) :: map
+  #  def new_interaction_response(message, flag \\ 0) do
+  #    %{
+  #      type: 4,
+  #      data: %{
+  #        content: message,
+  #        flags: flag
+  #      }
+  #    }
+  #  end
+
+  @spec new_interaction_response(%{
+          required(:content) => String.t(),
+          optional(:flags) => non_neg_integer(),
+          optional(:components) => list(Nostrum.Struct.Component.t())
+        }) :: map
+  def new_interaction_response(%{content: _} = data) do
     %{
       type: 4,
-      data: %{
-        content: message,
-        flags: flag
-      }
+      data: data
     }
+  end
+
+  @spec edit_interaction_response(Nostrum.Struct.Interaction.t(), map()) ::
+          {:ok, Nostrum.Struct.Message.t()} | {:error, Nostrum.Api.error()}
+  def edit_interaction_response(interaction, %{} = changes) do
+    Interaction.edit_response(interaction, changes)
   end
 
   @spec get_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
