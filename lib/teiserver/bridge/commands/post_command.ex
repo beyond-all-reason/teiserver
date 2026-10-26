@@ -160,7 +160,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
     Interaction.delete_response(interaction)
 
     Interaction.create_followup_message(interaction.application_id, interaction.token, %{
-      content: message
+      content: message.content
     })
   end
 end

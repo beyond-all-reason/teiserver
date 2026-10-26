@@ -58,7 +58,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         {:INTERACTION_CREATE, %{type: 3, data: %{custom_id: custom_id}} = interaction, _ws}
       ) do
     case custom_id do
-      "post_confirmed" ->
+      "post_confirm" ->
         PostCommand.post(interaction)
 
       "post_cancel" ->

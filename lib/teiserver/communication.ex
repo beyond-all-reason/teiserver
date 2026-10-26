@@ -265,12 +265,6 @@ defmodule Teiserver.Communication do
         }) :: map
   defdelegate new_interaction_response(data), to: DiscordChannelLib
 
-  #  @spec new_interaction_response(String.t()) :: map
-  #  defdelegate new_interaction_response(message), to: DiscordChannelLib
-  #
-  #  @spec new_interaction_response(String.t(), non_neg_integer()) :: map
-  #  defdelegate new_interaction_response(message, flag), to: DiscordChannelLib
-
   @spec edit_interaction_response(Nostrum.Struct.Interaction.t(), map()) :: map
   defdelegate edit_interaction_response(interaction, changes), to: DiscordChannelLib
 
