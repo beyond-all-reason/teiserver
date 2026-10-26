@@ -3,6 +3,37 @@ defmodule Teiserver.Account.PopulationReport do
   alias Ecto.Adapters.SQL
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
+  import Ecto.Query
+
+  def count_by_field(query, field) do
+    total = Repo.aggregate(query, :count, :id)
+
+    data =
+      extract_ids_with_field(query, field)
+      |> group_by_field_and_count()
+      |> Repo.all()
+
+    {total, data}
+  end
+
+  defp extract_ids_with_field(query, field) do
+    from u in query,
+      left_join: us in assoc(u, :user_stat),
+      select: %{
+        id: u.id,
+        field: fragment("?->>?", us.data, ^field)
+      }
+  end
+
+  defp group_by_field_and_count(query) do
+    from extracted in subquery(query),
+      group_by: extracted.field,
+      order_by: [desc: count(extracted.id)],
+      select: %{
+        field: extracted.field,
+        count: count(extracted.id)
+      }
+  end
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-people-group"
