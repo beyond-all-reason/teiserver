@@ -1,10 +1,21 @@
 defmodule Teiserver.Account.PopulationReport do
   @moduledoc false
   alias Ecto.Adapters.SQL
+  alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.DatePresets
   alias Teiserver.Repo
   import Ecto.Query
 
+  # Liveview functions
+  @spec compose_users_query_by_params(binary(), binary(), binary()) :: Ecto.Query.t()
+  def compose_users_query_by_params(last_login, registered, exclude_bots) do
+    UserQueries.users()
+    |> maybe_pass_registered(registered)
+    |> maybe_pass_last_login(last_login)
+    |> maybe_exclude_bots(exclude_bots)
+  end
+
+  @spec count_by_field(Ecto.Query.t(), binary()) :: {non_neg_integer(), list(map())}
   def count_by_field(query, field) do
     total = Repo.aggregate(query, :count, :id)
 
@@ -35,6 +46,42 @@ defmodule Teiserver.Account.PopulationReport do
       }
   end
 
+  defp maybe_pass_last_login(query, "Ignore"), do: query
+
+  defp maybe_pass_last_login(query, last_login) do
+    {last_login_after, last_login_before} = DatePresets.parse(last_login, "", "")
+
+    query
+    |> UserQueries.where_logged_in_after(last_login_after)
+    |> UserQueries.where_logged_in_before(last_login_before)
+  end
+
+  defp maybe_pass_registered(query, "Ignore"), do: query
+
+  defp maybe_pass_registered(query, registered) do
+    {registered_after, registered_before} = DatePresets.parse(registered, "", "")
+
+    query
+    |> UserQueries.where_registered_before(
+      DateTime.new!(registered_before, ~T"00:00:00", "Etc/UTC")
+    )
+    |> UserQueries.where_registered_after(
+      DateTime.new!(registered_after, ~T"00:00:00", "Etc/UTC")
+    )
+  end
+
+  defp maybe_exclude_bots(query, "true") do
+    query
+    |> UserQueries.where_not_has_role("Bot")
+  end
+
+  defp maybe_exclude_bots(query, "false") do
+    query
+  end
+
+  defp maybe_exclude_bots(query, _value), do: query
+
+  # Old report functions
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-people-group"
 
