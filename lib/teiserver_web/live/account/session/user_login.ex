@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Account.SessionLive.UserLogin do
   @moduledoc false
   alias Phoenix.Flash
+  alias Teiserver.Account
 
   use TeiserverWeb, :live_view
 
@@ -55,6 +56,12 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
                 </.button>
               </div>
             </div>
+            <p :if={@can_register} class="text-center mt-4">
+              {gettext("Don't have an account?")}
+              <.link href={~p"/register"} class="link link-primary">
+                {gettext("Register")}
+              </.link>
+            </p>
           </.simple_form>
         </div>
       </div>
@@ -66,6 +73,7 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
     email = Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
 
-    {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
+    {:ok, assign(socket, form: form, can_register: Account.can_register_with_web?()),
+    temporary_assigns: [form: form]}
   end
 end
