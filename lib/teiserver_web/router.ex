@@ -585,6 +585,7 @@ defmodule TeiserverWeb.Router do
       live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
       live "/users/:id/set_gdpr_forget", User.SetGDPRForget
       live "/users/:id/smurf_link", User.SmurfLink, :show
+      live "/users/:id/relationships", User.Relationships, :show
 
       live "/users/:id/edit/name", User.Show, :edit_name
       live "/users/:id/edit/email", User.Show, :edit_email

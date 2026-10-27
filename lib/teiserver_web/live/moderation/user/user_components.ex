@@ -265,6 +265,15 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         </.section_menu_link>
 
         <.section_menu_link
+          :if={@active == "relationships"}
+          icon="fa-users"
+          url="#"
+          active={true}
+        >
+          Relationships
+        </.section_menu_link>
+
+        <.section_menu_link
           :if={@active == "list"}
           icon={StylingHelper.icon(:list)}
           url={~p"/teiserver/admin/user"}
@@ -571,7 +580,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/relationships"}
         phx-click={JS.push_focus()}
       >
         <.button class="m-1 btn btn-primary btn-soft">
