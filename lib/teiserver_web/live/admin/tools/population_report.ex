@@ -1,8 +1,7 @@
-defmodule TeiserverWeb.AdminLive.Tools.Population do
+defmodule TeiserverWeb.AdminLive.Tools.PopulationReport do
   @moduledoc false
 
   alias Teiserver.Account.PopulationReport
-  alias Teiserver.Account.UserQueries
   alias Teiserver.Helper.DatePresets
   alias TeiserverWeb.AdminLive.ToolsComponents
   use TeiserverWeb, :live_view
@@ -20,7 +19,7 @@ defmodule TeiserverWeb.AdminLive.Tools.Population do
   @impl LiveView
   def mount(_params, _session, %Socket{} = socket) do
     socket
-    |> assign(:page_title, "Population")
+    |> assign(:page_title, "Population report")
     |> ok()
   end
 
@@ -107,13 +106,8 @@ defmodule TeiserverWeb.AdminLive.Tools.Population do
         {0, []}
 
       metric_field ->
-        query =
-          UserQueries.users()
-          |> maybe_pass_registered(registered)
-          |> maybe_pass_last_login(last_login)
-          |> maybe_exclude_bots(exclude_bots)
-
-        PopulationReport.count_by_field(query, metric_field)
+        PopulationReport.compose_users_query_by_params(last_login, registered, exclude_bots)
+        |> PopulationReport.count_by_field(metric_field)
     end
   end
 
@@ -129,39 +123,4 @@ defmodule TeiserverWeb.AdminLive.Tools.Population do
 
   defp maybe_mark_as_na(nil), do: "N/A"
   defp maybe_mark_as_na(value), do: value
-
-  defp maybe_pass_last_login(query, "Ignore"), do: query
-
-  defp maybe_pass_last_login(query, last_login) do
-    {last_login_after, last_login_before} = DatePresets.parse(last_login, "", "")
-
-    query
-    |> UserQueries.where_logged_in_after(last_login_after)
-    |> UserQueries.where_logged_in_before(last_login_before)
-  end
-
-  defp maybe_pass_registered(query, "Ignore"), do: query
-
-  defp maybe_pass_registered(query, registered) do
-    {registered_after, registered_before} = DatePresets.parse(registered, "", "")
-
-    query
-    |> UserQueries.where_registered_before(
-      DateTime.new!(registered_before, ~T"00:00:00", "Etc/UTC")
-    )
-    |> UserQueries.where_registered_after(
-      DateTime.new!(registered_after, ~T"00:00:00", "Etc/UTC")
-    )
-  end
-
-  defp maybe_exclude_bots(query, "true") do
-    query
-    |> UserQueries.where_not_has_role("Bot")
-  end
-
-  defp maybe_exclude_bots(query, "false") do
-    query
-  end
-
-  defp maybe_exclude_bots(query, _value), do: query
 end
