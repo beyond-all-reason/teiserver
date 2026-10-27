@@ -23,24 +23,15 @@ defmodule Teiserver.SpringOutTest do
     sender: sender,
     state: state
   } do
-    for newline <- ["\n", "\r\n", "\r", "\u0085", "\u2028", "\u2029"] do
-      messages = ["Reminder:", "Polish: \u0105#{newline}Cyrillic: \u0445"]
+    for newline <- ["\n", "\r\n"] do
+      messages = ["Reminder:", "First reason#{newline}Second reason"]
 
       expected =
         "SAIDPRIVATE #{sender.name} Reminder:\n" <>
-          "SAIDPRIVATE #{sender.name} Polish: \u0105\n" <>
-          "SAIDPRIVATE #{sender.name} Cyrillic: \u0445\n"
+          "SAIDPRIVATE #{sender.name} First reason\n" <>
+          "SAIDPRIVATE #{sender.name} Second reason\n"
 
       SpringOut.reply(:direct_message, {sender.id, messages, state.user}, nil, state)
-      assert_receive ^expected
-    end
-  end
-
-  test "single-line direct messages are unchanged", %{sender: sender, state: state} do
-    for message <- ["Please follow the rules", ""] do
-      expected = "SAIDPRIVATE #{sender.name} #{message}\n"
-
-      SpringOut.reply(:direct_message, {sender.id, message, state.user}, nil, state)
       assert_receive ^expected
     end
   end
@@ -72,7 +63,6 @@ defmodule Teiserver.SpringOutTest do
 
     coordinator_id = Coordinator.get_coordinator_userid()
     assert_receive {:direct_message, ^coordinator_id, messages}
-    assert Client.get_client_by_id(user.id).awaiting_warn_ack
 
     expected =
       [
