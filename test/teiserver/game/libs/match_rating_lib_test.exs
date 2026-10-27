@@ -104,6 +104,18 @@ defmodule Teiserver.Game.MatchRatingLibTest do
     assert ratings[user2.id].num_wins == 0
   end
 
+  test "variable speed matches are unranked" do
+    user1 = AccountTestLib.user_fixture()
+    user2 = AccountTestLib.user_fixture()
+    match = create_fake_match(user1.id, user2.id)
+
+    match
+    |> Ecto.Changeset.change(tags: %{"game/modoptions/variablespeed" => "1"})
+    |> Repo.update!()
+
+    assert {:error, :unranked_tag} = MatchRatingLib.rate_match(match.id)
+  end
+
   test "tau in config is used when rating matches" do
     # Create two user
     user1 = AccountTestLib.user_fixture()

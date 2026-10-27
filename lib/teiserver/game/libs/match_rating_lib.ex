@@ -82,6 +82,9 @@ defmodule Teiserver.Game.MatchRatingLib do
       Map.get(match.tags || %{}, "game/modoptions/ranked_game", "1") == "0" ->
         {:error, :unranked_tag}
 
+      Map.get(match.tags || %{}, "game/modoptions/variablespeed", "0") == "1" ->
+        {:error, :unranked_tag}
+
       not Enum.empty?(logs) ->
         {:error, :already_rated}
 
