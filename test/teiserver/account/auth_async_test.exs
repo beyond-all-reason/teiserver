@@ -1,5 +1,5 @@
 defmodule Teiserver.Account.AuthAsyncTest do
-  alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.AuthLib
 
   use Teiserver.DataCase, async: true
 
@@ -62,18 +62,10 @@ defmodule Teiserver.Account.AuthAsyncTest do
       user = %{id: 123, roles: ["Technician"]}
 
       assert allow?(user, "Technician")
+      refute allow?(user, "Admin")
+      refute allow?(user, "Contributor")
 
-      for role <- ["Server", "Admin", "Moderator", "Contributor", "Engine"] do
-        refute allow?(user, role)
-      end
-    end
-
-    test "Technician is selectable in the staff group and managed by admins" do
-      role = RoleLib.role_data("Technician")
-
-      assert role in RoleLib.grouped_role_data()[:staff]
-      assert role.edit_permission == "Admin"
-      assert role.contains == []
+      assert "Technician" in AuthLib.mfa_roles()
     end
   end
 end

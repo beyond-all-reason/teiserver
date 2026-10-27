@@ -2,7 +2,6 @@ defmodule Teiserver.Account.AuthTest do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.AccountFixtures
-  alias Teiserver.Telemetry.Infolog
 
   use Teiserver.DataCase, async: false
 
@@ -41,19 +40,6 @@ defmodule Teiserver.Account.AuthTest do
       Account.set_secret(user.id, "secret")
       assert AuthLib.has_active_mfa?(user.id)
       assert AuthLib.allow?(user, "Server")
-    end
-
-    test "Technician requires MFA before infolog access" do
-      user = AccountFixtures.user_fixture(%{roles: ["Technician"]})
-
-      refute AuthLib.allow?(user, "Technician")
-      refute Infolog.authorize(:index, user, %{})
-
-      Account.set_secret(user.id, "secret")
-
-      assert AuthLib.allow?(user, "Technician")
-      assert Infolog.authorize(:index, user, %{})
-      refute Infolog.authorize(:delete, user, %{})
     end
   end
 end

@@ -21,11 +21,11 @@ defmodule Teiserver.Account.AuthLib do
     [
       "Server",
       "Admin",
-      "Technician",
       "Senior moderator",
       "Moderator",
       "Reviewer",
       "Overwatch",
+      "Technician",
       "Contributor",
       "Event Organizer",
       "Caster",
