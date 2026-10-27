@@ -25,7 +25,7 @@
             <i class="fa-fw fa-solid fa-download"></i> Download
           </a>
           &nbsp;
-          <%= if allow?(@conn, "Admin") do %>
+          <%= if allow?(@conn, "admin.dev") do %>
             {link(raw("<i class='fa-solid fa-fw fa-trash'></i> Delete"),
               to: ~p"/telemetry/infolog/#{@infolog.id}",
               class: "btn btn-danger",

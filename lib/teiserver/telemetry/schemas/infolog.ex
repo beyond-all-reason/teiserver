@@ -27,5 +27,5 @@ defmodule Teiserver.Telemetry.Infolog do
   def authorize(action, conn, _params) when action in [:index, :show, :download],
     do: allow?(conn, "Technician")
 
-  def authorize(_action, conn, _params), do: allow?(conn, "Admin")
+  def authorize(_action, conn, _params), do: allow?(conn, "Server")
 end

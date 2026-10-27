@@ -57,7 +57,7 @@
                 <th>Timestamp</th>
 
                 <th colspan="2">&nbsp;</th>
-                <%= if allow?(@conn, "Admin") do %>
+                <%= if allow?(@conn, "admin.dev") do %>
                   <th>&nbsp;</th>
                 <% end %>
               </tr>
@@ -93,7 +93,7 @@
                       <i class="fa-fw far fa-download"></i> Download
                     </a>
                   </td>
-                  <%= if allow?(@conn, "Admin") do %>
+                  <%= if allow?(@conn, "admin.dev") do %>
                     <td>
                       {link("Delete",
                         to: ~p"/telemetry/infolog/#{log.id}",
