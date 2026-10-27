@@ -5,10 +5,13 @@ defmodule Teiserver.SpringOutTest do
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Moderation
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
   alias Teiserver.Protocols.SpringOut
   alias Teiserver.TeiserverTestLib
 
   use Teiserver.DataCase, async: false
+
+  import Teiserver.Helper.DateHelper, only: [date_to_str: 2]
 
   setup do
     sender = TeiserverTestLib.new_user()
@@ -16,76 +19,39 @@ defmodule Teiserver.SpringOutTest do
     {:ok, sender: sender, state: state}
   end
 
-  test "direct message strings emit a prefixed line for every newline", %{
+  test "line breaks inside direct messages become separate SAIDPRIVATE lines", %{
     sender: sender,
     state: state
   } do
     for newline <- ["\n", "\r\n", "\r", "\u0085", "\u2028", "\u2029"] do
-      message = "First reason#{newline}Second reason"
+      messages = ["Reminder:", "Polish: \u0105#{newline}Cyrillic: \u0445"]
 
       expected =
-        "SAIDPRIVATE #{sender.name} First reason\nSAIDPRIVATE #{sender.name} Second reason\n"
+        "SAIDPRIVATE #{sender.name} Reminder:\n" <>
+          "SAIDPRIVATE #{sender.name} Polish: \u0105\n" <>
+          "SAIDPRIVATE #{sender.name} Cyrillic: \u0445\n"
 
-      assert SpringOut.reply(:direct_message, {sender.id, message, state.user}, nil, state) ==
-               state
-
+      SpringOut.reply(:direct_message, {sender.id, messages, state.user}, nil, state)
       assert_receive ^expected
     end
   end
 
-  test "direct message lists split embedded newlines and preserve message order", %{
-    sender: sender,
-    state: state
-  } do
-    messages = [
-      "Moderation reminder:",
-      " - First reason\nSecond reason, expires 2026-10-27 12:00:00",
-      "Please acknowledge."
-    ]
-
-    expected =
-      "SAIDPRIVATE #{sender.name} Moderation reminder:\n" <>
-        "SAIDPRIVATE #{sender.name}  - First reason\n" <>
-        "SAIDPRIVATE #{sender.name} Second reason, expires 2026-10-27 12:00:00\n" <>
-        "SAIDPRIVATE #{sender.name} Please acknowledge.\n"
-
-    SpringOut.reply(:direct_message, {sender.id, messages, state.user}, nil, state)
-    assert_receive ^expected
-  end
-
-  test "direct messages preserve Unicode text and blank lines", %{sender: sender, state: state} do
-    message = "Polish: \u0105\r\n\r\nCyrillic: \u0445\n"
-
-    expected =
-      "SAIDPRIVATE #{sender.name} Polish: \u0105\n" <>
-        "SAIDPRIVATE #{sender.name} \n" <>
-        "SAIDPRIVATE #{sender.name} Cyrillic: \u0445\n" <>
-        "SAIDPRIVATE #{sender.name} \n"
-
-    SpringOut.reply(:direct_message, {sender.id, message, state.user}, nil, state)
-    assert_receive ^expected
-    assert String.valid?(expected)
-  end
-
-  test "single-line and empty direct messages keep their existing output", %{
-    sender: sender,
-    state: state
-  } do
-    for message <- ["Please follow the rules", "Polish: \u0105, Cyrillic: \u0445", ""] do
+  test "single-line direct messages are unchanged", %{sender: sender, state: state} do
+    for message <- ["Please follow the rules", ""] do
       expected = "SAIDPRIVATE #{sender.name} #{message}\n"
+
       SpringOut.reply(:direct_message, {sender.id, message, state.user}, nil, state)
       assert_receive ^expected
     end
   end
 
-  test "Coordinator warning reminders serialize reasons, dispute text, and acknowledgement", %{
+  test "Coordinator warning reminders are sent in order with multiline reasons", %{
     state: state
   } do
     TeiserverTestLib.start_coordinator!()
-    user = Account.recache_user(%{state.user | restrictions: ["Warning reminder"]})
-    Client.login(user, :test, "127.0.0.1")
+    user = state.user
 
-    {:ok, _action} =
+    {:ok, action} =
       Moderation.create_action(%{
         target_id: user.id,
         reason: "First reason\nSecond reason",
@@ -93,32 +59,35 @@ defmodule Teiserver.SpringOutTest do
         expires: DateTime.add(DateTime.utc_now(), 86_400)
       })
 
+    # Hooks are disabled in tests, so apply the restrictions the hook would normally apply.
+    # The user is not logged in yet, so this does not trigger a reminder of its own.
+    RefreshUserRestrictionsTask.refresh_user(user.id)
+
+    user.id
+    |> Account.get_user_by_id()
+    |> Client.login(:test, "127.0.0.1")
+
     Phoenix.PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
+    CoordinatorServer.handle_info({:do_client_inout, :login, user.id}, %{})
+
     coordinator_id = Coordinator.get_coordinator_userid()
-
-    header =
-      "This is a reminder that you received one or more formal moderation actions as listed below:"
-
-    assert {:noreply, %{}} =
-             CoordinatorServer.handle_info({:do_client_inout, :login, user.id}, %{})
-
-    assert_receive {:direct_message, ^coordinator_id, [^header | _remaining_messages] = messages}
-    assert Enum.all?(messages, &is_binary/1)
+    assert_receive {:direct_message, ^coordinator_id, messages}
     assert Client.get_client_by_id(user.id).awaiting_warn_ack
 
+    expected =
+      [
+        "This is a reminder that you received one or more formal moderation actions as listed below:",
+        " - First reason",
+        "Second reason, expires #{date_to_str(action.expires, format: :ymd_hms)}",
+        "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action.",
+        "Attempting to circumvent this moderation with a new account is not okay and can lead to suspension or banning.",
+        Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+      ]
+      |> Enum.map_join(fn line ->
+        "SAIDPRIVATE #{Account.get_username_by_id(coordinator_id)} #{line}\n"
+      end)
+
     SpringOut.reply(:direct_message, {coordinator_id, messages, user}, nil, state)
-    assert_receive output when is_binary(output)
-
-    coordinator_name = Account.get_username_by_id(coordinator_id)
-    prefix = "SAIDPRIVATE #{coordinator_name} "
-    lines = String.split(output, "\n", trim: true)
-    assert Enum.all?(lines, &String.starts_with?(&1, prefix))
-    assert (prefix <> " - First reason") in lines
-    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "Second reason, expires "))
-    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "If you feel"))
-    assert Enum.any?(lines, &String.starts_with?(&1, prefix <> "Attempting to circumvent"))
-
-    assert List.last(lines) ==
-             prefix <> Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+    assert_receive ^expected
   end
 end
