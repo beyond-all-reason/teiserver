@@ -109,12 +109,13 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Blog activity
       </.menu_page_link>
+
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon="fa-people-group"
-        url={~p"/admin/tools/population"}
+        url={~p"/admin/tools/population_report"}
       >
-        Population
+        Population Report
       </.menu_page_link>
     </div>
 
