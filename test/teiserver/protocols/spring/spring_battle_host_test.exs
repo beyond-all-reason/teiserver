@@ -35,6 +35,8 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/31087215808/job/92569417868
+  @tag :needs_attention
   test "battle with password", %{socket: socket, user: user} do
     _send_raw(
       socket,

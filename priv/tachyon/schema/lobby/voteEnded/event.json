@@ -17,9 +17,7 @@
             "type": "object",
             "properties": {
                 "id": { "type": "string" },
-                "outcome": {
-                    "enum": ["passed", "failed", "cancelled", "timeout"]
-                }
+                "outcome": { "$ref": "../../definitions/voteOutcomes.json" }
             },
             "required": ["id", "outcome"]
         }

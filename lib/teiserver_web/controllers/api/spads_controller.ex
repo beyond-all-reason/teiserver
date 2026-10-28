@@ -5,8 +5,11 @@ defmodule TeiserverWeb.API.SpadsController do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Config
   alias Teiserver.Coordinator
+
   use TeiserverWeb, :controller
+
   require Logger
+
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -56,13 +59,15 @@ defmodule TeiserverWeb.API.SpadsController do
     server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
 
     raw_player_data =
-      params["players"]
+      params
+      |> Map.get("players", "{}")
       |> String.replace(": None", ": null")
       |> String.replace("'", "\"")
       |> Jason.decode()
 
     bot_data =
-      params["bots"]
+      params
+      |> Map.get("bots", "{}")
       |> String.replace(": None", ": null")
       |> String.replace("'", "\"")
       |> Jason.decode()
@@ -78,23 +83,6 @@ defmodule TeiserverWeb.API.SpadsController do
         {:ok, data} -> data
         _error -> :error
       end
-
-    # first_player_id = player_data
-    #   |> Map.keys()
-    #   |> hd
-    #   |> Account.get_userid_from_name
-
-    # host_ip = get_member_of_lobby_host_ip(first_player_id)
-
-    # conn_ip = conn
-    #   |> Teiserver.Logging.LoggingPlug.get_ip_from_conn
-    #   |> Tuple.to_list()
-    #   |> Enum.join(".")
-
-    # if host_ip != conn_ip do
-    #   Logger.error("balance_battle with no ip match (#{inspect conn_ip} != #{inspect host_ip} (id = #{first_player_id})), params: #{inspect params}")
-    #   # raise "Internal server error"
-    # end
 
     team_count = int_parse(params["nbTeams"])
 
@@ -128,7 +116,7 @@ defmodule TeiserverWeb.API.SpadsController do
       balance_enabled == true ->
         opts = [
           # Balancing with parties in lobbies with large player counts can lead to OOM issues
-          # Balancing algorithmss in these conditions can generate a large number of combinations
+          # Balancing algorithms in these conditions can generate a large number of combinations
           # which can quickly fill up all available memory
           allow_groups: Enum.count(player_data) <= 16 and params["balanceMode"] != "skill"
         ]
@@ -173,6 +161,14 @@ defmodule TeiserverWeb.API.SpadsController do
               end)
 
             bot_result = %{}
+
+            # Tell the consul server to tick, there are certain things
+            # we might want to do after balance is applied and clientstatuses
+            # moved around
+            case Coordinator.get_consul_pid(client.lobby_id) do
+              nil -> :ok
+              pid -> :timer.send_after(100, pid, :tick)
+            end
 
             conn
             |> put_status(200)

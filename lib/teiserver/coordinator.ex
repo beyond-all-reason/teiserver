@@ -1,7 +1,8 @@
 defmodule Teiserver.Coordinator do
   @moduledoc false
+
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Throttles
 
@@ -175,16 +176,6 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  @spec send_balancer(T.lobby_id(), any) :: any
-  def send_balancer(nil, _msg), do: :ok
-
-  def send_balancer(lobby_id, msg) when is_integer(lobby_id) do
-    case get_balancer_pid(lobby_id) do
-      nil -> nil
-      pid -> send(pid, msg)
-    end
-  end
-
   @spec call_balancer(pid() | T.lobby_id(), any) :: any
   def call_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
@@ -271,7 +262,7 @@ defmodule Teiserver.Coordinator do
     lobby = Battle.get_lobby(lobby_id)
 
     if lobby do
-      CacheUser.send_direct_message(from_id, lobby.founder_id, msg)
+      Chat.send_direct_message(from_id, lobby.founder_id, msg)
     end
 
     :ok
@@ -279,7 +270,7 @@ defmodule Teiserver.Coordinator do
 
   @spec send_to_user(User.id(), String.t()) :: :ok
   def send_to_user(userid, msg) do
-    CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+    Chat.send_direct_message(get_coordinator_userid(), userid, msg)
   end
 
   @spec get_team_config(integer(), timeout()) :: map()

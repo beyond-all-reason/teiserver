@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
 
   alias Ecto.Multi
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Communication
   alias Teiserver.Microblog
   alias Teiserver.Microblog.PostTag
@@ -265,8 +264,7 @@ defmodule TeiserverWeb.Microblog.PostFormComponent do
         ]
       )
       |> Enum.filter(fn channel ->
-        not String.contains?(channel.name, "(counter)") and
-          AuthLib.allow?(assigns.current_user, channel.post_permission)
+        not String.contains?(channel.name, "(counter)")
       end)
       |> Enum.map(fn channel ->
         {channel.name, channel.id}

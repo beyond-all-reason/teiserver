@@ -1,6 +1,6 @@
 defmodule Teiserver.Helpers.Bimap do
   @moduledoc """
-  A wrapper aroud a map where each value has 2 keys.
+  A wrapper around a map where each value has 2 keys.
   Ensure that both keys are kept in sync.
   When storing another value and one of the key overlaps with an existing key,
   it deletes the previous keys before storing the new value.

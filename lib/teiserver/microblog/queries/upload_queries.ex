@@ -1,9 +1,13 @@
 defmodule Teiserver.Microblog.UploadQueries do
   @moduledoc false
 
+  alias Ecto.Query
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Microblog.Upload
+
   use TeiserverWeb, :queries
+
+  @type t :: Query.t()
 
   # Queries
   @spec query_uploads(list) :: Ecto.Query.t()
@@ -81,5 +85,25 @@ defmodule Teiserver.Microblog.UploadQueries do
     from uploads in query,
       left_join: uploaders in assoc(uploads, :uploader),
       preload: [uploader: uploaders]
+  end
+
+  # New style
+  @spec uploads() :: t()
+  def uploads do
+    from(uploads in Upload, as: :uploads)
+  end
+
+  # Where id
+  @spec where_id(t(), pos_integer() | String.t()) :: t()
+  def where_id(query, id) do
+    from uploads in query,
+      where: uploads.id == ^id
+  end
+
+  # Where uploader_id
+  @spec where_uploader_id(t(), pos_integer() | String.t()) :: t()
+  def where_uploader_id(query, uploader_id) do
+    from uploads in query,
+      where: uploads.uploader_id == ^uploader_id
   end
 end

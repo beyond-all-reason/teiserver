@@ -66,7 +66,7 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
   create a rate limiter that replenish `max_burst` permit per seconds.
   It holds `max_burst` permit in total.
 
-  `per_second(1)` and `per_minute(60)` have the same replineshment rate, but
+  `per_second(1)` and `per_minute(60)` have the same replenishment rate, but
   the max_permit is higher with `per_minute`.
   """
   @spec per_minute(non_neg_integer(), ms()) :: t()

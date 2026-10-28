@@ -145,9 +145,7 @@ defmodule Teiserver.Game.BalancerServer do
           {map(), T.balance_server_state()}
   defp make_balance(team_count, state, opts) do
     players = Battle.list_lobby_players(state.lobby_id)
-
-    result = make_balance(team_count, state, opts, players)
-    result
+    make_balance(team_count, state, opts, players)
   end
 
   # This function is public only for testing; it should not be called otherwise

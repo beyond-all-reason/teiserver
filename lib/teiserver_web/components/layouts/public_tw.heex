@@ -1,0 +1,21 @@
+<div>
+  <TeiserverWeb.NavComponents.top_navbar_tw
+    :if={assigns[:scope]}
+    active={assigns[:site_menu_active]}
+    scope={@scope}
+  />
+
+  <.flash_group flash={@flash} />
+
+  <main>
+    <div class="px-3 my-0">
+      {@inner_content}
+    </div>
+  </main>
+
+  <footer class="footer mt-auto pt-2 pb-1 px-2">
+    <div style="text-align: right;">
+      &nbsp;
+    </div>
+  </footer>
+</div>

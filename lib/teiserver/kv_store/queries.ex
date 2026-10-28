@@ -24,7 +24,7 @@ defmodule Teiserver.KvStore.Queries do
 
   @doc """
   same as put, but for batch insert. If any insertion fails, none will
-  be commited (all or nothing)
+  be committed (all or nothing)
   Doesn't return anything (for now?) since the order can be messed up
   and it would require more network transfer from db.
   I can't see why it would be useful to get back the object either.

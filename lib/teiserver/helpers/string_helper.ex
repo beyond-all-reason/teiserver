@@ -158,7 +158,7 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.downcase()
     |> String.replace("1", "l")
     |> String.replace("3", "e")
-    |> String.replace("4", "h")
+    |> String.replace("4", "a")
     |> String.replace("5", "s")
     |> String.replace("7", "t")
     |> String.replace("8", "b")
@@ -166,4 +166,35 @@ defmodule Teiserver.Helper.StringHelper do
     |> String.replace("-", "")
     |> String.replace("_", "")
   end
+
+  @doc """
+  Generate a random alphanumeric string of characters of a given length
+  """
+  def random_name(len \\ 20) do
+    chars = ~c"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+    1..len
+    |> Enum.map(fn _idx -> Enum.random(chars) end)
+    |> List.to_string()
+  end
+
+  @doc """
+  Calls String.to_integer/1 but with a wrapper to catch nil and "" values (returns nil)
+  """
+  def maybe_to_integer(nil), do: nil
+  def maybe_to_integer(""), do: nil
+  def maybe_to_integer(v), do: String.to_integer(v)
+
+  @doc """
+  Returns the first 8 digits of a UUID
+  """
+  def uuid_part(nil), do: nil
+  def uuid_part(str), do: String.slice(str, 0..7)
+
+  @doc """
+  Used to parse booleans from a form with the caveat that an empty string is a nil value
+  """
+  def boolean_from_form("true"), do: true
+  def boolean_from_form("false"), do: false
+  def boolean_from_form(_any), do: nil
 end

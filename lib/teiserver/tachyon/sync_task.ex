@@ -1,6 +1,6 @@
 defmodule Teiserver.Tachyon.SyncTask do
   @moduledoc """
-  A somewhat hackich way to run some code synchronously during the
+  A somewhat hackish way to run some code synchronously during the
   initialisation of the application
   """
 

@@ -1,14 +1,16 @@
 defmodule TeiserverWeb.UserAuthentication do
   @moduledoc """
   The module handling user authentication as part of live sessions.
-  Authorisation takes place in the the Auth and AuthLib modules.
+  Authorisation takes place in the Auth and AuthLib modules.
   """
 
   alias Phoenix.Component
   alias Phoenix.LiveView
+  alias Phoenix.LiveView.Socket
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Guardian
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
 
   use TeiserverWeb, :verified_routes
@@ -57,16 +59,39 @@ defmodule TeiserverWeb.UserAuthentication do
 
   def on_mount(:ensure_authenticated, _params, session, socket) do
     socket = mount_current_user(socket, session)
+    user = socket.assigns[:current_user]
 
-    if socket.assigns.current_user do
-      {:cont, socket}
-    else
-      socket =
-        socket
-        |> LiveView.put_flash(:error, "You must log in to access this page.")
-        |> LiveView.redirect(to: ~p"/login")
+    cond do
+      # Not logged in
+      is_nil(user) ->
+        socket =
+          socket
+          |> LiveView.put_flash(:error, "You must log in to access this page.")
+          |> LiveView.redirect(to: ~p"/login")
 
-      {:halt, socket}
+        {:halt, socket}
+
+      # GDPR forget is set, we need to log them out to force them
+      # into the cancel-flow option
+      not is_nil(user.gdpr_forget_after) ->
+        socket =
+          socket
+          |> LiveView.redirect(to: ~p"/logout")
+
+        {:halt, socket}
+
+      # Banned
+      Account.restricted?(user, ["Login"]) ->
+        socket =
+          socket
+          |> LiveView.put_flash(:error, "Your account is banned and cannot login.")
+          |> LiveView.redirect(to: ~p"/")
+
+        {:halt, socket}
+
+      # All good, lets carry on
+      true ->
+        {:cont, socket}
     end
   end
 
@@ -93,6 +118,19 @@ defmodule TeiserverWeb.UserAuthentication do
     end
   end
 
+  def on_mount({:authorise_any, permissions}, _params, _session, socket) do
+    if AuthLib.allow_any?(socket.assigns.current_user, permissions) do
+      {:cont, socket}
+    else
+      socket =
+        socket
+        |> LiveView.put_flash(:error, "You do not have permission to view that page.")
+        |> LiveView.redirect(to: ~p"/")
+
+      {:halt, socket}
+    end
+  end
+
   defp mount_current_user(socket, %{"guardian_default_token" => token} = _session) do
     user =
       with {:ok, %{"sub" => user_id}} <- Guardian.decode_and_verify(token),
@@ -103,11 +141,16 @@ defmodule TeiserverWeb.UserAuthentication do
           nil
       end
 
-    Component.assign_new(socket, :current_user, fn -> user end)
+    socket
+    |> Component.assign_new(:current_user, fn -> user end)
+    |> Component.assign_new(:tz, fn -> nil end)
+    |> fetch_current_scope_for_user()
   end
 
   defp mount_current_user(socket, _session) do
-    Component.assign_new(socket, :current_user, fn -> nil end)
+    socket
+    |> Component.assign_new(:current_user, fn -> nil end)
+    |> Component.assign_new(:tz, fn -> nil end)
   end
 
   @doc """
@@ -148,4 +191,50 @@ defmodule TeiserverWeb.UserAuthentication do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/"
+
+  @doc """
+  Populates the scope for the user if one is assigned
+  """
+  def fetch_current_scope_for_user(%Socket{assigns: %{current_user: %User{} = user}} = socket) do
+    scope = %Scope{
+      user: user,
+      ip: fetch_ip_from_socket(socket)
+    }
+
+    Component.assign_new(socket, :scope, fn -> scope end)
+  end
+
+  # Fallback for no user assigned
+  def fetch_current_scope_for_user(socket), do: socket
+
+  # Ideally we'd grab it from this:
+  #
+  #   peer_data = LiveView.get_connect_info(socket, :peer_data)
+  #   peer_data.address
+  #
+  # but something in our setup is making that come through as {0, 0, 0, 0, 0, 65535, 32512, 1}
+  # in prod so we have to use the x_headers
+  defp fetch_ip_from_socket(%Socket{} = socket) do
+    ip_key =
+      socket
+      |> LiveView.get_connect_info(:x_headers)
+      |> List.keyfind("x-real-ip", 0)
+
+    case ip_key do
+      {_key, ip} ->
+        if String.contains?(ip, ":") do
+          ip
+          |> String.split(":")
+          |> List.to_tuple()
+        else
+          ip
+          |> String.split(".")
+          |> Enum.map(&String.to_integer/1)
+          |> List.to_tuple()
+        end
+
+      _other ->
+        nil
+    end
+  end
 end

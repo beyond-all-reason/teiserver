@@ -1,28 +1,31 @@
 <% bsname = view_colour() %>
 
-{central_component("section_menu_button",
-  name: "distribution_table",
-  label: "Distribution table",
-  active: @active,
-  icon: "fa-solid fa-table",
-  bsname: bsname,
-  url: ~p"/teiserver/reports/ratings/distribution_table"
-)}
+<.section_menu_button
+  active={@active == "distribution_table"}
+  icon="fa-solid fa-table"
+  ,
+  bsname={bsname}
+  url={~p"/teiserver/reports/ratings/distribution_table"}
+>
+  Distribution table
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "distribution_graph",
-  label: "Distribution graph",
-  active: @active,
-  icon: "fa-solid fa-chart-area",
-  bsname: bsname,
-  url: ~p"/teiserver/reports/ratings/distribution_graph"
-)}
+<.section_menu_button
+  active={@active == "distribution_graph"}
+  icon="fa-solid fa-chart-area"
+  ,
+  bsname={bsname}
+  url={~p"/teiserver/reports/ratings/distribution_graph"}
+>
+  Distribution graph
+</.section_menu_button>
 
-{central_component("section_menu_button",
-  name: "balance_tester",
-  label: "Balance tester",
-  active: @active,
-  icon: "fa-solid fa-scale-balanced",
-  bsname: bsname,
-  url: ~p"/teiserver/reports/ratings/balance_tester"
-)}
+<.section_menu_button
+  active={@active == "balance_tester"}
+  icon="fa-solid fa-scale-balanced"
+  ,
+  bsname={bsname}
+  url={~p"/teiserver/reports/ratings/balance_tester"}
+>
+  Balance tester
+</.section_menu_button>

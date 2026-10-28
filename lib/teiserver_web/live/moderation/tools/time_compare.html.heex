@@ -1,0 +1,112 @@
+<ToolsComponents.section_menu
+  active="time_compare"
+  scope={@scope}
+/>
+
+<.header>
+  Time compare
+</.header>
+
+<.simple_form
+  :if={@connected?}
+  for={@form}
+  id="time_compare-form"
+  phx-change="update"
+  phx-submit="update"
+>
+  <div class="flex my-2">
+    <div class="flex-1 px-3">
+      <.live_component
+        module={TeiserverWeb.LiveComponents.UserPicker}
+        id="user-picker-1"
+        field={@form[:user1]}
+        label="User #1"
+      />
+    </div>
+    <div class="flex-1 px-3">
+      <.live_component
+        module={TeiserverWeb.LiveComponents.UserPicker}
+        id="user-picker-2"
+        field={@form[:user2]}
+        label="User #2"
+      />
+    </div>
+    <div class="flex-1 px-3">
+      <.live_component
+        module={TeiserverWeb.LiveComponents.UserPicker}
+        id="user-picker-3"
+        field={@form[:user3]}
+        label="User #3"
+      />
+    </div>
+  </div>
+
+  <div class="flex my-2">
+    <%!-- TODO: Currently the forward and backward buttons do not work reliably so I have hidden them --%>
+    <div :if={false} class="flex-1 px-3 text-center">
+      <br />
+      <div class="join">
+        <button
+          class="paginate-prev join-item btn btn-md"
+          phx-click="1-day-earlier"
+        >
+          <Fontawesome.icon icon="angle-left" style="regular" /> 1 day backward
+        </button>
+        <button
+          class="paginate-next join-item btn btn-md"
+          phx-click="1-day-later"
+        >
+          1 day forward <Fontawesome.icon icon="angle-right" style="regular" />
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 px-3">
+      <.input_tw field={@form[:date]} type="date" label="Date" />
+    </div>
+
+    <div class="flex-1 px-3 text-lg">
+      <br />
+      <.input_tw field={@form[:include_nil]} type="checkbox" label="Include empty minutes" />
+    </div>
+  </div>
+</.simple_form>
+
+<div :if={@connected? and not @has_data?} class="alert alert-info mt-20" id="no-results-alert">
+  No data found for this period
+</div>
+
+<%!-- Spacer for the form to the chart, there is a control that overlaps above the chart --%>
+<div class="h-15"></div>
+
+<LiveCharts.chart :if={@connected? and @has_data?} chart={@chart} />
+
+<div :if={@connected? and @has_data?}>
+  <h3>Legend</h3>
+  <table class="table table-sm">
+    <tbody>
+      <tr>
+        <td>0</td>
+        <td>Offline</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Menu</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Lobby</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Spectator</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Player</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<.back navigate={~p"/moderation"}>Back to Moderation</.back>

@@ -22,6 +22,12 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.Kickban
   alias Teiserver.TachyonLobby.Types, as: LT
 
   def apply_event(%Kickban{} = ev, %LT.Aggregate{} = agg) do
+    agg =
+      LT.Aggregate.add_log(agg, "kickban", %{
+        target_id: ev.user_id,
+        details: %{ban_until: ev.ban_until}
+      })
+
     effective_ban_until =
       case ev.ban_until do
         nil -> nil
@@ -57,9 +63,8 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.Kickban
 
     effects =
       if target_pid do
-        reason = if effective_ban_until != nil, do: "banned", else: "kicked"
-        message = {:lobby, agg.data.id, {:left, reason, effective_ban_until}}
-        effect = {:send_to_user, target_pid, message}
+        reason = if effective_ban_until != nil, do: {:banned, effective_ban_until}, else: :kicked
+        effect = {:kicked, ev.user_id, reason}
         [effect | agg.side_effects]
       else
         agg.side_effects

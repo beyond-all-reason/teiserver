@@ -46,7 +46,7 @@ defmodule Teiserver.OAuth.ApplicationTest do
     assert OAuth.get_application_by_uid(expected_app.uid) == nil
   end
 
-  test "non existant uid returns nil" do
+  test "nonexistent uid returns nil" do
     assert OAuth.get_application_by_uid("u_wot_mate?") == nil
     assert OAuth.get_application_by_uid(nil) == nil
   end

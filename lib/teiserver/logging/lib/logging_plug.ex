@@ -13,13 +13,9 @@ defmodule Teiserver.Logging.LoggingPlug do
 
   @spec call(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def call(conn, _ops) do
-    start_tick = :os.system_time(:micro_seconds)
+    start_tick = :erlang.monotonic_time(:microsecond)
 
     ip = get_ip_from_conn(conn) || "Error finding IP"
-
-    # conn = Map.put(conn, :remote_ip, ip)
-    # new_peer = {ip, conn.peer |> elem(1)}
-    # conn = Map.put(conn, :peer, new_peer)
 
     Conn.register_before_send(conn, fn conn ->
       if conn.status == 500 do
@@ -58,21 +54,19 @@ defmodule Teiserver.Logging.LoggingPlug do
   defp log_view(conn, start_tick, ip) do
     user_id = get_user_id(conn)
 
-    [_empty, section | path] = String.split(conn.request_path, "/")
+    route_info =
+      Phoenix.Router.route_info(TeiserverWeb.Router, conn.method, conn.request_path, conn.host)
 
-    # Log as seconds
-    # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000000
+    [_empty, section | _rest] = String.split(conn.request_path, "/")
 
-    # Log as milli seconds (1/1000th)
-    # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000
-
-    # Log as micro seconds
-    load_time = :os.system_time(:micro_seconds) - start_tick
+    load_time = :erlang.monotonic_time(:microsecond) - start_tick
 
     page_log =
       PageViewLog.changeset(%PageViewLog{}, %{
         section: section,
-        path: Enum.join(path, "/"),
+        # don't log the actual path with the params in them as this
+        # is going to generate a lot of noise and catch garbage
+        path: route_info.route,
         method: conn.method,
         ip: ip,
         load_time: load_time,
@@ -85,11 +79,22 @@ defmodule Teiserver.Logging.LoggingPlug do
     end
   end
 
+  @doc """
+  Return the IP used by the Conn struct
+  """
   def get_ip_from_conn(conn) do
     case List.keyfind(conn.req_headers, "x-real-ip", 0) do
-      {_key, ip} -> convert_from_x_real_ip(ip)
-      nil -> conn.remote_ip
-      _other -> nil
+      {_key, ip} ->
+        convert_from_x_real_ip(ip)
+
+      nil ->
+        case conn do
+          %{remote_ip: ip} -> ip
+          _other -> nil
+        end
+
+      _other ->
+        nil
     end
   end
 end

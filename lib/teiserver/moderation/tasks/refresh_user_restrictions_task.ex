@@ -19,16 +19,15 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
   def perform(_job) do
     if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      now_as_string = DateTime.utc_now() |> Jason.encode!() |> Jason.decode!()
-
       # Find all users who are muted or banned
       # we have these anti-nil things to handle if the job
       # runs just after startup the users may not be in the cache
       Account.list_users(
         search: [
-          data_less_than: {"restricted_until", now_as_string}
+          restricted_until_before: DateTime.utc_now()
         ],
-        select: [:id]
+        select: [:id],
+        limit: :infinity
       )
       |> Enum.each(fn %{id: userid} ->
         refresh_user(userid)
@@ -95,11 +94,12 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         update_client_with_restrictions(client, new_restrictions)
       end
     end
+
+    Account.recache_user(user_id)
+    :ok
   end
 
   defp update_client_with_restrictions(client, new_restrictions) do
-    Account.recache_user(client.userid)
-
     if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
       Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
     end

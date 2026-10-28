@@ -3,9 +3,9 @@ defmodule Teiserver.Party.Registry do
   Tracks tachyon parties
   """
 
-  alias Teiserver.Party
+  alias Teiserver.Party.Types, as: PT
 
-  @spec lookup(Party.Server.id()) :: pid() | nil
+  @spec lookup(PT.Data.id()) :: pid() | nil
   def lookup(party_id) do
     case Registry.lookup(__MODULE__, party_id) do
       [{pid, _value}] -> pid

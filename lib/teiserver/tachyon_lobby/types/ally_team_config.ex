@@ -5,7 +5,7 @@ defmodule Teiserver.TachyonLobby.Types.AllyTeamConfig do
 
   alias Teiserver.Asset
 
-  # start box are optional, if none given, engine allow spawing anywhere on
+  # start box are optional, if none given, engine allow spawning anywhere on
   # the map. It can also be controlled game side through modoption, that's
   # how polygon start boxes work
   @enforce_keys [:max_teams, :teams]

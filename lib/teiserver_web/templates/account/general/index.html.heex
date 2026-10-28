@@ -1,49 +1,51 @@
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "profile",
-    icon: "fa-solid fa-user-circle",
-    text: "My profile",
-    link: ~p"/profile"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon="fa-solid fa-user-circle"
+    url={~p"/profile"}
+  >
+    My profile
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: Teiserver.icon(:relationship),
-    text: "Friends/Mutes/Invites",
-    link: ~p"/account/relationship"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={Teiserver.icon(:relationship)}
+    url={~p"/account/relationship"}
+  >
+    Friends/Mutes/Invites
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: Teiserver.Config.UserConfigLib.icon(),
-    text: "Preferences",
-    link: ~p"/account/settings"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={Teiserver.Config.UserConfigLib.icon()}
+    url={~p"/account/settings"}
+  >
+    Preferences
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: Teiserver.Account.icon(),
-    text: "Account details",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/account/details"
-  )}
+  <.menu_card
+    icon={Teiserver.Account.icon()}
+    icon_class="fa-solid"
+    url={~p"/teiserver/account/details"}
+  >
+    Account details
+  </.menu_card>
 
-  {central_component("menu_card",
-    icon: "fa-lock",
-    text: "Security",
-    icon_class: "fa-solid",
-    link: ~p"/teiserver/account/security"
-  )}
+  <.menu_card
+    icon="fa-lock"
+    icon_class="fa-solid"
+    url={~p"/teiserver/account/security"}
+  >
+    Security
+  </.menu_card>
 </div>
 
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/"}
+  >
+    Back
+  </.menu_card>
 </div>

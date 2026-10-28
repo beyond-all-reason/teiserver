@@ -11,8 +11,10 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.FriendRequestLib
+  alias Teiserver.Account.Login
+  alias Teiserver.Account.Registration
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Config
   alias Teiserver.Coordinator
@@ -37,6 +39,7 @@ defmodule Teiserver.Protocols.SpringIn do
   @optimisation_level %{
     "LuaLobby Chobby" => :partial,
     "skylobby" => :partial,
+    "modlobby" => :partial,
     "SLTS Client d" => :none
   }
 
@@ -49,7 +52,13 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Battle chat commands that carry more data than a normal message (e.g. modoption
   # key=value pairs) and so get a 1024-char allowance instead of the default 256.
-  @long_battle_command_prefixes ["$welcome-message", "!welcome-message", "!mode "]
+  @long_battle_command_prefixes [
+    "$welcome-message",
+    "!aiprofile",
+    "!welcome-message",
+    "!mode ",
+    "!bset mapmetadata"
+  ]
 
   # Commands that don't require the user to be logged in
   @unauthenticated_commands ~w(
@@ -60,15 +69,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
-    if Config.get_site_config_cache("debug.Print incoming messages") or
-         state.print_client_messages do
-      if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
-        Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
-      else
-        Logger.info("<-- #{state.username}: #{Spring.format_log(data)}")
-      end
-    end
-
     new_state =
       if String.ends_with?(data, "\n") do
         data = state.message_part <> data
@@ -218,9 +218,21 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _data, msg_id, state) do
-    reply(:okay, "STLS", msg_id, state)
-    new_state = SpringTcpServer.upgrade_connection(state)
-    reply(:welcome, nil, msg_id, new_state)
+    if SpringTcpServer.can_use_tls?() do
+      reply(:okay, "STLS", msg_id, state)
+      new_state = SpringTcpServer.upgrade_connection(state)
+      reply(:welcome, nil, msg_id, new_state)
+    else
+      # there isn't really a way to notify the client about what went wrong
+      # exactly. We also don't support these clients, and the whole spring
+      # protocol is getting replaced, so it's a bit whatever.
+      # also, the STLS message is usually sent before any login which makes sense
+      # so if we want to have some idea of who is doing that, we can't rely
+      # on user/username.
+      Logger.error("STLS request from #{state.ip}")
+      send(self(), :terminate)
+      state
+    end
   end
 
   defp do_handle("c.battles.list_ids", _data, msg_id, state) do
@@ -282,8 +294,8 @@ defmodule Teiserver.Protocols.SpringIn do
     response =
       case regex_result do
         [_full_match, username, password, _cpu, _ip, lobby, lobby_hash, _modes | _rest] ->
-          username = CacheUser.clean_name(username)
-          CacheUser.try_md5_login(username, password, state.ip, lobby, lobby_hash)
+          username = Account.clean_name(username)
+          Login.try_md5_login(username, password, state.ip, lobby, lobby_hash)
 
         nil ->
           _no_match(state, "LOGIN", msg_id, data)
@@ -309,7 +321,7 @@ defmodule Teiserver.Protocols.SpringIn do
           if Regex.match?(@cluster_manager_regex, user.name) do
             :none
           else
-            Map.get(@optimisation_level, user.lobby_client, :full)
+            Map.get(@optimisation_level, lobby_client(user), :full)
           end
 
         new_state =
@@ -338,7 +350,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("REGISTER", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
       [_full_match, username, password_hash, email] ->
-        case CacheUser.register_user_with_md5(username, email, password_hash, state.ip) do
+        case Registration.register_user_with_md5(username, email, password_hash, state.ip) do
           :success ->
             reply(:registration_accepted, nil, msg_id, state)
 
@@ -354,7 +366,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
-    case CacheUser.get_user_by_id(userid) do
+    case Account.get_user_by_id(userid) do
       nil ->
         Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
         state
@@ -392,7 +404,7 @@ defmodule Teiserver.Protocols.SpringIn do
           true ->
             Account.verify_user(user.id)
 
-            optimisation_level = Map.get(@optimisation_level, user.lobby_client, :full)
+            optimisation_level = Map.get(@optimisation_level, lobby_client(user), :full)
             SpringOut.do_login_accepted(state, user, optimisation_level)
         end
     end
@@ -405,7 +417,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("CREATEBOTACCOUNT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, botname, _owner_name] ->
-        resp = CacheUser.register_bot(botname, state.userid)
+        resp = Registration.register_bot(botname, state.userid)
 
         case resp do
           {:error, _reason} ->
@@ -428,7 +440,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
-    case CacheUser.rename_user(state.userid, new_name) do
+    case Account.rename_user(state.userid, new_name) do
       :success ->
         :ok
 
@@ -446,43 +458,26 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:okay, url, msg_id, state)
   end
 
-  defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
-    result = CacheUser.request_email_change(state.user, new_email)
+  defp do_handle("CHANGEEMAILREQUEST", _new_email, msg_id, state) do
+    reply(
+      :change_email_request_denied,
+      "This feature is no longer supported in client, please use the website to change your email address.",
+      msg_id,
+      state
+    )
 
-    case result do
-      {:error, reason} ->
-        reply(:change_email_request_denied, reason, msg_id, state)
-        state
-
-      {:ok, new_user} ->
-        reply(:change_email_request_accepted, nil, msg_id, state)
-        %{state | user: new_user}
-    end
+    state
   end
 
-  defp do_handle("CHANGEEMAIL", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_full_match, new_email, supplied_code] ->
-        [correct_code, expected_email] = state.user.email_change_code
+  defp do_handle("CHANGEEMAIL", _data, msg_id, state) do
+    reply(
+      :change_email_denied,
+      "This feature is no longer supported in client, please use the website to change your email address.",
+      msg_id,
+      state
+    )
 
-        cond do
-          correct_code != supplied_code ->
-            reply(:change_email_denied, "bad code", msg_id, state)
-            state
-
-          new_email != expected_email ->
-            reply(:change_email_denied, "bad email", msg_id, state)
-            state
-
-          true ->
-            new_user = CacheUser.change_email(state.user, new_email)
-            reply(:change_email_accepted, nil, msg_id, state)
-            %{state | user: new_user}
-        end
-
-      _no_match_result ->
-        _no_match(state, "CHANGEEMAIL", msg_id, data)
-    end
+    state
   end
 
   defp do_handle("EXIT", _reason, _msg_id, state) do
@@ -492,7 +487,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("GETUSERINFO", _data, msg_id, state) do
-    ingame_hours = CacheUser.rank_time(state.userid)
+    ingame_hours = Login.rank_time(state.userid)
 
     [
       "Registration date: #{date_to_str(state.user.inserted_at, format: :ymd_hms, tz: "UTC")}",
@@ -515,7 +510,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # SLDB commands
   defp do_handle("GETIP", username, msg_id, state) do
-    if CacheUser.allow?(state.userid, :bot) do
+    user = Account.get_user_by_id(state.userid)
+
+    if Auth.moderator?(user) or Auth.is_bot?(user) do
       case Client.get_client_by_name(username) do
         nil ->
           reply(:no, "GETIP", msg_id, state)
@@ -528,11 +525,18 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  defp do_handle("GETUSERID", data, msg_id, state) do
-    if CacheUser.allow?(state.userid, :bot) do
-      target = CacheUser.get_user_by_name(data)
-      hash = target.lobby_hash
-      reply(:user_id, {data, hash, target.id}, msg_id, state)
+  defp do_handle("GETUSERID", username, msg_id, state) do
+    user = Account.get_user_by_id(state.userid)
+
+    if Auth.moderator?(user) or Auth.is_bot?(user) do
+      case Account.get_user_by_name(username) do
+        nil ->
+          reply(:no, "GETUSERID", msg_id, state)
+
+        target ->
+          hash = Account.get_user_stat_data(target.id)["lobby_hash"]
+          reply(:user_id, {username, hash, target.id}, msg_id, state)
+      end
     else
       state
     end
@@ -685,48 +689,36 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, _location_type, _location_id, reason] ->
-        friend_list = Account.list_friend_ids_of_user(state.userid)
-        target_id = CacheUser.get_userid(target_name)
+        target_id = Account.get_userid_from_name(target_name)
 
-        cond do
-          Enum.member?(friend_list, target_id) ->
-            CacheUser.send_direct_message(
-              Coordinator.get_coordinator_userid(),
-              state.userid,
-              "Your report has not been submitted, you can't report a friend."
-            )
+        if Account.restricted?(state.userid, ["Community", "Reporting"]) do
+          reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
+        else
+          client = Client.get_client_by_id(state.userid)
 
-            reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
+          {:ok, code} =
+            Account.create_code(%{
+              value: ULID.generate(),
+              purpose: "one_time_login",
+              expires: DateTime.shift(DateTime.utc_now(), minute: 30),
+              user_id: state.userid,
+              metadata: %{
+                ip: client.ip,
+                redirect: "/moderation/report_user/#{target_id}",
+                reason: reason
+              }
+            })
 
-          Account.restricted?(state.userid, ["Community", "Reporting"]) ->
-            reply(:no, {"c.moderation.report_user", "permission denied"}, msg_id, state)
+          host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
+          url = "https://#{host}/one_time_login/#{code.value}"
 
-          true ->
-            client = Client.get_client_by_id(state.userid)
+          Coordinator.send_to_user(state.userid, [
+            "To complete your report, please use the form on this link: #{url}",
+            "The link will expire in 30 minutes.",
+            "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
+          ])
 
-            {:ok, code} =
-              Account.create_code(%{
-                value: ULID.generate(),
-                purpose: "one_time_login",
-                expires: DateTime.shift(DateTime.utc_now(), minute: 30),
-                user_id: state.userid,
-                metadata: %{
-                  ip: client.ip,
-                  redirect: "/moderation/report_user/#{target_id}",
-                  reason: reason
-                }
-              })
-
-            host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]
-            url = "https://#{host}/one_time_login/#{code.value}"
-
-            Coordinator.send_to_user(state.userid, [
-              "To complete your report, please use the form on this link: #{url}",
-              "The link will expire in 30 minutes.",
-              "If the link doesn't work, you can also view your matches at https://#{host}/battle and report players from the player tab of the relevant battle."
-            ])
-
-            reply(:okay, nil, msg_id, state)
+          reply(:okay, nil, msg_id, state)
         end
 
       _other ->
@@ -827,8 +819,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYPRIVATE", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/u, data) do
       [_full_match, to_name, msg] ->
-        to_id = CacheUser.get_userid(to_name)
-        CacheUser.send_direct_message(state.userid, to_id, msg)
+        to_id = Account.get_userid_from_name(to_name)
+        Chat.send_direct_message(state.userid, to_id, msg)
         reply(:sent_direct_message, {to_id, msg}, msg_id, state)
 
       _no_match_result ->
@@ -1012,7 +1004,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("JOINBATTLEACCEPT", username, _msg_id, state) do
-    userid = CacheUser.get_userid(username)
+    userid = Account.get_userid_from_name(username)
     Lobby.accept_join_request(userid, state.lobby_id)
     state
   end
@@ -1024,7 +1016,7 @@ defmodule Teiserver.Protocols.SpringIn do
         [username] -> {username, "no reason given by lobby host user"}
       end
 
-    userid = CacheUser.get_userid(username)
+    userid = Account.get_userid_from_name(username)
     Lobby.deny_join_request(userid, state.lobby_id, reason)
     state
   end
@@ -1032,7 +1024,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("HANDICAP", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\d+)/, data) do
       [_full_match, username, value] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(value)
         Lobby.force_change_client(state.userid, client_id, %{handicap: value})
 
@@ -1101,7 +1093,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("KICKFROMBATTLE", username, _msg_id, state) do
     if Lobby.allow?(state.userid, :kickfrombattle, state.lobby_id) do
-      userid = CacheUser.get_userid(username)
+      userid = Account.get_userid_from_name(username)
       Lobby.kick_user_from_battle(userid, state.lobby_id)
     end
 
@@ -1112,7 +1104,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, player_number] ->
         if Lobby.allow?(state.userid, :player_number, state.lobby_id) do
-          client_id = CacheUser.get_userid(username)
+          client_id = Account.get_userid_from_name(username)
           value = int_parse(player_number)
           Lobby.force_change_client(state.userid, client_id, %{player_number: value})
         end
@@ -1127,7 +1119,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCEALLYNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, team_number] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(team_number)
         Lobby.force_change_client(state.userid, client_id, %{team_number: value})
 
@@ -1141,7 +1133,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCETEAMCOLOR", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_full_match, username, team_colour] ->
-        client_id = CacheUser.get_userid(username)
+        client_id = Account.get_userid_from_name(username)
         value = int_parse(team_colour)
         Lobby.force_change_client(state.userid, client_id, %{team_colour: value |> to_string()})
 
@@ -1153,7 +1145,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("FORCESPECTATORMODE", username, _msg_id, state) do
-    client_id = CacheUser.get_userid(username)
+    client_id = Account.get_userid_from_name(username)
     Lobby.force_change_client(state.userid, client_id, %{player: false})
 
     state
@@ -1314,7 +1306,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/u, data) do
       [_full_match, to_name, msg] ->
-        to_id = CacheUser.get_userid(to_name)
+        to_id = Account.get_userid_from_name(to_name)
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           msg_sliced =
@@ -1396,7 +1388,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_full_match, battlestatus, team_colour] ->
         updates =
           Spring.parse_battle_status(battlestatus)
-          |> Map.take([:ready, :player_number, :team_number, :player, :sync, :side])
+          |> Map.take([:ready, :team_number, :player, :sync, :side])
 
         existing = Client.get_client_by_id(state.userid)
 
@@ -1439,17 +1431,17 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("RING", data, _msg_id, state) do
     case String.split(data) do
       [sender, originator] ->
-        userid = CacheUser.get_userid(sender)
+        userid = Account.get_userid_from_name(sender)
         client = Client.get_client_by_id(state.userid)
 
         if client != nil and Auth.is_bot?(state.userid) do
-          originator_id = CacheUser.get_userid(originator)
-          CacheUser.ring(userid, originator_id)
+          originator_id = Account.get_userid_from_name(originator)
+          Lobby.ring(userid, originator_id)
         end
 
       _other ->
-        userid = CacheUser.get_userid(data)
-        CacheUser.ring(userid, state.userid)
+        userid = Account.get_userid_from_name(data)
+        Lobby.ring(userid, state.userid)
     end
 
     state
@@ -1475,6 +1467,8 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   @spec deny(map(), String.t()) :: map()
+  defp lobby_client(user), do: Account.get_user_stat_data(user.id)["lobby_client"]
+
   defp deny(state, msg_id) do
     reply(:servermsg, "You do not have permission to execute that command", msg_id, state)
     state
@@ -1518,7 +1512,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
   # defp engage_flood_protection(state) do
   #   reply(:disconnect, "Spring status flood protection", nil, state)
-  #   CacheUser.set_flood_level(state.userid, 10)
+  #   Login.set_flood_level(state.userid, 10)
   #   Client.disconnect(state.userid, "SpringIn.status.flood_protection")
   #   Logger.error("Spring Status command overflow from #{state.username}/#{state.userid}")
   #   {:stop, "Spring status flood protection", state}

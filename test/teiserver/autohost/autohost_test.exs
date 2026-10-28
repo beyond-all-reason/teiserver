@@ -55,11 +55,11 @@ defmodule Teiserver.Autohost.AutohostTest do
         Autohost.start_battle(autohost.id, "battle_id", self(), BotFixtures.start_script())
       end)
 
-      refute_receive {:start_battle, "battle_id", _}
+      refute_receive {:start_battle, "battle_id", _, _}
       # need to update capacity first, only then the autohost is considered fully online
       Session.update_capacity(sess_pid, 10, 0)
 
-      assert_receive {:start_battle, "battle_id", _}
+      assert_receive {:start_battle, "battle_id", _, _}
     end
 
     test "default subscribe messages from now" do
@@ -152,8 +152,9 @@ defmodule Teiserver.Autohost.AutohostTest do
       :timer.sleep(:infinity)
     end)
 
-    assert_receive {:start_battle, ^battle_id, _}
-    Session.reply_start_battle(pid, battle_id, {:ok, %{ips: ["1.2.3.4"], port: 1234}})
+    assert_receive {:start_battle, ^battle_id, _start_script, cb_state}
+    resp = {:ok, %{ips: ["1.2.3.4"], port: 1234}}
+    Session.async_reply(pid, cb_state, resp)
     %{battle_id: battle_id}
   end
 

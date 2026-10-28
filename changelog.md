@@ -1,7 +1,7 @@
 ## In progress
 #### Features
 - Added `country` to public [leaderboard API response](https://server4.beyondallreason.info/teiserver/api/public/leaderboard/Team)
-- Display uncertainy values for each match
+- Display uncertainty values for each match
 - Show intuitive chevron rank number
 - Scroll big tables on narrow screens
 - Better moderation log formatting

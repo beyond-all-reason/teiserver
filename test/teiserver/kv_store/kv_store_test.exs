@@ -77,7 +77,7 @@ defmodule Teiserver.KvStore.KvStoreTest do
     assert KV.get("test_store", "key") == nil
   end
 
-  test "deletes is fine with non existant blob" do
+  test "deletes is fine with nonexistent blob" do
     :ok = KV.delete("store", "key")
   end
 

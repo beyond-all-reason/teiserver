@@ -1,82 +1,84 @@
 defmodule Fontawesome do
   @moduledoc """
-  Example usage:
 
-  <Fontawesome.icon icon="arrow-left" style="regular" />
-  <Fontawesome.icon icon="arrow-left" style="regular" class="text-danger" />
+  Example usage:
+  ```
+  <Fontawesome.icon icon="arrow-left" />
+
+  <Fontawesome.icon icon="icon2" style="solid" />
+
+  <Fontawesome.icon icon="another-icon" weight="sharp" />
+
+  <Fontawesome.icon
+    icon="everything"
+    style="thin"
+    weight="sharp"
+    size="2x"
+    class="my-css-class"
+    css="border: 1px solid red;"
+    phx-click="do-something"
+  />
+  ```
+
+  Additionally contains lists of icon names with `Fontawesome.regular_icons/0` and `Fontawesome.brand_icons/0`
   """
   use Phoenix.Component
 
-  attr :icon, :string
-  attr :icon_atom, :atom
-  attr :class, :string, default: ""
-  attr :size, :string, default: nil
-  attr :weight, :string, default: "solid"
-  attr :style, :string, default: "solid"
-  attr :css_style, :string, default: ""
+  attr(:icon, :string, required: true)
+  attr(:style, :string, default: "regular")
+  attr(:weight, :string, default: nil)
+  attr(:size, :string, default: nil)
+  attr(:class, :any, default: nil)
+  attr(:css, :string, default: nil)
+  attr(:rest, :global)
 
+  @doc """
+  Returns a fontawesome icon as a Phoenix.LiveView.Rendered object.
+
+  Requires:
+    `icon`: The fontawesome icon you wish to display, you do not need to prefix it with "fa-"
+
+  Optional arguments:
+    `style`: regular, solid, light, thin, duotone or brand
+    `weight`: classic or sharp
+    `size`: the fx weight class, you do not need to prefix it with "fa-"
+    `class`: css classes placed into the "class" attribute after the above classes
+    `css`: css placed into the "style" attribute
+  """
   @spec icon(map) :: Phoenix.LiveView.Rendered.t()
   def icon(assigns) do
-    style = fa_prefix(assigns[:style])
-    size = fa_prefix(assigns[:size])
-    weight = fa_prefix(assigns[:weight])
+    style =
+      assigns[:style]
+      |> fa_prefix()
+      |> free_style()
 
-    icon_name =
-      cond do
-        assigns[:icon] && is_atom(assigns[:icon]) -> icon_lookup(assigns[:icon])
-        assigns[:icon_atom] && is_atom(assigns[:icon_atom]) -> icon_lookup(assigns[:icon_atom])
-        true -> fa_prefix(assigns[:icon])
-      end
+    weight =
+      assigns[:weight]
+      |> fa_prefix()
+
+    size = fa_prefix(assigns[:size])
+    icon_name = fa_prefix(assigns[:icon])
 
     assigns =
       assigns
       |> assign(:class, "fa-fw #{style} #{size} #{weight} #{icon_name} #{assigns[:class]}")
 
     ~H"""
-    <i class={@class} style={@css_style}></i>
+    <i class={@class} style={@css} {@rest}></i>
     """
   end
 
+  # Prefixes the relevant word with "fa-" if it is not already prefixed so
   defp fa_prefix("fa-" <> s), do: "fa-" <> s
-  defp fa_prefix(nil), do: ""
+  defp fa_prefix(""), do: ""
+  defp fa_prefix(nil), do: nil
   defp fa_prefix(s), do: "fa-" <> s
 
-  @spec icon_lookup(atom) :: String.t()
-  def icon_lookup(:report), do: "fa-signal"
-  def icon_lookup(:up), do: "fa-level-up"
-  def icon_lookup(:back), do: "fa-arrow-left"
-
-  def icon_lookup(:list), do: "fa-bars"
-  def icon_lookup(:show), do: "fa-eye"
-  def icon_lookup(:search), do: "fa-search"
-  def icon_lookup(:new), do: "fa-plus"
-  def icon_lookup(:edit), do: "fa-wrench"
-  def icon_lookup(:delete), do: "fa-trash"
-  def icon_lookup(:export), do: "fa-download"
-  def icon_lookup(:structure), do: "fa-cubes"
-  def icon_lookup(:documentation), do: "fa-book"
-  def icon_lookup(:live_view), do: "fa-brands fa-phoenix-framework"
-
-  def icon_lookup(:chat), do: "fa-comment"
-
-  def icon_lookup(:admin), do: "fa-user-crown"
-  def icon_lookup(:moderation), do: "fa-gavel"
-
-  def icon_lookup(:overview), do: "fa-expand-alt"
-  def icon_lookup(:detail), do: "fa-file-alt"
-  def icon_lookup(:user), do: "fa-user"
-
-  def icon_lookup(:filter), do: "fa-filter"
-
-  def icon_lookup(:summary), do: "fa-info"
-
-  def icon_lookup(:chart), do: "fa-chart-line"
-
-  def icon_lookup(:day), do: ""
-  def icon_lookup(:week), do: ""
-  def icon_lookup(:month), do: ""
-  def icon_lookup(:quarter), do: ""
-  def icon_lookup(:year), do: ""
+  # Used to make the styling of icons limited to the free version
+  defp free_style("fa-brands"), do: "fa-brands"
+  defp free_style(""), do: ""
+  defp free_style(nil), do: nil
+  defp free_style(_any), do: "fa-solid"
 
   def brand_icons do
     ~w(42-group 500px accessible-icon accusoft adn adversal affiliatetheme airbnb algolia alipay amazon-pay amazon amilia android angellist angrycreative angular apper apple-pay apple app-store-ios app-store artstation asymmetrik atlassian audible autoprefixer avianex aviato aws bandcamp battle-net behance bilibili bimobject bitbucket bitcoin bity blackberry black-tie blogger-b blogger bluetooth-b bluetooth bootstrap bots btc buffer buromobelexperte buy-n-large buysellads canadian-maple-leaf cc-amazon-pay cc-amex cc-apple-pay cc-diners-club cc-discover cc-jcb cc-mastercard cc-paypal cc-stripe cc-visa centercode centos chromecast chrome cloudflare cloudscale cloudsmith cloudversify cmplid codepen codiepie confluence connectdevelop contao cotton-bureau cpanel creative-commons-by creative-commons-nc-eu creative-commons-nc-jp creative-commons-nc creative-commons-nd creative-commons-pd-alt creative-commons-pd creative-commons-remix creative-commons-sampling-plus creative-commons-sampling creative-commons-sa creative-commons-share creative-commons creative-commons-zero critical-role css3-alt css3 cuttlefish dailymotion d-and-d-beyond d-and-d dashcube deezer delicious deploydog deskpro deviantart dev dhl diaspora digg digital-ocean discord discourse dochub docker draft2digital dribbble dropbox drupal dyalog earlybirds ebay edge-legacy edge elementor ello ember empire envira erlang ethereum etsy evernote expeditedssl facebook-f facebook-messenger facebook fantasy-flight-games fedex fedora figma firefox-browser firefox firstdraft first-order-alt first-order flickr flipboard fly font-awesome fonticons-fi fonticons fort-awesome-alt fort-awesome forumbee foursquare freebsd free-code-camp fulcrum galactic-republic galactic-senate get-pocket gg-circle gg git-alt github-alt github gitkraken gitlab git gitter glide-g glide gofore golang goodreads-g goodreads google-drive google-pay google-play google-plus-g google-plus google google-wallet gratipay grav gripfire grunt guilded gulp hacker-news hackerrank hashnode hips hire-a-helper hive hooli hornbill hotjar houzz html5 hubspot ideal imdb instagram instalod intercom internet-explorer invision ioxhost itch-io itunes-note itunes java jedi-order jenkins jira joget joomla jsfiddle js kaggle keybase keycdn kickstarter-k kickstarter korvue laravel lastfm leanpub less line linkedin-in linkedin linode linux lyft magento mailchimp mandalorian markdown mastodon maxcdn mdb medapps medium medrt meetup megaport mendeley meta microblog microsoft mixcloud mixer mix mizuni modx monero napster neos nfc-directional nfc-symbol nimblr node-js node npm ns8 nutritionix octopus-deploy odnoklassniki odysee old-republic opencart openid opera optin-monster orcid osi padlet page4 pagelines palfed patreon paypal perbyte periscope phabricator phoenix-framework phoenix-squadron php pied-piper-alt pied-piper-hat pied-piper-pp pied-piper pinterest-p pinterest pix playstation product-hunt pushed python qq quinscape quora raspberry-pi ravelry reacteurope react readme rebel reddit-alien reddit redhat red-river renren replyd researchgate resolving rev rocketchat rockrms r-project rust safari salesforce sass schlix screenpal scribd searchengin sellcast sellsy servicestack shirtsinbulk shopify shopware simplybuilt sistrix sith sitrox sketch skyatlas skype slack slideshare snapchat soundcloud sourcetree space-awesome speakap speaker-deck spotify square-behance square-dribbble square-facebook square-font-awesome-stroke square-font-awesome square-github square-gitlab square-git square-google-plus square-hacker-news square-instagram square-js square-lastfm square-odnoklassniki square-pied-piper square-pinterest square-reddit square-snapchat squarespace square-steam square-tumblr square-twitter square-viadeo square-vimeo square-whatsapp square-xing square-youtube stack-exchange stack-overflow stackpath staylinked steam steam-symbol sticker-mule strava stripe-s stripe stubber studiovinari stumbleupon-circle stumbleupon superpowers supple suse swift symfony teamspeak telegram tencent-weibo themeco themeisle the-red-yeti think-peaks tiktok trade-federation trello tumblr twitch twitter typo3 uber ubuntu uikit umbraco uncharted uniregistry unity unsplash untappd ups usb usps ussunnah vaadin viacoin viadeo viber vimeo vimeo-v vine vk vnv vuejs watchman-monitoring waze weebly weibo weixin whatsapp whmcs wikipedia-w windows wirsindhandwerk wix wizards-of-the-coast wodu wolf-pack-battalion wordpress-simple wordpress wpbeginner wpexplorer wpforms wpressr xbox xing yahoo yammer yandex-international yandex yarn y-combinator yelp yoast youtube zhihu)

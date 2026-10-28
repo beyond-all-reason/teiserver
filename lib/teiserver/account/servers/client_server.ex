@@ -114,6 +114,23 @@ defmodule Teiserver.Account.ClientServer do
     {:noreply, %{state | client: new_client}}
   end
 
+  def handle_cast({:set_moderator_bit, moderator?}, state) do
+    new_client = %{state.client | moderator: moderator?}
+
+    PubSub.broadcast(
+      Teiserver.PubSub,
+      "teiserver_global_user_updates",
+      %{
+        channel: "teiserver_global_user_updates",
+        event: :client_updated,
+        userid: state.userid,
+        client: new_client
+      }
+    )
+
+    {:noreply, %{state | client: new_client}}
+  end
+
   def handle_cast({:merge_update_client, partial_client}, state) do
     Logger.warning(":merge_update_client is still being used, instead use :update_values")
     new_client = Map.merge(state.client, partial_client)

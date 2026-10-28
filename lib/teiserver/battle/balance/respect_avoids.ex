@@ -1,11 +1,11 @@
 defmodule Teiserver.Battle.Balance.RespectAvoids do
   @moduledoc """
-  A balance algorithm that tries to keep avoided players on seperate teams.
+  A balance algorithm that tries to keep avoided players on separate teams.
 
   High uncertainty players are avoid immune because we classify those as noobs and want to spread
   them evenly across teams (like split_noobs).
 
-  Parties will have signficantly higher importance than avoids. To limit the amount of computation, the amount of
+  Parties will have significantly higher importance than avoids. To limit the amount of computation, the amount of
   avoids is limited for higher player counts.
   """
 
@@ -275,7 +275,7 @@ defmodule Teiserver.Battle.Balance.RespectAvoids do
 
   defp do_brute_force_and_draft(state) do
     # This is the best combo with only the top 14 experienced players
-    # This means we brute force at most 14 playesr
+    # This means we brute force at most 14 players
     combo_result =
       BruteForceAvoid.get_best_combo(state.top_experienced, state.avoids, state.parties)
 

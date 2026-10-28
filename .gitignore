@@ -68,8 +68,3 @@ runtime/
 /source_deploy.tar.gz
 /bin
 .vscode/launch.json
-
-# I'm storing server output here, don't want to push it to git
-example_output
-test_auth
-lib/teiserver/account/account_import.ex

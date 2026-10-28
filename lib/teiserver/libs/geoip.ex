@@ -3,7 +3,7 @@ defmodule Teiserver.Geoip do
   @moduledoc false
   alias Teiserver.Config
 
-  @spec get_flag(String.t()) :: String.t()
+  @spec get_flag(String.t() | nil) :: String.t()
   def get_flag(nil), do: "??"
   def get_flag(ip), do: get_flag(ip, nil)
 

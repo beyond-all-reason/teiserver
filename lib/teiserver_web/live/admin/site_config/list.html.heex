@@ -1,0 +1,57 @@
+<SiteConfigComponents.section_menu active="list" scope={@scope} />
+
+<.header>
+  Listing site configs
+</.header>
+
+<SiteConfigComponents.search_form params={%{}} />
+
+<table class="table table-sm table-zebra" id="site_config-table">
+  <tbody>
+    <%= for {group_name, group_configs} <- @site_configs do %>
+      <tr>
+        <td colspan="4" class="font-bold text-lg pt-4 bg-secondary/10">{group_name}</td>
+      </tr>
+      <tr :for={config <- group_configs} id={"row-#{StringHelper.safe_name(config.key)}"}>
+        <td>{config.label}</td>
+        <td>{@values[config.key]}</td>
+        <td>
+          <.link
+            patch={~p"/admin/site_config/#{config.key}/edit"}
+            class="btn btn-secondary btn-xs"
+          >
+            Edit
+          </.link>
+        </td>
+        <td>
+          <.link
+            navigate={~p"/admin/site_config/#{config.key}/history"}
+            class="btn btn-info btn-xs"
+          >
+            History
+          </.link>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<.back href={~p"/admin"}>Back to admin</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit] and allow?(@scope, "Admin")}
+  id="site_config-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/site_config")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@config_type.key || :new}
+    title={@page_title}
+    action={@live_action}
+    config_type={@config_type}
+    config_value={@config_value}
+    patch={~p"/admin/site_config"}
+    scope={@scope}
+  />
+</.modal>

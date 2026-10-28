@@ -1,5 +1,7 @@
 defmodule TeiserverWeb.Account.ProfileComponents do
   @moduledoc false
+  alias Teiserver.Account
+
   use TeiserverWeb, :component
   import TeiserverWeb.NavComponents, only: [tab_header: 1, tab_nav: 1]
 
@@ -17,7 +19,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
       <div class="col" id="nav-col">
         <.tab_header>
           <.tab_nav url={~p"/profile/#{@userid}/overview"} selected={@tab == "overview"}>
-            <Fontawesome.icon icon_atom={:summary} style="solid" /> Overview
+            <Fontawesome.icon icon="fa-info" style="solid" /> Overview
           </.tab_nav>
 
           <.tab_nav url={~p"/profile/#{@userid}/matches"} selected={@tab == "matches"}>
@@ -80,6 +82,8 @@ defmodule TeiserverWeb.Account.ProfileComponents do
   attr :profile_permissions, :list, default: []
 
   def profile_header(assigns) do
+    assigns = assign(assigns, :rank, Account.get_user_stat_data(assigns.user.id)["rank"] || 0)
+
     ~H"""
     <TeiserverWeb.AccountComponents.sub_menu active="profile" view_colour={@view_colour} />
 
@@ -92,7 +96,7 @@ defmodule TeiserverWeb.Account.ProfileComponents do
 
           {@user.name} &nbsp;&nbsp;&nbsp;&nbsp;
           <span style="font-size: 0.7em;">
-            Chevron level: {(@user.rank || 0) + 1}
+            Chevron level: {@rank + 1}
           </span>
         </h3>
       </div>

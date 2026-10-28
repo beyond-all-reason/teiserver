@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_args = extract_search_params(params)
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Moderation.BanController do
       |> Enum.map(fn log -> log.details["target_user_id"] end)
       |> Enum.reject(&(&1 == nil))
       |> Map.new(fn userid ->
-        {userid, Account.get_username(userid)}
+        {userid, Account.get_username_by_id(userid)}
       end)
 
     conn
@@ -202,7 +202,6 @@ defmodule TeiserverWeb.Moderation.BanController do
             target_id: ban.source_id,
             reason: ban.reason,
             restrictions: ["Login"],
-            score_modifier: 0,
             expires: DateTime.shift(DateTime.utc_now(), year: 1000)
           })
 

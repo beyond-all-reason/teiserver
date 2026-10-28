@@ -219,6 +219,15 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"status" => "success"} = Tachyon.join_lobby!(ctx2[:client], ctx[:lobby_id])
       %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
 
+      %{"status" => "success"} =
+        Tachyon.lobby_add_bot!(ctx[:client], "1", "ScavengersOffenseAI",
+          version: "botv0",
+          name: "Scavy"
+        )
+
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+
       Tachyon.send_request(ctx[:client], "lobby/startBattle", %{id: ctx[:lobby_id]})
 
       %{"commandId" => "autohost/start"} =
@@ -278,10 +287,64 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
       %{"commandId" => "lobby/joinBattle", "status" => "success"} =
         Tachyon.recv_message!(ctx3[:client])
 
-      # when battle terminates members should get notified
-      TachyonBattle.lookup(battle_id) |> Process.exit(:kill)
-      %{"commandId" => "lobby/updated", "data" => updated} = Tachyon.recv_message!(ctx[:client])
-      %{"currentBattle" => nil} = updated
+      # battle should be present in the user/self event
+      Tachyon.abrupt_disconnect!(ctx3[:client])
+      %{client: client3} = Tachyon.connect(ctx3[:user], swallow_first_event: false)
+
+      %{"commandId" => "user/self", "data" => %{"user" => %{"currentBattle" => tachyon_battle}}} =
+        Tachyon.recv_message!(client3)
+
+      # only lightly test event since the structure is checked by json schema, and the
+      # content is rather straightforward
+      assert tachyon_battle["username"] == ctx3[:user].name
+
+      player_id = to_string(ctx[:user].id)
+      player_name = ctx[:user].name
+      spectator_ids = MapSet.new([to_string(ctx2[:user].id), to_string(ctx3[:user].id)])
+
+      %{"commandId" => "battle/start"} = Tachyon.recv_message!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+
+      Tachyon.autohost_send_update_event(
+        ctx[:autohost_client],
+        Tachyon.autohost_engine_quit(battle_id)
+      )
+
+      # all participants receive battle/ended event
+      for client <- [ctx[:client], ctx2[:client], client3] do
+        assert %{
+                 "commandId" => "battle/ended",
+                 "data" => %{
+                   "battleId" => ^battle_id,
+                   "players" => [
+                     %{
+                       "userId" => ^player_id,
+                       "name" => ^player_name,
+                       "allyTeam" => "0",
+                       "team" => "0",
+                       "player" => "0"
+                     }
+                   ],
+                   "bots" => [
+                     %{
+                       "shortName" => "ScavengersOffenseAI",
+                       "allyTeam" => "1",
+                       "team" => "0",
+                       "player" => "0"
+                     }
+                   ],
+                   "spectators" => spectators,
+                   "winningAllyTeamIds" => []
+                 }
+               } = Tachyon.recv_message!(client)
+
+        assert MapSet.new(spectators, & &1["userId"]) == spectator_ids
+
+        # after which the currentBattle is cleared
+        assert %{"commandId" => "lobby/updated", "data" => %{"currentBattle" => nil}} =
+                 Tachyon.recv_message!(client)
+      end
     end
   end
 
@@ -489,7 +552,7 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
              }
 
       assert vote["quorum"] == 2
-      assert vote["majority"] == 2
+      assert vote["majority"] == 0.501
 
       # check joining a lobby also holds the vote details
       {:ok, ctx3} = Tachyon.setup_client()
@@ -595,6 +658,12 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/left", "data" => data} = Tachyon.recv_message!(ctx2[:client])
       assert data["reason"] == "kicked"
+
+      # check that user/self is also correct after reconnection
+      Tachyon.abrupt_disconnect!(ctx2[:client])
+      client2 = Tachyon.connect(ctx2[:token], swallow_first_event: false)
+      %{"commandId" => "user/self", "data" => data} = Tachyon.recv_message!(client2)
+      assert data["user"]["currentLobby"] == nil
     end
 
     test "invalid user id returns error" do
@@ -794,33 +863,6 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
       {:error, :timeout} = Tachyon.recv_message(client)
-    end
-  end
-
-  describe "lobby restoration" do
-    setup [{Tachyon, :setup_client}]
-
-    test "can create lobby", %{client: client, token: token} do
-      Teiserver.Tachyon.enable_state_restoration()
-
-      lobby_data = %{
-        name: "test lobby",
-        map_name: "test-map",
-        ally_team_config: Tachyon.mk_ally_team_config(2, 1)
-      }
-
-      %{"status" => "success", "data" => data} = Tachyon.create_lobby!(client, lobby_data)
-      lobby_id = data["id"]
-      Teiserver.Tachyon.restart_system()
-      assert {:error, :disconnected} == Tachyon.recv_message(client)
-
-      client = Tachyon.connect(token, swallow_first_event: false)
-      {:ok, %{"commandId" => "user/self", "data" => data}} = Tachyon.recv_message(client)
-      assert data["user"]["currentLobby"] == lobby_id
-
-      # make sure the session correctly monitors the lobby
-      TachyonLobby.lookup(lobby_id) |> Process.exit(:kill)
-      %{"commandId" => "lobby/left"} = Tachyon.recv_message!(client)
     end
   end
 

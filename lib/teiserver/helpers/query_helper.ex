@@ -3,6 +3,8 @@ defmodule Teiserver.Helper.QueryHelpers do
   alias Teiserver.Repo
   import Ecto.Query, warn: false
 
+  @type t :: Query.t()
+
   defmacro lower(field) do
     quote do
       fragment("LOWER(?)", unquote(field))
@@ -107,5 +109,14 @@ defmodule Teiserver.Helper.QueryHelpers do
   def query_select(query, fields) do
     from stat_grids in query,
       select: ^fields
+  end
+
+  @spec paginate(t(), non_neg_integer(), pos_integer()) :: t()
+  def paginate(query, page, page_size) do
+    offset = page * page_size
+
+    query
+    |> offset_query(offset)
+    |> limit_query(page_size)
   end
 end

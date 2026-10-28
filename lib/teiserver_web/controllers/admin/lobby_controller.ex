@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       end
 
     lobby_messages =
-      Chat.list_lobby_messages(
+      Chat.list_spring_lobby_messages(
         search: [
           match_id: match_id
         ],
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   @spec lobby_chat_download(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat_download(conn, %{"id" => match_id}) do
     file_contents =
-      Chat.list_lobby_messages(
+      Chat.list_spring_lobby_messages(
         search: [
           match_id: match_id
         ],
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       end
 
     chat_messages =
-      Chat.list_lobby_messages(
+      Chat.list_spring_lobby_messages(
         search: [
           match_id_in: match_ids
         ],
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       |> Enum.map(fn %{id: id} -> id end)
 
     file_contents =
-      Chat.list_lobby_messages(
+      Chat.list_spring_lobby_messages(
         search: [
           match_id_in: match_ids
         ],

@@ -33,7 +33,9 @@ defmodule Teiserver.Autohost.Types.StartScript do
           teams: [team(), ...]
         }
 
+  # A team should have at least either players or bots
   @type team :: %{
-          players: [AT.Player.t()]
+          optional(:players) => [AT.Player.t(), ...],
+          optional(:bots) => [AT.Bot.t(), ...]
         }
 end

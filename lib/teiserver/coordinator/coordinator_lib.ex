@@ -10,7 +10,6 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"help", [], "Displays this help text.", :everybody},
       {"whoami", [], "Sends back information about who you are.", :everybody},
       {"whois", ["user"], "Sends back information about the user specified.", :everybody},
-      {"discord", [], "Allows linking of your discord account to your BAR account.", :everybody},
       {"mute", ["username"], "Mutes that user and prevents you seeing their messages.",
        :everybody},
       {"unmute", ["username"], "Un-mutes that user and allows you to see their messages.",
@@ -74,6 +73,12 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
       {"resetchevlevels", [],
        "Resets the chevron level restrictions to not exist. Requires boss privileges.",
        :everybody},
+      {"fixids", [],
+       "Tells the server to fix overlapping player IDs. If you have two or more people inadvertently playing as the same person (same colour, one commander etc) then this should fix that. Requires boss privileges.",
+       :everybody},
+      {"quantum", [],
+       "Toggles quantum mode, when enabled each team will have 1 commander shared between all players on that team. This includes full shared unit and resource control. Requires boss privileges.",
+       :everybody},
 
       # ---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"],
@@ -125,7 +130,9 @@ Multiple locks can be engaged at the same time
       {"specafk", [],
        "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.",
        :moderator},
-      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator}
+      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator},
+      {"modme", [], "(Re)gain moderator privileges", :moderator},
+      {"unmodme", [], "Drops moderator privileges for this session", :moderator}
     ]
 
     # $command - Coordinator command

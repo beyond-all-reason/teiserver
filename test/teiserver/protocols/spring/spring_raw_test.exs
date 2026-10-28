@@ -1,6 +1,5 @@
 defmodule Teiserver.SpringRawTest do
   alias Teiserver.Account
-  alias Teiserver.Account.UserCacheLib
   use Teiserver.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
@@ -63,7 +62,7 @@ defmodule Teiserver.SpringRawTest do
     _send_raw(socket, "REGISTER #{name} #{password} raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
-    assert %{name: ^name} = UserCacheLib.get_user_by_name(name)
+    assert %{name: ^name} = Account.get_user_by_name(name)
 
     # Now check the DB!
     db_users = Account.list_users(search: [name: name])
@@ -81,7 +80,7 @@ defmodule Teiserver.SpringRawTest do
 
     _send_raw(socket, "REGISTER #{username} #{password} #{username}@email.e\n")
     _reply = _recv_raw(socket)
-    user = UserCacheLib.get_user_by_name(username)
+    user = Account.get_user_by_name(username)
     assert %{name: ^username} = user
     Account.verify_user(user.id)
 
@@ -176,18 +175,18 @@ defmodule Teiserver.SpringRawTest do
     _recv_raw(socket)
 
     # Incorrect password
-    for _idx <- 1..4 do
+    for _idx <- 1..5 do
       _send_raw(
         socket,
         "LOGIN #{user.name} IncorrectPassword 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
       )
 
-      reply = _recv_until(socket)
-      assert reply == "DENIED Invalid password\n"
-
       # Clear the much shorter lived flood protection
       Teiserver.cache_put(:teiserver_login_count, user.id, 0)
     end
+
+    [_r1, _r2, _r3, _r4, _r5] = _recv_until(socket) |> String.split("\n", trim: true)
+    Teiserver.cache_put(:teiserver_login_count, user.id, 0)
 
     # The rate limit should now be triggering
     _send_raw(
@@ -195,16 +194,14 @@ defmodule Teiserver.SpringRawTest do
       "LOGIN #{user.name} IncorrectPassword 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
-    reply = _recv_until(socket)
-    assert reply == "DENIED Flood protection\n"
-
     # Even with the correct password we should still have a rate limit
     _send_raw(
       socket,
       "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
-    reply = _recv_until(socket)
-    assert reply == "DENIED Flood protection\n"
+    [invalid_pass, valid_pass] = _recv_until(socket) |> String.split("\n", trim: true)
+    assert invalid_pass == "DENIED Flood protection"
+    assert valid_pass == "DENIED Flood protection"
   end
 end

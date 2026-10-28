@@ -52,20 +52,6 @@ defmodule Teiserver.Autohost.Session do
   end
 
   @doc """
-  Meant for the tachyon handler to notify back the session that it got the
-  response to autohost/start
-  """
-  @spec reply_start_battle(
-          pid(),
-          TachyonBattle.id(),
-          {:ok, start_response()} | {:error, term()}
-        ) :: :ok
-
-  def reply_start_battle(session_pid, battle_id, resp) do
-    send(session_pid, {:reply_start_battle, battle_id, resp})
-  end
-
-  @doc """
   send a message to the autohost with the given id
   this calls returns when the ack to the request has been received.
   """
@@ -77,11 +63,6 @@ defmodule Teiserver.Autohost.Session do
     |> :gen_statem.call({:send_message, payload}, @default_call_timeout)
   catch
     :exit, {:noproc, _details} -> {:error, :no_autohost}
-  end
-
-  @spec reply_send_message(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
-  def reply_send_message(session_pid, ref, resp) do
-    send(session_pid, {:reply_send_message, ref, resp})
   end
 
   @doc """
@@ -112,11 +93,6 @@ defmodule Teiserver.Autohost.Session do
     :exit, {:noproc, _details} -> {:error, :no_autohost}
   end
 
-  @spec reply_kill_battle(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
-  def reply_kill_battle(session_pid, ref, resp) do
-    send(session_pid, {:reply_kill_battle, ref, resp})
-  end
-
   @spec add_player(pid(), TachyonBattle.Types.add_player_data()) :: :ok | {:error, term()}
   def add_player(session_pid, add_data) do
     :gen_statem.call(session_pid, {:add_player, add_data}, @default_call_timeout)
@@ -124,9 +100,8 @@ defmodule Teiserver.Autohost.Session do
     :exit, {:noproc, _details} -> {:error, :no_autohost}
   end
 
-  @spec reply_add_player(pid(), reference(), :ok | {:error, reason :: term()}) :: :ok
-  def reply_add_player(session_pid, ref, resp) do
-    send(session_pid, {:reply_add_player, ref, resp})
+  def async_reply(session_pid, cb_state, resp) do
+    send(session_pid, {:async_reply, cb_state, resp})
   end
 
   @doc """
@@ -181,11 +156,11 @@ defmodule Teiserver.Autohost.Session do
         _state,
         data
       ) do
-    TachyonHandler.start_battle(data.conn_pid, battle_id, start_script)
+    cb_state = {:start_battle_cb, battle_id, start_script, from}
+    TachyonHandler.start_battle(data.conn_pid, battle_id, start_script, cb_state)
 
     data =
       data
-      |> Map.update!(:pending_battles, &Map.put(&1, battle_id, {from, start_script}))
       |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, {:battle, battle_id}))
 
     {:keep_state, data}
@@ -205,9 +180,8 @@ defmodule Teiserver.Autohost.Session do
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
   def handle_event({:call, from}, {:send_message, payload}, _state, %AT.SessionData{} = data) do
-    ref = make_ref()
-    TachyonHandler.send_message(data.conn_pid, ref, payload)
-    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
+    cb_state = {:genserver_reply, from}
+    TachyonHandler.send_message(data.conn_pid, cb_state, payload)
     {:keep_state, data}
   end
 
@@ -220,9 +194,8 @@ defmodule Teiserver.Autohost.Session do
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
   def handle_event({:call, from}, {:kill_battle, battle_id}, _state, %AT.SessionData{} = data) do
-    ref = make_ref()
-    TachyonHandler.kill_battle(data.conn_pid, ref, battle_id)
-    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
+    cb_state = {:genserver_reply, from}
+    TachyonHandler.kill_battle(data.conn_pid, cb_state, battle_id)
     {:keep_state, data}
   end
 
@@ -235,9 +208,8 @@ defmodule Teiserver.Autohost.Session do
       do: {:keep_state, data, [{:reply, from, {:error, :invalid_battle}}]}
 
   def handle_event({:call, from}, {:add_player, add_data}, _state, %AT.SessionData{} = data) do
-    ref = make_ref()
-    TachyonHandler.add_player(data.conn_pid, ref, add_data)
-    data = Map.update!(data, :pending_replies, &Map.put(&1, ref, from))
+    cb_state = {:genserver_reply, from}
+    TachyonHandler.add_player(data.conn_pid, cb_state, add_data)
     {:keep_state, data}
   end
 
@@ -250,15 +222,15 @@ defmodule Teiserver.Autohost.Session do
     {:keep_state, data, [{:reply, from, get_subscription_start(data)}]}
   end
 
-  def handle_event(:info, {:reply_kill_battle, ref, _resp}, _state, %AT.SessionData{} = data)
-      when not is_map_key(data.pending_replies, ref),
-      do: {:keep_state, data}
+  def handle_event(:info, {:async_reply, cb_state, resp}, _state, %AT.SessionData{} = data) do
+    case cb_state do
+      {:start_battle_cb, battle_id, start_script, from} ->
+        battle_started(battle_id, start_script, from, resp, data)
 
-  def handle_event(:info, {:reply_kill_battle, ref, resp}, _state, %AT.SessionData{} = data) do
-    {from, pending_replies} = Map.pop!(data.pending_replies, ref)
-    data = %{data | pending_replies: pending_replies}
-    GenServer.reply(from, resp)
-    {:keep_state, data}
+      {:genserver_reply, from} ->
+        GenServer.reply(from, resp)
+        {:keep_state, data}
+    end
   end
 
   def handle_event(:info, {:reply_add_player, ref, _resp}, _state, %AT.SessionData{} = data)
@@ -285,7 +257,6 @@ defmodule Teiserver.Autohost.Session do
       case val do
         {:battle, battle_id} ->
           data
-          |> Map.update!(:pending_battles, &Map.delete(&1, battle_id))
           |> Map.update!(:active_battles, &Map.delete(&1, battle_id))
       end
 
@@ -320,57 +291,6 @@ defmodule Teiserver.Autohost.Session do
       :handshaking -> {:next_state, :connected, data}
       _other -> {:keep_state, data}
     end
-  end
-
-  def handle_event(
-        :info,
-        {:reply_start_battle, battle_id, _resp},
-        _state,
-        %AT.SessionData{} = data
-      )
-      when not is_map_key(data.pending_battles, battle_id), do: {:keep_state, data}
-
-  def handle_event(
-        :info,
-        {:reply_start_battle, battle_id, resp},
-        _state,
-        %AT.SessionData{} = data
-      ) do
-    {{from, start_script}, pending_battles} = Map.pop!(data.pending_battles, battle_id)
-
-    case resp do
-      {:error, reason} ->
-        GenServer.reply(from, {:error, reason})
-        {:keep_state, data}
-
-      {:ok, start_response} ->
-        battle_data = %AT.BattleData{
-          start_script: start_script,
-          ips: start_response.ips,
-          port: start_response.port
-        }
-
-        data =
-          data
-          |> Map.replace!(:pending_battles, pending_battles)
-          |> Map.update!(:active_battles, &Map.put(&1, battle_id, battle_data))
-
-        GenServer.reply(from, {:ok, self(), start_response})
-
-        {:keep_state, data}
-    end
-  end
-
-  def handle_event(:info, {:reply_send_message, ref, _resp}, _state, %AT.SessionData{} = data)
-      when not is_map_key(data.pending_replies, ref) do
-    {:keep_state, data}
-  end
-
-  def handle_event(:info, {:reply_send_message, ref, resp}, _state, %AT.SessionData{} = data) do
-    {from, pending_replies} = Map.pop!(data.pending_replies, ref)
-    data = %{data | pending_replies: pending_replies}
-    GenServer.reply(from, resp)
-    {:keep_state, data}
   end
 
   # TODO: will need to "resurrect" a battle if we ever get into this situation.
@@ -457,5 +377,27 @@ defmodule Teiserver.Autohost.Session do
     end
     |> Enum.reject(&is_nil/1)
     |> Enum.min(fn -> DateTime.utc_now() end)
+  end
+
+  defp battle_started(battle_id, start_script, from, resp, %AT.SessionData{} = data) do
+    case resp do
+      {:error, reason} ->
+        Logger.error("failed to start a battle: #{inspect(reason)}")
+        GenServer.reply(from, {:error, reason})
+        {:keep_state, data}
+
+      {:ok, start_response} ->
+        battle_data = %AT.BattleData{
+          start_script: start_script,
+          ips: start_response.ips,
+          port: start_response.port
+        }
+
+        data = %{data | active_battles: Map.put(data.active_battles, battle_id, battle_data)}
+
+        GenServer.reply(from, {:ok, self(), start_response})
+
+        {:keep_state, data}
+    end
   end
 end

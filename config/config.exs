@@ -24,6 +24,7 @@ config :teiserver,
 
 # Configures the endpoint
 config :teiserver, TeiserverWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   # This is overriden in your secret config, it's here only to allow things to run easily
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
@@ -34,54 +35,10 @@ config :teiserver, TeiserverWeb.Endpoint,
   pubsub_server: Teiserver.PubSub,
   debug_errors: Config.config_env() == :dev,
   code_reloader: Config.config_env() == :dev,
-  check_origin: Config.config_env() == :prod,
   version: Mix.Project.config()[:version],
   https: [
-    versions: [:"tlsv1.2"],
     port: 8888,
-    otp_app: :teiserver,
-    ciphers: [
-      ~c"ECDHE-ECDSA-AES256-GCM-SHA384",
-      ~c"ECDHE-RSA-AES256-GCM-SHA384",
-      ~c"ECDHE-ECDSA-AES256-SHA384",
-      ~c"ECDHE-RSA-AES256-SHA384",
-      ~c"ECDHE-ECDSA-DES-CBC3-SHA",
-      ~c"ECDH-ECDSA-AES256-GCM-SHA384",
-      ~c"ECDH-RSA-AES256-GCM-SHA384",
-      ~c"ECDH-ECDSA-AES256-SHA384",
-      ~c"ECDH-RSA-AES256-SHA384",
-      ~c"DHE-DSS-AES256-GCM-SHA384",
-      ~c"DHE-DSS-AES256-SHA256",
-      ~c"AES256-GCM-SHA384",
-      ~c"AES256-SHA256",
-      ~c"ECDHE-ECDSA-AES128-GCM-SHA256",
-      ~c"ECDHE-RSA-AES128-GCM-SHA256",
-      ~c"ECDHE-ECDSA-AES128-SHA256",
-      ~c"ECDHE-RSA-AES128-SHA256",
-      ~c"ECDH-ECDSA-AES128-GCM-SHA256",
-      ~c"ECDH-RSA-AES128-GCM-SHA256",
-      ~c"ECDH-ECDSA-AES128-SHA256",
-      ~c"ECDH-RSA-AES128-SHA256",
-      ~c"DHE-DSS-AES128-GCM-SHA256",
-      ~c"DHE-DSS-AES128-SHA256",
-      ~c"AES128-GCM-SHA256",
-      ~c"AES128-SHA256",
-      ~c"ECDHE-ECDSA-AES256-SHA",
-      ~c"ECDHE-RSA-AES256-SHA",
-      ~c"DHE-DSS-AES256-SHA",
-      ~c"ECDH-ECDSA-AES256-SHA",
-      ~c"ECDH-RSA-AES256-SHA",
-      ~c"AES256-SHA",
-      ~c"ECDHE-ECDSA-AES128-SHA",
-      ~c"ECDHE-RSA-AES128-SHA",
-      ~c"DHE-DSS-AES128-SHA",
-      ~c"ECDH-ECDSA-AES128-SHA",
-      ~c"ECDH-RSA-AES128-SHA",
-      ~c"AES128-SHA"
-    ],
-    secure_renegotiate: true,
-    reuse_sessions: true,
-    honor_cipher_order: true
+    otp_app: :teiserver
   ]
 
 config :esbuild,
@@ -175,8 +132,16 @@ config :teiserver, Teiserver,
     battle_match_unrated: 365,
     account_unverified: 14,
     lobby_chat: 90,
+    party_chat: 90,
+    battle_chat: 90,
     room_chat: 90,
-    battle_minimum_seconds: 120
+    direct_messages: 365,
+    battle_minimum_seconds: 120,
+    linked_audit_logs: 365,
+    unlinked_audit_logs: 365,
+    unverified_users: 14,
+    previous_emails: 14,
+    lobby_logs: 90
   },
   require_mfa_for_privileged_roles: true
 
@@ -244,6 +209,10 @@ config :teiserver, Oban,
        # Every hour
        {"0 * * * *", Teiserver.Admin.HourlyCleanupTask},
 
+       # Every day at 6am
+       {"0 6 * * *", Teiserver.Account.DataExpiryTask},
+       {"0 6 * * *", Teiserver.Account.GDPRPseudoAnonymiseTask},
+
        # Every day at 8am
        {"0 8 * * *", Teiserver.Admin.DailyCleanupTask},
 
@@ -251,7 +220,8 @@ config :teiserver, Oban,
        {"0 9 * * *", Teiserver.Logging.AggregateViewLogsTask},
 
        # 1:07 am
-       {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+       {"7 1 * * *", Teiserver.Account.DeleteUnverifiedUsersTask},
+       {"7 1 * * *", Teiserver.Moderation.DeleteExpiredAARTask},
        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
        {"7 1 * * *", Teiserver.OAuth.Tasks.Cleanup},
 
@@ -281,7 +251,7 @@ config :teiserver, Oban,
        {"2 12 * * *", Teiserver.Account.RecalculateUserDailyStatTask}
      ]}
   ],
-  queues: [logging: 1, cleanup: 1, teiserver: 10]
+  queues: [logging: 1, cleanup: 1, processing: 5, teiserver: 10]
 
 config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 

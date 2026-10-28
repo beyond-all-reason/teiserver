@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
   end
 
   test "can process expanded_group" do
-    # Setup mocks with no avoids (insteading of calling db)
+    # Setup mocks with no avoids (instead of calling db)
     with_mock(RelationshipLib,
       get_lobby_avoids: fn _player_ids, _limit, _player_limit, _minimum_time_hours -> [] end,
       get_lobby_avoids: fn _player_ids, _limit, _player_limit -> [] end
@@ -287,7 +287,7 @@ defmodule Teiserver.Battle.RespectAvoidsTest do
   end
 
   test "gives each team the best captain" do
-    # Setup mocks with no avoids (insteading of calling db)
+    # Setup mocks with no avoids (instead of calling db)
     with_mock(RelationshipLib,
       get_lobby_avoids: fn _player_ids, _limit, _player_limit, _minimum_time_hours -> [] end,
       get_lobby_avoids: fn _player_ids, _limit, _player_limit -> [] end

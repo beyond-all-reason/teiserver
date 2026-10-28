@@ -1,0 +1,69 @@
+<BannedIPComponents.section_menu active="list" scope={@scope}>
+  <.link patch={~p"/moderation/banned_ips/new"} class="btn btn-primary">
+    <Fontawesome.icon icon="plus" style="regular" /> New Banned IP
+  </.link>
+</BannedIPComponents.section_menu>
+
+<.header>
+  Listing banned ips
+  <:actions>
+    <.link patch={~p"/moderation/banned_ips/new"}></.link>
+  </:actions>
+</.header>
+<div class="heading-subtitle">{@banned_ip_count} banned ips found</div>
+
+<BannedIPComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.table
+  id="banned_ips-table"
+  rows={@streams.banned_ips}
+  table_class="table-sm table-zebra mt-4"
+  row_click={fn {_id, banned_ip} -> JS.navigate(~p"/moderation/banned_ips/#{banned_ip}") end}
+>
+  <:col :let={{_id, banned_ip}} label="IP">{banned_ip.cidr}</:col>
+  <:action :let={{_id, banned_ip}}>
+    <div class="sr-only">
+      <.link navigate={~p"/moderation/banned_ips/#{banned_ip}"}>Show</.link>
+    </div>
+    <.link
+      patch={~p"/moderation/banned_ips/#{banned_ip}/edit"}
+      class="btn btn-secondary btn-outline btn-sm me-2"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:action>
+  <:action :let={{_id, banned_ip}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: banned_ip.id}) |> hide("##{banned_ip.id}")}
+      data-confirm="Are you sure?"
+      class="btn btn-error btn-outline btn-sm"
+    >
+      <Fontawesome.icon icon="trash" style="regular" /> Delete
+    </.link>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="banned_ip-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_ips")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_ip.id || :new}
+    title={@page_title}
+    action={@live_action}
+    banned_ip={@banned_ip}
+    patch={~p"/moderation/banned_ips"}
+  />
+</.modal>

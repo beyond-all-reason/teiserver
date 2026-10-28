@@ -11,7 +11,6 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Client
-  alias Teiserver.Config
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Lobby
@@ -56,18 +55,6 @@ defmodule Teiserver.Protocols.SpringOut do
     :telemetry.execute([:spring, :out], %{duration: elapsed, count: 1}, %{
       command: reply_cmd
     })
-
-    if Config.get_site_config_cache("debug.Print outgoing messages") or
-         state.print_server_messages do
-      if is_list(msg) do
-        msg
-        |> Enum.each(fn m ->
-          Logger.info("--> #{state.username}: #{Spring.format_log(m)}")
-        end)
-      else
-        Logger.info("--> #{state.username}: #{Spring.format_log(msg)}")
-      end
-    end
 
     if Enum.member?([nil, ""], msg) do
       state
@@ -417,16 +404,8 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # Email change request
-  defp do_reply(:change_email_accepted, nil) do
-    "CHANGEEMAILACCEPTED\n"
-  end
-
   defp do_reply(:change_email_denied, reason) do
     "CHANGEEMAILDENIED #{reason}\n"
-  end
-
-  defp do_reply(:change_email_request_accepted, nil) do
-    "CHANGEEMAILREQUESTACCEPTED\n"
   end
 
   # SLDB

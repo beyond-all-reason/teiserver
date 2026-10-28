@@ -63,13 +63,13 @@ defmodule TeiserverWeb.CoreComponents do
               phx-window-keydown={hide_modal(@on_cancel, @id)}
               phx-key="escape"
               phx-click-away={hide_modal(@on_cancel, @id)}
-              class="hidden relative rounded-2xl bg-secondary p-4 p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
+              class="hidden relative rounded-2xl bg-base-100 p-4 p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
             >
               <div class="absolute top-6 right-5">
                 <button
                   phx-click={hide_modal(@on_cancel, @id)}
                   type="button"
-                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
+                  class="-m-3 flex-none p-3 opacity-20 hover:opacity-40 btn-close"
                   aria-label={gettext("close")}
                 >
                   <Fontawesome.icon icon="times" />
@@ -135,19 +135,6 @@ defmodule TeiserverWeb.CoreComponents do
   slot :inner_block, doc: "the optional inner block that renders the flash message"
 
   def flash(assigns) do
-    text_colour =
-      case assigns[:kind] do
-        :info -> "info"
-        :success -> "success"
-        :warning -> "warning"
-        :error -> "danger"
-        _other -> ""
-      end
-
-    assigns =
-      assigns
-      |> assign(:text_colour, text_colour)
-
     ~H"""
     <div
       :if={msg = render_slot(@inner_block) || Phoenix.Flash.get(@flash, @kind)}
@@ -157,19 +144,22 @@ defmodule TeiserverWeb.CoreComponents do
       aria-live="assertive"
       aria-atomic="true"
       class={[
-        "toast align-items-center",
+        "alert",
         @kind == :info && "alert-info",
         @kind == :success && "alert-success",
         @kind == :warning && "alert-warning",
-        @kind == :error && "alert-danger"
+        @kind == :error && "alert-error"
       ]}
       {@rest}
     >
-      <div class={"toast-header border-#{@text_colour}"}>
-        <Fontawesome.icon icon="stop" style="solid" class={"text-#{@text_colour}"} /> &nbsp;
-        <small class="text-body-secondary">just now</small>
-
-        <button :if={@close} type="button" class="btn btn-close" aria-label={gettext("close")}>
+      <div class="toast-header">
+        <button
+          :if={@close}
+          type="button"
+          class={"btn btn-xs btn-soft btn-close btn-#{@kind}"}
+          aria-label={gettext("close")}
+        >
+          <Fontawesome.icon icon="times" style="regular" />
         </button>
       </div>
       <div class="toast-body">
@@ -187,8 +177,32 @@ defmodule TeiserverWeb.CoreComponents do
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
   def flash_group(assigns) do
+    # We set the z-index to 9999 because in some cases the toast is not correctly displaying
+    # over other elements even though it's a toast class
     ~H"""
-    <div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast toast-top toast-end mt-25 z-9999">
+      <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
+      <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
+      <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
+      <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
+
+      <.flash
+        id="client-error"
+        kind={:error}
+        title={gettext("We can't find the internet")}
+        phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
+        phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
+        hidden
+      >
+        {gettext("Attempting to reconnect")}
+      </.flash>
+    </div>
+    """
+  end
+
+  def oldflash_group(assigns) do
+    ~H"""
+    <div aria-live="polite" aria-atomic="true" class="position-relative h-1">
       <div class="toast-container top-0 end-0 p-3">
         <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
         <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
@@ -331,7 +345,9 @@ defmodule TeiserverWeb.CoreComponents do
     |> input()
   end
 
-  def input(%{type: "checkbox", value: value} = assigns) do
+  def input(%{type: "checkbox"} = assigns) do
+    value = assigns[:value] || "true"
+
     assigns =
       assign_new(assigns, :checked, fn -> Form.normalize_value("checkbox", value) end)
 
@@ -343,8 +359,9 @@ defmodule TeiserverWeb.CoreComponents do
         id={@id}
         class="form-check-input"
         type="checkbox"
-        value={@value}
+        value={assigns[:value] || "true"}
         checked={@checked}
+        {@rest}
       />
       <label class="form-check-label" for={@id}>
         <strong>{@label}</strong>{assigns[:text]}
@@ -496,6 +513,10 @@ defmodule TeiserverWeb.CoreComponents do
   attr :class, :any, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :any, default: nil, doc: "the input error class to use over defaults"
 
+  attr :fieldset?, :boolean,
+    default: true,
+    doc: "include the fieldset class in the wrapping div, defaults to true"
+
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
@@ -508,7 +529,7 @@ defmodule TeiserverWeb.CoreComponents do
     |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
-    |> input()
+    |> input_tw()
   end
 
   def input_tw(%{type: "hidden"} = assigns) do
@@ -594,7 +615,7 @@ defmodule TeiserverWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input_tw(assigns) do
     ~H"""
-    <div class="fieldset">
+    <div class={@fieldset? && "fieldset"}>
       <label>
         <span :if={@label} class="label mb-1">{@label}</span>
         <input
@@ -622,7 +643,7 @@ defmodule TeiserverWeb.CoreComponents do
 
   def label(assigns) do
     ~H"""
-    <label for={@for} class="control-label">
+    <label for={@for} class="label control-label">
       {render_slot(@inner_block)}
     </label>
     """
@@ -644,6 +665,13 @@ defmodule TeiserverWeb.CoreComponents do
 
   @doc """
   Renders a header with title.
+
+  <.header>
+    Main text
+    <:subtitle>
+      Subtitle text
+    </:subtitle>
+  </.header>
   """
   attr :class, :string, default: nil
   slot :inner_block, required: true
@@ -657,7 +685,7 @@ defmodule TeiserverWeb.CoreComponents do
         <h1 class="text-lg font-semibold leading-8 text-zinc-600 dark:text-zinc-300">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-700 dark:text-zinc-200">
+        <p :if={@subtitle != []} class="heading-subtitle">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -685,7 +713,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :row_click, :any, default: nil, doc: "the function for handling phx-click on each row"
   attr :row_class, :any, default: nil, doc: "the function for setting the tr class"
 
-  attr :table_class, :string, default: ""
+  attr :table_class, :any, default: ""
 
   attr :row_item, :any,
     default: &Function.identity/1,
@@ -709,7 +737,7 @@ defmodule TeiserverWeb.CoreComponents do
         <thead class="">
           <tr>
             <th :for={col <- @col} class="">{col[:label]}</th>
-            <th class="visually-hidden"><span>{gettext("Actions")}</span></th>
+            <th :if={@action != []} class="visually-hidden"><span>{gettext("Actions")}</span></th>
           </tr>
         </thead>
         <tbody
@@ -749,7 +777,7 @@ defmodule TeiserverWeb.CoreComponents do
       </.list>
   """
   slot :item, required: true do
-    attr :title, :string, required: true
+    attr :title, :string
   end
 
   def list(assigns) do
@@ -757,8 +785,12 @@ defmodule TeiserverWeb.CoreComponents do
     <div class="mt-14">
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 sm:gap-8">
-          <dt class="w-1/4 flex-none text-[0.8125rem] leading-6 text-zinc-500">{item.title}</dt>
-          <dd class="text-sm leading-6 text-zinc-700">{render_slot(item)}</dd>
+          <dt :if={item[:title]} class="list-title-item">
+            {item.title}
+          </dt>
+          <dd class="list-content-item">
+            {render_slot(item)}
+          </dd>
         </div>
       </dl>
     </div>
@@ -767,18 +799,38 @@ defmodule TeiserverWeb.CoreComponents do
 
   @doc """
   Renders a back navigation link.
+
+  Use navigate within the same LiveView session and href when directing to a different session.
+
   ## Examples
-      <.back navigate={~p"/posts"}>Back to posts</.back>
+      <.back navigate={~p"/section/posts"}>Back to posts</.back>
+
+      <.back href={~p"/section"}>Back to section</.back>
   """
-  attr :navigate, :any, required: true
+  attr :navigate, :any
+  attr :href, :any
   slot :inner_block, required: true
 
-  def back(assigns) do
+  def back(%{navigate: _navigate} = assigns) do
     ~H"""
     <div class="mt-16">
       <.link
         navigate={@navigate}
-        class="btn btn-secondary text-sm font-semibold leading-6 text-zinc-900 hover:text-zinc-700"
+        class="btn btn-secondary btn-soft text-sm font-semibold leading-6"
+      >
+        <i class="fa-fw fa-solid fa-arrow-left" />
+        {render_slot(@inner_block)}
+      </.link>
+    </div>
+    """
+  end
+
+  def back(%{href: _href} = assigns) do
+    ~H"""
+    <div class="mt-16">
+      <.link
+        href={@href}
+        class="btn btn-secondary btn-soft text-sm font-semibold leading-6"
       >
         <i class="fa-fw fa-solid fa-arrow-left" />
         {render_slot(@inner_block)}
@@ -866,5 +918,20 @@ defmodule TeiserverWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  @doc """
+  <.ui_deprecation_warning new_url={~p"/some/path"} />
+  """
+  attr :new_url, :string
+
+  def ui_deprecation_warning(assigns) do
+    ~H"""
+    <div class="alert alert-warning mt-4">
+      This page has been moved to the <a href={@new_url}>new UI</a>. If there is functionality missing from the new pages or errors present in them please
+      <a href="https://github.com/beyond-all-reason/teiserver/issues">create an issue</a>
+      on the Teiserver repo so we can ensure it's not missed.
+    </div>
+    """
   end
 end

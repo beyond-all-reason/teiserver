@@ -3,10 +3,14 @@ defmodule Teiserver.Moderation do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account.Scope
+  alias Teiserver.Account.User
   alias Teiserver.Helper.QueryHelpers
+  alias Teiserver.Logging.Helpers, as: LoggingHelper
   alias Teiserver.Moderation.Action
   alias Teiserver.Moderation.ActionLib
+  alias Teiserver.Moderation.AntiAbuseRecord
+  alias Teiserver.Moderation.AntiAbuseRecordQueries
   alias Teiserver.Moderation.Ban
   alias Teiserver.Moderation.BanLib
   alias Teiserver.Moderation.BannedDomain
@@ -30,8 +34,6 @@ defmodule Teiserver.Moderation do
 
   @spec colour :: atom
   defdelegate colour(), to: ReportLib
-
-  def overwatch_icon, do: "eye"
 
   @spec report_query(List.t()) :: Ecto.Query.t()
   def report_query(args) do
@@ -620,6 +622,35 @@ defmodule Teiserver.Moderation do
 
   def broadcast_update_action(v), do: v
 
+  @spec expire_warning_reminders(User.id() | nil) ::
+          {:ok, [Action.t()]} | {:error, Ecto.Changeset.t()}
+  def expire_warning_reminders(nil), do: {:ok, []}
+
+  def expire_warning_reminders(user_id) do
+    result =
+      Repo.transaction(fn ->
+        list_actions(
+          search: [
+            target_id: user_id,
+            expiry: "Unexpired only",
+            in_restrictions: "Warning reminder"
+          ],
+          limit: :infinity
+        )
+        |> Enum.map(fn action ->
+          case action |> Action.changeset(%{"expires" => DateTime.utc_now()}) |> Repo.update() do
+            {:ok, updated} -> updated
+            {:error, changeset} -> Repo.rollback(changeset)
+          end
+        end)
+      end)
+
+    with {:ok, updated_actions} <- result do
+      Enum.each(updated_actions, &broadcast_update_action({:ok, &1}))
+      {:ok, updated_actions}
+    end
+  end
+
   # Used to remove all references to a given action prior to the deletion
   # of the action
   defp dereference_action_from_reports_query(%Action{id: action_id}) do
@@ -850,7 +881,7 @@ defmodule Teiserver.Moderation do
   end
 
   # Others
-  @spec unbridge_user(nil | T.user() | User.id(), String.t(), non_neg_integer(), String.t()) ::
+  @spec unbridge_user(nil | User.t() | User.id(), String.t(), non_neg_integer(), String.t()) ::
           any
   def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
     unbridge_user(Account.get_user(userid), message, flagged_word_count, location)
@@ -865,7 +896,6 @@ defmodule Teiserver.Moderation do
           target_id: user.id,
           reason: "Automod detected flagged words in '#{message}'",
           restrictions: ["Bridging"],
-          score_modifier: 100,
           hidden: true,
           expires: DateTime.shift(DateTime.utc_now(), year: 1200)
         })
@@ -895,7 +925,7 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedDomain)
   end
 
-  @spec list_banned_domains_cache :: MapSet.t(String.t())
+  @spec list_banned_domains_cache() :: MapSet.t(String.t())
   def list_banned_domains_cache do
     Teiserver.cache_get(:application_metadata_cache, "banned_domains", MapSet.new())
   end
@@ -1046,6 +1076,8 @@ defmodule Teiserver.Moderation do
   """
   def get_banned_ip!(id), do: Repo.get!(BannedIP, id)
 
+  def get_banned_ip(id), do: Repo.get(BannedIP, id)
+
   @doc """
   Creates a banned_ip.
 
@@ -1141,9 +1173,10 @@ defmodule Teiserver.Moderation do
     Repo.all(BannedPhrase)
   end
 
-  @spec list_banned_phrases_cache() :: [BannedPhrase.t()]
-  def list_banned_phrases_cache do
-    Teiserver.cache_get(:application_metadata_cache, "banned_phrases", [])
+  @spec list_banned_phrases_cache(String.t() | nil) :: [BannedPhrase.t()]
+  def list_banned_phrases_cache(use_case) do
+    use_case = use_case || "all"
+    Teiserver.cache_get(:application_metadata_cache, "banned_phrases/#{use_case}", [])
   end
 
   @doc """
@@ -1248,5 +1281,146 @@ defmodule Teiserver.Moderation do
       {:error, :einval} ->
         false
     end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking anti_abuse_record changes.
+
+  ## Examples
+
+      iex> change_anti_abuse_record(anti_abuse_record)
+      %Ecto.Changeset{source: %AntiAbuseRecord{}}
+
+  """
+  @spec change_anti_abuse_record(AntiAbuseRecord.t()) :: Ecto.Changeset.t()
+  def change_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record) do
+    AntiAbuseRecord.changeset(anti_abuse_record, %{})
+  end
+
+  @doc """
+  Gets a single anti_abuse_record.
+
+  Returns `nil` if the AntiAbuseRecord does not exist.
+
+  ## Examples
+
+      iex> get_anti_abuse_record(123, scope)
+      %AntiAbuseRecord{}
+
+      iex> get_anti_abuse_record(456, scope)
+      nil
+
+  """
+  def get_anti_abuse_record(id, %Scope{} = scope) do
+    AntiAbuseRecordQueries.anti_abuse_records()
+    |> AntiAbuseRecordQueries.where_id(id)
+    |> Repo.one()
+    |> log_anti_abuse_record_access(scope, :get)
+  end
+
+  @doc """
+  Creates a anti_abuse_record.
+
+  ## Examples
+
+      iex> create_anti_abuse_record(%{field: value})
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> create_anti_abuse_record(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_anti_abuse_record(map(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def create_anti_abuse_record(attrs, %Scope{} = scope) do
+    %AntiAbuseRecord{}
+    |> AntiAbuseRecord.changeset(attrs)
+    |> Repo.insert()
+    |> log_anti_abuse_record_access(scope, :create)
+  end
+
+  @doc """
+  Updates a anti_abuse_record.
+
+  ## Examples
+
+      iex> update_anti_abuse_record(anti_abuse_record, %{field: new_value})
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> update_anti_abuse_record(anti_abuse_record, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_anti_abuse_record(AntiAbuseRecord.t(), map(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def update_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record, attrs, scope) do
+    anti_abuse_record
+    |> AntiAbuseRecord.changeset(attrs)
+    |> Repo.update()
+    |> log_anti_abuse_record_access(scope, :update)
+  end
+
+  @doc """
+  Deletes a AntiAbuseRecord.
+
+  ## Examples
+
+      iex> delete_anti_abuse_record(anti_abuse_record)
+      {:ok, %AntiAbuseRecord{}}
+
+      iex> delete_anti_abuse_record(anti_abuse_record)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_anti_abuse_record(AntiAbuseRecord.t(), Scope.t()) ::
+          {:ok, AntiAbuseRecord.t()} | {:error, Ecto.Changeset.t()}
+  def delete_anti_abuse_record(%AntiAbuseRecord{} = anti_abuse_record, scope) do
+    Repo.delete(anti_abuse_record)
+    |> log_anti_abuse_record_access(scope, :delete)
+  end
+
+  @doc """
+  Logs access to something related to anti-abuse records. Intended to take a piped argument
+  and pass through that argument while using it to populate the AuditLog.
+  """
+  def log_anti_abuse_record_access({:ok, %AntiAbuseRecord{} = record}, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
+      id: record.id,
+      action: action
+    })
+
+    {:ok, record}
+  end
+
+  def log_anti_abuse_record_access(%AntiAbuseRecord{} = record, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
+      id: record.id,
+      action: action
+    })
+
+    record
+  end
+
+  # If the changeset has an error in it we want to know they tried to use a changeset but it borked
+  def log_anti_abuse_record_access({:error, %Ecto.Changeset{} = chg}, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{
+      id: Map.get(chg.data, :id),
+      action: action,
+      changeset_action: chg.action
+    })
+
+    {:error, chg}
+  end
+
+  def log_anti_abuse_record_access(nil, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record access", %{id: nil, action: action})
+    nil
+  end
+
+  # Fallback, ideally we never see this but we'd rather log that something
+  # anti_abuse_record was happening than not log it at all
+  def log_anti_abuse_record_access(piped_value, %Scope{} = scope, action) do
+    LoggingHelper.add_audit_log(scope, "Anti-abuse record fallback", %{action: action})
+    piped_value
   end
 end

@@ -4,26 +4,19 @@ defmodule Teiserver.Party.Supervisor do
   """
 
   alias Teiserver.Account.User
-  alias Teiserver.Party
+  alias Teiserver.Party.Types, as: PT
 
   use DynamicSupervisor
 
   @doc """
   Create a new party
   """
-  @spec start_party(Party.Server.id(), User.id(), pid()) ::
+  @spec start_party(PT.Data.id(), User.id(), pid()) ::
           DynamicSupervisor.on_start_child()
   def start_party(party_id, user_id, creator_pid) do
     DynamicSupervisor.start_child(
       __MODULE__,
       {Teiserver.Party.Server, {party_id, {:user, user_id, creator_pid}}}
-    )
-  end
-
-  def start_party_from_snapshot(party_id, serialized_state) do
-    DynamicSupervisor.start_child(
-      __MODULE__,
-      {Teiserver.Party.Server, {party_id, {:snapshot, serialized_state}}}
     )
   end
 

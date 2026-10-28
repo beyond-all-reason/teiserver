@@ -91,19 +91,7 @@ defmodule TeiserverWeb.NavComponents do
 
             <.top_nav_item text="Lobbies" active={@active == "lobbies"} route={~p"/battle/lobbies"} />
 
-            <.top_nav_item
-              text="Parties"
-              route={~p"/teiserver/account/parties"}
-              active={@active == "parties"}
-            />
-
             <.top_nav_item text="Matches" route={~p"/battle"} active={@active == "match"} />
-
-            <.top_nav_item
-              text="Leaderboard"
-              route={~p"/battle/ratings/leaderboard"}
-              active={@active == "leaderboard"}
-            />
 
             <.top_nav_item
               :if={allow_any?(@current_user, ~w(Contributor Overwatch))}
@@ -115,7 +103,7 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item
               :if={allow?(@current_user, "Moderator")}
               text="Users"
-              route={~p"/teiserver/admin/user"}
+              route={~p"/moderation/users"}
               active={@active == "teiserver_user"}
             />
 
@@ -129,7 +117,7 @@ defmodule TeiserverWeb.NavComponents do
             <.top_nav_item
               :if={allow_any?(@current_user, ~w(Contributor))}
               text="Admin"
-              route={~p"/teiserver/admin"}
+              route={~p"/admin"}
               active={@active == "admin"}
             />
           </ul>
@@ -157,9 +145,9 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} />
+  <TeiserverWeb.NavComponents.top_navbar_tw active={"string"} scope={@scope} />
   """
-  attr :current_user, :map, required: true
+  attr :scope, :map, required: true
   attr :active, :string, required: true
 
   def top_navbar_tw(assigns) do
@@ -168,7 +156,9 @@ defmodule TeiserverWeb.NavComponents do
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
         <li>
           <%!--
-            Setting this to false for now as it will not correctly select dark CSS in some cases
+            Hiding this as when selected will swap to dark as part of tweaks made
+            to keep things consistent between system and dark mode. First loading of the site
+            will select this mode after which the user can select light or dark as desired.
           --%>
           <button
             :if={false}
@@ -200,63 +190,68 @@ defmodule TeiserverWeb.NavComponents do
         <li class={[@active == "home" && "menu-active"]}>
           <.link href={~p"/"}>Home</.link>
         </li>
+
+        <li
+          :if={allow?(@scope, "Admin")}
+          class={[@active == "admin" && "menu-active"]}
+        >
+          <.link href={~p"/admin"}>Admin</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Overwatch")}
+          class={[@active == "moderation" && "menu-active"]}
+        >
+          <.link href={~p"/moderation"}>Moderation</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Staff")}
+          class={[@active == "staff" && "menu-active"]}
+        >
+          <.link href={~p"/staff"}>Staff</.link>
+        </li>
+
+        <li
+          :if={allow?(@scope, "Server")}
+          class={[@active == "logging" && "menu-active"]}
+        >
+          <.link href={~p"/logging"}>Logging</.link>
+        </li>
+
+        <li
+          :if={allow_any?(@scope, ["Contributor", "Overwatch"])}
+          class={[@active == "reports" && "menu-active"]}
+        >
+          <.link href={~p"/teiserver/reports"}>Reports</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "chat" && "menu-active"]}>
+          <.link href={~p"/chat"}>Chat</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "lobbies" && "menu-active"]}>
+          <.link href={~p"/battle/lobbies"}>Lobbies</.link>
+        </li>
+
+        <li :if={@scope} class={[@active == "match" && "menu-active"]}>
+          <.link href={~p"/battle"}>Matches</.link>
+        </li>
+
         <li class={[@active == "microblog" && "menu-active"]}>
           <.link href={~p"/microblog"}>Blog</.link>
         </li>
-        <%= if @current_user do %>
-          <li class={[@active == "chat" && "menu-active"]}>
-            <.link href={~p"/chat"}>Chat</.link>
-          </li>
 
-          <li :if={allow?(@current_user, "Server")} class={[@active == "logging" && "menu-active"]}>
-            <.link href={~p"/logging"}>Logging</.link>
-          </li>
+        <li
+          :if={allow?(@scope, "Moderator")}
+          class={[@active == "users" && "menu-active"]}
+        >
+          <.link href={~p"/moderation/users"}>Users</.link>
+        </li>
 
-          <li class={[@active == "lobbies" && "menu-active"]}>
-            <.link href={~p"/battle/lobbies"}>Lobbies</.link>
-          </li>
-
-          <li class={[@active == "match" && "menu-active"]}>
-            <.link href={~p"/battle"}>Matches</.link>
-          </li>
-
-          <li class={[@active == "leaderboard" && "menu-active"]}>
-            <.link href={~p"/battle/ratings/leaderboard"}>Leaderboard</.link>
-          </li>
-
-          <li
-            :if={allow_any?(@current_user, ["Contributor", "Overwatch"])}
-            class={[@active == "reports" && "menu-active"]}
-          >
-            <.link href={~p"/teiserver/reports"}>Reports</.link>
-          </li>
-
-          <li
-            :if={allow?(@current_user, "Moderator")}
-            class={[@active == "users" && "menu-active"]}
-          >
-            <.link href={~p"/teiserver/admin/user"}>Users</.link>
-          </li>
-
-          <li
-            :if={allow?(@current_user, "Overwatch")}
-            class={[@active == "moderation" && "menu-active"]}
-          >
-            <.link href={~p"/moderation"}>Moderation</.link>
-          </li>
-
-          <li :if={allow?(@current_user, "Contributor")} class={[@active == "admin" && "menu-active"]}>
-            <.link href={~p"/teiserver/admin"}>Admin</.link>
-          </li>
-
-          <li>
-            <.link href={~p"/logout"} method="delete">Log out</.link>
-          </li>
-        <% else %>
-          <li class={[@active == "login" && "menu-active"]}>
-            <.link href={~p"/login"}>Log in</.link>
-          </li>
-        <% end %>
+        <li :if={@scope}>
+          <.link href={~p"/logout"} method="delete">Log out</.link>
+        </li>
       </ul>
     </nav>
     """
@@ -359,6 +354,29 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
+  A square link used on menu pages, typically as part of a grid layout div.
+
+  <.menu_page_link
+    icon="icon"
+    url={~p""}
+  >
+    Text here
+  </.menu_page_link>
+  """
+  attr :url, :string, required: true
+  attr :icon, :string, required: true
+  slot :inner_block, required: true
+
+  def menu_page_link(assigns) do
+    ~H"""
+    <a href={@url} class="menu-link">
+      <Fontawesome.icon icon={@icon} size="4x" /><br />
+      <div class="mt-4 text-lg">{render_slot(@inner_block)}</div>
+    </a>
+    """
+  end
+
+  @doc """
   <.sub_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
   </.sub_menu_button>
@@ -408,18 +426,18 @@ defmodule TeiserverWeb.NavComponents do
   end
 
   @doc """
-  <.section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+  <.section_menu_button_patch bsname={bsname} icon={lib} active={true/false} url={url}>
     Text goes here
-  </.section_menu_button>
+  </.section_menu_button_patch>
 
-  <.section_menu_button
+  <.section_menu_button_patch
       bsname={@view_colour}
       icon={StylingHelper.icon(:list)}
       active={@active == "index"}
       url={~p"/account/relationship"}
     >
       List
-    </.section_menu_button>
+    </.section_menu_button_patch>
   """
   attr :icon, :string, default: nil
   attr :url, :string, required: true
@@ -437,6 +455,53 @@ defmodule TeiserverWeb.NavComponents do
       <Fontawesome.icon :if={@icon} icon={@icon} style={if @active, do: "solid", else: "regular"} />
       {render_slot(@inner_block)}
     </.link>
+    """
+  end
+
+  @doc """
+  <.tw_section_menu_button bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.tw_section_menu_button>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :active, :boolean, default: false
+  slot :inner_block, required: true
+
+  def tw_section_menu_button(assigns) do
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "tab-active"))
+
+    ~H"""
+    <a href={@url} class={["tab", @active_class]}>
+      <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
+    </a>
+    """
+  end
+
+  @doc """
+  <.section_menu_link bsname={bsname} icon={lib} active={true/false} url={url}>
+    Text goes here
+  </.section_menu_link>
+  """
+  attr :icon, :string, default: nil
+  attr :url, :string, required: true
+  attr :active, :boolean, default: false
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def section_menu_link(assigns) do
+    assigns =
+      assigns
+      |> assign(:active_class, if(assigns[:active], do: "active"))
+
+    ~H"""
+    <li>
+      <a href={@url} class={["tab ", @class, @active_class]}>
+        <Fontawesome.icon :if={@icon} icon={@icon} style="solid" /> &nbsp; {render_slot(@inner_block)}
+      </a>
+    </li>
     """
   end
 

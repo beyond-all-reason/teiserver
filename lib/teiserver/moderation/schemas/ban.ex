@@ -2,6 +2,8 @@ defmodule Teiserver.Moderation.Ban do
   @moduledoc false
   use TeiserverWeb, :schema
 
+  @type id :: pos_integer()
+
   typed_schema "moderation_bans" do
     belongs_to :source, Teiserver.Account.User
     belongs_to :added_by, Teiserver.Account.User

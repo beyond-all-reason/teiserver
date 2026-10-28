@@ -5,12 +5,10 @@ defmodule Teiserver.TachyonLobby.Supervisor do
 
   use DynamicSupervisor
 
-  @spec start_lobby(LT.StartParams.t()) ::
+  @spec start_lobby(LT.Types.id(), LT.StartParams.t()) ::
           {:ok, %{pid: pid(), id: LT.Types.id()}}
           | {:error, {:already_started, pid()} | :max_children | term()}
-  def start_lobby(%LT.StartParams{} = start_params) do
-    id = Lobby.gen_id()
-
+  def start_lobby(id, %LT.StartParams{} = start_params) do
     case DynamicSupervisor.start_child(__MODULE__, {Lobby, {id, {:user, start_params}}}) do
       {:ok, pid} -> {:ok, %{id: id, pid: pid}}
       {:error, err} -> {:error, err}
@@ -18,11 +16,15 @@ defmodule Teiserver.TachyonLobby.Supervisor do
     end
   end
 
-  def start_lobby_from_snapshot(lobby_id, serialized_state) do
-    DynamicSupervisor.start_child(
-      __MODULE__,
-      {Lobby, {lobby_id, {:snapshot, serialized_state}}}
-    )
+  def start_replica(%LT.Data{} = data) do
+    # TODO: handle race condition there
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(
+        __MODULE__,
+        {Lobby, {data.id, {:replica, data}}}
+      )
+
+    :ok
   end
 
   def start_link(init_arg) do

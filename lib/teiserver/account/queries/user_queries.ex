@@ -2,6 +2,7 @@ defmodule Teiserver.Account.UserQueries do
   @moduledoc false
   alias Ecto.Query
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserStat
 
   use TeiserverWeb, :queries
 
@@ -111,46 +112,19 @@ defmodule Teiserver.Account.UserQueries do
       where: users.inserted_at < ^timestamp
   end
 
-  def _where(query, :data_equal, {field, value}) do
+  def _where(query, :restricted_until_before, timestamp) do
     from users in query,
-      where: fragment("? ->> ? = ?", users.data, ^field, ^value)
+      where: users.restricted_until < ^timestamp
   end
 
-  def _where(query, :data_greater_than, {field, value}) do
+  def _where(query, :restricted_until_after, timestamp) do
     from users in query,
-      where: fragment("? ->> ? > ?", users.data, ^field, ^value)
+      where: users.restricted_until > ^timestamp
   end
 
-  def _where(query, :data_less_than, {field, value}) do
+  def _where(query, :discord_id, discord_id) do
     from users in query,
-      where: fragment("? ->> ? < ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_not, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? != ?", users.data, ^field, ^value)
-  end
-
-  # https://www.postgresql.org/docs/current/functions-json.html - Unable to find a function for this :(
-  def _where(query, :data_contains, {field, value}) do
-    from users in query,
-      where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_not_contains, {field, value}) do
-    from users in query,
-      where: fragment("not ? ->> ? @> ?", users.data, ^field, ^value)
-  end
-
-  def _where(query, :data_contains_key, field) do
-    from users in query,
-      where: fragment("? @> ?", users.data, ^field)
-  end
-
-  # E.g. [data_contains_number: {"ignored", 9265}]
-  def _where(query, :data_contains_number, {field, value}) when is_number(value) do
-    from users in query,
-      where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
+      where: users.discord_id == ^discord_id
   end
 
   def _where(query, :has_role, role_name) do
@@ -161,22 +135,6 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :not_has_role, role_name) do
     from users in query,
       where: ^role_name not in users.roles
-  end
-
-  def _where(query, :bot, "Person") do
-    _where(query, :not_has_role, "Bot")
-  end
-
-  def _where(query, :bot, "Robot") do
-    _where(query, :has_role, "Bot")
-  end
-
-  def _where(query, :moderator, "User") do
-    _where(query, :not_has_role, "Moderator")
-  end
-
-  def _where(query, :moderator, "Moderator") do
-    _where(query, :has_role, "Moderator")
   end
 
   def _where(query, :smurf_of, userid) when is_integer(userid) do
@@ -197,162 +155,58 @@ defmodule Teiserver.Account.UserQueries do
       where: is_nil(users.smurf_of_id)
   end
 
-  def _where(query, :verified, true) do
-    from users in query,
-      where: "Verified" in users.roles
-  end
-
-  def _where(query, :verified, false) do
-    from users in query,
-      where: "Verified" not in users.roles
-  end
-
   def _where(query, :mod_action, "Banned") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
+      where: "Login" in users.restrictions
   end
 
   def _where(query, :mod_action, "Not banned") do
     from users in query,
-      where: not fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
+      where: "Login" not in users.restrictions
   end
 
   def _where(query, :mod_action, "Muted") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
-  end
-
-  def _where(query, :mod_action, "Shadowbanned") do
-    from users in query,
-      where: fragment("? ->> ? = ?", users.data, "shadowbanned", "true")
+      where: "All chat" in users.restrictions
   end
 
   def _where(query, :mod_action, "Warned") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
+      where: "Warning reminder" in users.restrictions
   end
 
   def _where(query, :mod_action, "Any action") do
     from users in query,
-      where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
+      where: users.restrictions != ^[]
   end
 
   def _where(query, :mod_action, "Muted or banned") do
     from users in query,
-      where:
-        fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-          fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
+      where: "Login" in users.restrictions or "All chat" in users.restrictions
   end
 
-  def _where(query, :mod_action, "not muted or banned") do
+  def _where(query, :mod_action, "Not muted or banned") do
     from users in query,
-      where:
-        not (fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"") or
-               fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\""))
+      where: "Login" not in users.restrictions and "All chat" not in users.restrictions
   end
 
   def _where(query, :mod_action, "Any user") do
     query
   end
 
-  def _where(query, :tester, "Trusted") do
+  def _where(query, :mod_action, action) do
     from users in query,
-      where: "Trusted" in users.roles
+      where: ^action in users.restrictions
   end
 
-  def _where(query, :tester, "Tester") do
+  def _where(query, :not_mod_action, action) do
     from users in query,
-      where: "Tester" in users.roles
-  end
-
-  def _where(query, :tester, "Normal") do
-    from users in query,
-      where: "Tester" not in users.roles
-  end
-
-  def _where(query, :streamer, "Streamer") do
-    from users in query,
-      where: "Streamer" in users.roles
-  end
-
-  def _where(query, :streamer, "Normal") do
-    from users in query,
-      where: "Streamer" not in users.roles
-  end
-
-  def _where(query, :donor, "Donor") do
-    from users in query,
-      where: "Donor" in users.roles
-  end
-
-  def _where(query, :donor, "Normal") do
-    from users in query,
-      where: "Donor" not in users.roles
-  end
-
-  def _where(query, :gdt_member, "GDT") do
-    from users in query,
-      where: "GDT" in users.roles
-  end
-
-  def _where(query, :gdt_member, "Normal") do
-    from users in query,
-      where: "GDT" not in users.roles
-  end
-
-  def _where(query, :contributor, "Contributor") do
-    from users in query,
-      where: "Contributor" in users.roles
-  end
-
-  def _where(query, :contributor, "Normal") do
-    from users in query,
-      where: "Contributor" not in users.roles
-  end
-
-  def _where(query, :developer, "Developer") do
-    from users in query,
-      where: "Developer" in users.roles
-  end
-
-  def _where(query, :developer, "Normal") do
-    from users in query,
-      where: "Developer" not in users.roles
-  end
-
-  def _where(query, :overwatch, "Overwatch") do
-    from users in query,
-      where: "Overwatch" in users.roles
-  end
-
-  def _where(query, :overwatch, "Normal") do
-    from users in query,
-      where: "Overwatch" not in users.roles
-  end
-
-  def _where(query, :caster, "Caster") do
-    from users in query,
-      where: "Caster" in users.roles
-  end
-
-  def _where(query, :caster, "Normal") do
-    from users in query,
-      where: "Caster" not in users.roles
-  end
-
-  def _where(query, :vip, "VIP") do
-    from users in query,
-      where: "VIP" in users.roles
-  end
-
-  def _where(query, :vip, "Normal") do
-    from users in query,
-      where: "VIP" not in users.roles
+      where: ^action not in users.restrictions
   end
 
   def _where(query, :lobby_client, lobby_client) do
     from users in query,
-      where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
+      where: users.lobby_client == ^lobby_client
   end
 
   def _where(query, :previous_names, name) do
@@ -380,6 +234,16 @@ defmodule Teiserver.Account.UserQueries do
   def _where(query, :last_login_before, timestamp) do
     from users in query,
       where: users.last_login < ^timestamp
+  end
+
+  def _where(query, :has_logged_in, true) do
+    from users in query,
+      where: not is_nil(users.last_login)
+  end
+
+  def _where(query, :has_logged_in, false) do
+    from users in query,
+      where: is_nil(users.last_login)
   end
 
   @spec do_order_by(t(), list | nil) :: t()
@@ -415,10 +279,8 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   def _order_by(query, "Last logged in") do
-    field = "last_login"
-
     from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
+      order_by: [desc: users.last_login]
   end
 
   def _order_by(query, "Last played") do
@@ -429,16 +291,6 @@ defmodule Teiserver.Account.UserQueries do
   def _order_by(query, "Last logged out") do
     from users in query,
       order_by: [desc: users.last_logout]
-  end
-
-  def _order_by(query, {:data, field, :asc}) do
-    from users in query,
-      order_by: [asc: fragment("? -> ?", users.data, ^field)]
-  end
-
-  def _order_by(query, {:data, field, :desc}) do
-    from users in query,
-      order_by: [desc: fragment("? -> ?", users.data, ^field)]
   end
 
   @spec do_preload(t(), list() | nil) :: t()
@@ -452,8 +304,8 @@ defmodule Teiserver.Account.UserQueries do
   end
 
   def _preload(query, :user_stat) do
-    from user in query,
-      left_join: user_stats in assoc(user, :user_stat),
+    from users in query,
+      left_join: user_stats in assoc(users, :user_stat),
       preload: [user_stat: user_stats]
   end
 
@@ -481,83 +333,23 @@ defmodule Teiserver.Account.UserQueries do
       preload: [reports_responded: reports_responded]
   end
 
-  @spec user_search_by_data(%{String.t() => String.t()}) :: {:ok, t()} | {:error, String.t()}
-  def user_search_by_data(values) do
-    # When submitting from the web, a blank value is an empty string so
-    # we need to filter that out as if it was a nil value
-    search_params =
-      %{
-        "hardware:gpuinfo" => values["gpu"],
-        "hardware:cpuinfo" => values["cpu"],
-        "hardware:osinfo" => values["os"],
-        "hardware:raminfo" => values["ram"],
-        "hardware:displaymax" => values["screen"],
-        values["custom_field"] => values["custom_value"]
-      }
-      |> Map.filter(fn {_k, v} ->
-        v != "" and v != nil
-      end)
-
-    # IP is handled differently because we're not searching in the same
-    # way so can't put it with the rest
-    ip_value = values["ip"] || ""
-
-    if Enum.empty?(search_params) and ip_value == "" do
-      {:error, "No valid search parameters"}
-    else
-      # The query with the join
-      base_query =
-        from users in User,
-          as: :users,
-          inner_join: user_stats in assoc(users, :user_stat),
-          as: :user_stats
-
-      # The majority of search parameters are applied here
-      query =
-        search_params
-        |> Enum.reduce(base_query, fn {key, value}, query ->
-          from [user_stats: user_stats] in query,
-            where: fragment("? ->> ? = ?", user_stats.data, ^key, ^value)
-        end)
-
-      # We want to treat IP slightly differently so we do that here
-      query =
-        if ip_value != "" do
-          from [user_stats: user_stats] in query,
-            where:
-              like(fragment("(? ->> ?)::text", user_stats.data, "last_ip"), ^(ip_value <> "%"))
-        else
-          query
-        end
-
-      {:ok, query}
-    end
-  end
-
   # New query style
   @spec users() :: t()
   def users do
     from(users in User, as: :users)
   end
 
+  # Where id
   @spec where_id(t(), pos_integer() | String.t()) :: t()
   def where_id(query, id) do
     from users in query,
       where: users.id == ^id
   end
 
-  @spec where_name(t(), String.t()) :: t()
-  def where_name(query, search_term) do
+  @spec where_id_in(t(), [User.id()]) :: t()
+  def where_id_in(query, ids) do
     from users in query,
-      where: users.name == ^search_term
-  end
-
-  @spec where_name_like(t(), String.t()) :: t()
-  def where_name_like(query, search_term) do
-    uname = "%" <> search_term <> "%"
-
-    from users in query,
-      where: ilike(users.name, ^uname)
+      where: users.id in ^ids
   end
 
   @spec where_id_not_in(t(), [User.id()]) :: t()
@@ -566,12 +358,172 @@ defmodule Teiserver.Account.UserQueries do
       where: users.id not in ^ids
   end
 
+  # Where name
+  @spec where_name(t(), String.t()) :: t()
+  def where_name(query, ""), do: query
+
+  def where_name(query, search_term) do
+    from users in query,
+      where: users.name == ^search_term
+  end
+
+  @spec where_name_lower(t(), String.t()) :: t()
+  def where_name_lower(query, ""), do: query
+
+  def where_name_lower(query, search_term) do
+    from users in query,
+      where: lower(users.name) == ^String.downcase(search_term)
+  end
+
+  @spec where_name_like(t(), String.t()) :: t()
+  def where_name_like(query, ""), do: query
+
+  def where_name_like(query, search_term) do
+    uname = "%" <> search_term <> "%"
+
+    from users in query,
+      where: ilike(users.name, ^uname)
+  end
+
+  # Where email
+  @spec where_email(t(), String.t()) :: t()
+  def where_email(query, ""), do: query
+
+  def where_email(query, search_term) do
+    from users in query,
+      where: users.email == ^search_term
+  end
+
+  @spec where_email_lower(t(), String.t()) :: t()
+  def where_email_lower(query, ""), do: query
+
+  def where_email_lower(query, search_term) do
+    from users in query,
+      where: lower(users.email) == ^String.downcase(search_term)
+  end
+
+  @spec where_email_like(t(), String.t()) :: t()
+  def where_email_like(query, ""), do: query
+
+  def where_email_like(query, search_term) do
+    uemail = "%" <> search_term <> "%"
+
+    from users in query,
+      where: ilike(users.email, ^uemail)
+  end
+
+  @spec where_name_or_email_lower(t(), String.t()) :: t()
+  def where_name_or_email_lower(query, ""), do: query
+
+  def where_name_or_email_lower(query, search_term) do
+    from users in query,
+      where:
+        lower(users.email) == ^String.downcase(search_term) or
+          lower(users.name) == ^String.downcase(search_term)
+  end
+
+  @spec where_name_or_email_like(t(), String.t()) :: t()
+  def where_name_or_email_like(query, ""), do: query
+
+  def where_name_or_email_like(query, raw_search_term) do
+    search_term = "%" <> raw_search_term <> "%"
+
+    from users in query,
+      where:
+        ilike(users.email, ^search_term) or
+          ilike(users.name, ^search_term)
+  end
+
+  # Logged in after
+  def where_logged_in_after(query, ""), do: query
+
+  def where_logged_in_after(query, %Date{} = date) do
+    where_logged_in_after(query, DateTime.new!(date, ~T[00:00:00], "Etc/UTC"))
+  end
+
+  def where_logged_in_after(query, %DateTime{} = datetime) do
+    from users in query,
+      where: users.last_login >= ^datetime
+  end
+
+  # Where role
+  def where_has_role(query, ""), do: query
+
+  def where_has_role(query, role_name) do
+    from users in query,
+      where: ^role_name in users.roles
+  end
+
+  def where_not_has_role(query, ""), do: query
+
+  def where_not_has_role(query, role_name) do
+    from users in query,
+      where: ^role_name not in users.roles
+  end
+
+  # Where restriction
+  def where_has_restriction(query, ""), do: query
+
+  def where_has_restriction(query, restriction_name) do
+    from users in query,
+      where: ^restriction_name in users.restrictions
+  end
+
+  def where_not_has_restriction(query, ""), do: query
+
+  def where_not_has_restriction(query, restriction_name) do
+    from users in query,
+      where: ^restriction_name not in users.restrictions
+  end
+
+  # Where GDPR Forget
+  @spec where_gdpr_forget_before(t(), DateTime.t()) :: t()
+  def where_gdpr_forget_before(query, datetime) do
+    from users in query,
+      where: users.gdpr_forget_after < ^datetime
+  end
+
+  @spec where_gdpr_forget_after(t(), DateTime.t()) :: t()
+  def where_gdpr_forget_after(query, datetime) do
+    from users in query,
+      where: users.gdpr_forget_after > ^datetime
+  end
+
+  # Where -other-
   @spec where_smurf_of(t(), User.id()) :: t()
   def where_smurf_of(query, user_id) do
     from users in query,
       where: users.smurf_of_id == ^user_id
   end
 
+  @spec where_registered_before(t(), DateTime.t()) :: t()
+  def where_registered_before(query, timestamp) do
+    from users in query,
+      where: users.inserted_at < ^timestamp
+  end
+
+  # Joins
+  def join_user_stats(query) do
+    if has_named_binding?(query, :user_stats) do
+      query
+    else
+      from [users: users] in query,
+        left_join: user_stats in UserStat,
+        as: :user_stats,
+        on: user_stats.user_id == users.id
+    end
+  end
+
+  # Preloads
+  @spec load_user_stat(t()) :: t()
+  def load_user_stat(query) do
+    query = join_user_stats(query)
+
+    from [users: users, user_stats: user_stats] in query,
+      preload: [user_stat: user_stats]
+  end
+
+  # Ordering
   @spec order_by_name(t(), :asc | :desc) :: t()
   def order_by_name(query, direction \\ :asc) do
     if direction == :asc do
@@ -580,4 +532,30 @@ defmodule Teiserver.Account.UserQueries do
       from(users in query, order_by: [desc: users.name])
     end
   end
+
+  @spec order_by_inserted_at(t(), :asc | :desc) :: t()
+  def order_by_inserted_at(query, direction \\ :asc) do
+    if direction == :asc do
+      from(users in query, order_by: [asc: users.inserted_at])
+    else
+      from(users in query, order_by: [desc: users.inserted_at])
+    end
+  end
+
+  @spec order_by_last_login(t(), :asc | :desc) :: t()
+  def order_by_last_login(query, direction \\ :asc) do
+    if direction == :asc do
+      from(users in query, order_by: [asc: users.last_login])
+    else
+      from(users in query, order_by: [desc: users.last_login])
+    end
+  end
+
+  @spec order_by_from_string(t(), String.t()) :: t()
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
+  def order_by_from_string(query, "Alphabetical (A-Z)"), do: order_by_name(query, :asc)
+  def order_by_from_string(query, "Alphabetical (Z-A)"), do: order_by_name(query, :desc)
+  def order_by_from_string(query, "Most recent login first"), do: order_by_last_login(query, :asc)
+  def order_by_from_string(query, "Oldest login first"), do: order_by_last_login(query, :desc)
 end

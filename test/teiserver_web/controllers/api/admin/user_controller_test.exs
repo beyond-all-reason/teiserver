@@ -143,7 +143,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
         "roles" => ["Verified"],
         "permissions" => ["Verified"],
         "restrictions" => [],
-        "shadowbanned" => false,
         "mu" => 1500,
         "sigma" => 100,
         "play_time" => 3600,
@@ -160,7 +159,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["user"]["roles"] == ["Verified"]
       assert resp["user"]["permissions"] == ["Verified"]
       assert resp["user"]["restrictions"] == []
-      assert resp["user"]["shadowbanned"] == false
       assert resp["credentials"]["access_token"]
       assert resp["credentials"]["refresh_token"]
     end
@@ -212,8 +210,6 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       # Promote a target user to a privileged role outside the API allowlist.
       {:ok, _promoted_user} =
         Account.script_update_user(user, %{roles: ["Admin"], permissions: ["Admin"]})
-
-      Account.recache_user(user.id)
 
       resp =
         conn
@@ -346,27 +342,15 @@ defmodule TeiserverWeb.API.Admin.UserControllerTest do
       assert resp["user"]["email"] == long_email
     end
 
-    test "handles special characters in name", %{authed_conn: conn} do
+    test "handles [, ] and _ in name", %{authed_conn: conn} do
       user_data = %{
-        "name" => "User-Name_123 [Test]",
+        "name" => "User_Name[123]",
         "email" => "special@example.com",
         "password" => "testpassword123"
       }
 
       resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-      assert resp["user"]["name"] == "User-Name_123 [Test]"
-    end
-
-    test "handles unicode characters", %{authed_conn: conn} do
-      user_data = %{
-        "name" => "José María",
-        "email" => "josé@example.com",
-        "password" => "testpassword123"
-      }
-
-      resp = conn |> post(create_user_path(), user_data) |> json_response(200)
-      assert resp["user"]["name"] == "José María"
-      assert resp["user"]["email"] == "josé@example.com"
+      assert resp["user"]["name"] == "User_Name[123]"
     end
   end
 

@@ -2,19 +2,18 @@ defmodule Teiserver.Coordinator.SpadsParser do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Battle
-  alias Teiserver.CacheUser
   alias Teiserver.Telemetry
 
   @spec handle_in(String.t(), map()) :: {:host_update, map()} | nil
   def handle_in(msg, state) do
     cond do
       # Team Size
-      match = Regex.run(~r/teamSize=(\d)+/, msg) ->
+      match = Regex.run(~r/teamSize=(\d+)/, msg) ->
         [_full, size] = match
         {:host_update, %{host_teamsize: String.to_integer(size)}}
 
       # Team count
-      match = Regex.run(~r/nbTeams=(\d)+/, msg) ->
+      match = Regex.run(~r/nbTeams=(\d+)/, msg) ->
         [_full, count] = match
         {:host_update, %{host_teamcount: String.to_integer(count)}}
 
@@ -33,7 +32,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
       # Add a boss
       match = Regex.run(~r/Boss mode enabled for (\S+)/, msg) ->
         [_full, player_name] = match
-        player_id = CacheUser.get_userid(player_name)
+        player_id = Account.get_userid_from_name(player_name)
 
         if player_id do
           new_bosses = [player_id | state.host_bosses]
@@ -49,7 +48,7 @@ defmodule Teiserver.Coordinator.SpadsParser do
       # Remove an individual boss
       match = Regex.run(~r/Boss mode disabled for (\S+) \(by \S+\)/, msg) ->
         [_full, player_name] = match
-        player_id = CacheUser.get_userid(player_name)
+        player_id = Account.get_userid_from_name(player_name)
 
         {:host_update, %{host_bosses: List.delete(state.host_bosses, player_id)}}
 

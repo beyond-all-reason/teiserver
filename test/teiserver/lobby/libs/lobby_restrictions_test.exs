@@ -57,4 +57,12 @@ defmodule Teiserver.Lobby.Libs.LobbyRestrictionsTest do
 
     assert result == "Rating: 4-20"
   end
+
+  test "team ffa join restrictions use large team openskill" do
+    assert LobbyRestrictions.rating_type_for_restrictions("Team FFA") == "Large Team"
+    assert LobbyRestrictions.rating_type_for_restrictions("Large Team") == "Large Team"
+    assert LobbyRestrictions.rating_type_for_restrictions("Small Team") == "Small Team"
+    assert LobbyRestrictions.rating_type_for_restrictions("FFA") == "FFA"
+    assert LobbyRestrictions.rating_type_for_restrictions("Duel") == "Duel"
+  end
 end

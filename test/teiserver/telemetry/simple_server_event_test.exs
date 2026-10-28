@@ -15,7 +15,7 @@ defmodule Teiserver.Telemetry.SimpleServerEventTest do
     query = "DELETE FROM telemetry_simple_server_events;"
     SQL.query(Repo, query, [])
 
-    user = TeiserverTestLib.new_user("simple_server_event_user")
+    user = TeiserverTestLib.new_user("simple_server_event")
     assert Telemetry.list_simple_server_events() |> Enum.count() == 0
 
     # Log the event

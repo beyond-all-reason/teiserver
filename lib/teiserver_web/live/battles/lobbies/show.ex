@@ -4,7 +4,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.CacheUser
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.Parser, as: CoordinatorParser
   alias Teiserver.Helper.StylingHelper
@@ -32,7 +31,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     moderator = allow?(socket, "Moderator")
     server_perms = allow?(socket, "Server")
-    tester_perms = allow?(socket, "Tester")
+    contributor_perms = allow?(socket, "Contributor")
 
     extra_content =
       if moderator do
@@ -62,7 +61,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:subbed, true)
       |> assign(:moderator, moderator)
       |> assign(:server_perms, server_perms)
-      |> assign(:tester_perms, tester_perms)
+      |> assign(:contributor_perms, contributor_perms)
 
     {:ok, socket}
   end
@@ -99,7 +98,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         {users, clients, ratings, parties, stats} =
           get_user_and_clients(lobby.players, consul_state)
 
-        bar_user = CacheUser.get_user_by_id(socket.assigns.current_user.id)
+        bar_user = Account.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
         modoptions = Battle.get_modoptions(id)
 
@@ -122,7 +121,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   defp get_user_and_clients(id_list, consul_state) do
     users =
-      CacheUser.list_users(id_list)
+      Account.list_users_by_ids(id_list)
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =

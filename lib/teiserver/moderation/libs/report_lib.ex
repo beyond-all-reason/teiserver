@@ -2,7 +2,7 @@ defmodule Teiserver.Moderation.ReportLib do
   @moduledoc false
 
   alias Teiserver.Battle.MatchLib
-  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Chat.SpringLobbyMessageLib
   alias Teiserver.Config
   alias Teiserver.Moderation.Report
   use TeiserverWeb, :library
@@ -33,7 +33,7 @@ defmodule Teiserver.Moderation.ReportLib do
 
   def types do
     [
-      {"Chat / Communication", "chat", LobbyMessageLib.icon()},
+      {"Chat / Communication", "chat", SpringLobbyMessageLib.icon()},
       {"In game actions", "actions", MatchLib.icon()}
     ]
   end
@@ -44,20 +44,20 @@ defmodule Teiserver.Moderation.ReportLib do
         {"Spam", "spam", "fa-envelopes-bulk"},
         {"Bullying", "bullying", "fa-person-harassing"},
         {"Hate speech", "hate", "fa-triangle-exclamation"},
-        {"Other", "other", "fa-face-unamused"}
+        {"Other", "other", "fa-face-sad-tear"}
       ],
       "actions" => [
-        {"Noob", "noob", "fa-chevrons-up"},
+        {"Noob", "noob", "fa-angles-up"},
         {"Griefing", "griefing", "fa-face-angry"},
-        {"Cheating", "cheating", "fa-cards"},
-        {"Other", "other", "fa-face-unamused"}
+        {"Cheating", "cheating", "fa-diamond"},
+        {"Other", "other", "fa-face-sad-tear"}
       ]
     }
   end
 
   def sections do
     [
-      {"Chat / Communication", "chat", LobbyMessageLib.icon()},
+      {"Chat / Communication", "chat", SpringLobbyMessageLib.icon()},
       {"In game actions", "actions", MatchLib.icon()}
     ]
   end

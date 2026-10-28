@@ -104,11 +104,10 @@
   <div class="col-md-12">
     <div class="card card-<= bsname >">
       <div class="card-body">
-        {render(Teiserver.Logging.PageViewLogView, "section_menu.html",
-          conn: @conn,
-          permissions: @current_user.permissions,
-          active: "report"
-        )}
+        <TeiserverWeb.Components.Logging.PageViewLogComponents.section_menu
+          active="report"
+          colour={bsname}
+        />
       </div>
     </div>
   </div>

@@ -22,9 +22,9 @@
     default: true;
     prefersdark: false;
     color-scheme: "dark";
-    --color-base-100: oklch(25.33% 0.016 252.42);
-    --color-base-200: oklch(23.26% 0.014 253.1);
-    --color-base-300: oklch(21.15% 0.012 254.09);
+    --color-base-100: oklch(28.33% 0.016 252.42);
+    --color-base-200: oklch(24.26% 0.014 253.1);
+    --color-base-300: oklch(20.15% 0.012 254.09);
     --color-base-content: oklch(97.807% 0.029 256.847);
     --color-primary: oklch(58% 0.233 277.117);
     --color-primary-content: oklch(96% 0.018 272.314);
@@ -95,13 +95,18 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* Adding some breakpoints for really wide screens */
+@theme {
+  --breakpoint-3xl: 140rem;
+  --breakpoint-4xl: 200rem;
+}
+
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session],
 [data-phx-teleported-src] {
   display: contents
 }
 
-/* This file is for your main application CSS */
 .menu-active {
   @apply bg-primary text-primary-content rounded-md;
 }
@@ -112,4 +117,103 @@
 
 .input[type="text"] {
   @apply text-gray-800 dark:text-gray-100;
+}
+
+.menu-grid {
+  @apply grid grid-flow-row-dense
+    sm:grid-cols-2
+    md:grid-cols-4
+    lg:grid-cols-5
+    xl:grid-cols-7
+    2xl:grid-cols-8
+    3xl:grid-cols-12
+    4xl:grid-cols-16;
+}
+
+.menu-link {
+  @apply col-span-1 my-2 mx-4 py-6 px-4
+    text-base-content text-center rounded-lg
+    hover:text-primary-content hover:bg-primary bg-base-300 transition duration-300 ease-in-out;
+}
+
+.form-input-grid {
+  @apply grid grid-flow-row-dense sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-8 4xl:grid-cols-10
+}
+
+.admin-sensitive-topbar, .moderation-sensitive-topbar {
+  @apply p-2;
+  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  text-align: center;
+}
+
+.admin-sensitive-topbar {
+  @apply bg-error text-error-content;
+}
+
+.moderation-sensitive-topbar {
+  @apply bg-warning text-warning-content;
+}
+
+.section-menu-bar {
+  @apply bg-base-200 w-full rounded-box mb-2 p-0;
+}
+
+.section-menu-bar .menu li a {
+  @apply mx-1;
+  height: 2.2rem;
+}
+
+.section-menu-bar .menu .active {
+  @apply text-neutral bg-primary/15 text-primary font-bold;
+}
+
+.section-menu-bar-inner_block {
+  @apply float-right;
+}
+
+.btn-reset-form {
+  @apply btn btn-neutral;
+}
+
+.heading-subtitle {
+  @apply text-sm leading-6;
+}
+
+.single-block-content {
+  @apply w-full max-w-4xl px-4 mx-auto mt-30 rounded-md;
+}
+
+.list-title-item {
+  @apply w-1/4 flex-none text-[0.8125rem] leading-6 text-neutral dark:text-neutral-content
+}
+
+.list-content-item {
+  @apply text-sm leading-6 text-neutral/80 dark:text-neutral-content/80
+}
+
+.user-note-contents li {
+  @apply ml-4 list-disc;
+}
+
+/* Apex charts dark mode */
+.apexcharts-text, .apexcharts-menu-item, .apexcharts-legend-text {
+  /* The legend doesn't apply as the style is being manually overriden by a style attribute I've not yet worked out how to remove */
+  @apply dark:fill-neutral-content dark:text-neutral;
+}
+
+.apexchart-container {
+  @apply w-full h-100 mb-8;
+}
+
+.data-explain {
+  @apply rounded-md bg-info/25 p-4;
+}
+
+.btn-close {
+  cursor: pointer;
 }

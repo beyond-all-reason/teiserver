@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.SimpleLobbyEventTest do
   test "simple lobby events" do
     r = :rand.uniform(999_999_999)
 
-    user = TeiserverTestLib.new_user("simple_lobby_event_user")
+    user = TeiserverTestLib.new_user("simple_lobby_event")
 
     {:ok, match} =
       Battle.create_match(%{

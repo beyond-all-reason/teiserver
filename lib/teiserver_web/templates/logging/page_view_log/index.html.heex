@@ -17,11 +17,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(TeiserverWeb.Logging.PageViewLogView, "section_menu.html",
-          conn: @conn,
-          permissions: @current_user.permissions,
-          active: if(@show_search, do: "search", else: "index")
-        )}
+        <TeiserverWeb.Components.Logging.PageViewLogComponents.section_menu
+          active="index"
+          colour={bsname}
+        />
 
         <%= if @show_search do %>
           {render(TeiserverWeb.Logging.PageViewLogView, "search.html",

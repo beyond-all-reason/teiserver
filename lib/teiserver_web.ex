@@ -68,7 +68,6 @@ defmodule TeiserverWeb do
       alias Teiserver.Helper.ColourHelper
       import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
       import Teiserver.Helpers.InputHelper
-      import Teiserver.Helpers.ComponentHelper
       import Teiserver.Helper.DateHelper
 
       import Teiserver.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
@@ -83,6 +82,7 @@ defmodule TeiserverWeb do
 
       import TeiserverWeb.CoreComponents
       import TeiserverWeb.NavComponents
+      import TeiserverWeb.Components.DetailLine, only: [detail_line: 1]
       unquote(verified_routes())
 
       import Phoenix.LiveView
@@ -110,12 +110,17 @@ defmodule TeiserverWeb do
   def live_view do
     quote do
       alias Phoenix.LiveView
+      alias Phoenix.LiveView.Socket
 
       use Phoenix.LiveView,
         layout: {TeiserverWeb.Layouts, :app}
 
       use Breadcrumble
+      alias Ecto.Changeset
+      alias Ecto.Multi
       alias Teiserver.Account.AuthPlug
+      alias Teiserver.Helper.QueryHelpers
+      alias Teiserver.Repo
 
       import Teiserver.Account.AuthLib,
         only: [
@@ -134,8 +139,13 @@ defmodule TeiserverWeb do
       import Teiserver.Helper.DateHelper
       alias Teiserver.Helper.StylingHelper
 
+      import Teiserver.Helper.StringHelper,
+        only: [format_number: 1, maybe_to_integer: 1, boolean_from_form: 1]
+
       import Teiserver.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
+
+      import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
@@ -148,7 +158,15 @@ defmodule TeiserverWeb do
   def live_component do
     quote do
       use Phoenix.LiveComponent
+      alias Ecto.Changeset
+      alias Ecto.Multi
       alias Phoenix.LiveComponent
+      alias Phoenix.LiveView.Socket
+      alias Teiserver.Helper.QueryHelpers
+      alias Teiserver.Repo
+
+      import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
+      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
@@ -163,6 +181,7 @@ defmodule TeiserverWeb do
       use Phoenix.Component
       alias Phoenix.LiveView.JS
       import TeiserverWeb.Gettext
+      alias Phoenix.LiveView.Socket
 
       alias Teiserver.Helper.StylingHelper
       import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
@@ -268,6 +287,7 @@ defmodule TeiserverWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import TeiserverWeb.{CoreComponents, NavComponents}
+      import TeiserverWeb.Components.DetailLine, only: [detail_line: 1]
 
       use Gettext, backend: TeiserverWeb.Gettext
 

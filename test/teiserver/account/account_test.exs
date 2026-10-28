@@ -9,7 +9,7 @@ defmodule Teiserver.AccountTest do
     @valid_attrs %{
       colour: "#AA0000",
       icon: "fa-solid fa-home",
-      name: "some name",
+      name: "some_name",
       permissions: [],
       email: "AnEmailAddress@email.com",
       password: Account.spring_md5_password("some password")
@@ -18,8 +18,8 @@ defmodule Teiserver.AccountTest do
       colour: "#0000AA",
       icon: "fa-solid fa-wrench",
       permissions: [],
-      name: "some updated name",
-      email: "some updated email",
+      name: "some_updated_name",
+      email: "some_updated@email",
       password: Account.spring_md5_password("some updated password")
     }
     @invalid_attrs %{
@@ -40,9 +40,11 @@ defmodule Teiserver.AccountTest do
       # We don't care about the actual results at this point, just that the filters are called
       Account.list_users(
         search: [
-          data_equal: {"field", "value"},
-          data_greater_than: {"field", "123"},
-          data_less_than: {"field", "123"},
+          last_login_after: ~U[2020-01-01 00:00:00Z],
+          has_logged_in: true,
+          restricted_until_before: DateTime.utc_now(),
+          discord_id: 123,
+          lobby_client: "bar_lobby",
           warn_mute_or_ban: nil,
 
           # Tests the fallback to Teiserver.UserLib
@@ -51,38 +53,25 @@ defmodule Teiserver.AccountTest do
         joins: [:user_stat]
       )
 
-      # Flag filters as true
-      Account.list_users(
-        search: [
-          bot: "Robot",
-          moderator: "Moderator",
-          tester: "Tester",
-          streamer: "Streamer",
-          donor: "Donor",
-          contributor: "Contributor",
-          developer: "Developer"
-        ]
-      )
-
-      # Flag filters as false
-      Account.list_users(
-        search: [
-          bot: "Person",
-          moderator: "User",
-          tester: "Normal",
-          streamer: "Normal",
-          donor: "Normal",
-          contributor: "Normal",
-          developer: "Normal"
-        ]
-      )
+      # Mod action filters
+      Account.list_users(search: [mod_action: "Banned"])
+      Account.list_users(search: [mod_action: "Not banned"])
+      Account.list_users(search: [mod_action: "Muted"])
+      Account.list_users(search: [mod_action: "Warned"])
+      Account.list_users(search: [mod_action: "Any action"])
+      Account.list_users(search: [mod_action: "Muted or banned"])
+      Account.list_users(search: [mod_action: "Not muted or banned"])
+      Account.list_users(search: [mod_action: "Permanently banned"])
+      Account.list_users(search: [not_mod_action: "Bridging"])
 
       # Order by
-      Account.list_users(order_by: [{:data, "field", :asc}])
-      Account.list_users(order_by: [{:data, "field", :desc}])
-
-      # Fallback
-      Account.list_users(order_by: [{:data, "field", :desc}])
+      Account.list_users(order_by: "Name (A-Z)")
+      Account.list_users(order_by: "Name (Z-A)")
+      Account.list_users(order_by: "Last logged in")
+      Account.list_users(order_by: "Last logged out")
+      Account.list_users(order_by: "Last played")
+      Account.list_users(order_by: "Newest first")
+      Account.list_users(order_by: "Oldest first")
     end
 
     test "get_user!/1 returns the user with given id" do
@@ -94,9 +83,8 @@ defmodule Teiserver.AccountTest do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
       assert user.colour == "#AA0000"
       assert user.icon == "fa-solid fa-home"
-      assert user.name == "some name"
+      assert user.name == "some_name"
       assert user.permissions == []
-      assert user.name == "some name"
       assert Account.verify_md5_password(@valid_attrs.password, user.password)
     end
 
@@ -109,9 +97,8 @@ defmodule Teiserver.AccountTest do
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
       assert user.colour == "#0000AA"
       assert user.icon == "fa-solid fa-wrench"
-      assert user.name == "some updated name"
+      assert user.name == "some_updated_name"
       assert user.permissions == []
-      assert user.name == "some updated name"
     end
 
     test "update_user/2 with invalid data returns error changeset" do

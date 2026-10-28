@@ -5,6 +5,16 @@ defmodule Teiserver.Config.SiteConfigTypes.SystemConfigs do
   @spec create() :: :ok
   def create do
     add_site_config_type(%{
+      key: "system.DeleteUnverifiedUsersTask",
+      section: "System",
+      type: "boolean",
+      default: false,
+      permissions: ["Server"],
+      description: "Enable or disable the job to delete unverified users",
+      value_label: "Enable deletion of unverified users task"
+    })
+
+    add_site_config_type(%{
       key: "system.Redirect url",
       section: "System",
       type: "string",

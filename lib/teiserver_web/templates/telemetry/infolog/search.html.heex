@@ -1,18 +1,4 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
-
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    $('select').select2({
-      width: "100%"
-    });
-  });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
-</script>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 <div class="search-row pt-3">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
@@ -28,37 +14,39 @@
   >
     <div class="row">
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-        <label for="search_order" class="control-label">Type: </label>
-        {central_component("icon_dropdown", %{
-          name: "type",
-          id: "search_type",
-          selected: @params["type"] || "Any",
-          enumerable: [
-            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
-            %{id: "LuaUI", icon: "fa-solid fa-square", colour: fg},
-            %{id: "LuaRules", icon: "fa-solid fa-square", colour: fg},
-            %{id: "SyncError", icon: "fa-solid fa-square", colour: fg},
-            %{id: "Errorlog", icon: "fa-solid fa-square", colour: fg},
-            %{id: "EngineCrash", icon: "fa-solid fa-square", colour: fg},
-            %{id: "AICrash", icon: "fa-solid fa-square", colour: fg},
-            %{id: "LuaMenu", icon: "fa-solid fa-square", colour: fg}
-          ]
-        })}
+        <.input
+          type="select"
+          id="search_type"
+          name="type"
+          label="Type"
+          value={@params["type"] || "Any"}
+          options={[
+            "Any",
+            "LuaUI",
+            "LuaRules",
+            "SyncError",
+            "Errorlog",
+            "EngineCrash",
+            "AICrash",
+            "LuaMenu"
+          ]}
+        />
       </div>
 
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-        <label for="search_order" class="control-label">Order by: </label>
-        {central_component("icon_dropdown", %{
-          name: "order",
-          id: "search_order",
-          selected: @params["order"] || "Newest first",
-          enumerable: [
-            %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
-            %{id: "Largest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
-            %{id: "Smallest first", icon: "fa-solid fa-sort-numeric-down", colour: fg}
-          ]
-        })}
+        <.input
+          type="select"
+          id="search_order"
+          name="search[order]"
+          label="Order by"
+          value={@params["order"] || "Name (A-Z)"}
+          options={[
+            "Newest first",
+            "Oldest first",
+            "Largest first",
+            "Smallest first"
+          ]}
+        />
       </div>
 
       <div class="col-md-4 col-lg-3 col-xl-2 my-2">

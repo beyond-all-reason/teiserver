@@ -90,7 +90,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     # members aren't cleaned up when DOWN is received
     assert LoginThrottleServer.get_queue_length() == 2
 
-    # attempt to aleviate a potential race, where the DOWN message from the
+    # attempt to alleviate a potential race, where the DOWN message from the
     # task reach the throttling server too late
     :timer.sleep(5)
     LoginThrottleServer.tick()

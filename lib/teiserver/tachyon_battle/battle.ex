@@ -4,6 +4,9 @@ defmodule Teiserver.TachyonBattle.Battle do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
+  alias Teiserver.Battle.Match
+  alias Teiserver.Messaging
+  alias Teiserver.Player
   alias Teiserver.TachyonBattle.Registry
   alias Teiserver.TachyonBattle.Types, as: T
 
@@ -18,7 +21,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @type state :: %{
           id: T.id(),
-          match_id: T.match_id(),
+          match_id: Match.id(),
           autohost_id: Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
@@ -39,6 +42,13 @@ defmodule Teiserver.TachyonBattle.Battle do
               password: String.t()
             }
           },
+
+          # "finished" event is sent once per player, some players might desync or fake results so
+          # we use the results majority of players agree on as the true outcome of the match
+          # TODO this majority voting won't work for 1v1s but we can deal with that later by
+          # e.g. tracking the % of uncertain results a player has and investigate further
+          finished_reports: %{User.id() => [non_neg_integer()]},
+          winning_ally_team_ids: [non_neg_integer()],
 
           # store the connection info for the actual battle so that player can
           # join/rejoin
@@ -81,7 +91,7 @@ defmodule Teiserver.TachyonBattle.Battle do
           User.id(),
           name :: String.t(),
           password :: String.t()
-        ) :: {:ok, connection_info()} | {:error, term()}
+        ) :: {:ok, %{ips: [String.t()], port: integer(), password: String.t()}} | {:error, term()}
   def add_player(battle_id, user_id, name, password) do
     via_tuple(battle_id) |> GenServer.call({:add_player, user_id, name, password})
   catch
@@ -148,7 +158,9 @@ defmodule Teiserver.TachyonBattle.Battle do
       # Need to also fix the autohost_pid when it comes back
       autohost_timeout: Map.get(args, :autohost_timeout, 100),
       battle_state: :initialised,
-      participants: Map.merge(players, specs)
+      participants: Map.merge(players, specs),
+      finished_reports: %{},
+      winning_ally_team_ids: []
     }
 
     # we need an overall timeout to avoid any potential zombie process
@@ -213,7 +225,10 @@ defmodule Teiserver.TachyonBattle.Battle do
         {:reply, {:error, :no_autohost}, state}
 
       {_pid, participant} when not is_nil(participant) ->
-        {:reply, {:ok, Map.take(state, [:ips, :port])}, state}
+        # This participant and their password is already known by the autohost
+        # returning the existing password as the new one wouldn't be recognised
+        resp = state |> Map.take([:ips, :port]) |> Map.put(:password, participant.password)
+        {:reply, {:ok, resp}, state}
 
       # The engine cannot deal with a total of more than 254 players
       # https://github.com/beyond-all-reason/RecoilEngine/issues/2850
@@ -225,9 +240,9 @@ defmodule Teiserver.TachyonBattle.Battle do
 
         case Autohost.add_player(pid, data) do
           :ok ->
-            resp = {:ok, Map.take(state, [:ips, :port])}
+            resp = state |> Map.take([:ips, :port]) |> Map.put(:password, password)
             state = put_in(state, [:participants, user_id], %{name: name, password: password})
-            {:reply, resp, state}
+            {:reply, {:ok, resp}, state}
 
           {:error, err} ->
             {:reply, {:error, err}, state}
@@ -250,25 +265,42 @@ defmodule Teiserver.TachyonBattle.Battle do
         {:noreply, %{state | battle_state: :in_progress}}
 
       {:finished, %{user_id: user_id, winning_ally_teams: winning_ally_teams}} ->
-        Battle.end_tachyon_match(state.match_id, ev.time, user_id, winning_ally_teams)
-        {:noreply, %{state | battle_state: :finished}}
+        finished_reports = Map.put(state.finished_reports, user_id, winning_ally_teams)
+
+        {:noreply,
+         %{
+           state
+           | battle_state: :finished,
+             finished_reports: finished_reports,
+             winning_ally_team_ids: majority_winning_ally_teams(finished_reports)
+         }}
 
       {:engine_crash, _details} ->
-        Battle.end_tachyon_match(state.match_id, ev.time)
-        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+        Battle.end_tachyon_match(state.match_id, ev.time, state.winning_ally_team_ids)
+
+        notify_battle_ended(state)
+
+        {:stop, :normal, %{state | battle_state: :shutting_down}}
 
       :engine_quit ->
-        Battle.end_tachyon_match(state.match_id, ev.time)
-        Battle.rate_tachyon_match(state.match_id)
-        {:stop, :shutdown, %{state | battle_state: :shutting_down}}
+        Battle.end_tachyon_match(state.match_id, ev.time, state.winning_ally_team_ids)
 
-      {:player_chat_broadcast, %{destination: :all, message: "!stop"}} ->
-        if state.autohost_pid != nil do
+        notify_battle_ended(state)
+
+        {:stop, :normal, %{state | battle_state: :shutting_down}}
+
+      {:player_chat_dm, %{message: message, user_id: from_id, to_user_id: to_id}} ->
+        Messaging.persist_battle_message(message, :player, state.match_id, from_id, to_id)
+        {:noreply, state}
+
+      {:player_chat_broadcast, %{destination: destination, message: message, user_id: user_id}} ->
+        Messaging.persist_battle_message(message, destination, state.match_id, user_id)
+
+        if destination == :all and message == "!stop" and state.autohost_pid != nil do
           Autohost.kill_battle(state.autohost_pid, state.id)
-          {:noreply, state}
-        else
-          {:noreply, state}
         end
+
+        {:noreply, state}
 
       _other ->
         {:noreply, state}
@@ -290,6 +322,75 @@ defmodule Teiserver.TachyonBattle.Battle do
   def handle_info(:battle_timeout, state) do
     Logger.info("Battle shutting down to save resources")
     {:stop, :normal, state}
+  end
+
+  defp notify_battle_ended(state) do
+    teams =
+      for {ally_team, ally_id} <- Enum.with_index(state.start_script.ally_teams),
+          {team, team_id} <- Enum.with_index(ally_team.teams),
+          do: {ally_id, team_id, team}
+
+    players =
+      for {ally_id, team_id, team} <- teams,
+          {player, player_id} <- Map.get(team, :players, []) |> Enum.with_index() do
+        %{
+          user_id: player.user_id,
+          name: player.name,
+          ally_team: ally_id,
+          team: team_id,
+          player: player_id
+        }
+      end
+
+    bots =
+      for {ally_id, team_id, team} <- teams,
+          {bot, player_id} <- Map.get(team, :bots, []) |> Enum.with_index() do
+        %{
+          ai_short_name: bot.ai_short_name,
+          ally_team: ally_id,
+          team: team_id,
+          player: player_id
+        }
+      end
+
+    player_ids = MapSet.new(players, & &1.user_id)
+
+    # All participants who are not players are considered spectators
+    # An issue to change the way we track spectators - https://github.com/beyond-all-reason/teiserver/issues/1534
+    spectators =
+      for {id, %{name: name}} <- state.participants,
+          not MapSet.member?(player_ids, id),
+          do: %{user_id: id, name: name}
+
+    battle_ended_data = %{
+      battle_id: state.id,
+      players: players,
+      bots: bots,
+      spectators: spectators,
+      winning_ally_team_ids: state.winning_ally_team_ids
+    }
+
+    Map.keys(state.participants)
+    |> Enum.each(fn participant_id ->
+      Player.notify_battle_ended(participant_id, state.id, battle_ended_data)
+    end)
+  end
+
+  @spec majority_winning_ally_teams(%{User.id() => [non_neg_integer()]}) :: [non_neg_integer()]
+  defp majority_winning_ally_teams(finished_reports) do
+    # Minimum number of votes requried for a majority
+    min_required_votes = (finished_reports |> Map.keys() |> Enum.count()) / 2
+
+    winners =
+      finished_reports
+      |> Map.values()
+      |> Enum.frequencies()
+      |> Enum.filter(fn {_winners, votes} -> votes > min_required_votes end)
+
+    case winners do
+      [{winning_ally_team_ids, _votes}] -> winning_ally_team_ids
+      [] -> []
+    end
   end
 
   defp via_tuple(battle_id) do

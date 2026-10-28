@@ -3,9 +3,9 @@ defmodule Teiserver.TeiserverConfigs do
 
   alias Teiserver.Account
   alias Teiserver.Lobby
+  alias Teiserver.Matchmaking
   alias Teiserver.Party
   alias Teiserver.Player.LoginQueue
-  alias Teiserver.Tachyon
 
   import Teiserver.Config, only: [add_site_config_type: 1]
 
@@ -18,7 +18,6 @@ defmodule Teiserver.TeiserverConfigs do
     moderation_configs()
     discord_configs()
     lobby_configs()
-    debugging_configs()
     profile_configs()
     rating_configs()
     tachyon_configs()
@@ -378,7 +377,7 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Sprint TCP Server max heap size",
+      key: "teiserver.Spring TCP Server max heap size",
       section: "Legacy protocol",
       type: "integer",
       permissions: ["Server"],
@@ -609,164 +608,12 @@ defmodule Teiserver.TeiserverConfigs do
 
   defp discord_configs do
     add_site_config_type(%{
-      key: "teiserver.Bridge from discord",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["Moderator"],
-      description: "Enables bridging from discord to in-lobby channels",
-      default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Bridge from server",
-      section: "Discord",
-      type: "boolean",
-      permissions: ["Moderator"],
-      description: "Enables bridging from in-lobby channels to discord",
-      default: true
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Bridge player numbers",
       section: "Discord",
       type: "boolean",
       permissions: ["Admin"],
       description: "Enables bridging of channel names to discord",
       default: true
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #main",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to bridge with #main"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #newbies",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to bridge with #newbies"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #promote",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to bridge for promoting games"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #overwatch-reports",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to post overwatch specific reports"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #moderation-reports",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to post moderation-reports"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #moderation-actions",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to post moderation-actions"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #server-updates",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to post server updates"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord channel #telemetry-infologs",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel to post infologs"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord forum #gdt-discussion",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the forum for starting GDT discussions"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord forum #gdt-voting",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the forum for starting GDT voting"
-    })
-
-    # User number channels
-    add_site_config_type(%{
-      key: "teiserver.Discord counter clients",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel broadcasting client count"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord counter players",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel broadcasting player count"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord counter matches",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel broadcasting match count"
-    })
-
-    add_site_config_type(%{
-      key: "teiserver.Discord counter lobbies",
-      section: "Discord",
-      type: "integer",
-      permissions: ["Admin"],
-      description: "The discord ID for the channel broadcasting lobby count"
-    })
-  end
-
-  @spec debugging_configs :: :ok
-  def debugging_configs do
-    add_site_config_type(%{
-      key: "debug.Print outgoing messages",
-      section: "Debug",
-      type: "boolean",
-      default: false,
-      permissions: ["Admin"],
-      description: "Print all outgoing messages"
-    })
-
-    add_site_config_type(%{
-      key: "debug.Print incoming messages",
-      section: "Debug",
-      type: "boolean",
-      default: false,
-      permissions: ["Admin"],
-      description: "Print all incoming messages"
     })
   end
 
@@ -868,9 +715,9 @@ defmodule Teiserver.TeiserverConfigs do
   end
 
   defp tachyon_configs do
-    Tachyon.setup_site_configs()
     Party.setup_site_configs()
     LoginQueue.setup_site_configs()
+    Matchmaking.setup_site_configs()
     :ok
   end
 end

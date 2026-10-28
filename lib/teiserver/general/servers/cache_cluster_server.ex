@@ -1,6 +1,6 @@
 defmodule Teiserver.General.CacheClusterServer do
   @moduledoc """
-  This allows us to propogate data between nodes in the cluster to ensure the ETS
+  This allows us to propagate data between nodes in the cluster to ensure the ETS
   tables are kept in sync.
   """
 

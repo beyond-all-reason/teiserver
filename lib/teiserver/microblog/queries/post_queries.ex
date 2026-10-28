@@ -1,9 +1,13 @@
 defmodule Teiserver.Microblog.PostQueries do
   @moduledoc false
 
+  alias Ecto.Query
   alias Teiserver.Microblog.Post
   alias Teiserver.Microblog.PostTagQueries
+
   use TeiserverWeb, :queries
+
+  @type t :: Query.t()
 
   # Queries
   @spec query_posts(list) :: Ecto.Query.t()
@@ -144,5 +148,25 @@ defmodule Teiserver.Microblog.PostQueries do
     from posts in query,
       left_join: discord_channels in assoc(posts, :discord_channel),
       preload: [discord_channel: discord_channels]
+  end
+
+  # New style
+  @spec posts() :: t()
+  def posts do
+    from(posts in Post, as: :posts)
+  end
+
+  # Where id
+  @spec where_id(t(), pos_integer() | String.t()) :: t()
+  def where_id(query, id) do
+    from posts in query,
+      where: posts.id == ^id
+  end
+
+  # Where poster_id
+  @spec where_poster_id(t(), pos_integer() | String.t()) :: t()
+  def where_poster_id(query, poster_id) do
+    from posts in query,
+      where: posts.poster_id == ^poster_id
   end
 end

@@ -86,10 +86,15 @@ defmodule Teiserver.Communication do
       nil
 
   """
-  @spec get_text_callback(Integer.t() | List.t()) :: TextCallback.t()
-  @spec get_text_callback(Integer.t(), List.t()) :: TextCallback.t()
-  def get_text_callback(id) when not is_list(id) do
+  @spec get_text_callback(Integer.t() | List.t()) :: TextCallback.t() | nil
+  @spec get_text_callback(Integer.t(), List.t()) :: TextCallback.t() | nil
+  def get_text_callback(id) when is_integer(id) do
     lobby_text_callback(id, [])
+    |> Repo.one()
+  end
+
+  def get_text_callback(name) when is_binary(name) do
+    lobby_text_callback(nil, search: [name: name])
     |> Repo.one()
   end
 
@@ -160,6 +165,7 @@ defmodule Teiserver.Communication do
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   def delete_text_callback(%TextCallback{} = text_callback) do
     Repo.delete(text_callback)
+    |> TextCallbackLib.delete_text_callback_cache()
   end
 
   @doc """
@@ -171,9 +177,28 @@ defmodule Teiserver.Communication do
       %Ecto.Changeset{source: %TextCallback{}}
 
   """
-  @spec change_text_callback(TextCallback.t()) :: Ecto.Changeset.t()
-  def change_text_callback(%TextCallback{} = text_callback) do
-    TextCallback.changeset(text_callback, %{})
+  @spec change_text_callback(TextCallback.t(), map()) :: Ecto.Changeset.t()
+  def change_text_callback(%TextCallback{} = text_callback, params \\ %{}) do
+    TextCallback.changeset(text_callback, params)
+  end
+
+  @doc """
+  Returns the distinct list of text callback categories.
+
+  ## Examples
+
+      iex> list_text_callback_categories()
+      ["default", "moderation", "guide", ...]
+
+  """
+  @spec list_text_callback_categories() :: [String.t()]
+  def list_text_callback_categories do
+    from(tc in TextCallback,
+      distinct: true,
+      select: tc.category,
+      order_by: tc.category
+    )
+    |> Repo.all()
   end
 
   @spec build_text_callback_cache() :: :ok
@@ -182,9 +207,6 @@ defmodule Teiserver.Communication do
   @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_text_callback_cache(args), to: TextCallbackLib
-
-  @spec lookup_text_callback_from_trigger(String.t()) :: TextCallback.t() | nil
-  defdelegate lookup_text_callback_from_trigger(trigger), to: TextCallbackLib
 
   @spec can_trigger_callback?(non_neg_integer() | TextCallback.t(), non_neg_integer()) ::
           TextCallback.t() | nil
@@ -231,6 +253,10 @@ defmodule Teiserver.Communication do
   @spec new_discord_message(String.t() | non_neg_integer(), String.t()) ::
           {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   defdelegate new_discord_message(channel_id, message), to: DiscordChannelLib
+
+  @spec rename_discord_channel(String.t() | non_neg_integer(), String.t()) ::
+          {:ok, Nostrum.Struct.Message.t()} | {:error, any}
+  defdelegate rename_discord_channel(channel_id, new_name), to: DiscordChannelLib
 
   @spec new_interaction_response(String.t()) :: map
   defdelegate new_interaction_response(message), to: DiscordChannelLib

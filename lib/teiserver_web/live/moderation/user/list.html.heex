@@ -1,0 +1,85 @@
+<UserComponents.section_menu active="list" scope={@scope}>
+  <UserComponents.quick_search />
+</UserComponents.section_menu>
+
+<.header>
+  Listing Users
+</.header>
+<div class="heading-subtitle">{format_number(@user_count)} users found</div>
+
+<.live_component
+  module={TeiserverWeb.LiveComponents.CmdPalette}
+  id="cmd-palette"
+  scope={@scope}
+  extra_commands={assigns[:extra_commands]}
+/>
+
+<UserComponents.search_form
+  params={@search}
+  changed?={@search_changed?}
+  preferences={@preferences}
+/>
+
+<.live_component
+  :if={@preferences}
+  module={UserListPreferences}
+  id="user-list-preferences-form"
+  scope={@scope}
+  preferences={@preferences}
+  update_parent={true}
+/>
+
+<div style="clear: both;"></div>
+
+<.table
+  :if={@preferences}
+  id="users-table"
+  rows={@users}
+  table_class={["table-sm mt-4 ", @preferences.table_class]}
+  row_click={
+    String.contains?(@preferences.show_link, "row-click") &&
+      fn user -> JS.navigate(~p"/moderation/users/#{user}") end
+  }
+>
+  <:col :let={user} label="User">{user.name}</:col>
+  <:col :let={user} :if={@is_moderator?} label="Email">
+    <span :if={@preferences.email == "partial"}>
+      {user.email |> String.split("@") |> List.last()}
+    </span>
+    <span :if={@preferences.email == "full"}>{user.email}</span>
+  </:col>
+  <:col :let={user} :if={@preferences.client?} label="Client">{user.client}</:col>
+  <:col :let={user} label="Status">
+    <UserComponents.status_icon user={user} />
+  </:col>
+  <:col :let={user} :if={@is_moderator? and @preferences.hw?} label="HW">{user.hw_string}</:col>
+  <:col :let={user} :if={@is_moderator? and @preferences.ip?} label="IP">{user.last_ip}</:col>
+  <:col :let={user} label="Roles">
+    {if Enum.member?(user.roles || [], "Trusted"), do: "Trusted "}
+    {if Enum.member?(user.roles || [], "Contributor"), do: "Contributor "}
+    {if Enum.member?(user.roles || [], "Moderator"), do: "Moderator"}
+  </:col>
+  <:col :let={user} :if={@preferences.last_login?} label="Last login">
+    {user.last_login && Calendar.strftime(user.last_login, "%Y-%m-%d")}
+  </:col>
+  <:col :let={user} label="Registered">
+    {Calendar.strftime(user.inserted_at, "%Y-%m-%d")}
+  </:col>
+  <:action :let={user}>
+    <div class={[
+      not String.contains?(@preferences.show_link, "button") && "sr-only",
+      "btn btn-info btn-outline btn-xs me-2"
+    ]}>
+      <.link navigate={~p"/moderation/users/#{user}"}>Show</.link>
+    </div>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>

@@ -1,4 +1,49 @@
-<div class="row" style="padding-top: 15vh;" id="login-div">
+<div class="single-block-content">
+  <div class="card bg-base-200 shadow-xl">
+    <div class="card-body">
+      <h1 class="text-4xl font-bold mb-4">
+        {gettext("One time code")}
+      </h1>
+
+      <form
+        action={~p"/otp"}
+        method="post"
+        class="w-full text-center"
+        oninput="if (this.otp.value.length === 6) this.requestSubmit()"
+      >
+        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+        <input type="hidden" name="user_id" value={@user.id} />
+        <input type="password" style="display:none" />
+
+        <label class="otp">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <input
+            name="otp"
+            type="text"
+            autocomplete="one-time-code"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            phx-change="otp-change"
+            autofocus
+            required
+          />
+        </label>
+
+        <div class="mt-6 mx-20">
+          <input type="submit" value="Verify OTP" class="btn btn-primary btn-block" />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div :if={false} class="row" style="padding-top: 15vh;" id="login-div">
   <div class="col-sm-12 col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3 col-xxl-4 offset-xxl-4">
     <div class="card mb-3">
       <div class="card-header">
@@ -30,10 +75,6 @@
               autocomplete="one-time-code"
               placeholder="Enter 6-digit code"
             />
-          </div>
-
-          <div class="mt-3">
-            <input type="submit" value="Verify OTP" class="btn btn-primary btn-block" />
           </div>
         </form>
       </div>

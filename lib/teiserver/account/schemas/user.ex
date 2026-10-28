@@ -2,8 +2,9 @@ defmodule Teiserver.Account.User do
   @moduledoc false
 
   alias Argon2
+  alias Ecto.Changeset
   alias Teiserver.Account
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.User
   alias Teiserver.Helper.StylingHelper
 
   use TeiserverWeb, :schema
@@ -15,6 +16,7 @@ defmodule Teiserver.Account.User do
   typed_schema "account_users" do
     field :name, :string
     field :email, :string
+    field :previous_emails, {:array, :string}, default: []
     field :password, :string, redact: true
 
     field :icon, :string
@@ -28,18 +30,26 @@ defmodule Teiserver.Account.User do
     field :restrictions, {:array, :string}, default: []
     field :restricted_until, :utc_datetime
 
-    field :shadowbanned, :boolean, default: false
-
     # Start time of their last match
     field :last_login, :utc_datetime
     field :last_played, :utc_datetime
     field :last_logout, :utc_datetime
+    field :email_last_changed_at, :utc_datetime
+    field :gdpr_forget_after, :utc_datetime
 
     field :discord_id, :integer
-    field :discord_dm_channel_id, :integer
     field :steam_id, :integer
 
+    field :rank, :integer, default: 0
+    field :country, :string, default: "??"
+    field :bot, :boolean, default: false
+    field :email_change_code, :string
+    field :lobby_hash, :string
+    field :chobby_hash, :string
+    field :lobby_client, :string
+
     has_many :user_configs, Teiserver.Config.UserConfig
+    has_many :notes, Teiserver.Account.UserNote
 
     # Extra user.ex relations go here
     belongs_to :smurf_of, Teiserver.Account.User
@@ -56,17 +66,11 @@ defmodule Teiserver.Account.User do
       bot: false,
       email_change_code: nil,
       last_login: nil,
-      last_login_mins: nil,
       restrictions: [],
       restricted_until: nil,
-      shadowbanned: false,
-      lobby_hash: [],
+      lobby_hash: nil,
       chobby_hash: nil,
-      print_client_messages: false,
-      print_server_messages: false,
       discord_id: nil,
-      discord_dm_channel: nil,
-      discord_dm_channel_id: nil,
       steam_id: nil
     }
   end
@@ -81,10 +85,12 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id country bot email_change_code lobby_hash chobby_hash lobby_client)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
+    |> validate_name_change()
     |> put_md5_password_hash()
   end
 
@@ -97,12 +103,13 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client email_last_changed_at)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -116,64 +123,43 @@ defmodule Teiserver.Account.User do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
 
-  def changeset(user, attrs, :server_limited_update_user) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
-    user
-    |> cast(
-      attrs,
-      ~w(name email icon colour data roles permissions)a
-    )
-    |> validate_required(~w(name email)a)
-    |> unique_constraint(:email)
-  end
-
   def changeset(user, attrs, :limited_with_data) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
-
     user
-    |> cast(attrs, ~w(name email icon colour data)a)
-    |> validate_required([:name, :email])
-    |> unique_constraint(:email)
+    |> cast(attrs, ~w(name icon colour data)a)
+    |> validate_required([:name])
+    |> validate_name_change()
   end
 
-  # Updating email or name from user update form requires plain text password confirmation
-  def changeset(user, attrs, :user_form) do
-    attrs =
-      attrs
-      |> remove_whitespace([:email])
+  # Requires the password to be used for email address changes
+  def changeset(%User{email: old_email} = user, attrs, :email) do
+    attrs = remove_whitespace(attrs, [:email])
 
-    cond do
-      attrs["password"] == nil or attrs["password"] == "" ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> add_error(
-          :password_confirmation,
-          "Please enter your password to change your account details."
-        )
+    new_previous_emails = [old_email | user.previous_emails || []]
 
-      Account.verify_plain_password(attrs["password"], user.password) == false ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> add_error(:password_confirmation, "Incorrect password")
-
-      true ->
-        user
-        |> cast(attrs, [:name, :email])
-        |> validate_required([:name, :email])
-        |> unique_constraint(:email)
-        |> validate_change(:email, fn :email, email ->
-          case CacheUser.valid_email?(email) do
-            :ok -> []
-            {:error, reason} -> [{:email, reason}]
-          end
-        end)
+    if Account.verify_plain_password(attrs["password"] || "", user.password) do
+      user
+      |> cast(attrs, [:email])
+      |> cast(
+        %{previous_emails: new_previous_emails, email_last_changed_at: DateTime.utc_now()},
+        [
+          :previous_emails,
+          :email_last_changed_at
+        ]
+      )
+      |> validate_required([:email, :previous_emails])
+      |> unique_constraint(:email)
+      # And is valid as an email
+      |> validate_change(:email, fn :email, email ->
+        case Account.valid_email?(email) do
+          :ok -> []
+          {:error, reason} -> [{:email, reason}]
+        end
+      end)
+      |> validate_changes_present([:email])
+    else
+      user
+      |> cast(attrs, [:email])
+      |> add_error(:password, "Incorrect password")
     end
   end
 
@@ -235,12 +221,13 @@ defmodule Teiserver.Account.User do
     user
     |> cast(
       attrs,
-      ~w(name email password icon colour data roles permissions restrictions restricted_until shadowbanned last_login last_played last_logout discord_id discord_dm_channel_id steam_id smurf_of_id)a
+      ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id)a
     )
     |> validate_required([:name, :email, :password, :permissions])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -274,17 +261,13 @@ defmodule Teiserver.Account.User do
     user
     |> cast(attrs, [:name, :email, :password, :icon, :colour, :data])
     |> unique_constraint(:email)
+    |> unique_constraint(:discord_id)
     |> validate_required([:name, :email, :password])
     |> validate_confirmation(:password, required: true, message: "Passwords do not match")
-    |> validate_change(:name, fn :name, name ->
-      case Account.valid_name?(name, false) do
-        :ok -> []
-        {:error, reason} -> [{:name, reason}]
-      end
-    end)
+    |> validate_name_change()
     |> validate_password()
     |> validate_change(:email, fn :email, email ->
-      case CacheUser.valid_email?(email) do
+      case Account.valid_email?(email) do
         :ok -> []
         {:error, reason} -> [{:email, reason}]
       end
@@ -295,6 +278,65 @@ defmodule Teiserver.Account.User do
         :md5_password -> put_md5_password_hash(changeset)
       end
     end)
+  end
+
+  def smurf_changeset(%User{} = user, attrs) do
+    cast(user, attrs, [:smurf_of_id])
+  end
+
+  def clear_gdpr_forget_changeset(%User{} = user) do
+    cast(user, %{gdpr_forget_after: nil}, [:gdpr_forget_after])
+  end
+
+  def set_gdpr_forget_changeset(%User{} = user, attrs) do
+    cast(user, attrs, [:gdpr_forget_after])
+  end
+
+  @doc """
+  Not for use by the user themselves, the normal email change changeset requires their password.
+  This changeset is intended for use only by privileged users.
+  """
+  def system_email_changeset(%User{} = user, new_email) do
+    new_previous_emails = [user.email | user.previous_emails || []]
+
+    user
+    |> cast(
+      %{
+        email: new_email,
+        previous_emails: new_previous_emails,
+        email_last_changed_at: DateTime.utc_now()
+      },
+      [:email, :previous_emails, :email_last_changed_at]
+    )
+    |> validate_required([:email])
+    |> unique_constraint(:email)
+    |> validate_change(:email, fn :email, email ->
+      case Account.valid_email?(email) do
+        :ok -> []
+        {:error, reason} -> [{:email, reason}]
+      end
+    end)
+  end
+
+  def rename_changeset(%User{} = user, new_name) do
+    user
+    |> cast(%{name: new_name}, [:name])
+    |> validate_required([:name])
+    |> validate_name_change()
+  end
+
+  def roles_changeset(%User{} = user, new_roles) do
+    new_roles = Enum.uniq(new_roles || [])
+
+    user
+    |> cast(%{roles: new_roles}, [:roles])
+    |> validate_required([:roles])
+  end
+
+  def discord_id_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:discord_id])
+    |> unique_constraint(:discord_id)
   end
 
   defp change_plain_password(user, attrs) do
@@ -331,6 +373,40 @@ defmodule Teiserver.Account.User do
 
   defp put_md5_password_hash(changeset), do: changeset
 
+  defp validate_name_change(%Changeset{} = changeset) do
+    changeset
+    |> validate_change(:name, fn :name, name ->
+      case Account.valid_name?(name) do
+        :ok -> []
+        {:error, reason} -> [{:name, reason}]
+      end
+    end)
+  end
+
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_action, conn, _data), do: allow?(conn, "admin.user")
+
+  @doc """
+  Ensure the user id is at least somewhat correct
+  """
+  @spec parse_user_id(id() | String.t()) :: {:ok, id()} | {:error, reason :: term()}
+  def parse_user_id(user_id) when is_integer(user_id) do
+    # this is a postgres constraint since user id are also bigints
+    bigint_max = Integer.pow(2, 63) - 1
+
+    if user_id >= 0 && user_id < bigint_max do
+      {:ok, user_id}
+    else
+      {:error, :out_of_range}
+    end
+  end
+
+  def parse_user_id(user_id) when is_binary(user_id) do
+    case user_id |> String.trim() |> Integer.parse() do
+      {id, ""} -> parse_user_id(id)
+      _err -> {:error, :invalid}
+    end
+  end
+
+  def parse_user_id(_user_id), do: {:error, :invalid}
 end

@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= form_for @response_changeset, @action, fn _f -> %>
+<%= form_for @response_changeset, @action, fn f -> %>
   <%= if @response_changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
@@ -10,39 +10,42 @@
   <div class="row mt-2">
     <%= for {action, icon} <- Teiserver.Moderation.ResponseLib.list_actions() do %>
       <div class="col">
-        {central_component("radio",
-          name: "response[action]",
-          id: "response_#{action}",
-          value: action,
-          label: raw("<i class='fa-fw #{icon}'></i> #{action}"),
-          field: :action,
-          changeset: @response_changeset
-        )}
+        <label for={"response_#{action}"}><i class={"fa-fw #{icon}"}></i> {action}</label>
+        <.input
+          type="radio"
+          class="form-check-input d-inline-block"
+          name="response[action]"
+          id={"response_#{action}"}
+          value={action}
+          field={f[:action]}
+        />
       </div>
     <% end %>
   </div>
 
   <div class="row mt-2">
     <div class="col">
-      {central_component("radio",
-        name: "response[accurate]",
-        id: "response_is_accurate",
-        value: "true",
-        label: raw("<i class='fa-fw fa-solid fa-check'></i> Accurate report"),
-        field: :accurate,
-        changeset: @response_changeset
-      )}
+      <label for="response_is_accurate"><i class="fa-fw fa-check"></i> Accurate report</label>
+      <.input
+        type="radio"
+        class="form-check-input d-inline-block"
+        name="response[accurate]"
+        id="response_is_accurate"
+        value="true"
+        field={f[:accurate]}
+      />
     </div>
 
     <div class="col">
-      {central_component("radio",
-        name: "response[accurate]",
-        id: "response_not_accurate",
-        value: "false",
-        label: raw("<i class='fa-fw fa-solid fa-times'></i> Inaccurate report"),
-        field: :accurate,
-        changeset: @response_changeset
-      )}
+      <label for="response_not_accurate"><i class="fa-fw fa-times"></i> Inaccurate report</label>
+      <.input
+        type="radio"
+        class="form-check-input d-inline-block"
+        name="response[accurate]"
+        id="response_not_accurate"
+        value="false"
+        field={f[:accurate]}
+      />
     </div>
   </div>
 

@@ -28,15 +28,10 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Logging.MatchLogView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "month_metrics"
-          })
-        )}
+        <TeiserverWeb.Components.Logging.MatchLogComponents.section_menu
+          active="month_metrics"
+          colour={bsname}
+        />
 
         <hr />
 
@@ -47,7 +42,7 @@
             <ul class="nav nav-tabs" role="tablist" id="the_tabs">
               <li class="nav-item">
                 <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  {central_component("icon", icon: icon())} Details
+                  <Fontawesome.icon icon={icon()} style="regular" /> Details
                 </a>
               </li>
             </ul>

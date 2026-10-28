@@ -10,8 +10,7 @@ defmodule Teiserver.Account.RetentionReportTest do
     test "does not raise for verified players with recorded activity" do
       user =
         GeneralTestLib.make_user(%{
-          "roles" => ["Verified"],
-          "data" => %{"last_login_mins" => 60}
+          "roles" => ["Verified"]
         })
 
       # last_login is a DateTime while inserted_at is a NaiveDateTime; the report
