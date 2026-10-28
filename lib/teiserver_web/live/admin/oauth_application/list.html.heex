@@ -1,0 +1,98 @@
+<OAuthApplicationComponents.section_menu active="list" scope={@scope}>
+  <.link
+    :if={allow?(@scope, "Admin")}
+    patch={~p"/admin/oauth_applications/new"}
+    class="btn btn-primary btn-sm"
+  >
+    <Fontawesome.icon icon="plus" style="regular" /> New oauth application
+  </.link>
+</OAuthApplicationComponents.section_menu>
+
+<.header>
+  Listing oauth applications
+</.header>
+<div class="heading-subtitle">{@oauth_application_count} oauth applications found</div>
+
+<OAuthApplicationComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.live_component
+  :if={@preferences}
+  module={PreferencesComponent}
+  id="oauth_application-list-preferences-form"
+  scope={@scope}
+  preferences={@preferences}
+  update_parent={true}
+/>
+
+<.table
+  :if={@preferences}
+  id="oauth_applications-table"
+  rows={@app_and_stats}
+  table_class="table-sm table-zebra mt-4"
+  row_click={
+    String.contains?(@preferences.show_link, "row-click") &&
+      fn {oauth_application, _stats} ->
+        JS.navigate(~p"/admin/oauth_applications/#{oauth_application}")
+      end
+  }
+  row_id={fn {oauth_application, _stats} -> "oauth_applications-#{oauth_application.id}" end}
+>
+  <:col :let={{app, _stats}} label="ID">{app.id}</:col>
+  <:col :let={{app, _stats}} label="Client ID (UID)">{app.uid}</:col>
+  <:col :let={{app, _stats}} label="Name">{app.name}</:col>
+  <:col :let={{app, _stats}} label="Description">{app.description}</:col>
+  <:col :let={{app, _stats}} label="Owner">
+    <%= if is_nil(app.owner_id) do %>
+      No owner
+    <% else %>
+      {app.owner.name} ({app.owner.email})
+    <% end %>
+  </:col>
+
+  <:col :let={{app, _stats}} label="Scopes">{Enum.join(app.scopes, ", ")}</:col>
+  <:col :let={{_app, stats}} label="Code / Token / Creds">
+    {stats.code_count} / {stats.token_count} / {stats.credential_count}
+  </:col>
+
+  <:action :let={{oauth_application, _stats}}>
+    <div class={[
+      not String.contains?(@preferences.show_link, "button") && "sr-only",
+      "btn btn-info btn-outline btn-xs me-2"
+    ]}>
+      <.link navigate={~p"/admin/oauth_applications/#{oauth_application}"}>Show</.link>
+    </div>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/admin/oauth_applications/#{oauth_application}/edit"}
+      class="btn btn-secondary btn-outline btn-xs me-2"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back href={~p"/admin"}>Back to admin</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit] and allow?(@scope, "Admin")}
+  id="oauth_application-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/oauth_applications")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@oauth_application.id || :new}
+    title={@page_title}
+    action={@live_action}
+    oauth_application={@oauth_application}
+    patch={~p"/admin/oauth_applications"}
+    scope={@scope}
+  />
+</.modal>

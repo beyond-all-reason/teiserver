@@ -784,6 +784,23 @@ defmodule TeiserverWeb.Router do
       live "/discord_channels/:id/show/edit", DiscordChannel.Show, :edit
     end
 
+    live_session :admin_oauth_applications,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug,
+         {:set, %{site_menu_active: "admin", sensitive_data: true}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/oauth_applications", OAuthApplication.List, :list
+      live "/oauth_applications/new", OAuthApplication.List, :new
+      live "/oauth_applications/:id/edit", OAuthApplication.List, :edit
+
+      live "/oauth_applications/:id", OAuthApplication.Show, :show
+      live "/oauth_applications/:id/show/edit", OAuthApplication.Show, :edit
+      live "/oauth_applications/:id/show/:key", OAuthApplication.Show, :show
+    end
+
     live_session :admin_site_configs,
       layout: {TeiserverWeb.Layouts, :admin_tw},
       on_mount: [

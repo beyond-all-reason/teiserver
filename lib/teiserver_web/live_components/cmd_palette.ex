@@ -8,11 +8,6 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     scope={@scope}
     extra_commands={[]}
   />
-
-  TODO:
-  - Bound selected_idx to the number of commands listed
-  - The moving up or down feels oddly slow, can't work out why
-  - Add a way for additional contextual commands to be given to the component
   """
 
   alias Teiserver.Account.AuthLib
@@ -23,6 +18,13 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   @command_objects [
     %{id: "goto:home", cmd: :goto, label: "Goto: Home", path: "/"},
     %{id: "goto:admin", cmd: :goto, label: "Goto: Admin", path: "/admin", allow: ["Admin"]},
+    %{
+      id: "goto:oauth_applications",
+      cmd: :goto,
+      label: "Goto: OAuth applications",
+      path: "/admin/oauth_applications",
+      allow: ["Admin"]
+    },
     %{
       id: "goto:moderation",
       cmd: :goto,

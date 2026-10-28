@@ -7,8 +7,11 @@ defmodule Teiserver.Config.UserConfigTypes.LastUsedValueConfigs do
 
   @spec create() :: :ok
   def create do
-    # Admin
+    # Admin; discord channels
     add_last_used("last_used.discord_channel_search_page_size")
+
+    # Admin; oauth applications
+    add_last_used("last_used.oauth_application_search_page_size")
 
     # Moderation
     add_last_used("last_used.anti_abuse_search_page_size")
