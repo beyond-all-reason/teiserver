@@ -224,7 +224,7 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           optional(:flags) => non_neg_integer(),
           optional(:components) => list(Nostrum.Struct.Component.t())
         }) :: map
-  def new_interaction_response(%{content: _} = data) do
+  def new_interaction_response(%{content: _content} = data) do
     %{
       type: 4,
       data: data
