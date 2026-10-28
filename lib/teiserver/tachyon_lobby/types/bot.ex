@@ -19,4 +19,8 @@ defmodule Teiserver.TachyonLobby.Types.Bot do
           version: String.t() | nil,
           options: %{String.t() => String.t()}
         }
+
+  # in tests, some user ids are string
+  def bot_id?(id) when is_integer(id), do: false
+  def bot_id?(id), do: String.starts_with?(id, "bot")
 end

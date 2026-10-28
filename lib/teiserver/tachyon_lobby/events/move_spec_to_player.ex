@@ -17,6 +17,7 @@ end
 defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MoveSpecToPlayer do
   alias Teiserver.TachyonLobby.Events.MoveSpecToPlayer
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias Teiserver.TachyonLobby.Types.Bot
 
   def apply_event(%MoveSpecToPlayer{} = ev, %LT.Aggregate{} = agg) do
     spec_data = agg.data.spectators[ev.user_id]
@@ -48,9 +49,15 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MoveSpe
     overview_changes = Map.put(agg.overview_changes, :player_count, map_size(data.players))
 
     %{agg | data: data, changes: changes, overview_changes: overview_changes}
-    |> LT.Aggregate.add_log("join_team", %{
+    |> add_log(ev.user_id, %{
       user_id: ev.user_id,
       details: %{ally_team: elem(ev.player_data.team, 0)}
     })
+  end
+
+  defp add_log(agg, user_id, attrs) do
+    if Bot.bot_id?(user_id),
+      do: agg,
+      else: LT.Aggregate.add_log(agg, "join_team", attrs)
   end
 end
