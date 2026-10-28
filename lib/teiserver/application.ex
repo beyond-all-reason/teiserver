@@ -3,10 +3,12 @@ defmodule Teiserver.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  alias LibclusterPostgres.Strategy, as: LibclusterStrategy
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
   alias Teiserver.Logging
   alias Teiserver.Plugins
+  alias Teiserver.Repo
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
@@ -40,6 +42,9 @@ defmodule Teiserver.Application do
         TeiserverWeb.Presence,
         {Teiserver.General.CacheClusterServer, name: Teiserver.General.CacheClusterServer},
         {Oban, Application.get_env(:teiserver, Oban, [])},
+
+        # libcluster
+        {Cluster.Supervisor, libcluster_topology()},
 
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
@@ -244,5 +249,16 @@ defmodule Teiserver.Application do
   def spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_ssl, listener_opts, Teiserver.SpringTcpServer, [])
+  end
+
+  defp libcluster_topology do
+    [
+      [
+        app: [
+          strategy: LibclusterStrategy,
+          config: Repo.config()
+        ]
+      ]
+    ]
   end
 end
