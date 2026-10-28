@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Account.GeneralControllerTest do
   end
 
   test "admin permissions", %{conn: conn} do
-    resp = get(conn, ~p"/teiserver/admin")
+    resp = get(conn, ~p"/admin")
     assert redirected_to(resp) == ~p"/"
   end
 end

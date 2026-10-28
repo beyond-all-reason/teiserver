@@ -25,15 +25,12 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
     start_date =
       DateTime.utc_now()
       |> DateTime.shift(hour: -26)
-      |> DateTime.to_unix()
-
-    start_date = round(start_date / 60)
 
     user_ids =
       Account.list_users(
         search: [
-          data_greater_than: {"last_login_mins", start_date |> to_string()},
-          data_equal: {"bot", "false"},
+          last_login_after: start_date,
+          not_has_role: "Bot",
           smurf_of: false
         ],
         limit: :infinity,
@@ -60,7 +57,7 @@ defmodule Teiserver.Account.RecalculateUserDailyStatTask do
         )
         |> Enum.filter(fn {userid, _data_rows} ->
           if Enum.member?(user_ids, userid) do
-            Account.get_username(userid) != nil
+            Account.get_username_by_id(userid) != nil
           end
         end)
         |> Enum.each(fn {userid, data_rows} ->

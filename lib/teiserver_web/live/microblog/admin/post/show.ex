@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Microblog.Admin.PostLive.Show do
 
   @impl Phoenix.LiveView
   def handle_params(%{"id" => id}, _url, socket) do
-    if allow?(socket.assigns[:current_user], "Blog helper") do
+    if allow?(socket.assigns[:current_user], "Contributor") do
       post = Microblog.get_post!(id, preload: [:tags])
 
       if post.poster_id == socket.assigns.current_user.id or

@@ -23,6 +23,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.Relationship
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account.RelationshipQueries
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.SmurfKey
   alias Teiserver.Account.SmurfKeyLib
   alias Teiserver.Account.SmurfKeyType
@@ -32,6 +33,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserCacheLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserStat
   alias Teiserver.Account.UserStatLib
   alias Teiserver.Account.UserToken
@@ -109,12 +111,9 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_user_plain_password(user, attrs), to: UserLib
 
-  @spec update_user_user_form(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate update_user_user_form(user, attrs), to: UserLib
-
-  @spec server_limited_update_user(User.t(), map) ::
+  @spec update_user_email(User.t(), map, String.t()) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  defdelegate server_limited_update_user(user, attrs), to: UserLib
+  defdelegate update_user_email(user, attrs, ip), to: UserLib
 
   @spec server_update_user(User.t(), map) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate server_update_user(user, attrs), to: UserLib
@@ -125,6 +124,14 @@ defmodule Teiserver.Account do
   @spec password_reset_update_user(User.t(), map) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate password_reset_update_user(user, attrs), to: UserLib
+
+  @spec update_user_smurf(User.t(), map) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate update_user_smurf(user, attrs), to: UserLib
+
+  @spec update_user_discord_id(User.t(), map) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate update_user_discord_id(user, attrs), to: UserLib
 
   @spec delete_user(User.t()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate delete_user(user), to: UserLib
@@ -157,8 +164,24 @@ defmodule Teiserver.Account do
           :ok | {:error, :inactive | :invalid | :used}
   defdelegate validate_totp(user_or_secret, otp), to: TOTPLib
 
+  @spec validate_totp(User.t() | binary, String.t(), DateTime.t()) ::
+          :ok | {:error, :inactive | :invalid | :used}
+  defdelegate validate_totp(user_or_secret, otp, time), to: TOTPLib
+
   @spec generate_otpauth_uri(String.t(), binary) :: String.t()
   defdelegate generate_otpauth_uri(name, secret), to: TOTPLib
+
+  @spec clean_name(String.t()) :: String.t()
+  defdelegate clean_name(name), to: UserLib
+
+  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, reason :: String.t()}
+  defdelegate valid_name?(name, admin_action \\ false), to: UserLib
+
+  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
+  defdelegate rename_user(userid, new_name, admin_action \\ false), to: UserLib
+
+  @spec valid_email?(String.t()) :: :ok | {:error, reason :: String.t()}
+  defdelegate valid_email?(email), to: UserLib
 
   # User stat table
   @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
@@ -1093,7 +1116,7 @@ defmodule Teiserver.Account do
   end
 
   @spec create_or_update_rating(map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
-  def create_or_update_rating(attrs \\ %{}) do
+  def create_or_update_rating(attrs) do
     case get_rating(attrs.user_id, attrs.rating_type_id) do
       nil ->
         create_rating(attrs)
@@ -1656,8 +1679,8 @@ defmodule Teiserver.Account do
   defdelegate check_block_status(userid, userid_list), to: RelationshipLib
 
   @spec profile_view_permissions(
-          T.user(),
-          T.user(),
+          User.t(),
+          User.t(),
           nil | Account.Relationship,
           nil | Account.Friend,
           nil | Account.FriendRequest
@@ -2141,62 +2164,41 @@ defmodule Teiserver.Account do
 
   # User functions
 
-  @spec get_username(User.id()) :: String.t() | nil
-  defdelegate get_username(userid), to: UserCacheLib
-
   @spec get_username_by_id(User.id()) :: String.t() | nil
   defdelegate get_username_by_id(userid), to: UserCacheLib
 
   @spec get_userid_from_name(String.t()) :: integer() | nil
-  def get_userid_from_name(name), do: UserCacheLib.get_userid(name)
+  def get_userid_from_name(name), do: UserCacheLib.get_userid_from_name(name)
 
-  @spec get_user_by_name(String.t()) :: T.user() | nil
+  @spec get_user_by_name(String.t()) :: User.t() | nil
   defdelegate get_user_by_name(username), to: UserCacheLib
 
-  @spec get_user_by_email(String.t()) :: T.user() | nil
+  @spec get_user_by_email(String.t()) :: User.t() | nil
   defdelegate get_user_by_email(email), to: UserCacheLib
 
-  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
+  @spec get_user_by_discord_id(integer() | String.t()) :: User.t() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
 
-  @spec get_user_by_token(String.t()) :: T.user() | nil
-  defdelegate get_user_by_token(token), to: UserCacheLib
-
-  @spec get_user_by_id(User.id()) :: T.user() | nil
+  @spec get_user_by_id(User.id()) :: User.t() | nil
   defdelegate get_user_by_id(id), to: UserCacheLib
 
-  @spec list_users_from_cache(list) :: list
-  def list_users_from_cache(id_list), do: UserCacheLib.list_users(id_list)
+  @spec get_user_by_id!(User.id()) :: User.t()
+  defdelegate get_user_by_id!(id), to: UserCacheLib
 
-  @spec recache_user(User.id() | User.t()) :: :ok
-  defdelegate recache_user(id), to: UserCacheLib
+  @spec list_users_by_ids(list) :: list
+  def list_users_by_ids(id_list), do: UserCacheLib.list_users_by_ids(id_list)
 
-  @spec convert_user(T.user()) :: T.user()
-  defdelegate convert_user(user), to: UserCacheLib
+  @spec decache_user(User.id() | User.t()) :: :ok
+  defdelegate decache_user(user_or_user_id), to: UserCacheLib
 
-  @spec add_user(T.user()) :: T.user()
-  defdelegate add_user(user), to: UserCacheLib
-
-  @spec update_cache_user(User.id(), map()) :: T.user()
-  def update_cache_user(userid, user), do: UserCacheLib.update_cache_user(userid, user)
-
-  @spec decache_user(User.id()) :: :ok | :no_user
-  defdelegate decache_user(userid), to: UserCacheLib
+  @spec recache_user(User.id() | User.t() | nil) :: User.t() | nil
+  defdelegate recache_user(user_or_user_id), to: UserCacheLib
 
   @spec make_bot_password() :: String.t()
   defdelegate make_bot_password(), to: UserLib
-
-  @spec rename_user(User.id(), String.t(), boolean) :: :success | {:error, String.t()}
-  defdelegate rename_user(userid, new_name, admin_action \\ false), to: Teiserver.CacheUser
-
-  @spec valid_name?(String.t(), boolean()) :: :ok | {:error, String.t()}
-  defdelegate valid_name?(new_name, admin_action), to: Teiserver.CacheUser
-
-  @spec system_change_user_name(User.id(), String.t()) :: :ok
-  defdelegate system_change_user_name(userid, new_name), to: Teiserver.CacheUser
 
   # Client stuff
   @spec get_client_by_name(String.t()) :: nil | T.client()
@@ -2380,5 +2382,140 @@ defmodule Teiserver.Account do
       "Lobby chat",
       "Battle chat"
     ])
+  end
+
+  @doc """
+  Creates (if not already created) the system user we use as a reference for system actions
+  """
+  @spec system_user() :: User.t()
+  def system_user do
+    user =
+      get_user(nil,
+        search: [
+          email: "coordinator@teiserver.local"
+        ]
+      )
+
+    case user do
+      nil ->
+        # Make account
+        {:ok, %User{} = account} =
+          script_create_user(%{
+            name: "Coordinator",
+            email: "coordinator@teiserver.local",
+            icon: "fa-solid fa-sitemap",
+            colour: "#AA00AA",
+            password: make_bot_password(),
+            roles: ["Bot", "Verified", "Server"],
+            data: %{
+              bot: true,
+              moderator: true,
+              lobby_client: "Teiserver Internal Process"
+            }
+          })
+
+        update_user_stat(account.id, %{
+          country_override: Application.get_env(:teiserver, Teiserver)[:server_flag]
+        })
+
+        account
+
+      account ->
+        account
+    end
+  end
+
+  @doc """
+  Get a scope for system actions.
+  """
+  @spec system_scope() :: Scope.t()
+  def system_scope do
+    user = system_user()
+
+    %Scope{
+      user: user,
+      ip: "0.0.0.0"
+    }
+  end
+
+  @doc """
+  Gets a single user_note.
+
+  Raises `Ecto.NoResultsError` if the Banned phrase does not exist.
+
+  ## Examples
+
+      iex> get_user_note!(123)
+      %UserNote{}
+
+      iex> get_user_note!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_user_note!(id), do: Repo.get!(UserNote, id)
+
+  @doc """
+  Creates a user_note.
+
+  ## Examples
+
+      iex> create_user_note(%{field: value})
+      {:ok, %UserNote{}}
+
+      iex> create_user_note(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_user_note(attrs \\ %{}) do
+    %UserNote{}
+    |> UserNote.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_note.
+
+  ## Examples
+
+      iex> update_user_note(user_note, %{field: new_value})
+      {:ok, %UserNote{}}
+
+      iex> update_user_note(user_note, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_note(%UserNote{} = user_note, attrs) do
+    user_note
+    |> UserNote.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a user_note.
+
+  ## Examples
+
+      iex> delete_user_note(user_note)
+      {:ok, %UserNote{}}
+
+      iex> delete_user_note(user_note)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_user_note(%UserNote{} = user_note) do
+    Repo.delete(user_note)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user_note changes.
+
+  ## Examples
+
+      iex> change_user_note(user_note)
+      %Ecto.Changeset{data: %UserNote{}}
+
+  """
+  def change_user_note(%UserNote{} = user_note, attrs \\ %{}) do
+    UserNote.changeset(user_note, attrs)
   end
 end

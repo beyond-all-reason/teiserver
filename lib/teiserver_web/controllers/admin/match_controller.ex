@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Admin.MatchController do
   alias Teiserver.Account
+  alias Teiserver.Account.User
   alias Teiserver.Battle
 
   use TeiserverWeb, :controller
@@ -26,7 +27,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   def index(conn, params) do
     username = Map.get(params, "account_user", "") |> String.trim()
 
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_criteria =
@@ -74,7 +75,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec user_show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def user_show(conn, %{"user_id" => userid} = params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_params = [user_id: userid]
@@ -94,7 +95,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
     total_pages = div(total_count - 1, limit) + 1
 
-    user = Account.get_user_by_id(userid)
+    %User{} = user = Account.get_user_by_id(userid)
 
     conn
     |> assign(:user, user)

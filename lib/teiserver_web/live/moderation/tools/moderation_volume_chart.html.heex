@@ -1,0 +1,80 @@
+<ToolsComponents.section_menu
+  active="moderation_volume_chart"
+  scope={@scope}
+/>
+
+<.header>
+  Moderation volume charts
+</.header>
+
+<.simple_form
+  :if={@connected?}
+  for={@form}
+  id="time_compare-form"
+  phx-change="update"
+  phx-submit="update"
+>
+  <div class="flex my-2">
+    <div class="flex-1 px-3">
+      <.input_tw field={@form[:start_date]} type="date" label="Start date" />
+    </div>
+
+    <div class="flex-1 px-3">
+      <.input_tw field={@form[:end_date]} type="date" label="End date" />
+    </div>
+  </div>
+</.simple_form>
+
+<%!-- Spacer for the form to the chart, there is a control that overlaps above the chart --%>
+<div class="h-15"></div>
+
+<div class="flex">
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Report counts</h3>
+    <LiveCharts.chart :if={@connected? == true} chart={@report_count_chart} />
+  </div>
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Report types</h3>
+    <LiveCharts.chart :if={@connected? == true} chart={@report_by_type_chart} />
+  </div>
+</div>
+
+<div class="flex mb-8">
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Restriction counts</h3>
+    <LiveCharts.chart :if={@connected? == true} chart={@restrictions_chart} />
+  </div>
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Bans</h3>
+    <LiveCharts.chart :if={@connected? == true} chart={@bans_chart} />
+  </div>
+</div>
+
+<div class="data-explain">
+  <ul class="ml-4 list-disc">
+    <li>Dates start at 00:00 of the day and end at 23:59, all are in UTC</li>
+    <li>The reports are calculated based on the date of creation.</li>
+    <li>Actions are calculated based on date of creation</li>
+    <li>
+      Bans are calculated based on date of creation, application based on date of application
+    </li>
+    <li>
+      Restriction types are defined as:
+      <ul class="ml-4 list-disc">
+        <li>
+          <span class="font-bold">Warnings</span>: {@restriction_types["Warnings"]
+          |> Enum.join(", ")}
+        </li>
+        <li>
+          <span class="font-bold">Chat</span>: {@restriction_types["Chat"] |> Enum.join(", ")}
+        </li>
+        <li>
+          <span class="font-bold">Suspension</span>: {@restriction_types["Suspension"]
+          |> Enum.join(", ")}
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<.back navigate={~p"/moderation"}>Back to Moderation</.back>

@@ -5,17 +5,7 @@
     $('.datepicker').datepicker({
       format: "dd/mm/yyyy"
     });
-
-    $('select').select2({
-      width: "100%"
-    });
   });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="row">
@@ -49,48 +39,24 @@
             </div>
 
             <div class="col-md-4 col-lg-3 col-xl-2 my-2">
-              <label for="search_action" class="control-label">Game type: </label>
-              {central_component("icon_dropdown", %{
-                name: "game_type",
-                id: "search_game_type",
-                selected: @params["game_type"] || "Any",
-                enumerable: [
-                  %{id: "", name: "Any", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{id: "Duel", name: "Duel", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{
-                    id: "Small Team",
-                    name: "Small Team",
-                    icon: "fa-solid fa-square",
-                    colour: "#AA0000"
-                  },
-                  %{
-                    id: "Large Team",
-                    name: "Large Team",
-                    icon: "fa-solid fa-square",
-                    colour: "#AA0000"
-                  },
-                  %{id: "FFA", name: "FFA", icon: "fa-solid fa-square", colour: "#AA0000"},
-                  %{
-                    id: "Team FFA",
-                    name: "Team FFA",
-                    icon: "fa-solid fa-square",
-                    colour: "#AA0000"
-                  },
-                  %{
-                    id: "Scavengers",
-                    name: "Scavengers",
-                    icon: "fa-solid fa-square",
-                    colour: "#AA0000"
-                  },
-                  %{
-                    id: "Raptors",
-                    name: "Raptors",
-                    icon: "fa-solid fa-square",
-                    colour: "#AA0000"
-                  },
-                  %{id: "Bots", name: "Bots", icon: "fa-solid fa-square", colour: "#AA0000"}
-                ]
-              })}
+              <.input
+                type="select"
+                id="search_game_type"
+                name="game_type"
+                label="Game type"
+                value={@params["game_type"] || "Any"}
+                options={[
+                  {"Any", ""},
+                  "Duel",
+                  "Small Team",
+                  "Large Team",
+                  "FFA",
+                  "Team FFA",
+                  "Scavengers",
+                  "Raptors",
+                  "Bots"
+                ]}
+              />
             </div>
 
             <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">

@@ -88,13 +88,14 @@ type_icons = %{
                 </label>
               </td>
               <td>
-                {central_component("checkbox",
-                  name: "ban[key_values][]",
-                  id: "ban_type_#{key.value}",
-                  value: key.value,
-                  label: "",
-                  checked: Enum.member?(@ban.key_values, key.value)
-                )}
+                <.input
+                  type="checkbox"
+                  id={"ban_type_#{key.value}"}
+                  name="ban[key_values][]"
+                  checked={Enum.member?(@ban.key_values, key.value)}
+                  label=""
+                  value={key.value}
+                />
               </td>
             </tr>
           <% end %>

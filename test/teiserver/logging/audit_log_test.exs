@@ -1,7 +1,9 @@
 defmodule Teiserver.Logging.AuditLogTests do
+  alias Teiserver.Account.Scope
   alias Teiserver.Logging
   alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging.AuditLogLib
+  alias Teiserver.Logging.Helpers
 
   use Teiserver.DataCase, async: false
 
@@ -31,5 +33,10 @@ defmodule Teiserver.Logging.AuditLogTests do
 
     got = AuditLogLib.list_audit_types() |> Enum.sort()
     assert got == actions
+  end
+
+  test "add audit log with no-user scope" do
+    scope = %Scope{}
+    assert %AuditLog{} = Helpers.add_audit_log(scope, "action", %{})
   end
 end

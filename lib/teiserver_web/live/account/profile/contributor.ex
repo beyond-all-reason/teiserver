@@ -8,14 +8,13 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
-  def mount(%{"userid" => userid_str}, _session, socket) do
-    userid = String.to_integer(userid_str)
-    user = Account.get_user_by_id(userid)
-    hide_contributor_rank = Account.hide_contributor_rank?(userid)
+  def mount(%{"userid" => user_id}, _session, socket) do
+    user = Account.get_user_by_id(user_id)
+    hide_contributor_rank = Account.hide_contributor_rank?(user.id)
 
     socket =
       cond do
-        user == nil ->
+        is_nil(user) ->
           socket
           |> put_flash(:info, "Unable to find that user")
           |> redirect(to: ~p"/")
@@ -87,8 +86,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
         "bar_plus.flag" => assigns.temp_country_code
       })
 
-      Account.recache_user(assigns.user.id)
-
       {:noreply,
        socket
        |> assign(:country_code, assigns.temp_country_code)
@@ -117,7 +114,6 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
       end
 
     Account.set_hide_contributor_rank(assigns.user.id, boolean_value)
-    Account.recache_user(assigns.user.id)
 
     {:noreply,
      socket
@@ -129,8 +125,8 @@ defmodule TeiserverWeb.Account.ProfileLive.Contributor do
   end
 
   defp user_assigns(%{assigns: %{user: user}} = socket) do
-    country_code = user.country
     stats = Account.get_user_stat_data(user.id)
+    country_code = stats["country"] || "??"
 
     socket
     |> assign(:country_code, country_code)

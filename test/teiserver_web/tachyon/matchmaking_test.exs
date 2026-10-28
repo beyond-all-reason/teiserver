@@ -16,20 +16,24 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
   use TeiserverWeb.ConnCase
 
   defp altair_attr(id),
-    do: %{
-      spring_name: "Altair Crossing Remake " <> id,
-      display_name: "Altair Crossing",
-      thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
-      matchmaking_queues: [id]
-    }
+    do:
+      %{
+        spring_name: "Altair Crossing Remake " <> id,
+        display_name: "Altair Crossing",
+        thumbnail_url: "https://www.beyondallreason.info/map/altair-crossing",
+        matchmaking_queues: [id]
+      }
+      |> add_startboxes(2)
 
   defp rosetta_attr(id),
-    do: %{
-      spring_name: "Rosetta " <> id,
-      display_name: "Rosetta",
-      thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
-      matchmaking_queues: [id]
-    }
+    do:
+      %{
+        spring_name: "Rosetta " <> id,
+        display_name: "Rosetta",
+        thumbnail_url: "https://www.beyondallreason.info/map/rosetta",
+        matchmaking_queues: [id]
+      }
+      |> add_startboxes(2)
 
   defp map_attrs(id),
     do: [altair_attr(id), rosetta_attr(id)]
@@ -109,7 +113,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       }
     ]
 
-    Map.put(attrs, :startboxes_set, boxes)
+    polygon_startboxes = %{
+      "mapmetadata_startpos" => "ImNvdWNvdSIK",
+      "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+    }
+
+    attrs
+    |> Map.put(:startboxes_set, boxes)
+    |> Map.update(:modoptions, polygon_startboxes, fn m -> Map.merge(polygon_startboxes, m) end)
   end
 
   defp mk_queue(attrs) do
@@ -562,11 +573,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       {:ok, queue_id: q1v1_id, queue_pid: q1v1_pid, queue_version: version1v1} = setup_queue(1)
       {:ok, queue_id: q2v2_id, queue_pid: q2v2_pid, queue_version: version2v2} = setup_queue(2)
 
-      clients =
-        Enum.map(1..5, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 5)
 
       [c1, c2, c3, c4, c5] = clients
 
@@ -611,11 +618,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     test "foundUpdate event", %{app: app} do
       {:ok, queue_id: q_id, queue_pid: q_pid, queue_version: version} = setup_queue(2)
 
-      clients =
-        Enum.map(1..4, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 4)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -645,11 +648,7 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         queue_attrs(uuid, 1)
         |> mk_queue()
 
-      clients =
-        Enum.map(1..2, fn _i ->
-          {:ok, %{client: client}} = setup_user(app)
-          client
-        end)
+      clients = setup_clients(app, 2)
 
       for client <- clients do
         assert %{"status" => "success"} =
@@ -728,6 +727,108 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
     end
   end
 
+  describe "state after reconnection" do
+    setup [:setup_queue, :setup_app]
+
+    defp reconnect_self_matchmaking(token) do
+      client = Tachyon.connect(token, swallow_first_event: false)
+
+      %{"commandId" => "user/self", "data" => %{"user" => user}} =
+        Tachyon.recv_message!(client)
+
+      user["matchmaking"]
+    end
+
+    test "no matchmaking", %{app: app} do
+      {:ok, %{client: client, token: token}} = setup_user(app)
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "no_matchmaking"} = reconnect_self_matchmaking(token)
+    end
+
+    test "queuing", %{app: app, queue_id: queue_id, queue_version: version} do
+      {:ok, %{client: client, token: token}} = setup_user(app)
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(client, [%{id: queue_id, version: version}])
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "queuing", "queues" => [%{"id" => ^queue_id, "version" => ^version}]} =
+               reconnect_self_matchmaking(token)
+    end
+
+    test "found", %{app: app, queue_id: queue_id, queue_pid: queue_pid, queue_version: version} do
+      [%{client: client, token: token} | _others] =
+        join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{
+               "state" => "found",
+               "queue" => %{
+                 "id" => ^queue_id,
+                 "version" => ^version,
+                 "hasAlreadyReadied" => false,
+                 "timeoutAt" => timeout_at
+               },
+               "otherQueues" => []
+             } = reconnect_self_matchmaking(token)
+
+      assert timeout_at > DateTime.utc_now() |> DateTime.to_unix(:microsecond)
+    end
+
+    test "found reports the queues left behind", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      queue_version: version
+    } do
+      {:ok, other} = setup_queue(1)
+      other_id = other[:queue_id]
+      other_version = other[:queue_version]
+
+      {:ok, %{client: client, token: token}} = setup_user(app)
+      {:ok, %{client: other_client}} = setup_user(app)
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(client, [
+                 %{id: queue_id, version: version},
+                 %{id: other_id, version: other_version}
+               ])
+
+      assert %{"status" => "success"} =
+               Tachyon.join_queues!(other_client, [%{id: queue_id, version: version}])
+
+      send(queue_pid, :tick)
+      assert {:ok, %{"commandId" => "matchmaking/found"}} = Tachyon.recv_message(client)
+
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{
+               "state" => "found",
+               "queue" => %{"id" => ^queue_id},
+               "otherQueues" => [%{"id" => ^other_id, "version" => ^other_version}]
+             } = reconnect_self_matchmaking(token)
+    end
+
+    test "found after readying up", %{
+      app: app,
+      queue_id: queue_id,
+      queue_pid: queue_pid,
+      queue_version: version
+    } do
+      [%{client: client, token: token} | _others] =
+        join_and_pair(app, %{id: queue_id, version: version}, queue_pid, 2)
+
+      assert %{"status" => "success"} = Tachyon.matchmaking_ready!(client)
+      Tachyon.abrupt_disconnect!(client)
+
+      assert %{"state" => "found", "queue" => %{"hasAlreadyReadied" => true}} =
+               reconnect_self_matchmaking(token)
+    end
+  end
+
   describe "join with autohost" do
     setup [{Tachyon, :setup_client}, :setup_app, :setup_queue, {Tachyon, :setup_autohost}]
 
@@ -749,6 +850,14 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
 
       start_req = Tachyon.recv_message!(autohost_client)
       assert %{"commandId" => "autohost/start", "type" => "request", "data" => data} = start_req
+
+      assert %{
+               "gameOptions" => %{
+                 "mapmetadata_startpos" => "ImNvdWNvdSIK",
+                 "mapmetadata_startboxes_set" => "ImhlbGxvIgo="
+               }
+             } = data
+
       battle_id = data["battleId"]
 
       host_data = %{
@@ -781,7 +890,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "ip" => _ip,
+                 "battleId" => _id,
+                 "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
                  "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
@@ -799,7 +909,8 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
       assert %{
                "commandId" => "battle/start",
                "data" => %{
-                 "ip" => _ip,
+                 "battleId" => _id,
+                 "ips" => [_ip],
                  "port" => _port,
                  "engine" => %{"version" => "105.1.1-2590-gb9462a0 bar"},
                  "game" => %{"springName" => "Beyond All Reason test-26929-d709d32"},
@@ -849,7 +960,10 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         )
       end
 
+      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
+
       assert Polling.poll_until_some(fn -> Battle.get_match!(match_id).finished end)
+
       memberships = Battle.get_match_memberships(match_id)
 
       for member <- memberships do
@@ -860,13 +974,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
         end
       end
 
-      Tachyon.autohost_send_update_event(autohost_client, Tachyon.autohost_engine_quit(battle_id))
-
       assert Polling.poll_until_true(fn ->
                Game.count_rating_logs(search: [match_id: match_id]) == 2
              end)
 
       for usr <- clients do
+        %{"commandId" => "battle/ended"} = Tachyon.recv_message!(usr.client)
+
         %{"commandId" => "user/updated", "data" => %{"users" => [%{"status" => "menu"}]}} =
           Tachyon.recv_message!(usr.client)
       end
@@ -903,6 +1017,13 @@ defmodule Teiserver.Tachyon.MatchmakingTest do
                  Tachyon.recv_message!(client)
       end
     end
+  end
+
+  defp setup_clients(app, amount) do
+    Enum.map(1..amount, fn _i ->
+      {:ok, %{client: client}} = setup_user(app)
+      client
+    end)
   end
 
   defp join_and_pair(app, queue, queue_pid, number_of_player) do

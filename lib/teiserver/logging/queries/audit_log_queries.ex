@@ -1,0 +1,114 @@
+defmodule Teiserver.Logging.AuditLogQueries do
+  @moduledoc false
+  alias Ecto.Query
+  alias Teiserver.Account.User
+  alias Teiserver.Logging.AuditLog
+
+  use TeiserverWeb, :queries
+
+  @type t :: Query.t()
+
+  @spec audit_logs() :: t()
+  def audit_logs do
+    from(audit_logs in AuditLog, as: :audit_logs)
+  end
+
+  # Where id
+  @spec where_id(t(), pos_integer() | String.t()) :: t()
+  def where_id(query, id) do
+    from audit_logs in query,
+      where: audit_logs.id == ^id
+  end
+
+  # Where user_id
+  @spec where_user_id(t(), [User.id()]) :: t()
+  def where_user_id(query, nil), do: query
+
+  def where_user_id(query, user_id) do
+    from audit_logs in query,
+      where: audit_logs.user_id == ^user_id
+  end
+
+  @spec where_subject_id(t(), [User.id()]) :: t()
+  def where_subject_id(query, user_id) do
+    # Need to use a string for the jsonb getters as we are using ->> which
+    # casts it to a string.
+    user_id = to_string(user_id)
+
+    from audit_logs in query,
+      where:
+        fragment("? ->> ? = ?", audit_logs.details, "user", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "user_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "target", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "target_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "actual_origin_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "origin_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "smurf_id", ^user_id)
+  end
+
+  @spec where_subject_or_user_id(t(), [User.id()]) :: t()
+  def where_subject_or_user_id(query, user_id) do
+    # Need to use a string for the jsonb getters as we are using ->> which
+    # casts it to a string.
+    user_id = to_string(user_id)
+
+    from audit_logs in query,
+      where:
+        audit_logs.user_id == ^user_id or
+          fragment("? ->> ? = ?", audit_logs.details, "user", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "user_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "target", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "target_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "actual_origin_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "origin_id", ^user_id) or
+          fragment("? ->> ? = ?", audit_logs.details, "smurf_id", ^user_id)
+  end
+
+  @spec where_details_equal(t(), String.t(), String.t()) :: t()
+  def where_details_equal(query, key, value) when is_integer(value) do
+    from audit_logs in query,
+      where: fragment("? -> ? = ?", audit_logs.details, ^key, ^value)
+  end
+
+  def where_details_equal(query, key, value) do
+    from audit_logs in query,
+      where: fragment("? ->> ? = ?", audit_logs.details, ^key, ^value)
+  end
+
+  @spec where_action(t(), nil | String.t() | [String.t()]) :: t()
+  def where_action(query, nil), do: query
+  def where_action(query, ""), do: query
+  def where_action(query, []), do: query
+
+  def where_action(query, action) do
+    actions = List.wrap(action)
+
+    from audit_logs in query,
+      where: audit_logs.action in ^actions
+  end
+
+  # Joins
+  @spec load_user(t()) :: t()
+  def load_user(query) do
+    from audit_logs in query,
+      left_join: users in User,
+      as: :users,
+      on: users.id == audit_logs.user_id,
+      preload: [user: users]
+  end
+
+  @spec order_by_inserted_at(t(), :asc | :desc) :: t()
+  def order_by_inserted_at(query, direction \\ :asc) do
+    # If two audit logs share the same timestamp their ordering
+    # will not be consistent without also ordering by ID
+    if direction == :asc do
+      from(audit_logs in query, order_by: [asc: audit_logs.inserted_at, asc: audit_logs.id])
+    else
+      from(audit_logs in query, order_by: [desc: audit_logs.inserted_at, desc: audit_logs.id])
+    end
+  end
+
+  @spec order_by_from_string(t(), String.t()) :: t()
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
+end

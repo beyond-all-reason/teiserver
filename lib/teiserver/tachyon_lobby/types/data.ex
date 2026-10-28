@@ -9,6 +9,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
 
   @enforce_keys [
     :id,
+    :primary?,
     :monitors,
     :name,
     :map_name,
@@ -19,6 +20,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
   ]
   defstruct [
     :id,
+    :primary?,
     :monitors,
     :name,
     :map_name,
@@ -35,7 +37,6 @@ defmodule Teiserver.TachyonLobby.Types.Data do
     bots: %{},
     bot_idx_counter: 0,
     current_battle: nil,
-    ids_to_rejoin: MapSet.new(),
     vote_idx: 1,
     current_vote: nil,
     vote_history: %{},
@@ -44,6 +45,7 @@ defmodule Teiserver.TachyonLobby.Types.Data do
 
   @type t() :: %__MODULE__{
           id: LT.Types.id(),
+          primary?: boolean(),
           monitors: MC.t(),
           name: String.t(),
           game_version: String.t(),
@@ -59,7 +61,6 @@ defmodule Teiserver.TachyonLobby.Types.Data do
           bots: %{LT.Bot.id() => LT.Bot.t()},
           bot_idx_counter: integer(),
           current_battle: LT.CurrentBattleDetails.t() | nil,
-          ids_to_rejoin: MapSet.t(),
           vote_idx: integer(),
           current_vote: LT.VoteState.t() | nil,
           vote_history: %{String.t() => LT.VoteRecord.t()},

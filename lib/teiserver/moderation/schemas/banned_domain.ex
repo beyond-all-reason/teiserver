@@ -4,6 +4,8 @@ defmodule Teiserver.Moderation.BannedDomain do
   """
   use TeiserverWeb, :schema
 
+  @type id :: non_neg_integer()
+
   typed_schema "banned_domains" do
     field :domain, :string
 

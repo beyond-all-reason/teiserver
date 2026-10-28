@@ -6,6 +6,8 @@ defmodule Teiserver.Moderation.BannedIP do
 
   use TeiserverWeb, :schema
 
+  @type id :: non_neg_integer()
+
   typed_schema "banned_ips" do
     field :cidr, :string
 

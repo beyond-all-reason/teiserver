@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Party
   alias Teiserver.Player
   alias Teiserver.TachyonBattle
 
@@ -26,8 +27,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @type lost_reason :: :cancel | :timeout | {:server_error, term()}
   @type ready_data :: %{
           user_id: User.id(),
-          name: String.t(),
-          password: String.t()
+          name: String.t()
         }
 
   @spec start(QueueServer.id(), QueueServer.queue(), [team()], timeout()) ::
@@ -68,7 +68,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
           # holds data from players that have readied up, in a format to be used to
           # create the start script. Maintain the same structure as `teams` but
           # the players for members are flatten
-          readied: [[%{user_id: User.id(), name: String.t(), password: String.t()}], ...]
+          readied: [[%{user_id: User.id(), name: String.t()}], ...]
         }
 
   def start_link(init_arg) do
@@ -166,11 +166,13 @@ defmodule Teiserver.Matchmaking.PairingRoom do
         battle_start_data =
           host_data
           |> Map.put(:engine, engine)
-          |> Map.put(:game, %{springName: game})
-          |> Map.put(:map, %{springName: map.spring_name})
+          |> Map.put(:game, %{spring_name: game})
+          |> Map.put(:map, %{spring_name: map.spring_name})
 
-        for team <- state.teams, member <- team, p_id <- member.player_ids do
-          Player.battle_start(p_id, battle_data, battle_start_data)
+        for ally_team <- start_script.ally_teams,
+            team <- ally_team.teams,
+            %AT.Player{} = player <- team.players do
+          Player.battle_start(player.user_id, battle_data, battle_start_data, player.password)
         end
 
         QueueServer.disband_pairing(state.queue_id, self())
@@ -222,6 +224,8 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     QueueServer.disband_pairing(state.queue_id, self())
 
     for team <- state.teams, member <- team do
+      if member.party_id, do: Party.matchmaking_notify_cancel(member.party_id)
+
       for p_id <- member.player_ids do
         if p_id == user_id do
           # when a user in a party leaves while in a pairing room, need to let know
@@ -244,8 +248,12 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   def handle_info(:timeout, state) do
     QueueServer.disband_pairing(state.queue_id, self())
 
-    for team <- state.teams, member <- team, player_id <- member.player_ids do
-      Player.matchmaking_notify_lost(player_id, :timeout)
+    for team <- state.teams, member <- team do
+      if member.party_id, do: Party.matchmaking_notify_cancel(member.party_id)
+
+      for player_id <- member.player_ids do
+        Player.matchmaking_notify_lost(player_id, :timeout)
+      end
     end
 
     {:stop, :normal, state}
@@ -254,13 +262,18 @@ defmodule Teiserver.Matchmaking.PairingRoom do
   @spec start_script(state(), %{version: String.t()}, String.t(), Asset.Map.t()) ::
           AT.StartScript.t()
   defp start_script(state, engine, game, map) do
-    %AT.StartScript{
+    res = %AT.StartScript{
       engine_version: engine.version,
       game_name: game,
       map_name: map.spring_name,
       start_pos_type: :ingame,
       ally_teams: get_ally_teams(state, map)
     }
+
+    case Asset.get_polygon_startboxes(map) do
+      nil -> res
+      modoptions -> %{res | game_options: modoptions}
+    end
   end
 
   @spec get_ally_teams(state(), Asset.Map.t()) :: [Autohost.ally_team(), ...]
@@ -276,6 +289,7 @@ defmodule Teiserver.Matchmaking.PairingRoom do
     for {team, startbox} <- Enum.zip(state.readied, startboxes) do
       teams =
         for player <- team do
+          player = AT.Player.new(player.user_id, player.name)
           %{players: [player]}
         end
 

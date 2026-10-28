@@ -1,0 +1,98 @@
+<TextCallbackComponents.section_menu active="list" scope={@scope}>
+  <.link
+    :if={allow?(@scope, "Admin")}
+    patch={~p"/staff/text_callbacks/new"}
+    class="btn btn-primary btn-sm"
+  >
+    <Fontawesome.icon icon="plus" style="regular" /> New text callback
+  </.link>
+</TextCallbackComponents.section_menu>
+
+<.header>
+  Listing text callbacks
+</.header>
+<div class="heading-subtitle">{@text_callback_count} text callbacks found</div>
+
+<TextCallbackComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.live_component
+  :if={@preferences}
+  module={PreferencesComponent}
+  id="textcallback-list-preferences-form"
+  scope={@scope}
+  preferences={@preferences}
+  update_parent={true}
+/>
+
+<.table
+  :if={@preferences}
+  id="text_callbacks-table"
+  rows={@text_callbacks}
+  table_class="table-sm table-zebra mt-4"
+  row_click={
+    String.contains?(@preferences.show_link, "row-click") &&
+      fn text_callback -> JS.navigate(~p"/staff/text_callbacks/#{text_callback}") end
+  }
+  row_id={fn text_callback -> "text_callbacks-#{text_callback.id}" end}
+>
+  <:col :let={text_callback} label="Name">{text_callback.name}</:col>
+  <:col :let={text_callback} label="Category">{text_callback.category}</:col>
+  <:col :let={text_callback} label="Enabled?">
+    <Fontawesome.icon :if={text_callback.enabled} icon="check" style="solid" />
+  </:col>
+  <:col
+    :let={text_callback}
+    :if={@preferences && @preferences.response_size != "hide"}
+    label="Response"
+  >
+    <%= case @preferences.response_size do %>
+      <% "100" -> %>
+        {String.slice(text_callback.response, 0..100)}
+      <% "200" -> %>
+        {String.slice(text_callback.response, 0..200)}
+      <% _any -> %>
+        {text_callback.response}
+    <% end %>
+  </:col>
+  <:action :let={text_callback}>
+    <div class={[
+      not String.contains?(@preferences.show_link, "button") && "sr-only",
+      "btn btn-info btn-outline btn-xs me-2"
+    ]}>
+      <.link navigate={~p"/staff/text_callbacks/#{text_callback}"}>Show</.link>
+    </div>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/staff/text_callbacks/#{text_callback}/edit"}
+      class="btn btn-secondary btn-outline btn-xs me-2"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back href={~p"/staff"}>Back to staff</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit] and allow?(@scope, "Admin")}
+  id="text_callback-modal"
+  show
+  on_cancel={JS.patch(~p"/staff/text_callbacks")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@text_callback.id || :new}
+    title={@page_title}
+    action={@live_action}
+    text_callback={@text_callback}
+    patch={~p"/staff/text_callbacks"}
+    scope={@scope}
+  />
+</.modal>

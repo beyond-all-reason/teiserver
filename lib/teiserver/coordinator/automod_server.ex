@@ -95,11 +95,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
       "hardware:macAddrHash" ->
         Account.create_smurf_key(msg.userid, "chobby_mac_hash", msg.value)
-        Account.update_cache_user(msg.userid, %{chobby_mac_hash: msg.value})
 
       "hardware:sysInfoHash" ->
         Account.create_smurf_key(msg.userid, "chobby_sysinfo_hash", msg.value)
-        Account.update_cache_user(msg.userid, %{chobby_sysinfo_hash: msg.value})
 
       _property_type_name ->
         :ok
@@ -194,7 +192,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   def enact_ban([ban | _rest], userid) do
     user = Account.get_user!(userid)
-    {:ok, _update_result} = Account.server_update_user(user, %{"smurf_of_id" => ban.source_id})
+    {:ok, _update_result} = Account.update_user_smurf(user, %{smurf_of_id: ban.source_id})
 
     add_audit_log(
       Coordinator.get_coordinator_userid(),

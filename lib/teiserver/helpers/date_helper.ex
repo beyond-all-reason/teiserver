@@ -194,6 +194,7 @@ defmodule Teiserver.Helper.DateHelper do
   """
   def parse_ymd(nil), do: nil
   def parse_ymd(""), do: nil
+  def parse_ymd(%Date{} = date), do: date
 
   def parse_ymd(s) do
     [year, month, day] = String.split(s, "-")
@@ -314,15 +315,6 @@ defmodule Teiserver.Helper.DateHelper do
     |> Enum.join("")
   end
 
-  def make_date_series(:days, start_date, end_date) do
-    start = %{start_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-    last = %{end_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-
-    start
-    |> Stream.iterate(&DateTime.shift(&1, day: 1))
-    |> Stream.take_while(&(compare(&1, last) == :lt))
-  end
-
   @doc """
   Returns true if a > b
   """
@@ -357,7 +349,8 @@ defmodule Teiserver.Helper.DateHelper do
 
   # --- Date/DateTime helpers replacing Timex functions ---
 
-  @spec to_datetime(Date.t()) :: DateTime.t()
+  @spec to_datetime(Date.t() | DateTime.t()) :: DateTime.t()
+  def to_datetime(%DateTime{} = datetime), do: datetime
   def to_datetime(%Date{} = date), do: DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
 
   defp to_utc_datetime(%DateTime{} = dt), do: dt

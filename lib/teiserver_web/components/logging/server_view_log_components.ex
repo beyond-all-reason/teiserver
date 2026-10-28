@@ -1,0 +1,105 @@
+defmodule TeiserverWeb.Components.Logging.ServerViewLogComponents do
+  @moduledoc """
+  Components for ServerViewLog pages
+  """
+
+  use TeiserverWeb, :component
+  import TeiserverWeb.NavComponents, only: [section_menu_button: 1]
+
+  @doc """
+  <TeiserverWeb.Components.Logging.ServerViewLogComponents.section_menu active={active} colour={} />
+  """
+  attr :colour, :string, required: true
+  attr :active, :string, required: true
+
+  def section_menu(assigns) do
+    ~H"""
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/day"}
+    >
+      Daily
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/week"}
+    >
+      Weekly
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/month"}
+    >
+      Monthly
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/quarter"}
+    >
+      Quarterly
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/year"}
+    >
+      Yearly
+    </.section_menu_button>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/show/day/today"}
+    >
+      Today
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/show/week/today"}
+    >
+      This week
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/show/month/today"}
+    >
+      This month
+    </.section_menu_button>
+
+    <.section_menu_button
+      bsname={@colour}
+      url={~p"/logging/server/show/quarter/today"}
+    >
+      This quarter
+    </.section_menu_button>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <.section_menu_button
+      icon="fa-solid fa-clock"
+      bsname={@colour}
+      url={~p"/logging/server/now"}
+    >
+      Now
+    </.section_menu_button>
+
+    <.section_menu_button
+      icon="fa-solid fa-server"
+      bsname={@colour}
+      url={~p"/logging/server/load"}
+    >
+      Load
+    </.section_menu_button>
+
+    <.section_menu_button
+      icon="fa-solid fa-euro"
+      bsname={@colour}
+      url={~p"/logging/server/user_cost"}
+    >
+      User cost
+    </.section_menu_button>
+    """
+  end
+end

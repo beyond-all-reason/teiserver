@@ -5,7 +5,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
 
@@ -19,15 +18,13 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   @spec cmd_definition() :: map()
   def cmd_definition do
     %{
-      name: "post",
+      name: name(),
       description: "Post something into the current channel",
       options: [
         %{
-          # type  = sub_command
           type: 1,
           name: "report",
           description: "Post a report",
-          required: true,
           options: [
             %{
               name: "id",
@@ -41,7 +38,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
           type: 1,
           name: "action",
           description: "Post an Action",
-          required: true,
           options: [
             %{
               name: "id",
@@ -55,7 +51,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
           type: 1,
           name: "profile",
           description: "Post the link of a moderation profile",
-          required: true,
           options: [
             %{
               name: "name",
@@ -85,7 +80,10 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
             action ->
               channel_id =
-                Config.get_site_config_cache("teiserver.Discord channel #moderation-actions")
+                case Communication.get_discord_channel("Public moderation log") do
+                  nil -> nil
+                  channel -> channel.channel_id
+                end
 
               ActionLib.generate_discord_message_text(action) <>
                 "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
@@ -114,7 +112,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
               "User \"#{name}\" not found"
 
             user ->
-              "https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
+              "#{name}: https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
           end
       end
 

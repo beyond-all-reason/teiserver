@@ -48,4 +48,29 @@ defmodule Teiserver.Support.Polling do
   def poll_until_true(f, opts \\ []) do
     poll_until(f, fn x -> x == true end, opts)
   end
+
+  def poll_until_teiserver_ready(node) do
+    poll_until_some(
+      fn ->
+        try do
+          :erpc.call(node, Application, :started_applications, [])
+          |> Enum.find(fn {app, _desc, _version} -> app == :teiserver end)
+        rescue
+          e in ErlangError ->
+            case e do
+              %ErlangError{original: {:erpc, :noconnection}} ->
+                nil
+
+              %ErlangError{original: {:exception, :undef, _mfa}} ->
+                nil
+
+              _other ->
+                reraise e, __STACKTRACE__
+            end
+        end
+      end,
+      wait: 50,
+      limit: 50
+    )
+  end
 end

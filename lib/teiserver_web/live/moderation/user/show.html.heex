@@ -1,0 +1,190 @@
+<UserComponents.section_menu active="show" user={@user} scope={@scope}>
+  <.link
+    href={~p"/teiserver/admin/user/#{@user_id}"}
+    phx-click={JS.push_focus()}
+    class="me-4"
+  >
+    <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
+  </.link>
+
+  <.link
+    navigate={~p"/moderation/users/#{@user_id}/new/note"}
+    phx-click={JS.push_focus()}
+    class="me-4"
+  >
+    <.button class="btn btn-sm btn-primary btn-soft">
+      <Fontawesome.icon icon="fa-file-lines" style="solid" /> New note
+    </.button>
+  </.link>
+
+  <UserComponents.quick_search />
+</UserComponents.section_menu>
+
+<.header :if={@user}>
+  {@user.name}
+
+  <span class="ml-4">
+    <span :if={@has_active_mfa?} class="badge badge-success">
+      <Fontawesome.icon icon="lock" style="regular" /> MFA
+    </span>
+
+    <span :if={not @has_active_mfa?} class="badge badge-error">
+      No MFA
+    </span>
+
+    <span :if={@has_mfa_role?} class="badge badge-info">
+      Privileged user
+    </span>
+
+    <span :if={@user.discord_id} class="badge badge-primary">
+      <Fontawesome.icon icon="discord" style="fa-brands" />
+    </span>
+
+    <span :if={@user.steam_id} class="badge badge-neutral">
+      <Fontawesome.icon icon="steam" style="fa-brands" />
+    </span>
+  </span>
+</.header>
+
+<div :if={not Enum.empty?(@alerts)} class="my-2 flex">
+  <div :for={{type, text} <- @alerts} class={"mx-2 flex-1 alert #{type}"}>
+    {text}
+  </div>
+</div>
+
+<div class="flex">
+  <div class="flex-1 px-4">
+    <UserComponents.show_tabset scope={@scope} tab={@tab1} set="1" />
+
+    <div :if={@user}>
+      <UserComponents.show_details :if={@tab1 == "details"} user={@user} />
+
+      <UserComponents.show_audit :if={@tab1 == "audit"} audit_logs={@streams.audit_logs} />
+
+      <UserComponents.show_notes
+        :if={@tab1 == "notes"}
+        user_notes={@streams.user_notes}
+        scope={@scope}
+        user_id={@user_id}
+      />
+
+      <UserComponents.show_extra_data
+        :if={@tab1 == "extra_data" and allow?(@scope, "Admin")}
+        user_stats={@user_stats}
+        user={@user}
+      />
+
+      <UserComponents.show_actions
+        :if={@tab1 == "actions"}
+        user={@user}
+        scope={@scope}
+        client={@client}
+        has_active_mfa?={@has_active_mfa?}
+      />
+
+      <UserComponents.show_raw
+        :if={@tab1 == "raw" and allow?(@scope, "Server")}
+        user={@user}
+      />
+    </div>
+  </div>
+  <div :if={@user} class="flex-1 px-4">
+    <UserComponents.show_tabset scope={@scope} tab={@tab2} set="2" />
+
+    <div :if={@user}>
+      <UserComponents.show_details :if={@tab2 == "details"} user={@user} />
+
+      <UserComponents.show_audit :if={@tab2 == "audit"} audit_logs={@streams.audit_logs} />
+
+      <UserComponents.show_notes
+        :if={@tab2 == "notes"}
+        user_notes={@streams.user_notes}
+        scope={@scope}
+        user_id={@user_id}
+      />
+
+      <UserComponents.show_extra_data
+        :if={@tab2 == "extra_data" and allow?(@scope, "Admin")}
+        user_stats={@user_stats}
+        user={@user}
+      />
+
+      <UserComponents.show_actions
+        :if={@tab2 == "actions"}
+        user={@user}
+        scope={@scope}
+        client={@client}
+        has_active_mfa?={@has_active_mfa?}
+      />
+
+      <UserComponents.show_raw
+        :if={@tab2 == "raw" and allow?(@scope, "Server")}
+        user={@user}
+      />
+    </div>
+  </div>
+</div>
+
+<.back navigate={~p"/moderation/users"}>Back to Users</.back>
+
+<.modal
+  :if={@live_action == :edit_name and not is_nil(@user)}
+  id="user-edit_name-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormNameComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action == :edit_email and not is_nil(@user)}
+  id="user-edit_email-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormEmailComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action == :edit_roles and not is_nil(@user)}
+  id="user-edit_roles-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    module={FormRolesComponent}
+    id={@user.id}
+    user={@user}
+    scope={@scope}
+    role_data={@role_data}
+    has_active_mfa?={@has_active_mfa?}
+  />
+</.modal>
+
+<.modal
+  :if={@live_action in [:new_note, :edit_note] and not is_nil(@user)}
+  id="user-new_note-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/users/#{@user}")}
+>
+  <.live_component
+    title={@page_title}
+    module={UserNoteFormComponent}
+    action={@live_action}
+    id={@user_note.id || :new}
+    user_id={@user_id}
+    user_note={@user_note}
+    scope={@scope}
+    patch={~p"/moderation/users/#{@user}"}
+  />
+</.modal>

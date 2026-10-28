@@ -79,13 +79,11 @@ defmodule Teiserver.ModerationTest do
     @valid_attrs %{
       "reason" => "some reason",
       "restrictions" => ["r1", "r2"],
-      "score_modifier" => "1000",
       "expires" => DateTime.utc_now()
     }
     @update_attrs %{
       "reason" => "some updated reason",
       "restrictions" => ["u1", "u2"],
-      "score_modifier" => "1500",
       "expires" => DateTime.utc_now()
     }
     @invalid_attrs %{"reason" => nil}
@@ -136,6 +134,27 @@ defmodule Teiserver.ModerationTest do
     test "change_action/1 returns a action changeset" do
       action = ModerationTestLib.action_fixture()
       assert %Ecto.Changeset{} = Moderation.change_action(action)
+    end
+
+    test "warnings expire on acknowledgement" do
+      warning_action = ModerationTestLib.action_fixture(%{restrictions: ["Warning reminder"]})
+
+      non_warning_action =
+        ModerationTestLib.action_fixture(%{
+          target_id: warning_action.target_id,
+          restrictions: ["Login"]
+        })
+
+      assert {:ok, [resolved]} = Moderation.expire_warning_reminders(warning_action.target_id)
+      assert resolved.id == warning_action.id
+
+      # Only the warning remnder action is updated
+      assert NaiveDateTime.compare(
+               Moderation.get_action!(warning_action.id).expires,
+               NaiveDateTime.utc_now()
+             ) != :gt
+
+      assert Moderation.get_action!(non_warning_action.id).expires == non_warning_action.expires
     end
   end
 

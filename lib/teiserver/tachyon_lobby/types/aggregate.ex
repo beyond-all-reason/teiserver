@@ -18,13 +18,19 @@ defmodule Teiserver.TachyonLobby.Types.Aggregate do
   alias Teiserver.TachyonLobby.Types, as: LT
 
   @enforce_keys [:data]
-  defstruct [:data, changes: %{}, overview_changes: %{}, side_effects: []]
+  defstruct [:data, changes: %{}, overview_changes: %{}, side_effects: [], actions: []]
 
   @type t() :: %__MODULE__{
           data: LT.Data.t(),
           changes: map(),
           overview_changes: map(),
           # TODO refine that with proper structs/types
-          side_effects: list()
+          side_effects: list(),
+          actions: list(:gen_statem.action())
         }
+
+  @spec add_log(t(), event_type :: String.t(), extra_data :: map()) :: t()
+  def add_log(%__MODULE__{} = agg, event_type, extra_data \\ %{}) do
+    %{agg | side_effects: agg.side_effects ++ [{:log, event_type, extra_data}]}
+  end
 end

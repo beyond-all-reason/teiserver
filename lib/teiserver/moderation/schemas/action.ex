@@ -6,13 +6,13 @@ defmodule Teiserver.Moderation.Action do
 
   use TeiserverWeb, :schema
 
+  @type id :: pos_integer()
+
   typed_schema "moderation_actions" do
     belongs_to :target, Teiserver.Account.User
     field :reason, :string
-    field :appeal_status, :string
     field :notes, :string
     field :restrictions, {:array, :string}
-    field :score_modifier, :integer
     field :expires, :naive_datetime
 
     field :hidden, :boolean, default: false
@@ -31,9 +31,9 @@ defmodule Teiserver.Moderation.Action do
     struct
     |> cast(
       params,
-      ~w(target_id reason restrictions score_modifier expires notes hidden discord_message_id appeal_status)a
+      ~w(target_id reason restrictions expires notes hidden discord_message_id)a
     )
-    |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
+    |> validate_required(~w(target_id reason restrictions expires)a)
     |> adjust_restrictions()
     |> validate_length(:restrictions, min: 1)
   end

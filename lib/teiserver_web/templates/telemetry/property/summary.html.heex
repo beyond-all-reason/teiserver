@@ -11,23 +11,21 @@
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <div class="float-end">
-          {central_component("section_menu_button",
-            name: "day",
-            label: "Day",
-            active: @timeframe,
-            bsname: bsname,
-            icon: "",
-            url: "?timeframe=day"
-          )}
+          <.section_menu_button
+            active={@timeframe == "day"}
+            bsname={bsname}
+            url="?timeframe=day"
+          >
+            Day
+          </.section_menu_button>
 
-          {central_component("section_menu_button",
-            name: "week",
-            label: "Week",
-            active: @timeframe,
-            bsname: bsname,
-            icon: "",
-            url: "?timeframe=week"
-          )}
+          <.section_menu_button
+            active={@timeframe === "week"}
+            bsname={bsname}
+            url="?timeframe=week"
+          >
+            Week
+          </.section_menu_button>
         </div>
 
         {render(

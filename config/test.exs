@@ -12,7 +12,7 @@ config :teiserver, Teiserver.Repo,
   queue_target: 5000,
   queue_interval: 100_000,
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 50,
+  pool_size: 20,
   timeout: 300_000
 
 config :teiserver, Teiserver.SpringTcpServer,
@@ -73,7 +73,12 @@ config :teiserver, Teiserver.PromEx, disabled: true
 
 config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Stub
 
+config :teiserver, Teiserver.Cluster,
+  poll_module_function: {Teiserver.Support.Polling, :poll_until_teiserver_ready}
+
 config :teiserver, Teiserver.Mailer,
   adapter: Swoosh.Adapters.Test,
   noreply_address: "noreply@testsite.co.uk",
   contact_address: "info@testsite.co.uk"
+
+config :teiserver, TeiserverWeb.Monitoring, port: 4401

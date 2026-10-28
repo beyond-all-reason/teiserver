@@ -29,7 +29,7 @@ defmodule Teiserver.IpCheck.Api do
   defp get_api_endpoint do
     endpoint = Config.get_site_config_cache("teiserver.External IP check endpoint")
 
-    if endpoint != nil || endpoint != "",
+    if endpoint != nil and endpoint != "",
       do: {:ok, endpoint},
       else: {:error, :missing_api_endpoint}
   end

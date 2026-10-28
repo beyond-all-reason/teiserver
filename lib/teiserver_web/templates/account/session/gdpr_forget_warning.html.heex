@@ -1,0 +1,30 @@
+<div class="hero bg-base-200 min-h-screen">
+  <div
+    class="hero-content text-center text-neutral"
+    style="background-color: oklab(0.9856 0.00146784 0.0150486);"
+  >
+    <div class="max-w-600">
+      <h1 class="text-5xl font-bold">Your account is scheduled for deletion</h1>
+      <div class="p-6 m-4 text-lg text-left">
+        You asked us to delete your Beyond All Reason account <span class="font-bold">{@user.name}</span>. It is scheduled for permanent deletion on <span class="font-bold">{Calendar.strftime(@user.gdpr_forget_after, "%Y-%m-%d %I:%M:%S")} UTC</span>. Nothing has been deleted yet.
+        <br /><br /> Logging in now cancels that request and keeps your account. <br /><br />
+        If you still want your account deleted, do not log in. Close this page and the deletion goes ahead on <span class="font-bold">{Calendar.strftime(@user.gdpr_forget_after, "%Y-%m-%d %I:%M:%S")} UTC</span>.
+      </div>
+
+      <form method="POST">
+        <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+
+        <div class="flex">
+          <div class="flex-1">
+            <a href={@website_url} class="btn btn-lg btn-secondary min-w-100">
+              Keep deletion scheduled
+            </a>
+          </div>
+          <div class="flex-1">
+            <button class="btn btn-lg btn-warning min-w-100">Cancel deletion and log in</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
   alias Teiserver.Account
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.UserLib
+  alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
-  alias Teiserver.Config
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
   alias Teiserver.Moderation
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_args = extract_search_params(params)
@@ -63,6 +63,13 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> assign(:current_count, Enum.count(actions))
     |> assign(:params, Map.put(params, "limit", limit))
     |> render("index.html")
+  end
+
+  @spec search(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def search(conn, params) do
+    conn
+    |> assign(:show_search, true)
+    |> index(params)
   end
 
   defp extract_search_params(params) do
@@ -146,12 +153,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   @spec format_discord_link(Moderation.Report.t()) :: String.t()
   def format_discord_link(report) do
-    channel =
-      if report.type == "actions" do
-        Config.get_site_config_cache("teiserver.Discord channel #overwatch-reports")
-      else
-        Config.get_site_config_cache("teiserver.Discord channel #moderation-reports")
-      end
+    channel = DiscordBridgeBot.get_channel_for_report_type(report.type)
 
     "https://discord.com/channels/#{Communication.get_guild_id()}/#{channel}/#{report.discord_message_id}"
   end
@@ -189,10 +191,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> render("new_select.html")
 
       user ->
-        changeset =
-          Moderation.change_action(%Action{
-            score_modifier: 0
-          })
+        changeset = Moderation.change_action(%Action{})
 
         reports =
           Moderation.list_reports(
@@ -439,7 +438,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
 
     action_map =
-      Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
+      Map.take(action, ~w(target_id reason restrictions expires hidden)a)
 
     add_audit_log(conn, "Moderation:Action deleted", %{action: action_map})
     RefreshUserRestrictionsTask.refresh_user(action.target_id)

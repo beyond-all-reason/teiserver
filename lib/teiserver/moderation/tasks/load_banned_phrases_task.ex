@@ -10,13 +10,29 @@ defmodule Teiserver.Moderation.LoadBannedPhrasesTask do
   def perform do
     banned_phrases =
       BannedPhraseQueries.banned_phrases()
-      |> BannedPhraseQueries.order_by_severity(:desc)
       |> Repo.all()
       |> Enum.map(&BannedPhrase.load_phrase/1)
 
+    # Cache a per-use_case list
+    BannedPhrase.use_cases()
+    |> Enum.each(fn use_case ->
+      filtered_phrases =
+        banned_phrases
+        |> Enum.filter(fn %BannedPhrase{} = phrase ->
+          Enum.member?(phrase.use_cases, use_case)
+        end)
+
+      CacheHelper.store_put(
+        :application_metadata_cache,
+        "banned_phrases/#{use_case}",
+        filtered_phrases
+      )
+    end)
+
+    # And finally a list of all of them
     CacheHelper.store_put(
       :application_metadata_cache,
-      "banned_phrases",
+      "banned_phrases/all",
       banned_phrases
     )
   end

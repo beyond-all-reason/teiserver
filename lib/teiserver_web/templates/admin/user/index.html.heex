@@ -14,24 +14,21 @@ is_moderator = allow?(@conn, "Moderator") %>
   }
 </script>
 
+<div class="alert alert-warning mt-4">
+  The plan is for this page to be deprecated once the remaining functionality is moved over to the new pages. If there is functionality missing from the new pages or errors present please
+  <a href="https://github.com/beyond-all-reason/teiserver/issues">create an issue</a>
+  on the Teiserver repo so we can ensure it's not missed.
+</div>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            show_search: false,
-            active:
-              cond do
-                @conn.params["search"] != nil -> "advanced_search"
-                assigns[:data_search] != nil -> "data_search"
-                # @filter != nil -> @filter
-                true -> "list"
-              end
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="index"
+          colour={bsname}
+          current_user={@current_user}
+        />
 
         <%= if @conn.params["search"] != nil do %>
           {render(TeiserverWeb.Admin.UserView, "search.html", assigns)}
@@ -73,7 +70,7 @@ is_moderator = allow?(@conn, "Moderator") %>
               <%= for {user, user_stats} <- @users do %>
                 <tr>
                   <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-                    {central_component("icon", icon: user.icon)}
+                    <Fontawesome.icon icon={user.icon} style="regular" />
                   </td>
                   <td>{user.name}</td>
                   <%= if is_moderator do %>
@@ -142,7 +139,7 @@ is_moderator = allow?(@conn, "Moderator") %>
           <.pagination
             page={@page}
             total_pages={@total_pages}
-            base_url="/teiserver/admin/user"
+            base_url={~p"/teiserver/admin/user"}
             limit={@limit}
             total_count={@total_count}
             current_count={@current_count}

@@ -42,15 +42,10 @@ type_icons = %{
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Moderation.BanView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            basic_search: "",
-            show_search: false,
-            active: "new"
-          })
-        )}
+        <TeiserverWeb.ModerationLive.BanComponents.section_menu
+          active="new"
+          colour={bsname}
+        />
 
         <hr />
         <div class="float-end">
@@ -142,13 +137,14 @@ type_icons = %{
                             </label>
                           </td>
                           <td>
-                            {central_component("checkbox",
-                              name: "ban[key_values][]",
-                              id: "ban_type_#{key.value}",
-                              value: key.value,
-                              label: "",
-                              checked: false
-                            )}
+                            <.input
+                              type="checkbox"
+                              id={"ban_type_#{key.value}"}
+                              name="ban[key_values][]"
+                              checked={false}
+                              label=""
+                              value={key.value}
+                            />
                           </td>
                         </tr>
                       <% end %>

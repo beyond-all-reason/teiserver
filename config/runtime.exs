@@ -39,6 +39,11 @@ config :teiserver,
   blog_upload_extensions:
     System.get_env("TEI_BLOG_UPLOAD_EXTENSIONS", ".jpg .jpeg .png") |> String.split(" ")
 
+# This allows us to default to certain values for dev, test and prod but also
+# allow easily overriding them at startup in this runtime.exs
+default_mfa_requirement =
+  Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
+
 config :teiserver, Teiserver,
   game_name: "Beyond All Reason",
   game_name_short: "BAR",
@@ -51,6 +56,8 @@ config :teiserver, Teiserver,
   enable_benchmark: false,
   node_name: Teiserver.ConfigHelpers.get_env("TEI_NODE_NAME", "local"),
   enable_managed_lobbies: true,
+  require_mfa_for_privileged_roles:
+    Teiserver.ConfigHelpers.get_env("TEI_MFA_REQUIRED", default_mfa_requirement, :bool),
   user_agreement:
     "A verification code has been sent to your email address. Please read our terms of service at https://www.beyondallreason.info/privacy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
 
@@ -68,7 +75,7 @@ config :teiserver, Teiserver.Repo,
 
 check_origin =
   if Teiserver.ConfigHelpers.get_env("TEI_SHOULD_CHECK_ORIGIN", false, :bool) do
-    :conn
+    ["//#{domain_name}"]
   else
     false
   end
@@ -149,13 +156,10 @@ if use_tls? do
       root: ".",
       cache_static_manifest: "priv/static/cache_manifest.json",
       server: true,
-      https:
-        Keyword.merge(
-          cert_opts,
-          # dhfile is not supported for tls 1.3
-          # https://www.erlang.org/doc/man/ssl.html#type-dh_file
-          dhfile: Teiserver.ConfigHelpers.get_env("TEI_TLS_DH_FILE_PATH", "/etc/ssl/dhparam.pem")
-        )
+      https: [
+        keyfile: cert_opts[:keyfile],
+        certfile: cert_opts[:certfile]
+      ]
   end
 else
   config :teiserver, Teiserver.SpringTcpServer,
@@ -245,7 +249,6 @@ if enable_discord_bridge do
       :guild_messages,
       :guild_message_reactions,
       :direct_messages,
-      :message_content,
       :direct_message_reactions
     ],
     log_full_events: true,
@@ -258,5 +261,9 @@ if enable_discord_bridge do
     bot_name: Teiserver.ConfigHelpers.get_env("TEI_DISCORD_BOT_NAME")
 end
 
+# If we are running the server locally this will conflict, this allows us to test
+# if it is already defined, if not then it will set it to a new value as a default
+monitoring_port = Application.get_env(:teiserver, TeiserverWeb.Monitoring)[:port] || 4001
+
 config :teiserver, TeiserverWeb.Monitoring,
-  port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", 4001, :int)
+  port: Teiserver.ConfigHelpers.get_env("TEI_METRICS_SERVER_PORT", monitoring_port, :int)

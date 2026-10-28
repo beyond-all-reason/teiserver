@@ -20,8 +20,9 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_name(""), do: nil
 
   def get_client_by_name(name) do
-    userid = Account.get_userid_from_name(name)
-    get_client_by_id(userid)
+    name
+    |> Account.get_userid_from_name()
+    |> get_client_by_id()
   end
 
   @spec get_client_by_id(nil) :: nil
@@ -80,6 +81,11 @@ defmodule Teiserver.Account.ClientLib do
   @spec update_client(User.id(), map()) :: nil | :ok
   def update_client(userid, partial_client) do
     cast_client(userid, {:update_values, partial_client})
+  end
+
+  @spec set_moderator_bit(User.id(), boolean()) :: nil | :ok
+  def set_moderator_bit(userid, moderator?) do
+    cast_client(userid, {:set_moderator_bit, moderator?})
   end
 
   @spec replace_update_client(
@@ -288,9 +294,9 @@ defmodule Teiserver.Account.ClientLib do
       client
       | userid: user.id,
         name: user.name,
-        rank: user.rank,
-        moderator: Auth.moderator?(user.id),
-        bot: Auth.is_bot?(user.id),
+        rank: stats["rank"] || 0,
+        moderator: Auth.moderator?(user),
+        bot: Auth.is_bot?(user),
         ip: stats["last_ip"],
         country: stats["country"],
         lobby_client: stats["lobby_client"]

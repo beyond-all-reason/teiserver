@@ -83,11 +83,12 @@ defmodule Teiserver.Battle.MatchLib do
           queue_id: queue_id
         } = state
 
-        teams =
+        players =
           member_list
           |> Account.list_clients()
           |> Enum.filter(fn c -> c.player == true end)
-          |> Enum.group_by(fn c -> c.team_number end)
+
+        teams = Enum.group_by(players, fn c -> c.team_number end)
 
         if teams != %{} do
           team_count = teams |> Enum.count()
@@ -107,6 +108,7 @@ defmodule Teiserver.Battle.MatchLib do
             tags: modoptions,
             team_count: team_count,
             team_size: team_size,
+            player_count: Enum.count(players),
             passworded: lobby.passworded,
             game_type: game_type,
             founder_id: lobby.founder_id,

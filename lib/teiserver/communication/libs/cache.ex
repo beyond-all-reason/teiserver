@@ -18,7 +18,6 @@ defmodule Teiserver.Communication.Cache do
   @impl Supervisor
   def init(:ok) do
     children = [
-      CacheHelper.concache_perm_sup(:text_callback_trigger_lookup),
       CacheHelper.concache_perm_sup(:text_callback_store)
     ]
 

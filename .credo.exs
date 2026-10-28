@@ -81,7 +81,7 @@
              ignore_sigils: true,
              ignore_strings: true,
              ignore_urls: true,
-             max_length: 98,
+             max_length: 103,
              priority: :low
            ]},
           {Credo.Check.Readability.ModuleAttributeNames, []},

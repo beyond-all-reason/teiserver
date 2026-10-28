@@ -3,6 +3,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   Helper methods for lobby policies
   """
 
+  alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
@@ -153,15 +154,17 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     if allow_bypass_rank_check?(user) do
       :ok
     else
+      rank = Account.get_user_stat_data(user.id)["rank"] || 0
+
       cond do
-        state.minimum_rank_to_play != nil and user.rank < state.minimum_rank_to_play ->
+        state.minimum_rank_to_play != nil and rank < state.minimum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(rank, state)
           {:error, msg}
 
-        state.maximum_rank_to_play != nil and user.rank > state.maximum_rank_to_play ->
+        state.maximum_rank_to_play != nil and rank > state.maximum_rank_to_play ->
           # Send message
-          msg = get_failed_rank_check_text(user.rank, state)
+          msg = get_failed_rank_check_text(rank, state)
           {:error, msg}
 
         true ->
@@ -182,7 +185,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     team_size = state.host_teamsize
     team_count = state.host_teamcount
 
-    rating_type = MatchLib.game_type(team_size, team_count)
+    rating_type = rating_type_for_restrictions(MatchLib.game_type(team_size, team_count))
 
     {player_rating, player_uncertainty} =
       BalanceLib.get_user_rating_value_uncertainty_pair(user_id, rating_type)
@@ -213,6 +216,16 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
         :ok
     end
   end
+
+  @doc """
+  OpenSkill rating type used when checking lobby join/play restrictions.
+
+  Team FFA uses Large Team OpenSkill for join/play restrictions
+  because Team FFA ratings are not currently reliable. (see https://github.com/beyond-all-reason/teiserver/issues/337)
+  """
+  @spec rating_type_for_restrictions(String.t()) :: String.t()
+  def rating_type_for_restrictions("Team FFA"), do: "Large Team"
+  def rating_type_for_restrictions(rating_type), do: rating_type
 
   @doc """
   You cannot have all welcome lobby name if there are restrictions

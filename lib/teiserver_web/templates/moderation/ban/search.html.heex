@@ -1,21 +1,11 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
       format: "dd/mm/yyyy"
     });
-
-    $('select').select2({
-      width: "100%"
-    });
   });
-</script>
-
-{central_component("icon_dropdown_js", [])}
-
-<link rel="stylesheet" href={~p"/css/select2.css"} />
-<script src={~p"/js/select2.js"}>
 </script>
 
 <div class="search-row">
@@ -41,18 +31,19 @@
       </div>
 
       <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="search_order" class="control-label">Order by: </label>
-        {central_component("icon_dropdown", %{
-          name: "order",
-          id: "search_order",
-          selected: @conn.params["order"] || "Newest first",
-          enumerable: [
-            %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
-            %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg}
-          ]
-        })}
+        <.input
+          type="select"
+          id="search_order"
+          name="search[order]"
+          label="Order by"
+          value={@params["order"] || "Name (A-Z)"}
+          options={[
+            "Name (A-Z)",
+            "Name (Z-A)",
+            "Newest first",
+            "Oldest first"
+          ]}
+        />
       </div>
     </div>
 

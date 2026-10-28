@@ -13,6 +13,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Algo
+  alias Teiserver.Matchmaking.Algo.Env
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
@@ -211,7 +212,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           {:ok, queue_pid :: pid()} | {:error, reason :: term()}
   def party_join_queue(queue_id, version, party_id, player_ids) do
     game_type = queue_id |> via_tuple() |> GenServer.call(:get_game_type)
-    member = Member.new(player_ids, game_type)
+    member = %{Member.new(player_ids, game_type) | party_id: party_id}
     queue_id |> via_tuple() |> GenServer.call({:party_join_queue, version, party_id, member})
   catch
     :exit, {:noproc, _details} -> {:no, :invalid_queue}
@@ -228,6 +229,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
     queue_id |> via_tuple() |> GenServer.call({:leave_queue, player_id})
   catch
     :exit, {:noproc, _details} -> {:error, :invalid_queue}
+    :exit, {:shutdown, _reason} -> :ok
   end
 
   @doc """
@@ -655,7 +657,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     {alg_module, alg_state} = state.queue.algo
 
-    apply(alg_module, :get_matches, [state.members, alg_state])
+    apply(alg_module, :get_matches, [state.members, alg_state, Env.default_env()])
   end
 
   defp demonitor_players(player_ids, monitors) do

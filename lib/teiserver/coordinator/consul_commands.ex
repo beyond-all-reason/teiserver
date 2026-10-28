@@ -4,10 +4,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.ConsulServer
@@ -59,7 +60,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     queue_string =
       queue
-      |> Enum.map_join(", ", &CacheUser.get_username/1)
+      |> Enum.map_join(", ", &Account.get_username_by_id/1)
 
     queue_size = Enum.count(queue)
 
@@ -73,12 +74,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           "Nobody is bossed"
 
         [boss_id] ->
-          "Host boss is: #{CacheUser.get_username(boss_id)}"
+          "Host boss is: #{Account.get_username_by_id(boss_id)}"
 
         boss_ids ->
           boss_names =
             boss_ids
-            |> Enum.map_join(", ", fn b -> CacheUser.get_username(b) end)
+            |> Enum.map_join(", ", fn b -> Account.get_username_by_id(b) end)
 
           "Host bosses are: #{boss_names}"
       end
@@ -130,6 +131,37 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> List.flatten()
       |> Enum.filter(fn v -> v != nil end)
 
+    # Moderator info regarding relationships
+    player_status =
+      if Auth.moderator?(senderid) do
+        player_ids = Battle.list_lobby_players(state.lobby_id)
+
+        blocks =
+          senderid
+          |> RelationshipLib.list_userids_blocked_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
+          |> Enum.map(&Account.get_username_by_id/1)
+
+        avoids =
+          senderid
+          |> RelationshipLib.list_userids_avoided_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
+          |> Enum.map(&Account.get_username_by_id/1)
+
+        ignores =
+          senderid
+          |> RelationshipLib.list_userids_ignored_by_userid()
+          |> Enum.filter(&Enum.member?(player_ids, &1))
+          |> Enum.map(&Account.get_username_by_id/1)
+
+        [
+          "---- Moderator info ----",
+          "You are avoiding #{Enum.count(avoids)} players in this lobby: #{Enum.join(avoids, ", ")}",
+          "You are blocking #{Enum.count(blocks)} players in this lobby: #{Enum.join(blocks, ", ")}",
+          "You are ignoring #{Enum.count(ignores)} players in this lobby: #{Enum.join(ignores, ", ")}"
+        ]
+      end
+
     status_msg =
       [
         @splitter,
@@ -141,7 +173,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         party_text,
         pos_str,
         "Join queue: #{queue_string} (size: #{queue_size})",
-        other_settings
+        other_settings,
+        player_status
       ]
       |> List.flatten()
       |> Enum.filter(fn s -> s != nil end)
@@ -151,7 +184,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "roll", remaining: remaining, senderid: senderid} = _cmd, state) do
-    username = CacheUser.get_username(senderid)
+    username = Account.get_username_by_id(senderid)
 
     dice_regex = Regex.run(~r/^(\d+)[dD](\d+)$/, remaining)
     max_format = Regex.run(~r/^(\d+)$/, remaining)
@@ -257,9 +290,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Enum.sort_by(fn {_userid, seconds_ago} -> seconds_ago end, &<=/2)
         |> Enum.map(fn {userid, seconds_ago} ->
           if seconds_ago > max_diff_s do
-            "#{CacheUser.get_username(userid)} is almost certainly afk"
+            "#{Account.get_username_by_id(userid)} is almost certainly afk"
           else
-            "#{CacheUser.get_username(userid)} last seen #{seconds_ago}s ago"
+            "#{Account.get_username_by_id(userid)} last seen #{seconds_ago}s ago"
           end
         end)
 
@@ -284,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{split: nil} = state
       ) do
     ConsulServer.say_command(cmd, state)
-    sender_name = CacheUser.get_username(senderid)
+    sender_name = Account.get_username_by_id(senderid)
 
     min_players =
       case String.trim(rem) do
@@ -292,10 +325,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           1
 
         _other ->
-          rem
-          |> String.trim()
-          |> String.to_integer()
-          |> max(1)
+          parse_result =
+            rem
+            |> String.trim()
+            |> Integer.parse()
+
+          case parse_result do
+            :error ->
+              1
+
+            {i, _string} ->
+              max(i, 1)
+          end
       end
 
     ChatLib.sayex(
@@ -306,7 +347,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     Lobby.list_lobby_players!(state.lobby_id)
     |> Enum.each(fn playerid ->
-      CacheUser.send_direct_message(state.coordinator_id, playerid, [
+      Chat.send_direct_message(state.coordinator_id, playerid, [
         @splitter,
         "#{sender_name} is moving to a new lobby, to follow them say $y.",
         "If you want to follow someone else then say $follow <name> and you will follow that user.",
@@ -316,7 +357,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ])
     end)
 
-    CacheUser.send_direct_message(state.coordinator_id, senderid, [
+    Chat.send_direct_message(state.coordinator_id, senderid, [
       "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby.",
       "If you choose a lobby yourself then anybody voting yes will follow you to that lobby.",
       @splitter
@@ -400,7 +441,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     if balance do
       admin_or_moderator_messages =
-        if Auth.admin?(senderid) or Auth.moderator?(senderid) do
+        if Auth.moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -574,8 +615,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           state.lobby_id
         )
     end
-
-    state
   end
 
   #################### Boss
@@ -600,9 +639,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_admin_or_moderator = Auth.admin?(senderid) or Auth.moderator?(senderid)
+    is_moderator = Auth.moderator?(senderid)
 
-    allowed_choices = BalanceLib.get_allowed_algorithms(is_admin_or_moderator)
+    allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
 
     if Enum.member?(allowed_choices, remaining) do
       ChatLib.say(
@@ -1009,6 +1048,63 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  # Disables quantum mode if enabled
+  def handle_command(
+        %{command: "quantum", remaining: "", senderid: senderid} = _cmd,
+        %{quantum_mode?: true} = state
+      ) do
+    sender_name = Account.get_username_by_id(senderid)
+
+    ChatLib.say(
+      state.coordinator_id,
+      "#{sender_name} disabled Quantum mode. The game is still unranked.",
+      state.lobby_id
+    )
+
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
+    Battle.remove_modoptions(state.lobby_id, ["game/quantum/coms"])
+
+    %{state | quantum_mode?: false}
+  end
+
+  # Enables quantum mode where each team has 1 commander and full shared control
+  # next step will be to add options to it allowing you to pick how many commanders
+  # are shared on a team or which teams are used but for now we're keeping it simple
+  def handle_command(
+        %{command: "quantum", remaining: remaining, senderid: senderid} = _cmd,
+        state
+      ) do
+    sender_name = Account.get_username_by_id(senderid)
+
+    # Extract arguments from the command
+    command_args =
+      extract_command_args(remaining)
+      |> Map.take(["coms"])
+
+    commander_count = Map.get(command_args, "coms", "1")
+
+    ChatLib.say(
+      state.coordinator_id,
+      "#{sender_name} enabled Quantum mode, all players on a team will share the same commander and units. The game will not be ranked.",
+      state.lobby_id
+    )
+
+    # Make the game unranked
+    Battle.set_modoption(state.lobby_id, "game/modoptions/ranked_game", "0")
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "1")
+    Battle.set_modoption(state.lobby_id, "game/quantum/coms", commander_count)
+
+    # This will fix_ids but also anything else we want to check on
+    send(self(), :tick)
+
+    %{state | quantum_mode?: true}
+  end
+
+  def handle_command(%{command: "fixids"}, state) do
+    send(self(), :fix_ids)
+    state
+  end
+
   #################### VIP Streamer
   def handle_command(%{command: "shuffle", remaining: remaining, senderid: senderid}, state) do
     mode =
@@ -1021,9 +1117,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         "contributor" ->
           "contributor"
-
-        "dev" ->
-          "dev"
 
         "admin" ->
           "admin"
@@ -1038,7 +1131,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           ChatLib.sayprivateex(
             state.coordinator_id,
             senderid,
-            "Shuffle types are party, friends, contributor, dev, admin, all and default; using 'default'",
+            "Shuffle types are party, friends, contributor, admin, all and default; using 'default'",
             state.lobby_id
           )
 
@@ -1083,7 +1176,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           )
 
         "friends" ->
-          sender_friends = [senderid | CacheUser.get_user_by_id(senderid) |> Map.get(:friends)]
+          sender_friends = [
+            senderid | Account.get_user_by_id(senderid) |> Map.get(:friends)
+          ]
 
           all_possible_clients
           |> Enum.group_by(
@@ -1100,17 +1195,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> Enum.group_by(
             fn %{userid: userid} ->
               Auth.contributor?(userid)
-            end,
-            fn %{userid: userid} ->
-              userid
-            end
-          )
-
-        "dev" ->
-          all_possible_clients
-          |> Enum.group_by(
-            fn %{userid: userid} ->
-              Auth.has_any_role?(userid, "Core")
             end,
             fn %{userid: userid} ->
               userid
@@ -1221,7 +1305,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client = Account.get_client_by_id(player_id)
 
       if client.ready == false and client.player == true do
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
       end
     end)
@@ -1283,7 +1367,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         if tips != nil do
           # Send coordinator message which can be long; appears on right
-          CacheUser.send_direct_message(state.coordinator_id, senderid, tips)
+          Chat.send_direct_message(state.coordinator_id, senderid, tips)
         end
 
         state
@@ -1305,7 +1389,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       client = Client.get_client_by_id(player_id)
 
       if client.ready == false and client.player == true do
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
       end
     end)
@@ -1319,7 +1403,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
 
       player_id ->
-        CacheUser.ring(player_id, state.coordinator_id)
+        Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
         ConsulServer.say_command(cmd, state)
     end
@@ -1372,9 +1456,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       afk_check_list
       |> Enum.each(fn userid ->
-        CacheUser.ring(userid, state.coordinator_id)
+        Lobby.ring(userid, state.coordinator_id)
 
-        CacheUser.send_direct_message(
+        Chat.send_direct_message(
           state.coordinator_id,
           userid,
           "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
@@ -1408,7 +1492,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       target_id ->
         ConsulServer.say_command(cmd, state)
-        sender_name = CacheUser.get_username(senderid)
+        sender_name = Account.get_username_by_id(senderid)
 
         Lobby.sayex(
           state.coordinator_id,
@@ -1784,4 +1868,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   @spec get_queue(map()) :: [User.id()]
   defdelegate get_queue(state), to: ConsulServer
+
+  # Expects a string of args of the form "key1=value1 key2=value2"
+  @spec extract_command_args(String.t()) :: map()
+  defp extract_command_args(arg_string) do
+    arg_string
+    |> String.split(" ")
+    |> Enum.filter(fn arg_pair_string -> String.contains?(arg_pair_string, "=") end)
+    |> Map.new(fn arg_pair_string ->
+      [key, value | _other] = String.split(arg_pair_string, "=")
+      {key, value}
+    end)
+  end
 end

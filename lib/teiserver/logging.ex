@@ -7,6 +7,7 @@ defmodule Teiserver.Logging do
   alias Teiserver.Logging.AggregateViewLogLib
   alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging.AuditLogLib
+  alias Teiserver.Logging.Filter
   alias Teiserver.Logging.MatchDayLog
   alias Teiserver.Logging.MatchDayLogLib
   alias Teiserver.Logging.MatchMonthLog
@@ -38,6 +39,14 @@ defmodule Teiserver.Logging do
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-bars"
+
+  def setup_loggers do
+    LoggerBackends.add({LoggerFileBackend, :error_log})
+    LoggerBackends.add({LoggerFileBackend, :notice_log})
+    LoggerBackends.add({LoggerFileBackend, :info_log})
+    Logger.add_handlers(:teiserver)
+    Filter.silence_bogus_origins()
+  end
 
   defp server_minute_log_query(args) do
     server_minute_log_query(nil, args)

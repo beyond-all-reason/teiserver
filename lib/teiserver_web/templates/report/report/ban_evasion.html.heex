@@ -10,16 +10,6 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Report.ReportView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "ban_evasion"
-          })
-        )}
-
         <form
           action={~p"/teiserver/reports/show/ban_evasion"}
           method="post"
@@ -125,7 +115,7 @@
 
                   <td>
                     <a
-                      href={~p"/teiserver/admin/users/smurf_search/#{user.id}"}
+                      href={~p"/moderation/users/#{user.id}/smurf_search"}
                       class="btn btn-secondary btn-sm"
                     >
                       Show

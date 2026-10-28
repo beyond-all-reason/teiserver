@@ -1,0 +1,73 @@
+<BannedDomainComponents.section_menu active="list" scope={@scope}>
+  <.link patch={~p"/moderation/banned_domains/new"} class="btn btn-primary">
+    <Fontawesome.icon icon="plus" style="regular" /> New Banned Domain
+  </.link>
+</BannedDomainComponents.section_menu>
+
+<.header>
+  Listing Banned Domains
+  <:actions>
+    <.link patch={~p"/moderation/banned_domains/new"}></.link>
+  </:actions>
+</.header>
+<div class="heading-subtitle">{@banned_domain_count} Banned Domains found</div>
+
+<BannedDomainComponents.search_form params={@search} changed?={@search_changed?} />
+
+<.table
+  id="banned_domains-table"
+  rows={@streams.banned_domains}
+  table_class="table-sm table-zebra mt-4"
+  row_click={
+    fn {_id, banned_domain} -> JS.navigate(~p"/moderation/banned_domains/#{banned_domain}") end
+  }
+>
+  <:col :let={{_id, banned_domain}} label="Domain">{banned_domain.domain}</:col>
+  <:action :let={{_id, banned_domain}}>
+    <div class="sr-only">
+      <.link navigate={~p"/moderation/banned_domains/#{banned_domain}"}>Show</.link>
+    </div>
+    <.link
+      patch={~p"/moderation/banned_domains/#{banned_domain}/edit"}
+      class="btn btn-secondary btn-outline btn-sm me-2"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:action>
+  <:action :let={{_id, banned_domain}}>
+    <.link
+      phx-click={
+        JS.push("delete", value: %{id: banned_domain.id}) |> hide("##{banned_domain.id}")
+      }
+      data-confirm="Are you sure?"
+      class="btn btn-error btn-outline btn-sm"
+    >
+      <Fontawesome.icon icon="trash" style="regular" /> Delete
+    </.link>
+  </:action>
+</.table>
+
+<div class="grid place-items-center mt-4">
+  <TeiserverWeb.PaginationComponents.tw_pagination
+    page={@page}
+    page_count={@page_count}
+  />
+</div>
+
+<.back navigate={~p"/moderation"}>Back to moderation</.back>
+
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="banned_domain-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_domains")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_domain.id || :new}
+    title={@page_title}
+    action={@live_action}
+    banned_domain={@banned_domain}
+    patch={~p"/moderation/banned_domains"}
+  />
+</.modal>

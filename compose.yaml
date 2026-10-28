@@ -55,6 +55,8 @@ services:
       # Guardian (authentication)
       #- TEI_GUARDIAN_ISSUER=teiserver
       #- TEI_GUARDIAN_SECRET_KEY=
+      # Internal authorisation
+      - TEI_MFA_REQUIRED=true
       # OAuth
       - TEI_OAUTH_ISSUER=http://localhost:4000
       # Email integration
@@ -80,13 +82,17 @@ services:
   database:
     image: postgres:17.10
     container_name: teiserver-database
+    command: -c 'max_connections=200'
     environment:
       - POSTGRES_DB=teiserver_dev
       - POSTGRES_USER=teiserver_dev
       - POSTGRES_PASSWORD=123456789
     volumes:
+      - ./containers/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
       - ./containers/database:/var/lib/postgresql
     restart: unless-stopped
+    ports:
+      - "5432:5432"
 
   mailserver:
     image: "axllent/mailpit"

@@ -50,7 +50,8 @@
               href={~p"/battle/#{@match.id}"}
               class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}
             >
-              {central_component("icon", icon: Teiserver.Battle.MatchLib.icon())} Match details
+              <Fontawesome.icon icon={Teiserver.Battle.MatchLib.icon()} style="regular" />
+              Match details
             </a>
           <% end %>
 

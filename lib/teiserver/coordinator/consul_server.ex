@@ -7,10 +7,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.CacheUser
+  alias Teiserver.Chat
   alias Teiserver.Client
   alias Teiserver.Communication
   alias Teiserver.Config
@@ -30,7 +31,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
-  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
+  @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum fixids)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
 
@@ -63,7 +64,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call(:get_consul_state, _from, state) do
     result =
-      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked)a
+      ~w(gatekeeper minimum_rating_to_play maximum_rating_to_play minimum_rank_to_play maximum_rank_to_play level_to_spectate locks bans timeouts welcome_message join_queue low_priority_join_queue approved_users host_bosses host_preset host_teamsize host_teamcount player_limit ranked quantum_mode?)a
       |> Map.new(fn key ->
         {key, Map.get(state, key)}
       end)
@@ -113,6 +114,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     else
       {:noreply, state}
     end
+  end
+
+  # Manually trigger fix_ids without doing a tick update
+  def handle_info(:fix_ids, state) do
+    fix_ids(state)
+    {:noreply, state}
   end
 
   def handle_info({:put, key, value}, state) do
@@ -200,7 +207,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq()
 
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply,
@@ -212,7 +219,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_left, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     maybe_persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
@@ -228,7 +235,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_kicked, userid}, state) do
-    username = Account.get_username(userid)
+    username = Account.get_username_by_id(userid)
     ChatLib.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
     player_count_changed(state)
@@ -372,9 +379,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(
-        %{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus},
+        %{channel: "teiserver_lobby_updates", event: :updated_client_battlestatus} = msg,
         state
       ) do
+    if state.quantum_mode? do
+      %{client: client, userid: userid} = msg
+
+      # If we are in quantum mode we want to try and keep these aligned
+      # if team_number is nil we don't want to change anything though
+      if client.team_number != nil and client.team_number != client.player_number do
+        # The map passed to us doesn't always have the full client so we need to
+        # get it to update it properly
+        client = Client.get_client_by_id(userid)
+
+        Client.update(
+          %{client | player_number: client.team_number},
+          :client_updated_battlestatus
+        )
+      end
+    end
+
     player_count_changed(state)
     {:noreply, state}
   end
@@ -468,10 +492,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       {:noreply, new_state}
     else
-      {:noreply, %{state | ranked: true}}
+      # Ranked is set to "1"
+      if state.quantum_mode? do
+        ChatLib.say(
+          state.coordinator_id,
+          "Ranked mode has been enabled, we have disabled Quantum mode as a result.",
+          state.lobby_id
+        )
+      end
+
+      Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
+
+      {:noreply, %{state | ranked: true, quantum_mode?: false}}
     end
   end
 
+  # Ranked set to true
   def handle_info(
         %{
           channel: "teiserver_lobby_updates",
@@ -480,9 +516,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
         },
         state
       ) do
+    if state.quantum_mode? do
+      ChatLib.say(
+        state.coordinator_id,
+        "Ranked mode has been enabled, we have disabled Quantum mode as a result.",
+        state.lobby_id
+      )
+    end
+
+    Battle.set_modoption(state.lobby_id, "game/quantum/enabled", "0")
+
     # Default to ranked true
     LobbyLib.cast_lobby(state.lobby_id, :refresh_name)
-    {:noreply, %{state | ranked: true}}
+    {:noreply, %{state | ranked: true, quantum_mode?: false}}
   end
 
   def handle_info(%{channel: "teiserver_lobby_updates"}, state) do
@@ -579,18 +625,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [now | user_times]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
-    user = CacheUser.get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
 
     cond do
-      Auth.admin?(user.id) or Auth.moderator?(user.id) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
-        CacheUser.set_flood_level(userid, 100)
+        Login.set_flood_level(userid, 100)
         Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= state.ring_limit_count - 1 ->
-        CacheUser.ring(userid, state.coordinator_id)
+        Lobby.ring(userid, state.coordinator_id)
 
         ChatLib.sayprivateex(
           state.coordinator_id,
@@ -612,7 +658,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakdefs requires boss privileges"
@@ -628,7 +674,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
 
     if not is_boss do
-      CacheUser.send_direct_message(
+      Chat.send_direct_message(
         state.coordinator_id,
         userid,
         "Setting tweakunits requires boss privileges"
@@ -735,7 +781,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         player_count = Battle.get_lobby_player_count(state.lobby_id)
 
         if player_count >= 7 do
-          if user.chobby_hash == nil do
+          if Account.get_user_stat_data(user.id)["chobby_hash"] == nil do
             %{new_client | player: false}
           else
             new_client
@@ -842,7 +888,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     )
   end
 
-  @spec user_allowed_to_play?(T.user(), T.client(), map()) :: boolean()
+  @spec user_allowed_to_play?(User.t(), T.client(), map()) :: boolean()
   defp user_allowed_to_play?(user, client, state) do
     userid = user.id
 
@@ -864,12 +910,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         cond do
           rating_check_result != :ok ->
             {_status, msg} = rating_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           rank_check_result != :ok ->
             {_status, msg} = rank_check_result
-            CacheUser.send_direct_message(get_coordinator_userid(), userid, msg)
+            Chat.send_direct_message(get_coordinator_userid(), userid, msg)
             false
 
           true ->
@@ -944,9 +990,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       ban_state == :banned ->
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
-
-      client.shadowbanned ->
-        {false, "Err"}
 
       block_status == :blocking ->
         Telemetry.log_simple_lobby_event(userid, match_id, "join_refused.blocking")
@@ -1060,8 +1103,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # Ensure no two players have the same player_number
-  defp fix_ids(state) do
+  # Ensure no two players have the same player_number unless it's quantum mode
+  # in which case there's going to be overlap
+  defp fix_ids(%{quantum_mode?: false} = state) do
     players = list_players(state)
 
     # Never do this for more than 256 players
@@ -1090,6 +1134,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  # At this stage quantum mode will set all players in a team to have the same shared
+  # commander
+  defp fix_ids(%{quantum_mode?: true} = state) do
+    list_players(state)
+    |> Enum.reject(fn player_client ->
+      player_client.player_number == player_client.team_number
+    end)
+    |> Enum.each(fn player_client ->
+      Client.update(
+        %{player_client | player_number: player_client.team_number},
+        :client_updated_battlestatus
+      )
+    end)
+  end
+
   @spec afk_check_update(map()) :: map()
   defp afk_check_update(%{afk_check_at: nil} = state), do: state
 
@@ -1101,7 +1160,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn user_id ->
         Lobby.force_change_client(state.coordinator_id, user_id, %{player: false})
 
-        CacheUser.send_direct_message(
+        Chat.send_direct_message(
           state.coordinator_id,
           user_id,
           "You were AFK while waiting for a game and have been moved to spectators."
@@ -1259,7 +1318,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_user(name, state) do
     name = String.downcase(name)
 
-    case CacheUser.get_userid(name) do
+    case Account.get_userid_from_name(name) do
       nil ->
         # Try partial search of players in lobby
         battle = Lobby.get_lobby(state.lobby_id)
@@ -1302,7 +1361,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec log_command(map(), map()) :: map()
   def log_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)
-    sender = CacheUser.get_user_by_id(cmd.senderid)
+    sender = Account.get_user_by_id(cmd.senderid)
     ChatLib.persist_message(sender, message, state.lobby_id, :say)
     state
   end
@@ -1359,6 +1418,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_list: [],
       afk_check_at: nil,
       last_seen_map: %{},
+      quantum_mode?: false,
 
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,

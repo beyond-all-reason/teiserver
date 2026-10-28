@@ -11,6 +11,7 @@ defmodule Teiserver.Matchmaking do
 
   @type queue :: Matchmaking.QueueServer.queue()
   @type queue_id :: Matchmaking.QueueServer.id()
+  @type queue_ref :: {queue_id(), version :: String.t()}
   @type member :: Member.t()
   @type join_error :: Matchmaking.QueueServer.join_error()
   @type join_result :: Matchmaking.QueueServer.join_result()
@@ -81,6 +82,8 @@ defmodule Teiserver.Matchmaking do
   """
   @spec get_stats(queue_id :: String.t()) :: {:ok, stats()} | {:error, :not_found}
   defdelegate get_stats(queue_id), to: Matchmaking.QueueServer
+
+  defdelegate setup_site_configs(), to: Matchmaking.Config
 
   @doc """
   Subscribe to matchmaking queue updates.

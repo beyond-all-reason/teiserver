@@ -11,7 +11,7 @@ defmodule Teiserver.Player do
 
   alias Teiserver.Account.User
   alias Teiserver.Matchmaking
-  alias Teiserver.Party
+  alias Teiserver.Party.Types, as: PartyTypes
   alias Teiserver.Player
   alias Teiserver.TachyonBattle
 
@@ -29,8 +29,6 @@ defmodule Teiserver.Player do
 
   @spec connection_via_tuple(User.id()) :: GenServer.name()
   defdelegate connection_via_tuple(user_id), to: Player.Registry, as: :via_tuple
-
-  defdelegate restore_sessions(), to: Player.Session
 
   @doc """
   To be used when a process is interested in the presence of a given player.
@@ -83,9 +81,14 @@ defmodule Teiserver.Player do
   @doc """
   It's go time! the player should join a game
   """
-  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data()) ::
+  @spec battle_start(User.id(), {TachyonBattle.id(), pid()}, start_data(), password :: String.t()) ::
           :ok
-  defdelegate battle_start(user_id, battle_id, battle_start_data), to: Player.Session
+  defdelegate battle_start(user_id, battle_id, battle_start_data, password), to: Player.Session
+
+  @doc """
+  Let players and spectators know a battle has ended
+  """
+  defdelegate notify_battle_ended(user_id, battle_id, battle_ended_data), to: Player.Session
 
   @doc """
   Let the player know that they can join a battle associated with a lobby
@@ -99,6 +102,8 @@ defmodule Teiserver.Player do
           :ok
   defdelegate lobby_join_battle(user_id, battle_data, battle_start_data, password),
     to: Player.Session
+
+  defdelegate notify_left_lobby(user_id, lobby_id, reason), to: Player.Session
 
   @doc """
   Let the player know they've been invited to a party
@@ -114,7 +119,7 @@ defmodule Teiserver.Player do
   @doc """
   Let the player know that they are no longer invited/member of the party
   """
-  @spec party_notify_removed(User.id(), Party.state()) :: :ok
+  @spec party_notify_removed(User.id(), PartyTypes.Overview.t()) :: :ok
   defdelegate party_notify_removed(user_id, party_state), to: Player.Session
 
   @doc """
@@ -124,7 +129,7 @@ defmodule Teiserver.Player do
   @spec party_notify_join_queues(
           User.id(),
           [{Matchmaking.queue_id(), version :: String.t()}],
-          Party.state()
+          PartyTypes.Overview.t()
         ) :: :ok
   defdelegate party_notify_join_queues(user_id, queues, party_state), to: Player.Session
 

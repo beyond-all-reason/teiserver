@@ -16,8 +16,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @create_attrs %{
     reason: "some name",
     restrictions: %{"Login" => "Login"},
-    expires: "1 day",
-    score_modifier: "10000"
+    expires: "1 day"
   }
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}}
@@ -56,11 +55,6 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "new action" do
-    test "renders select form", %{conn: conn} do
-      conn = get(conn, ~p"/moderation/action/new")
-      assert html_response(conn, 200) =~ "Select user:"
-    end
-
     test "renders creation form", %{conn: conn} do
       user = GeneralTestLib.make_user()
 

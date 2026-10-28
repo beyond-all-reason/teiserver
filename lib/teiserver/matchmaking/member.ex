@@ -13,7 +13,8 @@ defmodule Teiserver.Matchmaking.Member do
     :player_ids,
     :joined_at,
     :rating,
-    avoid: []
+    avoid: [],
+    party_id: nil
   ]
 
   @typedoc """

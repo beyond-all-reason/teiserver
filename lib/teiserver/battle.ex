@@ -15,6 +15,7 @@ defmodule Teiserver.Battle do
   alias Teiserver.Battle.MatchMonitorServer
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
@@ -444,19 +445,19 @@ defmodule Teiserver.Battle do
     update_tachyon_match(match, %{started: time})
   end
 
-  # Called once per player to report who won
-  def end_tachyon_match(match_id, time, _user_id, winning_ally_teams \\ []) do
+  def end_tachyon_match(match_id, time, winning_ally_teams \\ []) do
     match = get_match!(match_id)
 
     already_finished? = match.finished != nil
-    winning_ally_team = List.first(winning_ally_teams)
 
-    # TODO Currently trusting the first received event,
-    # should be reworked to accept what the majority agrees on
-    if winning_ally_team != nil && match.winning_team != nil &&
-         winning_ally_team != match.winning_team do
-      Logger.warning("Match #{match_id} winning team conflict!")
+    # TODO We don't currently support properly rating multiple winning ally teams
+    if length(winning_ally_teams) > 1 do
+      Logger.warning(
+        "Match #{match_id} has multiple winning ally team IDs but we are only consdiering the first, TODO reminder"
+      )
     end
+
+    winning_ally_team = List.first(winning_ally_teams)
 
     cond do
       not already_finished? and winning_ally_team != nil ->
@@ -473,6 +474,8 @@ defmodule Teiserver.Battle do
           })
         end)
 
+        MatchRatingLib.rate_match(match_id)
+
       not already_finished? ->
         update_tachyon_match(match, %{finished: time, processed: true})
 
@@ -480,18 +483,6 @@ defmodule Teiserver.Battle do
         {:ok, match}
     end
   end
-
-  def end_tachyon_match(match_id, time) do
-    match = get_match!(match_id)
-
-    if match.finished == nil do
-      update_tachyon_match(match, %{finished: time, processed: true})
-    else
-      {:ok, match}
-    end
-  end
-
-  defdelegate rate_tachyon_match(match_id), to: Teiserver.Game.MatchRatingLib, as: :rate_match
 
   @spec stop_match(nil | T.lobby_id()) :: :ok
   def stop_match(nil), do: :ok

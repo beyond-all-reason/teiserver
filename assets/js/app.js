@@ -5,14 +5,27 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 // import {hooks as colocatedHooks} from "phoenix-colocated/teiserver"
 import topbar from "../vendor/topbar_tw"
-
-// TODO: Is this used any more? I think we can probably remove the UserSocket and thus this line
-// Local files
-import socket from "./socket"
+import LiveCharts from "live_charts"
+import CommandPalette from "./hooks/command_palette"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
-  params: {_csrf_token: csrfToken}
+  params: {_csrf_token: csrfToken},
+  hooks: {
+  // your other hooks...
+  // e.g. SomeCustomHook,
+  CommandPalette,
+
+  // Expand LiveCharts hooks at the end
+  ...LiveCharts.Hooks,
+  }
+})
+
+// Copy the data-copy value of an element to the clipboard, triggered with
+// phx-click={JS.dispatch("phx:copy")}
+window.addEventListener("phx:copy", event => {
+  const text = event.target.dataset.copy
+  if (text) navigator.clipboard.writeText(text)
 })
 
 // Show progress bar on live navigation and form submits
@@ -63,4 +76,3 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
-

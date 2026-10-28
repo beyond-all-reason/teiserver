@@ -16,7 +16,6 @@ defmodule Teiserver.Support.Tachyon do
 
   def tachyon_case_setup(tags) do
     if tags[:module] |> to_string() |> String.contains?("Tachyon") || tags[:tachyon] do
-      Tachyon.disable_state_restoration()
       Tachyon.restart_system()
 
       # this reduces the noise when processes attempt to do sql when the test
@@ -256,8 +255,6 @@ defmodule Teiserver.Support.Tachyon do
     WSC.send_message(client, {:text, event(command_id, data) |> Jason.encode!()})
   end
 
-  # TODO tachyon_mvp: create a version of this function that also check the
-  # the response against the expected json schema
   def recv_message(client, opts \\ []) do
     opts = Keyword.put_new(opts, :timeout, 300)
 
@@ -408,6 +405,19 @@ defmodule Teiserver.Support.Tachyon do
     :ok = send_request(client, "user/info", %{userId: to_string(user_id)})
     {:ok, resp} = recv_message(client)
     resp
+  end
+
+  def report_user!(client, user_ids, reason_type, opts \\ []) do
+    data = %{userIds: Enum.map(user_ids, &to_string/1), reason: %{type: reason_type}}
+
+    data =
+      case Keyword.get(opts, :message) do
+        nil -> data
+        message -> Map.put(data, :message, message)
+      end
+
+    :ok = send_request(client, "user/report", data)
+    recv_message!(client)
   end
 
   def friend_list!(client) do

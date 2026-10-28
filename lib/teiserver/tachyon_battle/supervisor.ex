@@ -2,6 +2,7 @@ defmodule Teiserver.TachyonBattle.Supervisor do
   @moduledoc false
 
   alias Teiserver.Autohost.Types, as: AT
+  alias Teiserver.Battle.Match
   alias Teiserver.TachyonBattle.Battle
   alias Teiserver.TachyonBattle.Types, as: T
 
@@ -18,7 +19,7 @@ defmodule Teiserver.TachyonBattle.Supervisor do
 
   @spec start_battle(
           T.id(),
-          T.match_id(),
+          Match.id(),
           Teiserver.Autohost.id(),
           AT.StartScript.t()
         ) ::

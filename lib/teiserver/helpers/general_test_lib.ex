@@ -3,7 +3,11 @@ defmodule Teiserver.Helpers.GeneralTestLib do
 
   alias Teiserver.Account
   alias Teiserver.Account.Guardian
+  alias Teiserver.Account.Scope
+  alias Teiserver.Account.User
+  alias Teiserver.Helper.StringHelper
   alias TeiserverWeb.UserSocket
+
   import Phoenix.ChannelTest
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
@@ -13,10 +17,15 @@ defmodule Teiserver.Helpers.GeneralTestLib do
 
   def user_fixture, do: make_user(%{"permissions" => []})
 
+  # TODO: This should be replaced by AccountFixtures.user_fixture()
+  # unfortunately they have different signatures so it's not a find
+  # and replace
   def make_user(params \\ %{}) do
+    name = StringHelper.random_name(15)
+
     {:ok, u} =
       Account.create_user(%{
-        "name" => params["name"] || "Test",
+        "name" => params["name"] || "TEST_#{name}",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "fa-solid fa-user",
@@ -47,7 +56,7 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     user =
       if :user in flags do
         make_user(%{
-          "name" => "Current user",
+          "name" => "current_user",
           "email" => "current_user@current_user.com",
           "permissions" => []
         })
@@ -66,7 +75,9 @@ defmodule Teiserver.Helpers.GeneralTestLib do
     login(build_conn(), user.email)
   end
 
-  # @spec general_setup(list, ) :: tuple
+  # TODO: This should be refactored into a single opts argument
+  # with the possibility for roles, flags and other rarely used arguments
+  # being part of that
   def conn_setup(roles \\ [], flags \\ []) do
     {:ok, _data} = data_setup(flags)
 
@@ -78,7 +89,6 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       else
         user =
           make_user(%{
-            "name" => "Current user",
             "email" => "current_user#{r}@current_user#{r}.com",
             "roles" => roles
           })
@@ -114,5 +124,15 @@ defmodule Teiserver.Helpers.GeneralTestLib do
       end
 
     {:ok, r: r, user: user, jwt: jwt, conn: conn, user_token: jwt, socket: socket}
+  end
+
+  @doc """
+  Creates a scope fixture from the user provided
+  """
+  def scope_fixture(%User{} = user, attrs \\ %{}) do
+    %Scope{
+      user: user,
+      ip: attrs[:ip] || {0, 0, 0, 0, 0, 0, 0, 1}
+    }
   end
 end

@@ -1,0 +1,92 @@
+<TextCallbackComponents.section_menu active="show" scope={@scope}>
+  <TextCallbackComponents.quick_search />
+</TextCallbackComponents.section_menu>
+
+<.header>
+  Text callback: {@text_callback.name}
+  <:actions>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/staff/text_callbacks/#{@text_callback}/show/edit"}
+      phx-click={JS.push_focus()}
+      class="btn btn-primary btn-sm"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      phx-click="delete-text-callback"
+      data-confirm="Are you sure you want to delete this text callback?"
+      class="btn btn-error btn-sm"
+    >
+      <Fontawesome.icon icon="trash" style="regular" /> Delete
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name">{@text_callback.name}</:item>
+  <:item title="Category">{@text_callback.category}</:item>
+  <:item title="Response"><pre class="text-wrap">{@text_callback.response}</pre></:item>
+</.list>
+
+<div :if={@audit_logs} class="mt-4">
+  <h3 class="font-bold text-xl">Audit logs</h3>
+  <.table id="audit-logs" rows={@audit_logs} table_class="table-sm table-hover">
+    <:col :let={log} label="User">
+      {log.user && log.user.name}
+    </:col>
+
+    <:col :let={log} label="Action">
+      {log.action}
+    </:col>
+
+    <:col :let={log} label="Timestamp">
+      {Calendar.strftime(log.inserted_at, "%Y-%m-%d %H:%M:%S")}
+    </:col>
+
+    <:col :let={log} :if={allow?(@scope, "Admin")} label="">
+      <a href={~p"/logging/audit_logs/#{log.id}"} class="btn btn-xs btn-neutral btn-soft">
+        Details
+      </a>
+    </:col>
+  </.table>
+</div>
+
+<div :if={@usage_logs} class="mt-4">
+  <h3 class="font-bold text-xl">Usage logs</h3>
+  <.table id="usage-logs" rows={@usage_logs} table_class="table-sm table-hover">
+    <:col :let={log} label="UserID">
+      {log.details["discord_user_id"]}
+      {if log.username, do: "(#{log.username})"}
+    </:col>
+
+    <:col :let={log} label="Channel">
+      {log.details["discord_channel_id"]}
+      {if log.channel_name, do: "(#{log.channel_name})"}
+    </:col>
+
+    <:col :let={log} label="Timestamp">
+      {date_to_str(log.inserted_at, format: :hms_or_ymd)}
+    </:col>
+  </.table>
+</div>
+
+<.back href={~p"/staff/text_callbacks"}>Back to Text callbacks</.back>
+
+<.modal
+  :if={@live_action == :edit and allow?(@scope, "Admin")}
+  id="text_callback-modal"
+  show
+  on_cancel={JS.patch(~p"/staff/text_callbacks/#{@text_callback}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@text_callback.id}
+    title={@page_title}
+    action={@live_action}
+    text_callback={@text_callback}
+    patch={~p"/staff/text_callbacks/#{@text_callback}"}
+    scope={@scope}
+  />
+</.modal>

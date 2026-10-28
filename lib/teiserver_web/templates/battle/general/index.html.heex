@@ -1,29 +1,29 @@
 <div class="row page-row">
-  {central_component("menu_card",
-    icon: Teiserver.Lobby.icon(),
-    name: "lobbies",
-    text: "Lobbies",
-    icon_class: "fa-solid",
-    link: ~p"/battle/lobbies"
-  )}
+  <.menu_card
+    icon={Teiserver.Lobby.icon()}
+    icon_class="fa-solid"
+    url={~p"/battle/lobbies"}
+  >
+    Lobbies
+  </.menu_card>
 
   <%= if allow?(@conn, "admin.dev") do %>
-    {central_component("menu_card",
-      icon: Teiserver.Battle.MatchLib.icon(),
-      name: "battle_logs",
-      text: "Battle logs",
-      icon_class: "fa-solid",
-      link: ~p"/battle"
-    )}
+    <.menu_card
+      icon={Teiserver.Battle.MatchLib.icon()}
+      icon_class="fa-solid"
+      url={~p"/battle"}
+    >
+      Battle logs
+    </.menu_card>
   <% end %>
 </div>
 
 <div class="row page-row">
-  {central_component("menu_card",
-    icon_class: "fa-solid",
-    name: "",
-    icon: StylingHelper.icon(:back),
-    text: "Back",
-    link: ~p"/"
-  )}
+  <.menu_card
+    icon_class="fa-solid"
+    icon={StylingHelper.icon(:back)}
+    url={~p"/"}
+  >
+    Back
+  </.menu_card>
 </div>

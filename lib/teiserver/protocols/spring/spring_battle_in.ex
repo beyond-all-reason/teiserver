@@ -29,7 +29,6 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
     case Jason.decode(json_str) do
       {:ok, data} ->
         host_data = %{
-          # host_bosses: [User.get_userid(data["boss"])],
           host_teamsize: data["teamSize"] |> int_parse(),
           host_teamcount: data["nbTeams"] |> int_parse()
         }

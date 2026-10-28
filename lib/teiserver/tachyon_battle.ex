@@ -12,6 +12,7 @@ defmodule Teiserver.TachyonBattle do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
+  alias Teiserver.Battle.Match
   alias Teiserver.Bot
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonBattle.Types, as: T
@@ -40,7 +41,7 @@ defmodule Teiserver.TachyonBattle do
     end
   end
 
-  @spec start_battle_process(Autohost.id(), T.match_id(), AT.StartScript.t()) ::
+  @spec start_battle_process(Autohost.id(), Match.id(), AT.StartScript.t()) ::
           {:ok, T.id(), pid()} | {:error, term()}
   def start_battle_process(autohost_id, match_id, %AT.StartScript{} = start_script) do
     battle_id = gen_id()
@@ -73,10 +74,10 @@ defmodule Teiserver.TachyonBattle do
           User.id(),
           name :: String.t(),
           password :: String.t()
-        ) :: {:ok, connection_info()} | {:error, term()}
+        ) :: {:ok, %{ips: [String.t()], port: integer(), password: String.t()}} | {:error, term()}
   defdelegate add_player(battle_id, user_id, name, password), to: TachyonBattle.Battle
 
-  @spec get_match_id(T.id()) :: term() | nil
+  @spec get_match_id(T.id()) :: Match.id() | nil
   defdelegate get_match_id(battle_id), to: TachyonBattle.Battle
 
   # keep this function private to dissuade caller to misuse the API.

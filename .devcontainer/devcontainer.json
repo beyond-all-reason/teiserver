@@ -37,7 +37,13 @@
 		"vscode": {
 			"extensions": [
 				"jakebecker.elixir-ls"
-			]
+			],
+			"settings": {
+				"terminal.integrated.env.linux": {
+					"EDITOR": "code --wait",
+					"VISUAL": "code --wait"
+				}
+			}
 		}
 	}
 

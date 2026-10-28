@@ -1,6 +1,6 @@
 defmodule Teiserver.TachyonLobby.Events.FillFromJoinQueue do
   @moduledoc """
-  Add any player from the join queue to the list of active players whereverer
+  Add any player from the join queue to the list of active players wherever
   there is space, attempting to fill the least full teams first
   """
 

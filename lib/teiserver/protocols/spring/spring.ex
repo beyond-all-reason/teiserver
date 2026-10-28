@@ -48,12 +48,12 @@ defmodule Teiserver.Protocols.Spring do
   # using HANDICAP command.
   # b18..b21 = Used for team no. extension (16->256)
   #            Currently supported by LP_LargeTeamNb SPADS plugin
-  #            alternatively battleStatus:teams-8bit shoould be sent as protocol extension message
+  #            alternatively battleStatus:teams-8bit should be sent as protocol extension message
   # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
   # b28..b31 = Used for ally team no. extension (16->256)
   #            Currently supported by LP_LargeTeamNb SPADS plugin
-  #            alternatively battleStatus:teams-8bit shoould be sent as protocol extension message
+  #            alternatively battleStatus:teams-8bit should be sent as protocol extension message
   @spec parse_battle_status(String.t()) :: map()
   def parse_battle_status(status) do
     status_bits =
@@ -212,6 +212,8 @@ defmodule Teiserver.Protocols.Spring do
   @doc """
   Takes zipped and base64'd data and tries to extract it
   """
+  def read_compressed_base64(nil), do: {:error, "base64 decode error"}
+
   def read_compressed_base64(raw_string) do
     case Base.url_decode64(raw_string) do
       {:ok, compressed_contents} ->

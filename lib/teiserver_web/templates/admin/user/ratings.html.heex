@@ -4,15 +4,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        {render(
-          TeiserverWeb.Admin.UserView,
-          "section_menu.html",
-          Map.merge(assigns, %{
-            quick_search: "",
-            show_search: false,
-            active: "ratings"
-          })
-        )}
+        <TeiserverWeb.Components.Admin.UserComponents.section_menu
+          active="ratings"
+          colour={bsname}
+          current_user={@current_user}
+        />
         <hr />
 
         <div class="float-end">
@@ -31,26 +27,23 @@
         <div class="row">
           <div class="col-md-12">
             <%= if @filter != nil do %>
-              {central_component("section_menu_button",
-                name: "rating-all",
-                label: "All matches",
-                active: @filter,
-                url: ~p"/teiserver/admin/users/ratings/#{@user.id}",
-                icon: "",
-                bsname: bsname
-              )}
+              <.section_menu_button
+                url={~p"/teiserver/admin/users/ratings/#{@user.id}"}
+                icon=""
+                bsname={bsname}
+              >
+                All matches
+              </.section_menu_button>
             <% end %>
 
             <%= for rt <- @rating_type_list do %>
               <%= if @ratings[rt] != nil do %>
-                {central_component("section_menu_button",
-                  name: rt,
-                  label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
-                  active: @filter,
-                  url: "?filter=#{rt}",
-                  icon: "",
-                  bsname: bsname
-                )}
+                <.section_menu_button
+                  url={"?filter=#{rt}"}
+                  bsname={bsname}
+                >
+                  {rt} &nbsp;&nbsp;&nbsp; {@ratings[rt].rating_value |> round(2)}
+                </.section_menu_button>
               <% end %>
             <% end %>
           </div>

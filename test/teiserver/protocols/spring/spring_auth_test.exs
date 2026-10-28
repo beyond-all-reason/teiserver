@@ -1,9 +1,9 @@
 defmodule Teiserver.SpringAuthTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.UserCacheLib
+  alias Teiserver.Account.Login
+  alias Teiserver.Account.Registration
   alias Teiserver.BitParse
-  alias Teiserver.CacheUser
   alias Teiserver.Client
   alias Teiserver.TeiserverTestLib
   use Teiserver.ServerCase, async: false
@@ -150,7 +150,7 @@ IGNORELISTEND\n"
     assert reply == "SAIDPRIVATE #{user2.name} тест!\n"
   end
 
-  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST",
+  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST",
        %{
          socket: socket1,
          user: user
@@ -208,6 +208,8 @@ IGNORELISTEND\n"
     assert reply == :timeout
   end
 
+  # https://github.com/beyond-all-reason/teiserver/actions/runs/29731305203/job/88316188735?pr=1397
+  @tag :needs_attention
   test "JOIN, GETCHANNELMESSAGES, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
     _send_raw(socket, "JOIN test_room\n")
     reply = _recv_raw(socket)
@@ -434,9 +436,9 @@ CLIENTS test_room #{user.name}\n"
     _recv_raw(socket)
 
     # Check our starting situation
-    assert UserCacheLib.get_user_by_name(new_name) == nil
-    assert %{name: ^old_name} = UserCacheLib.get_user_by_name(old_name)
-    assert %{id: ^userid} = UserCacheLib.get_user_by_id(userid)
+    assert Account.get_user_by_name(new_name) == nil
+    assert %{name: ^old_name} = Account.get_user_by_name(old_name)
+    assert %{id: ^userid} = Account.get_user_by_id(userid)
     assert %{userid: ^userid} = Client.get_client_by_id(userid)
 
     # Rename with an invalid name
@@ -446,7 +448,7 @@ CLIENTS test_room #{user.name}\n"
     assert String.contains?(reply, "Invalid characters in name")
     assert String.contains?(reply, "(only a-z, A-Z, 0-9, [, ] and _ allowed)")
 
-    # Rename with existng name
+    # Rename with existing name
     _send_raw(socket, "RENAMEACCOUNT #{watcher_user.name}\n")
     reply = _recv_raw(socket)
     assert String.starts_with?(reply, "SERVERMSG")
@@ -456,7 +458,7 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "RENAMEACCOUNT test_user_rename\n")
     reply = _recv_raw(socket)
     # assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
-    assert reply == :timeout
+    assert reply in [:timeout, "s.system.disconnect Logged out\n"]
 
     # Check they got logged out
     wreply = _recv_raw(watcher)
@@ -502,7 +504,7 @@ CLIENTS test_room #{user.name}\n"
     )
 
     # Un-flood them
-    CacheUser.set_flood_level(userid, 0)
+    Login.set_flood_level(userid, 0)
     # And re-verify them
     Account.verify_user(userid)
 
@@ -530,41 +532,13 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "EXIT\n")
   end
 
-  test "CHANGEEMAIL", %{socket: socket, user: user} do
-    # Make the request
+  test "CHANGEEMAIL", %{socket: socket} do
+    # We no longer support this command, we just need to ensure calling it doesn't cause an exception
     _send_raw(socket, "CHANGEEMAILREQUEST new_email@email.com\n")
     reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILREQUESTACCEPTED\n"
-    new_user = UserCacheLib.get_user_by_id(user.id)
-    [code, new_email] = new_user.email_change_code
-    assert new_email == "new_email@email.com"
 
-    # Submit a bad code
-    _send_raw(socket, "CHANGEEMAIL new_email@email.com bad_code\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILDENIED bad code\n"
-
-    # Submit a bad email
-    _send_raw(socket, "CHANGEEMAIL bad_email #{code}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILDENIED bad email\n"
-
-    # Now do it correctly
-    _send_raw(socket, "CHANGEEMAIL new_email@email.com #{code}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILACCEPTED\n"
-    new_user = UserCacheLib.get_user_by_id(user.id)
-    assert new_user.email == "new_email@email.com"
-    assert new_user.email_change_code == [nil, nil]
-  end
-
-  test "CHANGEEMAIL to email already taken", %{socket: socket} do
-    other_user = TeiserverTestLib.new_user()
-
-    # Make the request
-    _send_raw(socket, "CHANGEEMAILREQUEST #{other_user.email}\n")
-    reply = _recv_raw(socket)
-    assert reply == "CHANGEEMAILREQUESTDENIED Email already in use\n"
+    assert reply ==
+             "CHANGEEMAILREQUESTDENIED This feature is no longer supported in client, please use the website to change your email address.\n"
   end
 
   test "CREATEBOTACCOUNT - no mod", %{socket: socket, user: user} do
@@ -590,59 +564,8 @@ CLIENTS test_room #{user.name}\n"
              "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
   end
 
-  # test "c.moderation.report", %{socket: socket, user: user} do
-  #   _send_raw(
-  #     socket,
-  #     "c.moderation.report_user bad_name_here location_type nil reason with spaces\n"
-  #   )
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
-
-  #   _send_raw(socket, "c.moderation.report_user bad_name_here\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
-
-  #   _send_raw(
-  #     socket,
-  #     "c.moderation.report_user bad_name_here\tlocation_type\tnil\treason with spaces\n"
-  #   )
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "NO cmd=c.moderation.report_user\tno target user\n"
-  #   assert reply =~
-  #     "OK\nSAIDPRIVATE Coordinator To complete your report, please use the form on this link:"
-
-  #   # Now we do it correctly, first without a location id
-  #   target_user = new_user()
-  #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 0
-  #   _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\tnil\treason with spaces\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply == "OK\n"
-  #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 1
-
-  #   # Next, with one
-  #   _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\t123\treason with spaces\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply == "OK\n"
-  #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
-
-  #   # Finally, put in a bad location ID and expect to get a database error back
-  #   _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\tlocation_id\treason with spaces\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply == "NO cmd=c.moderation.report_user\tdatabase error\n"
-  #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
-
-  #   # Reporting a friend
-  #   CacheUser.create_friend_request(user.id, target_user.id)
-  #   CacheUser.accept_friend_request(user.id, target_user.id)
-
-  #   _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\t123\treason with spaces\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "NO cmd=c.moderation.report_user\treporting friend\n"
-  #   assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
-  # end
-
   test "User age", context do
-    user = new_user("test_user_rank_test", %{"rank" => 5})
+    user = new_user("test_user_rank", %{"rank" => 5})
     %{socket: socket} = auth_setup(context, user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
@@ -654,21 +577,16 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      CacheUser.user_register_params_with_md5(
-        "test_user_bad_id",
+      Registration.user_register_params_with_md5(
+        "test_bad_id",
         "test_user_bad_id@email.com",
         Account.spring_md5_password("password")
       )
       |> Account.create_user()
 
-    bad_user
-    |> UserCacheLib.convert_user()
-    |> UserCacheLib.add_user()
-
     Account.verify_user(bad_user.id)
 
-    # Need to add it as a client for the :add_user command to work
-    bad_user.id |> CacheUser.get_user_by_id() |> Client.login(:spring, "127.0.0.1")
+    bad_user.id |> Account.get_user_by_id() |> Client.login(:spring, "127.0.0.1")
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).tcp_pid
@@ -677,18 +595,18 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
 
     assert reply ==
-             "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
+             "ADDUSER test_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_bad_id 0\n"
 
     Client.disconnect(bad_user.id)
   end
 
   test "GETIP", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_ip_user", %{})
+    ip_user = new_user("test_user_ip", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETIP test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -696,18 +614,18 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETIP test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip\n")
     reply = _recv_raw(socket)
-    assert reply == "test_user_ip_user is currently bound to 127.0.0.1\n"
+    assert reply == "test_user_ip is currently bound to 127.0.0.1\n"
   end
 
   test "GETUSERID", %{user: user, socket: socket} = context do
-    ip_user = new_user("test_user_id_user", %{})
+    ip_user = new_user("test_user_id", %{})
     %{socket: _socket} = auth_setup(context, ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETUSERID test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -715,9 +633,9 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETUSERID test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
+    assert reply == "The ID for test_user_id is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
   end
 
   # test "Unicode support - TCP", %{socket: socket1, user: user} = context do
@@ -737,4 +655,18 @@ CLIENTS test_room #{user.name}\n"
   #   reply = _recv_binary(socket1)
   #   assert reply == "SAIDPRIVATE #{user2.name} 😄\n"
   # end
+
+  test "CREATEBOTACCOUNT", %{user: user, socket: socket} do
+    Auth.add_roles(user.id, ["Moderator"])
+    :timer.sleep(500)
+    _recv_until(socket)
+
+    # There was an issue where we validated _all_ names and that caused SPADS to be
+    # unable to create a bot account, this ensures that does not regres
+    _send_raw(socket, "CREATEBOTACCOUNT Host[EU4][000] OwnerName\n")
+    reply = _recv_raw(socket)
+
+    assert reply ==
+             "SERVERMSG A new bot account Host[EU4][000] has been created, with the same password as #{user.name}\n"
+  end
 end

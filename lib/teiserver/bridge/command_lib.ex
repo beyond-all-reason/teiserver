@@ -1,5 +1,9 @@
 defmodule Teiserver.Bridge.CommandLib do
   @moduledoc false
+
+  alias Nostrum.Api.ApplicationCommand
+  alias Teiserver.Communication
+
   require Logger
 
   @spec handle_command(Nostrum.Struct.Interaction.t(), map()) :: map()
@@ -10,34 +14,45 @@ defmodule Teiserver.Bridge.CommandLib do
 
   @spec get_command_module(String.t()) :: module
   def get_command_module(name) do
-    Teiserver.store_get(:discord_command_cache, name) ||
-      Teiserver.store_get(:discord_command_cache, "no_command")
+    Teiserver.store_get(:discord_command_cache, name)
+  end
+
+  @spec list_command_modules() :: [module]
+  def list_command_modules do
+    {:ok, module_list} = :application.get_key(:teiserver, :modules)
+
+    module_list
+    # credo:disable-for-lines:17 Credo.Check.Refactor.FilterFilter
+    |> Enum.filter(fn m ->
+      m |> Module.split() |> Enum.take(3) == ["Teiserver", "Bridge", "Commands"]
+    end)
+    |> Enum.filter(fn m ->
+      Code.ensure_loaded(m)
+
+      exports =
+        function_exported?(m, :name, 0) &&
+          function_exported?(m, :cmd_definition, 0) &&
+          function_exported?(m, :execute, 2)
+
+      if not exports do
+        Logger.error("DiscordCommand #{inspect(m)} does not export all the required functions")
+      end
+
+      exports
+    end)
+  end
+
+  @spec register_discord_commands() :: {:ok, [map()]} | Nostrum.Api.error()
+  def register_discord_commands do
+    definitions = list_command_modules() |> Enum.map(& &1.cmd_definition())
+
+    ApplicationCommand.bulk_overwrite_guild_commands(Communication.get_guild_id(), definitions)
   end
 
   @spec cache_discord_commands() :: :ok
   def cache_discord_commands do
-    {:ok, module_list} = :application.get_key(:teiserver, :modules)
-
     lookup =
-      module_list
-      # credo:disable-for-lines:17 Credo.Check.Refactor.FilterFilter
-      |> Enum.filter(fn m ->
-        m |> Module.split() |> Enum.take(3) == ["Teiserver", "Bridge", "Commands"]
-      end)
-      |> Enum.filter(fn m ->
-        Code.ensure_loaded(m)
-
-        exports =
-          function_exported?(m, :name, 0) &&
-            function_exported?(m, :cmd_definition, 0) &&
-            function_exported?(m, :execute, 2)
-
-        if not exports do
-          Logger.error("DiscordCommand #{inspect(m)} does not export all the required functions")
-        end
-
-        exports
-      end)
+      list_command_modules()
       |> Enum.reduce(%{}, fn module, acc ->
         Map.put(acc, module.name(), module)
       end)

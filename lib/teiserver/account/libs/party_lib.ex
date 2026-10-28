@@ -12,11 +12,9 @@ end
 defmodule Teiserver.Account.PartyLib do
   @moduledoc false
   alias ExULID.ULID
-  alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Party
   alias Teiserver.Account.User
-  alias Teiserver.Chat
   alias Teiserver.Data.Types, as: T
 
   @spec colours() :: atom
@@ -32,7 +30,7 @@ defmodule Teiserver.Account.PartyLib do
         nil
 
       %{leader: leader} ->
-        Account.get_username(leader)
+        Account.get_username_by_id(leader)
     end
   end
 
@@ -176,56 +174,5 @@ defmodule Teiserver.Account.PartyLib do
             nil
         end
     end
-  end
-
-  @spec say(User.id(), T.party_id(), String.t()) :: :ok | nil
-  def say(userid, party_id, msg) do
-    case party_exists?(party_id) do
-      false -> nil
-      true -> do_say(userid, party_id, msg)
-    end
-  end
-
-  @spec do_say(User.id(), T.party_id(), String.t()) :: :ok | nil
-  defp do_say(userid, party_id, msg) do
-    msg = trim_message(msg)
-
-    if Account.restricted?(userid, ["All chat"]) do
-      nil
-    else
-      persist_message(userid, msg, party_id)
-
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "teiserver_party:#{party_id}",
-        %{
-          channel: "teiserver_party:#{party_id}",
-          event: :message,
-          party_id: party_id,
-          sender_id: userid,
-          message: msg
-        }
-      )
-
-      :ok
-    end
-  end
-
-  @spec persist_message(User.id(), String.t(), T.party_id()) :: any
-  def persist_message(userid, msg, party_id) do
-    Chat.create_party_message(%{
-      content: msg,
-      party_id: party_id,
-      inserted_at: DateTime.utc_now(),
-      user_id: userid
-    })
-  end
-
-  defp trim_message(msg) when is_list(msg) do
-    Enum.join(msg, "\n") |> trim_message()
-  end
-
-  defp trim_message(msg) do
-    String.trim(msg)
   end
 end

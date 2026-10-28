@@ -4,8 +4,11 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
   alias Teiserver.Battle.Tasks.BreakdownMatchDataTask
   alias Teiserver.Logging
   alias Teiserver.Logging.MatchDayLog
+  alias Teiserver.Logging.Tasks.PersistMatchDayTask
   alias Teiserver.Repo
+
   use Oban.Worker, queue: :teiserver
+
   import Ecto.Query, warn: false
 
   @impl Oban.Worker
@@ -27,25 +30,28 @@ defmodule Teiserver.Logging.Tasks.PersistMatchDayTask do
         |> Date.add(1)
       end
 
-    cond do
-      date == nil ->
-        :ok
+    maybe_run(date)
+  end
 
-      Date.compare(date, Date.utc_today()) == :lt ->
-        run(date)
+  # This used to be part of the perform function but dialyzer was erroring
+  # on it so it was moved to a function here which resolved the issue.
+  defp maybe_run(nil), do: :ok
 
-        new_date = Date.add(date, 1)
+  defp maybe_run(date) do
+    if Date.compare(date, Date.utc_today()) == :lt do
+      run(date)
 
-        if Date.compare(new_date, Date.utc_today()) == :lt do
-          %{}
-          |> __MODULE__.new()
-          |> Oban.insert()
-        end
+      new_date = Date.add(date, 1)
 
-        :ok
+      if Date.compare(new_date, Date.utc_today()) == :lt do
+        %{}
+        |> PersistMatchDayTask.new()
+        |> Oban.insert()
+      end
 
-      true ->
-        :ok
+      :ok
+    else
+      :ok
     end
   end
 

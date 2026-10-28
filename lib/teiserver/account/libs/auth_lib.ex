@@ -8,13 +8,28 @@ defmodule Teiserver.Account.AuthLib do
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.Auth
+  alias Teiserver.Account.Role
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.Scope
+  alias Teiserver.Account.TOTPLib
+  alias Teiserver.Account.User
 
   @spec icon :: String.t()
   def icon, do: "fa-solid fa-address-card"
 
   def mfa_roles do
-    ~w[Server Admin Moderator Overwatch Contributor]s
+    [
+      "Server",
+      "Admin",
+      "Senior moderator",
+      "Moderator",
+      "Reviewer",
+      "Overwatch",
+      "Contributor",
+      "Event Organizer",
+      "Caster",
+      "Staff"
+    ]
   end
 
   @spec get_all_permission_sets() :: list()
@@ -43,13 +58,16 @@ defmodule Teiserver.Account.AuthLib do
     permission_list ++ sections ++ modules
   end
 
+  @doc """
+  Given a list of roles, extract a combined list of all the permissions granted by these roles.
+  """
   @spec get_permissions_from_roles([String.t()]) :: [String.t()]
   def get_permissions_from_roles(roles) do
     roles
     |> Enum.map(fn role_name ->
       case RoleLib.role_data(role_name) do
         nil -> [role_name]
-        %{contains: permissions} -> [role_name | permissions]
+        %Role{contains: permissions} -> [role_name | permissions]
       end
     end)
     |> List.flatten()
@@ -85,7 +103,7 @@ defmodule Teiserver.Account.AuthLib do
 
   # If you don't need permissions then lets not bother checking
   @spec allow?(
-          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t(),
+          map() | Conn.t() | Socket.t() | Teiserver.Account.User.t() | Scope.t(),
           String.t() | [String.t()]
         ) :: boolean
   def allow?(nil, _any), do: false
@@ -111,7 +129,11 @@ defmodule Teiserver.Account.AuthLib do
       permission_test(permissions_held, permissions_required)
   end
 
-  # User and CacheUser
+  # Scope
+  def allow?(%Scope{user: user} = _scope, permissions_required),
+    do: allow?(user, permissions_required)
+
+  # User
   def allow?(%{id: id, roles: roles}, permissions_required) do
     permissions_held = get_permissions_from_roles(roles)
 
@@ -226,5 +248,33 @@ defmodule Teiserver.Account.AuthLib do
   @spec current_user(Plug.Conn.t()) :: Teiserver.Account.User.t() | nil
   def current_user(conn) do
     conn.assigns[:current_user]
+  end
+
+  @doc """
+  Returns how many seconds ago they last used their MFA
+  """
+  @spec get_user_mfa_age_in_seconds(User.id()) :: :inactive | non_neg_integer()
+  def get_user_mfa_age_in_seconds(user_id) do
+    case TOTPLib.get_last_used(user_id) do
+      :inactive ->
+        :inactive
+
+      %DateTime{} = last_used_dt ->
+        DateTime.diff(DateTime.utc_now(), last_used_dt)
+    end
+  end
+
+  @doc """
+  Returns a boolean saying if the MFA of a user needs to refresh (it was last used
+  more than 5 minutes ago), in the event the user has no MFA it will not require a refresh.
+  """
+  @spec need_to_mfa_refresh?(User.id()) :: boolean()
+  def need_to_mfa_refresh?(user_id) do
+    max_age = Application.get_env(:teiserver, Teiserver)[:mfa_privilege_refresh_max_age] || 300
+
+    case get_user_mfa_age_in_seconds(user_id) do
+      :inactive -> false
+      age -> age > max_age
+    end
   end
 end

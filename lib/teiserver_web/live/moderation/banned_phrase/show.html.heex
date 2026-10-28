@@ -1,0 +1,39 @@
+<BannedPhraseComponents.section_menu active="show" scope={@scope} />
+
+<.header>
+  Banned Phrase: {@banned_phrase.phrase}
+  <:subtitle>This is a banned_phrase record from your database.</:subtitle>
+  <:actions>
+    <.link
+      patch={~p"/moderation/banned_phrases/#{@banned_phrase}/show/edit"}
+      phx-click={JS.push_focus()}
+    >
+      <.button>Edit Banned Phrase</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Phrase">{@banned_phrase.phrase}</:item>
+  <:item title="Score threshold">{@banned_phrase.score_threshold}</:item>
+  <:item title="Type">{@banned_phrase.type}</:item>
+  <:item title="Use cases">{Enum.join(@banned_phrase.use_cases, ", ")}</:item>
+</.list>
+
+<.back navigate={~p"/moderation/banned_phrases"}>Back to Banned Phrases</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="banned_phrase-modal"
+  show
+  on_cancel={JS.patch(~p"/moderation/banned_phrases/#{@banned_phrase}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@banned_phrase.id}
+    title={@page_title}
+    action={@live_action}
+    banned_phrase={@banned_phrase}
+    patch={~p"/moderation/banned_phrases/#{@banned_phrase}"}
+  />
+</.modal>

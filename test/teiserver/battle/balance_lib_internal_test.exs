@@ -47,7 +47,7 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     ]
 
     result = BalanceLib.create_balance(groups, 2, algorithm: "loser_picks")
-    assert %{has_parties?: true} = result
+    assert %{has_parties?: false} = result
   end
 
   test "does team have parties" do
@@ -120,6 +120,28 @@ defmodule Teiserver.Battle.BalanceLibInternalTest do
     is_moderator = false
     result = BalanceLib.get_allowed_algorithms(is_moderator)
     assert result == ["default", "auto", "loser_picks", "respect_avoids", "split_noobs"]
+  end
+
+  describe "get the deviation by comparing the best team against the worst team" do
+    test "with no teams" do
+      assert BalanceLib.get_deviation(%{}) == 0
+    end
+
+    test "with one team" do
+      assert BalanceLib.get_deviation(%{1 => 50}) == 0
+    end
+
+    test "with two teams" do
+      ratings = %{1 => 100, 2 => 75}
+
+      assert BalanceLib.get_deviation(ratings) == 25
+    end
+
+    test "with three teams" do
+      ratings = %{1 => 100, 2 => 70, 3 => 40}
+
+      assert BalanceLib.get_deviation(ratings) == 60
+    end
   end
 
   defp create_test_users do

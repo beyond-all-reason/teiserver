@@ -11,8 +11,9 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Helper.StylingHelper
   alias Teiserver.Telemetry
+
   use TeiserverWeb, :live_view
-  import Teiserver.Helpers.ComponentHelper
+
   import Teiserver.Helper.ColourHelper
 
   import TeiserverWeb.Battle.MatchLive.SubComponents.OverviewComponent
@@ -73,9 +74,8 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   defp apply_action(%{assigns: %{match_name: match_name}} = socket, :balance, _params) do
     # Restrict the balance tab to certain roles.
-    # Note that Staff roles like Contributor will inherit Tester permissions
     socket
-    |> mount_require_any(["Reviewer", "Tester"])
+    |> mount_require_any(["Reviewer", "Contributor"])
     |> assign(:page_title, "#{match_name} - Balance")
   end
 
@@ -230,38 +230,39 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
   defp get_match_rating_status(match) do
     # Expecting to return an error explaining current match rating status
     # Unprocessed matches and matches with existing rating logs won't be rated again
-    {_result, rating_status} = MatchRatingLib.rate_match(match)
+    case MatchRatingLib.rateable(match) do
+      :ok ->
+        # Match is rateable at the moment but wasn't rated in the past for some reason
+        # This can happen if the match is older and its data and tags got deleted during
+        # cleanup so we no longer know that it was unrated or had cheating enabled
+        {"info", "Match not rated"}
 
-    case rating_status do
-      :invalid_game_type ->
-        {"success", "Unrated game type"}
-
-      :not_processed ->
-        {"danger", "Match not processed!"}
-
-      :no_winning_team ->
-        {"warning", "Match not rated due to no winning team!"}
-
-      :uneven_team_size ->
-        {"warning", "Match not rated due to uneven team size!"}
-
-      :not_enough_teams ->
-        {"primary", "Match not rated due to not enough teams!"}
-
-      :too_short ->
-        {"warning", "Match too short to be rated!"}
-
-      :unranked_tag ->
-        {"info", "Match not rated due to unrated modoption!"}
-
-      :already_rated ->
+      {:error, :already_rated} ->
         {"success", "Match rated successfully"}
 
-      :cheating_enabled ->
-        {"warning", "Match not rated due to cheating enabled!"}
+      {:error, :invalid_game_type} ->
+        {"success", "Unrated game type"}
 
-      :no_match ->
-        {"danger", "No match!"}
+      {:error, :not_processed} ->
+        {"danger", "Match not processed!"}
+
+      {:error, :no_winning_team} ->
+        {"warning", "Match not rated due to no winning team!"}
+
+      {:error, :uneven_team_size} ->
+        {"warning", "Match not rated due to uneven team size!"}
+
+      {:error, :not_enough_teams} ->
+        {"primary", "Match not rated due to not enough teams!"}
+
+      {:error, :too_short} ->
+        {"warning", "Match too short to be rated!"}
+
+      {:error, :unranked_tag} ->
+        {"info", "Match not rated due to unrated modoption!"}
+
+      {:error, :cheating_enabled} ->
+        {"warning", "Match not rated due to cheating enabled!"}
     end
   end
 
@@ -410,7 +411,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
           </div>
 
           <div :if={@stage == :complete} class="card-body">
-            You have succesfully gifted an accolade to {@recipient.name}! <br /><br />
+            You have successfully gifted an accolade to {@recipient.name}! <br /><br />
             <a phx-click="return-to-match" class="btn btn-sm btn-success">
               Return to match details
             </a>
@@ -440,7 +441,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
                 <%= for badge_type <- @badge_types do %>
                   <tr>
                     <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                      {central_component("icon", icon: badge_type.icon)}
+                      <Fontawesome.icon icon={badge_type.icon} style="regular" />
                     </td>
                     <td style={"background-color: #{rgba_css badge_type.colour};"}>
                       {badge_type.name}

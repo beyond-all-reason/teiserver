@@ -2,42 +2,22 @@ defmodule TeiserverWeb.Account.SessionController do
   alias Plug.Conn
   alias Teiserver.Account
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
+  alias Teiserver.Account.Scope
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.Config
   alias Teiserver.EmailHelper
   alias Teiserver.Helper.DateHelper
+  alias Teiserver.Logging.AuditLog
   alias Teiserver.Logging.Helpers, as: LoggingHelpers
   alias Teiserver.Logging.LoggingPlug
+
   use TeiserverWeb, :controller
+
   require Logger
 
-  @spec new(Conn.t(), map()) :: Conn.t()
-  def new(conn, _params) do
-    changeset = Account.change_user(%User{})
-    maybe_user = GuardianPlug.current_resource(conn)
-
-    if maybe_user do
-      if conn.assigns[:current_user] do
-        redirect(conn, to: "/")
-      else
-        conn
-        |> GuardianPlug.sign_in(maybe_user)
-        |> GuardianPlug.remember_me(maybe_user)
-        |> redirect(to: "/")
-      end
-    else
-      conn
-      |> GuardianPlug.sign_out(clear_remember_me: true)
-      |> assign(:changeset, changeset)
-      |> assign(:action, ~p"/login")
-      |> assign(:can_register?, Account.can_register_with_web?())
-      |> render("new.html")
-    end
-  end
-
-  @spec login(Conn.t(), map()) :: Conn.t()
-  def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
+  @spec create(Conn.t(), map()) :: Conn.t()
+  def create(conn, %{"user" => %{"email" => email, "password" => password}}) do
     email = String.trim(email)
 
     case UserLib.authenticate_user(conn, email, password) do
@@ -48,6 +28,11 @@ defmodule TeiserverWeb.Account.SessionController do
         conn
         |> put_session(:pending_mfa_user_id, user.id)
         |> redirect(to: ~p"/otp")
+
+      {:gdpr_forget_is_set, user} ->
+        conn
+        |> put_session(:gdpr_forget_user_id, user.id)
+        |> redirect(to: ~p"/gdpr_forget")
 
       {:error, reason} ->
         login_reply({:error, reason}, conn)
@@ -60,6 +45,7 @@ defmodule TeiserverWeb.Account.SessionController do
 
     conn
     |> assign(:user, user)
+    |> put_layout(:public_tw)
     |> render("totp.html")
   end
 
@@ -92,6 +78,43 @@ defmodule TeiserverWeb.Account.SessionController do
           end
 
         conn
+        |> put_layout(:public_tw)
+        |> put_flash(:warning, flash_message)
+        |> assign(:user, user)
+        |> render("totp.html")
+    end
+  end
+
+  def refresh_totp(conn, %{"user_id" => user_id, "otp" => otp, "redirect" => redirect}) do
+    user = UserLib.get_user(user_id)
+
+    case Account.validate_totp(user, otp) do
+      :ok ->
+        conn
+        |> redirect(to: redirect)
+
+      {:error, reason} ->
+        flash_message =
+          case reason do
+            :used ->
+              "Code has already been used."
+
+            :invalid ->
+              "Invalid code."
+
+            :locked ->
+              login_reply(
+                {:error,
+                 "The MFA one time password has been entered wrong too many times. Please reset your password to remove MFA from your account."},
+                conn
+              )
+
+            _other ->
+              "There was a problem verifying the code."
+          end
+
+        conn
+        |> put_layout(:public_tw)
         |> put_flash(:warning, flash_message)
         |> assign(:user, user)
         |> render("totp.html")
@@ -192,21 +215,13 @@ defmodule TeiserverWeb.Account.SessionController do
   defp login_reply({:error, reason}, conn) do
     conn
     |> GuardianPlug.sign_out(clear_remember_me: true)
-    |> put_flash(:danger, to_string(reason))
-    |> assign(:result, to_string(reason))
-    |> render("result.html")
+    |> put_flash(:error, to_string(reason))
+    |> redirect(to: ~p"/login")
   end
 
   @spec forgot_password(Conn.t(), map()) :: Conn.t()
   def forgot_password(conn, _params) do
-    key = UUID.uuid1()
-    value = UUID.uuid1()
-    Teiserver.cache_put(:codes, key, value)
-
-    conn
-    |> assign(:key, key)
-    |> assign(:value, value)
-    |> render("forgot_password.html")
+    conn |> render("forgot_password.html")
   end
 
   @spec send_password_reset(Conn.t(), map()) :: Conn.t()
@@ -220,9 +235,6 @@ defmodule TeiserverWeb.Account.SessionController do
       else
         Account.get_user_by_email(email) || %{id: -1}
       end
-
-    key = params["key"]
-    expected_value = Teiserver.cache_get(:codes, key)
 
     existing_resets =
       Account.list_codes(
@@ -241,39 +253,10 @@ defmodule TeiserverWeb.Account.SessionController do
       not Enum.empty?(existing_resets) ->
         conn
         |> put_flash(:success, "Existing password reset already sent out")
-        |> assign(:result, "Existing password reset already sent out")
-        |> render("result.html")
-
-      expected_value == nil ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
-        conn
-        |> assign(:key, key)
-        |> assign(:value, value)
-        |> put_flash(:info, "Form timeout")
-        |> render("forgot_password.html")
-
-      params[key] != expected_value ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
-        conn
-        |> assign(:key, key)
-        |> assign(:value, value)
-        |> put_flash(:info, "The form has timed out")
-        |> render("forgot_password.html")
+        |> redirect(to: ~p"/login")
 
       user.id == -1 ->
-        key = UUID.uuid1()
-        value = UUID.uuid1()
-        Teiserver.cache_put(:codes, key, value)
-
         conn
-        |> assign(:key, key)
-        |> assign(:value, value)
         |> put_flash(:info, "No user by that email")
         |> render("forgot_password.html")
 
@@ -303,21 +286,18 @@ defmodule TeiserverWeb.Account.SessionController do
     cond do
       code == nil ->
         conn
-        |> put_flash(:danger, "Unable to find link")
-        |> assign(:result, "Unable to find link")
-        |> render("result.html")
+        |> put_flash(:error, "Unable to find link")
+        |> redirect(to: ~p"/login")
 
       code.purpose != "reset_password" ->
         conn
-        |> put_flash(:danger, "Link cannot be found")
-        |> assign(:result, "Link cannot be found")
-        |> render("result.html")
+        |> put_flash(:error, "Link cannot be found")
+        |> redirect(to: ~p"/login")
 
       DateTime.compare(DateTime.utc_now(), code.expires) == :gt ->
         conn
-        |> put_flash(:danger, "Link has expired")
-        |> assign(:result, "Link has expired")
-        |> render("result.html")
+        |> put_flash(:error, "Link has expired")
+        |> redirect(to: ~p"/login")
 
       true ->
         changeset = Account.change_user(code.user)
@@ -382,6 +362,64 @@ defmodule TeiserverWeb.Account.SessionController do
               value: value
             )
         end
+    end
+  end
+
+  @spec gdpr_forget_warning(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def gdpr_forget_warning(conn, _params) do
+    user_id = get_session(conn, :gdpr_forget_user_id)
+    %User{} = user = Account.get_user!(user_id)
+
+    # Need to assign it for the audit log to attach to the correct user though
+    # they are not logged in at this point
+    conn =
+      conn
+      |> assign(:current_user, user)
+
+    if UserLib.gdpr_forget_in_progress?(user) do
+      %AuditLog{} = LoggingHelpers.add_audit_log(conn, "GDPR forget login warning", %{})
+      website_url = Application.get_env(:teiserver, Teiserver)[:main_website]
+
+      conn
+      |> assign(:user, user)
+      |> assign(:website_url, website_url)
+      |> render("gdpr_forget_warning.html")
+    else
+      conn
+      |> redirect(to: ~p"/login")
+    end
+  end
+
+  @spec gdpr_forget_cancel_confirm(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def gdpr_forget_cancel_confirm(conn, _params) do
+    user_id = get_session(conn, :gdpr_forget_user_id)
+    %User{} = user = Account.get_user(user_id)
+
+    # Need to assign it for the audit log to attach to the correct user though
+    # they are not logged in at this point
+    conn =
+      conn
+      |> assign(:current_user, user)
+
+    scope = %Scope{
+      user: user,
+      ip: conn.remote_ip
+    }
+
+    with {:ok, %User{gdpr_forget_after: nil}} <- UserLib.clear_gdpr_forget(user, scope),
+         %AuditLog{} <- LoggingHelpers.add_audit_log(conn, "Self-cleared GDPR forget", %{}) do
+      conn
+      |> put_flash(:success, "GDPR forget process cancelled, you can login normally again.")
+      |> redirect(to: ~p"/login")
+    else
+      error_result ->
+        Logger.error(
+          "Unable to execute gdpr_forget_cancel_confirm page, got: #{inspect(error_result)}"
+        )
+
+        conn
+        |> put_flash(:error, "Unable to cancel GDPR forget process. Please raise a ticket.")
+        |> redirect(to: ~p"/gdpr_forget")
     end
   end
 end

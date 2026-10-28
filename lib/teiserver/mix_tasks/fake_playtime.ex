@@ -3,12 +3,12 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
   Adds fake play time stats to all non bot users
   This will also be called by the teiserver.fakedata task
 
-  If you want to run this task invidually, use:
+  If you want to run this task individually, use:
   mix teiserver.fake_playtime
   """
 
   alias Teiserver.Account
-  alias Teiserver.CacheUser
+  alias Teiserver.Account.Login
 
   use Mix.Task
 
@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Teiserver.FakePlaytime do
 
     # Now recalculate ranks
     # This calc would usually be done in do_login
-    rank = CacheUser.calculate_rank(user_id)
+    rank = Login.calculate_rank(user_id)
 
     Account.update_user_stat(user_id, %{
       rank: rank

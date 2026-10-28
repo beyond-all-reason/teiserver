@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    page = params["page"] - 1
+    page = params["page"]
     limit = params["limit"]
 
     search_params = extract_search_params(params)

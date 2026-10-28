@@ -1,0 +1,24 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/definitions/voteHistory.json",
+    "title": "VoteHistory",
+    "description": "History of votes keyed by vote ID",
+    "type": "object",
+    "patternProperties": {
+        "^.*$": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "vote": { "$ref": "../definitions/voteActions.json" },
+                        "outcome": {
+                            "$ref": "../definitions/voteOutcomes.json"
+                        },
+                        "finishedAt": { "$ref": "../definitions/unixTime.json" }
+                    },
+                    "required": ["vote", "outcome", "finishedAt"]
+                },
+                { "type": "null" }
+            ]
+        }
+    }
+}

@@ -5,8 +5,11 @@ defmodule Teiserver.TachyonLobby do
 
   alias Teiserver.Account.User
   alias Teiserver.Asset
+  alias Teiserver.Cluster
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Moderation.LobbyLog
+  alias Teiserver.Repo
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.TachyonLobby.Registry
@@ -21,6 +24,9 @@ defmodule Teiserver.TachyonLobby do
   def list do
     Registry.list_lobbies()
   end
+
+  defdelegate routing_key(id), to: Lobby
+  defdelegate gen_id(), to: Lobby
 
   @spec subscribe_updates() :: %{id() => LT.ListOverview.t()}
   def subscribe_updates do
@@ -54,8 +60,11 @@ defmodule Teiserver.TachyonLobby do
   end
 
   def create(%LT.StartParams{} = start_params) do
+    id = start_params.id || gen_id()
+    mfa = {TachyonLobby.Supervisor, :start_lobby, [id, start_params]}
+
     with :ok <- validate_start_params(start_params),
-         {:ok, %{pid: pid, id: id}} <- TachyonLobby.Supervisor.start_lobby(start_params),
+         {:ok, %{pid: pid, id: id}} <- routing_key(id) |> Cluster.replicated_apply(mfa),
          {:ok, %LT.Details{} = details} <- Lobby.get_details(id) do
       {:ok, pid, details}
     end
@@ -72,29 +81,24 @@ defmodule Teiserver.TachyonLobby do
     end
   end
 
-  @spec rejoin(id(), User.id()) ::
-          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
-  def rejoin(lobby_id, user_id), do: rejoin(lobby_id, user_id, self())
-
-  @spec rejoin(id(), User.id(), pid()) ::
-          {:ok, lobby_pid :: pid(), LT.Details.t()} | {:error, :invalid_lobby}
-  defdelegate rejoin(lobby_id, user_id, pid), to: Lobby
-
   @type client_status_update_data :: Lobby.client_status_update_data()
   @spec update_client_status(id(), User.id(), client_status_update_data()) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby}
   defdelegate update_client_status(lobby_id, user_id, update_data), to: Lobby
 
-  def restore_lobbies do
-    Teiserver.Tachyon.System.restore_state("lobby", __MODULE__, :restore_lobby)
-  end
-
-  def restore_lobby(id, serialized_state) do
-    TachyonLobby.Supervisor.start_lobby_from_snapshot(id, serialized_state)
-  end
-
   @spec lookup(id()) :: pid() | nil
   defdelegate lookup(lobby_id), to: TachyonLobby.Registry
+
+  @spec lookup_primary(id()) :: pid() | nil
+  def lookup_primary(lobby_id) do
+    Lobby.routing_key(lobby_id)
+    |> Cluster.primary_apply({__MODULE__, :lookup, [lobby_id]})
+  rescue
+    # TODO: this error is a bit too wide, this should only cover for when
+    # the peer node is gone or not loaded (somehow)
+    ErlangError ->
+      nil
+  end
 
   @spec count() :: non_neg_integer()
   defdelegate count(), to: TachyonLobby.Registry
@@ -132,8 +136,9 @@ defmodule Teiserver.TachyonLobby do
               ),
               to: Lobby
 
-  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
-  defdelegate remove_bot(lobby_id, bot_id), to: Lobby
+  @spec remove_bot(id(), User.id(), bot_id :: String.t()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  defdelegate remove_bot(lobby_id, user_id, bot_id), to: Lobby
 
   @type bot_update_data :: Lobby.bot_update_data()
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
@@ -183,4 +188,22 @@ defmodule Teiserver.TachyonLobby do
   @spec kickban(id(), User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
           :ok | {:error, :invalid_lobby | :not_in_lobby | :unauthorized | term()}
   defdelegate kickban(lobby_id, user_id, target_id, ban_until \\ nil), to: Lobby
+
+  @doc """
+  Creates a lobby_log.
+
+  ## Examples
+
+      iex> create_lobby_log(%{field: value})
+      {:ok, %LobbyLog{}}
+
+      iex> create_lobby_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_lobby_log(attrs \\ %{}) do
+    %LobbyLog{}
+    |> LobbyLog.changeset(attrs)
+    |> Repo.insert()
+  end
 end

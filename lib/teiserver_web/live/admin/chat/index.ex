@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.ChatLive.Index do
   alias Teiserver.Account
   alias Teiserver.Chat
-  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Chat.SpringLobbyMessageLib
   alias Teiserver.Coordinator
   use TeiserverWeb, :live_view
 
@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
         socket =
           socket
           |> assign(:site_menu_active, "chat")
-          |> assign(:view_colour, LobbyMessageLib.colours())
+          |> assign(:view_colour, SpringLobbyMessageLib.colours())
           |> assign(:messages, [])
           |> assign(:usernames, %{})
           |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
   def handle_params(params, _url, %{assigns: %{filters: filters}} = socket) do
     filters =
       if params["userid"] do
-        user = Account.get_user_by_id(params["userid"])
+        user = Account.get_user_by_id!(params["userid"])
 
         Map.merge(filters, %{
           "username" => user.name,
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
           []
 
         "Lobby" ->
-          Chat.list_lobby_messages(
+          Chat.list_spring_lobby_messages(
             search: [
               user_id_in: filters["userids"],
               user_id_not_in: excluded_ids,
@@ -176,20 +176,8 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
             order_by: filters["order"]
           )
 
-        "Party" ->
-          Chat.list_party_messages(
-            search: [
-              user_id_in: filters["userids"],
-              user_id_not_in: excluded_ids,
-              inserted_after: inserted_after,
-              term: term
-            ],
-            limit: 100,
-            order_by: filters["order"]
-          )
-
         "Direct" ->
-          Chat.list_direct_messages(
+          Chat.list_spring_direct_messages(
             search: [
               member_id_in: filters["userids"],
               inserted_after: inserted_after,

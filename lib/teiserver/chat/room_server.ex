@@ -4,7 +4,6 @@ defmodule Teiserver.Chat.RoomServer do
   alias Teiserver.Account.User
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
-  alias Teiserver.Data.Types, as: T
   alias Teiserver.Helpers.MonitorCollection, as: MC
 
   use GenServer, restart: :temporary
@@ -44,7 +43,7 @@ defmodule Teiserver.Chat.RoomServer do
     :exit, {:noproc, _details} -> :ok
   end
 
-  @spec can_join_room?(String.t(), T.user()) :: true | :invalid_room | {false, String.t()}
+  @spec can_join_room?(String.t(), User.t()) :: true | :invalid_room | {false, String.t()}
   def can_join_room?(name, user) do
     name |> via_tuple() |> GenServer.call({:can_join_room?, user})
   catch

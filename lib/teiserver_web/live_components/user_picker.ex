@@ -5,16 +5,16 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   It will submit the ID value of the selected user but will display the ID and name of the user.
 
   <.live_component
-      module={TeiserverWeb.LiveComponents.UserPicker}
-      id="user-picker"
-      field={@form[:smurf_user_id]}
-      label="User to link to:"
-    />
+    module={TeiserverWeb.LiveComponents.UserPicker}
+    id="user-picker"
+    field={@form[:smurf_user_id]}
+    label="User to link to:"
+  />
   """
+  alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.Repo
-  alias TeiserverWeb.CoreComponents
 
   use TeiserverWeb, :live_component
 
@@ -38,12 +38,13 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   def render(assigns) do
     ~H"""
     <div>
+      <label :if={@label} for={@id}>
+        <span class="label">{@label}</span>
+      </label>
       <div>
-        <CoreComponents.label :if={@label} for={@id}>{@label}</CoreComponents.label>
-
-        <div class="w-full inline-flex border rounded-lg">
+        <div class="join">
           <div
-            class="w-15 text-center pt-3 bg-green-400 text-green-900 dark:bg-green-800 dark:text-green-50 cursor-pointer rounded-l-lg user-picker-search-button"
+            class="btn btn-primary join-item user-picker-search-button"
             phx-click={
               JS.push("show-picker")
               |> JS.toggle(to: "##{@uniq_id}-picker-form")
@@ -51,15 +52,20 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
             }
             phx-target={@myself}
           >
-            <i class="fa-solid fa-lg fa-fw fa-magnifying-glass"></i>
+            <Fontawesome.icon icon="search" style="regular" /> Search
           </div>
+          <label class="input validator join-item">
+            <input
+              type="text"
+              class="input w-full min-w-xs"
+              placeholder=""
+              disabled
+              name="none"
+              value={@shown_value}
+            />
+          </label>
 
-          <.input_tw
-            name="none"
-            value={@shown_value}
-            placeholder="Click green button to search"
-          />
-          <.input_tw
+          <.input
             field={@field}
             value={@actual_value}
             type="hidden"
@@ -85,6 +91,16 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
   end
 
   def update(assigns, socket) do
+    # If we are given a user_id for the component but no user then we need to go
+    # get that user so we can render the component correct at first load
+    assigns =
+      if assigns.field.value != nil and assigns.field.value != "" and assigns[:value] == nil do
+        user = Account.get_user_by_id!(assigns.field.value)
+        Map.put(assigns, :value, user)
+      else
+        assigns
+      end
+
     socket
     |> assign(assigns)
     |> update_input_values()
@@ -241,7 +257,7 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
     ~H"""
     <div class={["mt-2", not @show && "hidden"]} id={"#{@uniq_id}-picker-form"}>
       Search for user by name or ID, search will take place as soon as you stop typing
-      <.input
+      <.input_tw
         id={"#{@uniq_id}-search-input"}
         name="user-search-term"
         value={@search_term}

@@ -14,7 +14,7 @@ defmodule Teiserver.ChatFixtures do
         },
         attrs
       )
-      |> Chat.create_lobby_message()
+      |> Chat.create_spring_lobby_message()
 
     msg
   end

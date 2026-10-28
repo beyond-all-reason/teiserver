@@ -72,6 +72,64 @@
 
 <div class="row">
   <div class="col-md-12">
+    <div class="card card-primary mb-4">
+      <div class="card-body">
+        <h4><i class="fa-brands fa-fw fa-discord"></i> Discord</h4>
+
+        <%= if @discord_id do %>
+          <p>Your account is linked to Discord ID <code>{@discord_id}</code>.</p>
+
+          <.link
+            href={~p"/teiserver/account/security/discord/unlink"}
+            method="delete"
+            data-confirm="Are you sure you want to unlink your Discord account?"
+          >
+            <input type="hidden" name="_csrf_token" value={get_csrf_token()} /> Unlink Discord
+          </.link>
+        <% else %>
+          <p>
+            To link your Teiserver and Discord accounts:
+          </p>
+          <ol>
+            <li>Click "Generate code" below</li>
+            <li>
+              Use the <code>/link</code>
+              in BAR Discord server and provide the generated code within 15 minutes
+            </li>
+          </ol>
+
+          <%= if @discord_link_code do %>
+            <p>
+              Your current code (expires {date_to_str(@discord_link_code.expires,
+                format: :hms_or_ymd
+              )}):
+            </p>
+            <input
+              type="text"
+              readonly
+              value={@discord_link_code.value}
+              class="form-control mb-2"
+              style="max-width: 30em;"
+              onclick="this.select();"
+            />
+          <% else %>
+            <.link
+              href={~p"/teiserver/account/security/discord/generate_code"}
+              method="post"
+            >
+              <button type="submit" class="btn btn-primary">
+                Generate code
+              </button>
+            </.link>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
     <h4>OAuth Applications</h4>
     <%= if Enum.empty?(@oauth_applications) do %>
       <div class="text-muted">
