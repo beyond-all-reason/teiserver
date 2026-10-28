@@ -47,7 +47,7 @@ defmodule Teiserver.SpringOutTest do
         target_id: user.id,
         reason: "First reason\nSecond reason",
         restrictions: ["Warning reminder"],
-        expires: DateTime.add(DateTime.utc_now(), 86_400)
+        expires: DateTime.shift(DateTime.utc_now(), day: 1)
       })
 
     # Hooks are disabled in tests, so apply the restrictions the hook would normally apply.
