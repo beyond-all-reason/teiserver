@@ -346,6 +346,12 @@ defmodule Teiserver.Account.UserQueries do
       where: users.id == ^id
   end
 
+  @spec where_id_in(t(), [User.id()]) :: t()
+  def where_id_in(query, ids) do
+    from users in query,
+      where: users.id in ^ids
+  end
+
   @spec where_id_not_in(t(), [User.id()]) :: t()
   def where_id_not_in(query, ids) do
     from users in query,

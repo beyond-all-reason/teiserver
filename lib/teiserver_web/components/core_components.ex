@@ -919,4 +919,19 @@ defmodule TeiserverWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  <.ui_deprecation_warning new_url={~p"/some/path"} />
+  """
+  attr :new_url, :string
+
+  def ui_deprecation_warning(assigns) do
+    ~H"""
+    <div class="alert alert-warning mt-4">
+      This page has been moved to the <a href={@new_url}>new UI</a>. If there is functionality missing from the new pages or errors present in them please
+      <a href="https://github.com/beyond-all-reason/teiserver/issues">create an issue</a>
+      on the Teiserver repo so we can ensure it's not missed.
+    </div>
+    """
+  end
 end
