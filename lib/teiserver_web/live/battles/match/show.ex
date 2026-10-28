@@ -16,11 +16,11 @@ defmodule TeiserverWeb.Battle.MatchLive.Show do
 
   import Teiserver.Helper.ColourHelper
 
-  import TeiserverWeb.Battle.MatchLive.SubComponents.OverviewComponent
-  import TeiserverWeb.Battle.MatchLive.SubComponents.PlayersComponent
-  import TeiserverWeb.Battle.MatchLive.SubComponents.RatingsComponent
-  import TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent
-  import TeiserverWeb.Battle.MatchLive.SubComponents.EventsComponent
+  import TeiserverWeb.LiveComponents.MatchComponents.OverviewComponent
+  import TeiserverWeb.LiveComponents.MatchComponents.PlayersComponent
+  import TeiserverWeb.LiveComponents.MatchComponents.RatingsComponent
+  import TeiserverWeb.LiveComponents.MatchComponents.BalanceComponent
+  import TeiserverWeb.LiveComponents.MatchComponents.EventsComponent
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do

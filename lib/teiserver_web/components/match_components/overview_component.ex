@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Battle.MatchLive.SubComponents.OverviewComponent do
+defmodule TeiserverWeb.LiveComponents.MatchComponents.OverviewComponent do
   @moduledoc false
   use TeiserverWeb, :component
   import Teiserver.Helper.DateHelper, only: [date_to_str: 2, duration_to_str_short: 1]

@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Battle.MatchLive.ShowTest do
-  alias TeiserverWeb.Battle.MatchLive.SubComponents.BalanceComponent
+  alias TeiserverWeb.LiveComponents.MatchComponents.BalanceComponent
   use Teiserver.DataCase, async: true
 
   test "get team id" do
@@ -11,5 +11,9 @@ defmodule TeiserverWeb.Battle.MatchLive.ShowTest do
     player_id = 3
     result = BalanceComponent.get_team_id(player_id, team_players)
     assert result == 1
+  end
+
+  test "check balance algorythm states" do
+
   end
 end
