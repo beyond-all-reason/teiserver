@@ -2,6 +2,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisorTest do
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
   alias Teiserver.Matchmaking.QueueSupervisor
+  alias Teiserver.Support.Polling
   alias Teiserver.Support.Tachyon.Matchmaking, as: SupportMM
 
   use Teiserver.DataCase, sync: false
@@ -11,7 +12,7 @@ defmodule Teiserver.Matchmaking.QueueSupervisorTest do
   describe "setup_queues!" do
     test "works" do
       QueueSupervisor.setup_queues!([])
-      assert Enum.empty?(Matchmaking.list_queues())
+      Polling.poll_until(&Matchmaking.list_queues/0, &Enum.empty?/1)
 
       [to_keep_attrs, to_kill_attrs, to_start_attrs] =
         Stream.repeatedly(&SupportMM.queue_attrs/0) |> Stream.take(3) |> Enum.to_list()
@@ -30,7 +31,14 @@ defmodule Teiserver.Matchmaking.QueueSupervisorTest do
 
       assert_receive {:DOWN, ^ref, :process, ^to_kill_pid, _reason}
 
-      running_ids = Matchmaking.list_queues() |> Enum.map(&elem(&1, 0))
+      running_ids =
+        Polling.poll_until(
+          fn ->
+            Matchmaking.list_queues() |> Enum.map(&elem(&1, 0))
+          end,
+          fn qs -> length(qs) == 2 end
+        )
+
       assert to_keep_attrs.id in running_ids
       assert to_start_attrs.id in running_ids
       refute to_kill_attrs.id in running_ids
