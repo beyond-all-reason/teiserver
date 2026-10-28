@@ -10,6 +10,9 @@ defmodule Teiserver.Config.UserConfigTypes.TableColumnPreferenceConfigs do
     # Admin; discord channels
     add_preference("col_pref.admin_discord_channels.show_link", "row-click")
 
+    # Admin; oauth applications
+    add_preference("col_pref.admin_oauth_applications.show_link", "row-click")
+
     # Moderation; user list
     add_preference("col_pref.mod_users.show_link", "row-click")
     add_preference("col_pref.mod_users.search_mode", "advanced")

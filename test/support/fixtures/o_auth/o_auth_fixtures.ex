@@ -1,12 +1,32 @@
 defmodule Teiserver.OAuthFixtures do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.AccountFixtures
+  alias Teiserver.Helper.StringHelper
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.Code
   alias Teiserver.OAuth.Credential
   alias Teiserver.OAuth.Token
   alias Teiserver.Repo
+
+  def app_fixture(attrs \\ %{}) do
+    uid = StringHelper.random_name(15)
+
+    {:ok, application} =
+      attrs
+      |> Enum.into(%{
+        name: "fixture app",
+        uid: uid,
+        owner_id: AccountFixtures.user_fixture().id,
+        scopes: ["tachyon.lobby"],
+        redirect_uris: ["http://localhost/foo"],
+        description: "app created as part of a test"
+      })
+      |> OAuth.create_application()
+
+    application
+  end
 
   def app_attrs(owner_id) do
     %{
