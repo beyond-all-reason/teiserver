@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.LiveComponents.MatchComponents.PlayersComponent do
+defmodule TeiserverWeb.MatchComponents.PlayersComponent do
   @moduledoc false
 
   alias Openskill.Util

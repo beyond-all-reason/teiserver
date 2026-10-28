@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.LiveComponents.MatchComponents.RatingsComponent do
+defmodule TeiserverWeb.MatchComponents.RatingsComponent do
   @moduledoc false
   use TeiserverWeb, :component
   import Teiserver.Helper.ColourHelper, only: [rgba_css: 1, rgba_css: 2]

@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.LiveComponents.MatchComponents.BalanceComponent do
+defmodule TeiserverWeb.MatchComponents.BalanceComponent do
   @moduledoc false
 
   alias Teiserver.Battle.BalanceLib

@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.LiveComponents.MatchComponents.EventsComponent do
+defmodule TeiserverWeb.MatchComponents.EventsComponent do
   @moduledoc false
 
   alias Teiserver.Telemetry
