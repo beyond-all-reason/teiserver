@@ -19,12 +19,13 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MovePla
   alias Teiserver.TachyonLobby.Events
   alias Teiserver.TachyonLobby.Events.MovePlayer
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias Teiserver.TachyonLobby.Types.Bot
 
   def apply_event(%MovePlayer{} = ev, %LT.Aggregate{} = agg) do
     {ally_team, team, player} = ev.team
 
     agg =
-      LT.Aggregate.add_log(agg, "join_team", %{
+      add_log(agg, ev.player_id, %{
         user_id: ev.player_id,
         details: %{ally_team: ally_team, team: team, player: player}
       })
@@ -44,5 +45,11 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MovePla
 
     new_aggregate = %{agg | data: data, changes: changes}
     Teiserver.TachyonLobby.Event.apply_event(%Events.RepackPlayers{}, new_aggregate)
+  end
+
+  defp add_log(agg, user_id, attrs) do
+    if Bot.bot_id?(user_id),
+      do: agg,
+      else: LT.Aggregate.add_log(agg, "join_team", attrs)
   end
 end
