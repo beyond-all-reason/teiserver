@@ -7,7 +7,11 @@ defmodule TeiserverWeb.TachyonController do
   * verify the websocket subprotocol. The default socket can only handle
     a fixed list of subprotocol which isn't fit for our purpose.
   """
+  alias TeiserverWeb.Tachyon.Versioning
+
   use TeiserverWeb, :controller
+
+  require Logger
 
   plug TeiserverWeb.Plugs.OAuthAuthenticatedPlug, scopes: ["tachyon.lobby"]
 
@@ -22,7 +26,8 @@ defmodule TeiserverWeb.TachyonController do
   end
 
   defp do_connect(conn, _opts) do
-    with {:ok, subprotocol, handler} <- handler_for_version(conn),
+    with {:ok, subprotocol, version, handler} <- handler_for_version(conn),
+         conn = assign(conn, :tachyon_version, version),
          {:ok, state} <- handler.connect(conn) do
       try do
         rate_limiter =
@@ -51,28 +56,29 @@ defmodule TeiserverWeb.TachyonController do
       |> Enum.flat_map(&String.split(&1, ","))
       |> Enum.map(&String.trim/1)
 
-    supported_version = "v0.tachyon"
+    if Enum.empty?(subprotocol_headers) do
+      {:error, 400, "must provide header #{@subprotocol_hdr_name}"}
+    else
+      case Versioning.negotiate_version(subprotocol_headers) do
+        {:ok, subprotocol, version} ->
+          token = conn.assigns[:token]
 
-    cond do
-      subprotocol_headers == [] ->
-        {:error, 400, "must provide header #{@subprotocol_hdr_name}"}
+          cond do
+            not is_nil(token.owner_id) ->
+              {:ok, subprotocol, version, Teiserver.Player.TachyonHandler}
 
-      Enum.member?(subprotocol_headers, supported_version) ->
-        token = conn.assigns[:token]
+            not is_nil(token.bot_id) ->
+              {:ok, subprotocol, version, Teiserver.Autohost.TachyonHandler}
 
-        cond do
-          not is_nil(token.owner_id) ->
-            {:ok, supported_version, Teiserver.Player.TachyonHandler}
+            true ->
+              Logger.error("no owner nor autohost found for token, this should never happen")
+              {:error, 500, "no owner nor autohost found for token, this should never happen"}
+          end
 
-          not is_nil(token.bot_id) ->
-            {:ok, supported_version, Teiserver.Autohost.TachyonHandler}
-
-          true ->
-            {:error, 500, "no owner nor autohost found for token, this should never happen"}
-        end
-
-      true ->
-        {:error, 400, "No supported subprotocol version found in #{inspect(subprotocol_headers)}"}
+        {:error, :no_shared_versions} ->
+          {:error, 400,
+           "No supported subprotocol version found in #{inspect(subprotocol_headers)}"}
+      end
     end
   end
 
