@@ -426,7 +426,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   end
 
   @impl GenServer
-  def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _object, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -444,7 +444,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
       {:room, room_pid, player_ids} ->
         Logger.info(
-          "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}"
+          "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}, because #{inspect(reason)}"
         )
 
         new_state =

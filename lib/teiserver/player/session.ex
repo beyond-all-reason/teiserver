@@ -1219,9 +1219,9 @@ defmodule Teiserver.Player.Session do
         Enum.split_with(joined, fn {qid, _version} -> qid == queue_id end)
 
       monitors =
-        Enum.reduce(other_queues, state.monitors, fn {qid, _version}, monitors ->
+        Enum.reduce(other_queues, state.monitors, fn {qid, version}, monitors ->
           Matchmaking.leave_queue(qid, state.user.id)
-          MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
+          MC.demonitor_by_val(monitors, {:mm_queue, {qid, version}}, [:flush])
         end)
 
       monitors = MC.monitor(monitors, room_pid, :mm_room)
@@ -1267,7 +1267,7 @@ defmodule Teiserver.Player.Session do
 
       {:pairing,
        %PT.MmPairingState{
-         paired_queue: q_id,
+         paired_queue: q_ref,
          room: _room_pid,
          frozen_queues: frozen_queues,
          readied?: readied
@@ -1275,16 +1275,16 @@ defmodule Teiserver.Player.Session do
         monitors =
           state.monitors
           |> MC.demonitor_by_val(:mm_room, [:flush])
-          |> MC.demonitor_by_val({:mm_queue, q_id})
+          |> MC.demonitor_by_val({:mm_queue, q_ref})
 
         state = Map.replace!(state, :monitors, monitors)
 
-        q_ids = [q_id | frozen_queues]
+        q_refs = [q_ref | frozen_queues]
 
         case reason do
           :timeout when not readied ->
             state =
-              leave_all_queues(q_ids, state)
+              leave_all_queues(q_refs, state)
               |> send_to_player({:matchmaking, :notify_lost})
               |> send_to_player({:matchmaking, {:cancelled, reason}})
 
@@ -1292,7 +1292,7 @@ defmodule Teiserver.Player.Session do
 
           {:server_error, _details} ->
             state =
-              leave_all_queues(q_ids, state)
+              leave_all_queues(q_refs, state)
               |> send_to_player({:matchmaking, :notify_lost})
               |> send_to_player({:matchmaking, {:cancelled, reason}})
 
@@ -1301,7 +1301,7 @@ defmodule Teiserver.Player.Session do
           _other_reason ->
             state = send_to_player(state, {:matchmaking, :notify_lost})
 
-            case join_matchmaking(q_ids, state) do
+            case join_matchmaking(q_refs, state) do
               {:ok, new_state} ->
                 {:noreply, new_state}
 
@@ -1865,9 +1865,9 @@ defmodule Teiserver.Player.Session do
       # the `queue` message is all or nothing, so if joining a later queue need
       # to leave the queues already joined
       {:error, reason} ->
-        Enum.each(joined, fn {qid, _version} ->
+        Enum.each(joined, fn {qid, version} ->
           Matchmaking.leave_queue(qid, user_id)
-          MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
+          MC.demonitor_by_val(monitors, {:mm_queue, {qid, version}}, [:flush])
         end)
 
         {:error, reason}
@@ -1897,9 +1897,9 @@ defmodule Teiserver.Player.Session do
     # what should be done in that case
     monitors =
       Enum.reduce(queues_to_leave, state.monitors, fn
-        {qid, _version}, monitors ->
+        {qid, version}, monitors ->
           Matchmaking.leave_queue(qid, state.user.id)
-          MC.demonitor_by_val(monitors, {:mm_queue, qid}, [:flush])
+          MC.demonitor_by_val(monitors, {:mm_queue, {qid, version}}, [:flush])
       end)
 
     state
