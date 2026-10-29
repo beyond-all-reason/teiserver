@@ -924,6 +924,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_boss}}]}
 
+      Enum.empty?(data.bosses) and data.current_vote != nil ->
+        {:keep_state, data, [{:reply, from, {:error, :vote_in_progress}}]}
+
       Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:kickban, target_id, ban_until})
         events = [%Events.StartVote{vote_state: vote}]
@@ -972,6 +975,9 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
+
+      Enum.empty?(data.bosses) and data.current_vote != nil ->
+        {:keep_state, data, [{:reply, from, {:error, :vote_in_progress}}]}
 
       Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:appoint_boss, appointee_id})
