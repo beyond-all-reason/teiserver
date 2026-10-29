@@ -1,6 +1,6 @@
 <div class="row mt-2">
   <.menu_card
-    :if={allow?(@current_user, "Engine")}
+    :if={allow?(@current_user, "Technician")}
     icon={Teiserver.Telemetry.InfologLib.icon()}
     url={~p"/telemetry/infolog"}
     size={:small}

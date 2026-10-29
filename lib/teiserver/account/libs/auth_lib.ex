@@ -25,6 +25,7 @@ defmodule Teiserver.Account.AuthLib do
       "Moderator",
       "Reviewer",
       "Overwatch",
+      "Technician",
       "Contributor",
       "Event Organizer",
       "Caster",

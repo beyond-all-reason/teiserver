@@ -60,6 +60,14 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
+        :if={allow?(@scope, "Technician")}
+        icon={Teiserver.Telemetry.TelemetryLib.icon()}
+        url={~p"/telemetry"}
+      >
+        Telemetry
+      </.menu_page_link>
+
+      <.menu_page_link
         :if={allow?(@scope, "Contributor")}
         icon={StylingHelper.icon(:summary)}
         url={~p"/teiserver/reports"}

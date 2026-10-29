@@ -21,7 +21,7 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Server Engine))}
+        :if={allow?(@scope, "Technician")}
         icon={Teiserver.Telemetry.TelemetryLib.icon()}
         url={~p"/telemetry"}
       >
