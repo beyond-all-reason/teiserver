@@ -56,6 +56,14 @@ defmodule TeiserverWeb.AdminLive.ToolsComponents do
           Blog activity
         </.section_menu_link>
 
+        <.section_menu_link
+          icon="fa-people-group"
+          url={~p"/admin/tools/population_report"}
+          active={@active == "population_report"}
+        >
+          Population Report
+        </.section_menu_link>
+
         {render_slot(@extra_links)}
       </ul>
 

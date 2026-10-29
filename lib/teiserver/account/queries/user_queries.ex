@@ -446,6 +446,18 @@ defmodule Teiserver.Account.UserQueries do
       where: users.last_login >= ^datetime
   end
 
+  # Logged in before
+  def where_logged_in_before(query, ""), do: query
+
+  def where_logged_in_before(query, %Date{} = date) do
+    where_logged_in_before(query, DateTime.new!(date, ~T[00:00:00], "Etc/UTC"))
+  end
+
+  def where_logged_in_before(query, %DateTime{} = datetime) do
+    from users in query,
+      where: users.last_login < ^datetime
+  end
+
   # Where role
   def where_has_role(query, ""), do: query
 
@@ -500,6 +512,12 @@ defmodule Teiserver.Account.UserQueries do
   def where_registered_before(query, timestamp) do
     from users in query,
       where: users.inserted_at < ^timestamp
+  end
+
+  @spec where_registered_after(t(), DateTime.t()) :: t()
+  def where_registered_after(query, timestamp) do
+    from users in query,
+      where: users.inserted_at >= ^timestamp
   end
 
   # Joins

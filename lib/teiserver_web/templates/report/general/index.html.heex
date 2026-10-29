@@ -59,16 +59,6 @@
     </.menu_card>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.PopulationReport.icon()}
-      url={~p"/teiserver/reports/show/population"}
-    >
-      Population
-    </.menu_card>
-  <% end %>
-
   <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
     <.menu_card
       size={:small}

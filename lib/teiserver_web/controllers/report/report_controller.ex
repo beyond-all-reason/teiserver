@@ -30,9 +30,6 @@ defmodule TeiserverWeb.Report.ReportController do
         "retention" ->
           Teiserver.Account.RetentionReport
 
-        "population" ->
-          Teiserver.Account.PopulationReport
-
         "new_user_funnel" ->
           Teiserver.Account.NewUserFunnelReport
 
