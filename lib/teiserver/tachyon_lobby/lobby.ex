@@ -44,6 +44,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   alias Teiserver.TachyonLobby.Supervisor, as: LobbySupervisor
   # lobby types
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias Teiserver.TachyonLobby.Types.Bot, as: LBot
 
   require Logger
 
@@ -728,6 +729,16 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
+        {:update_properties, user_id, _data},
+        _state,
+        %LT.Data{} = fsm_data
+      )
+      when not is_map_key(fsm_data.players, user_id) and
+             not is_map_key(fsm_data.spectators, user_id),
+      do: {:keep_state, fsm_data, [{:reply, from, {:error, :not_in_lobby}}]}
+
+  def handle_event(
+        {:call, from},
         {:update_properties, _user_id, data},
         _state,
         %LT.Data{} = fsm_data
@@ -924,7 +935,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_boss}}]}
 
-      Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
+      Enum.empty?(data.bosses) and Enum.count(data.players, &(!LBot.bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:kickban, target_id, ban_until})
         events = [%Events.StartVote{vote_state: vote}]
         data = process_events(data, events).data
@@ -973,7 +984,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_a_boss}}]}
 
-      Enum.empty?(data.bosses) and Enum.count(data.players, &(!bot_id?(elem(&1, 0)))) > 1 ->
+      Enum.empty?(data.bosses) and Enum.count(data.players, &(!LBot.bot_id?(elem(&1, 0)))) > 1 ->
         vote = new_vote(data, user_id, {:appoint_boss, appointee_id})
         events = [%Events.StartVote{vote_state: vote}]
         data = process_events(data, events).data
@@ -1323,10 +1334,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     final_aggregate = Enum.reduce(events, aggregate, &Event.apply_event/2)
 
-    initial_player_count = Enum.count(data.players, fn {_id, p} -> not bot_id?(p.id) end)
+    initial_player_count = Enum.count(data.players, fn {_id, p} -> not LBot.bot_id?(p.id) end)
 
     final_player_count =
-      Enum.count(final_aggregate.data.players, fn {_id, p} -> not bot_id?(p.id) end)
+      Enum.count(final_aggregate.data.players, fn {_id, p} -> not LBot.bot_id?(p.id) end)
 
     final_aggregate =
       update_in(final_aggregate, [Access.key!(:overview_changes)], fn changes ->
@@ -1434,7 +1445,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     updates =
       if is_map_key(updates, :players) do
         {players, rest} = Map.pop!(updates, :players)
-        {bots, players} = Enum.split_with(players, &bot_id?(elem(&1, 0)))
+        {bots, players} = Enum.split_with(players, &LBot.bot_id?(elem(&1, 0)))
 
         %{players: Map.new(players), bots: Map.new(bots)}
         |> Enum.filter(&(elem(&1, 1) != %{}))
@@ -1517,7 +1528,10 @@ defmodule Teiserver.TachyonLobby.Lobby do
         :ok
 
       {:error, reason} ->
-        Logger.error("Error while creating lobby log #{inspect(attrs)}: #{inspect(reason)}")
+        Logger.error(
+          "Error while creating lobby log #{event_type} #{inspect(attrs)}: #{inspect(reason)}"
+        )
+
         {:error, reason}
     end
   end
@@ -1527,10 +1541,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
   defp ban_expired?(ban_until) do
     DateTime.compare(ban_until, DateTime.utc_now()) != :gt
   end
-
-  # in tests, some user ids are string
-  def bot_id?(id) when is_integer(id), do: false
-  def bot_id?(id), do: String.starts_with?(id, "bot")
 
   @spec gen_start_script(LT.Data.t()) :: AT.StartScript.t()
   defp gen_start_script(%LT.Data{} = state) do
@@ -1623,7 +1633,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           _other_action -> {:error, :vote_in_progress}
         end
 
-      Enum.count(state.players, fn {_id, p} -> not bot_id?(p.id) end) > 1 ->
+      Enum.count(state.players, fn {_id, p} -> not LBot.bot_id?(p.id) end) > 1 ->
         vote = new_vote(state, user_id, {:change_map, new_map})
         {:ok, [%Events.StartVote{vote_state: vote}]}
 
@@ -1693,7 +1703,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
     vote_duration_s = 60
 
     voters =
-      for {_id, p} <- state.players, !bot_id?(p.id), into: %{} do
+      for {_id, p} <- state.players, !LBot.bot_id?(p.id), into: %{} do
         if p.id == initiator_id, do: {p.id, :yes}, else: {p.id, :pending}
       end
 
