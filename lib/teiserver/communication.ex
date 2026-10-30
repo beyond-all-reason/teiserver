@@ -258,6 +258,23 @@ defmodule Teiserver.Communication do
           {:ok, Nostrum.Struct.Message.t()} | {:error, any}
   defdelegate rename_discord_channel(channel_id, new_name), to: DiscordChannelLib
 
+  @spec get_original_interaction_response(Interaction.t()) ::
+          Nostrum.Api.error() | {:ok, Nostrum.Struct.Message.t()}
+  defdelegate get_original_interaction_response(interaction), to: DiscordChannelLib
+
+  @spec respond_to_interaction(Nostrum.Struct.Interaction.t(), %{
+          optional(:type) => non_neg_integer(),
+          optional(:data) => map
+        }) :: map
+  defdelegate respond_to_interaction(interaction, data), to: DiscordChannelLib
+
+  @spec create_interaction_followup_message(String.t(), map) ::
+          {:ok, Nostrum.Struct.Message.t()} | Nostrum.Api.error()
+  defdelegate create_interaction_followup_message(token, message_map), to: DiscordChannelLib
+
+  @spec delete_interaction_response(Interaction.t()) :: {:ok} | Nostrum.Api.error()
+  defdelegate delete_interaction_response(interaction), to: DiscordChannelLib
+
   @spec new_interaction_response(%{
           required(:content) => String.t(),
           optional(:flags) => non_neg_integer(),

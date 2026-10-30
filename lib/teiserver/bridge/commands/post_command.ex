@@ -3,7 +3,6 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   Calls the bot to post report or action in current channel
   """
 
-  alias Nostrum.Api.Interaction
   alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
@@ -99,7 +98,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
         "report" ->
           case Moderation.get_report(args.value, preload: [:reporter, :target]) do
             nil ->
-              %{content: "No report with ID \"#{args.value}\" found"}
+              %{content: "No report with ID \"#{args.value}\" found", flags: @ephemeral}
 
             report ->
               message =
@@ -153,13 +152,13 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   end
 
   def post(interaction) do
-    Interaction.create_response(interaction, %{type: 6})
+    Communication.respond_to_interaction(interaction, %{type: 6})
 
-    {:ok, message} = Interaction.original_response(interaction)
+    {:ok, message} = Communication.get_original_interaction_response(interaction)
 
-    Interaction.delete_response(interaction)
+    Communication.delete_interaction_response(interaction)
 
-    Interaction.create_followup_message(interaction.application_id, interaction.token, %{
+    Communication.create_interaction_followup_message(interaction.token, %{
       content: message.content
     })
   end

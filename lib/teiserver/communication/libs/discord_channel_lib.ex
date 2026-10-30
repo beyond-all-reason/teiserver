@@ -219,22 +219,71 @@ defmodule Teiserver.Communication.DiscordChannelLib do
     end
   end
 
+  @spec get_original_interaction_response(Nostrum.Struct.Interaction.t()) ::
+          Nostrum.Api.error() | {:ok, Nostrum.Struct.Message.t()}
+  def get_original_interaction_response(interaction) do
+    if use_discord?() do
+      Interaction.original_response(interaction)
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
+  @spec respond_to_interaction(Nostrum.Struct.Interaction.t(), %{
+          optional(:type) => non_neg_integer(),
+          optional(:data) => map
+        }) :: {:ok} | Nostrum.Api.error() | {:error, :discord_disabled}
+  def respond_to_interaction(interaction, data) do
+    if use_discord?() do
+      Interaction.create_response(interaction, data)
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
+  @spec create_interaction_followup_message(String.t(), map) ::
+          {:ok, Nostrum.Struct.Message.t()} | Nostrum.Api.error()
+  def create_interaction_followup_message(token, message_map) do
+    if use_discord?() do
+      Interaction.create_followup_message(token, message_map)
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
+  @spec delete_interaction_response(Nostrum.Struct.Interaction.t()) :: {:ok} | Nostrum.Api.error()
+  def delete_interaction_response(interaction) do
+    if use_discord?() do
+      Interaction.delete_response(interaction)
+    else
+      {:error, :discord_disabled}
+    end
+  end
+
   @spec new_interaction_response(%{
           required(:content) => String.t(),
           optional(:flags) => non_neg_integer(),
           optional(:components) => list(Nostrum.Struct.Component.t())
         }) :: map
   def new_interaction_response(%{content: _content} = data) do
-    %{
-      type: 4,
-      data: data
-    }
+    if use_discord?() do
+      %{
+        type: 4,
+        data: data
+      }
+    else
+      {:error, :discord_disabled}
+    end
   end
 
   @spec edit_interaction_response(Nostrum.Struct.Interaction.t(), map()) ::
           {:ok, Nostrum.Struct.Message.t()} | {:error, Nostrum.Api.error()}
   def edit_interaction_response(interaction, %{} = changes) do
-    Interaction.edit_response(interaction, changes)
+    if use_discord?() do
+      Interaction.edit_response(interaction, changes)
+    else
+      {:error, :discord_disabled}
+    end
   end
 
   @spec get_discord_message(non_neg_integer | String.t(), non_neg_integer) ::
