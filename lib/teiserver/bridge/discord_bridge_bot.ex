@@ -62,7 +62,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
         PostCommand.post(interaction)
 
       "post_cancel" ->
-        Interaction.create_response(interaction, %{type: 6})
+        Communication.respond_to_interaction(interaction, %{type: 6})
         Communication.edit_interaction_response(interaction, %{components: []})
     end
   end

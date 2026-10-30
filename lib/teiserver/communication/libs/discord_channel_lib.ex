@@ -266,14 +266,10 @@ defmodule Teiserver.Communication.DiscordChannelLib do
           optional(:components) => list(Nostrum.Struct.Component.t())
         }) :: map
   def new_interaction_response(%{content: _content} = data) do
-    if use_discord?() do
-      %{
-        type: 4,
-        data: data
-      }
-    else
-      {:error, :discord_disabled}
-    end
+    %{
+      type: 4,
+      data: data
+    }
   end
 
   @spec edit_interaction_response(Nostrum.Struct.Interaction.t(), map()) ::
