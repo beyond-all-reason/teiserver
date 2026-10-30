@@ -37,6 +37,48 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
     # We have no "no records" test for this page as there will always
     # be at least one user, the one viewing it.
 
+    test "quick search jumps to the user when only one is found", %{conn: conn} do
+      user = AccountFixtures.user_fixture(%{name: "MyUniqueTestUser"})
+
+      {:error, {:redirect, %{to: path}}} =
+        live(conn, ~p"/moderation/users?name_or_email=MyUniqueTestUser")
+
+      assert path == ~p"/moderation/users/#{user.id}"
+    end
+
+    test "quick search lists the users when more than one is found", %{conn: conn} do
+      AccountFixtures.user_fixture(%{name: "QuickSearchPerson1"})
+      AccountFixtures.user_fixture(%{name: "QuickSearchPerson2"})
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users?name_or_email=QuickSearchPerson")
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      assert Enum.count(table.rows) == 2
+    end
+
+    test "search form does not jump when only one user is found", %{conn: conn} do
+      AccountFixtures.user_fixture(%{name: "MyUniqueTestUser"})
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users")
+
+      live
+      |> form("#user-search-form")
+      |> render_submit(%{"name" => "MyUniqueTestUser"})
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      assert Enum.count(table.rows) == 1
+    end
+
     test "with records", %{conn: conn} do
       AccountFixtures.user_fixture()
       AccountFixtures.user_fixture()

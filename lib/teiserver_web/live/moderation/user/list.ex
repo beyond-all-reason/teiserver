@@ -28,6 +28,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> get_users()
     |> get_user_count()
     |> generate_cmd_palette_commands()
+    |> maybe_redirect_to_single_user(params)
     |> ok()
   end
 
@@ -309,6 +310,21 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
     socket
     |> assign(user_count: user_count, page_count: page_count)
+  end
+
+  # The quick search in the header sends name_or_email as a url param, if it
+  # matches exactly one user we go straight to them. The search form on this
+  # page does not go through mount so it never redirects.
+  defp maybe_redirect_to_single_user(%Socket{assigns: assigns} = socket, params) do
+    quick_search = String.trim(params["name_or_email"] || "")
+
+    case assigns.users do
+      [user] when quick_search != "" and assigns.user_count <= 1 ->
+        redirect(socket, to: ~p"/moderation/users/#{user.id}")
+
+      _users ->
+        socket
+    end
   end
 
   defp maybe_load_user_stat(query, %{skip_user_stat?: true}), do: query
