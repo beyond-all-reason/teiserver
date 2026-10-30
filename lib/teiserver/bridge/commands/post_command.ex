@@ -80,7 +80,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
         "action" ->
           case Moderation.get_action(args.value) do
             nil ->
-              "No action with ID \"#{args.value}\" found"
+              %{content: "No action with ID \"#{args.value}\" found"}
 
             action ->
               channel_id =
@@ -99,7 +99,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
         "report" ->
           case Moderation.get_report(args.value, preload: [:reporter, :target]) do
             nil ->
-              "No report with ID \"#{args.value}\" found"
+              %{content: "No report with ID \"#{args.value}\" found"}
 
             report ->
               message =
@@ -139,7 +139,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
           case Account.get_user_by_name(name) do
             nil ->
-              "User \"#{name}\" not found"
+              %{content: "User \"#{name}\" not found"}
 
             user ->
               %{
