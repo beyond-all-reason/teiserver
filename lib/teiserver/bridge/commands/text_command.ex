@@ -73,10 +73,10 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
 
     case Communication.get_text_callback(text_option.value) do
       nil ->
-        Communication.new_interaction_response(
-          "That entry no longer exists, please run the command again.",
-          @ephemeral
-        )
+        Communication.new_interaction_response(%{
+          content: "That entry no longer exists, please run the command again.",
+          flags: @ephemeral
+        })
 
       text_callback ->
         if Communication.can_trigger_callback?(text_callback, interaction.channel_id) do
@@ -88,13 +88,13 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
           })
 
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
-
-          Communication.new_interaction_response(text_callback.response)
+          Communication.new_interaction_response(%{content: text_callback.response})
         else
-          Communication.new_interaction_response(
-            "Message not posted due to spam prevention. Give it a few minutes before trying again.",
-            @ephemeral
-          )
+          Communication.new_interaction_response(%{
+            content:
+              "Message not posted due to spam prevention. Give it a few minutes before trying again.",
+            flags: @ephemeral
+          })
         end
     end
   end

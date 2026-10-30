@@ -2,6 +2,7 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   @moduledoc """
   Calls the bot to post report or action in current channel
   """
+
   alias Teiserver.Account
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
@@ -9,6 +10,8 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
   alias Teiserver.Moderation.ActionLib
 
   @behaviour Teiserver.Bridge.BridgeCommandBehaviour
+
+  @ephemeral 64
 
   @impl Teiserver.Bridge.BridgeCommandBehaviour
   @spec name() :: String.t()
@@ -71,12 +74,12 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
     subcommand = Enum.at(interaction.data.options, 0)
     args = Enum.at(subcommand.options, 0)
 
-    content =
+    data =
       case subcommand.name do
         "action" ->
           case Moderation.get_action(args.value) do
             nil ->
-              "No action with ID \"#{args.value}\" found"
+              %{content: "No action with ID \"#{args.value}\" found"}
 
             action ->
               channel_id =
@@ -85,23 +88,49 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
                   channel -> channel.channel_id
                 end
 
-              ActionLib.generate_discord_message_text(action) <>
-                "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
+              message =
+                ActionLib.generate_discord_message_text(action) <>
+                  "\n**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{channel_id}/#{action.discord_message_id}"
+
+              %{content: message}
           end
 
         "report" ->
           case Moderation.get_report(args.value, preload: [:reporter, :target]) do
             nil ->
-              "No report with ID \"#{args.value}\" found"
+              %{content: "No report with ID \"#{args.value}\" found", flags: @ephemeral}
 
             report ->
-              DiscordBridgeBot.get_report_message(report)
-              |> List.delete_at(-1)
-              |> List.insert_at(
-                -1,
-                "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel_for_report_type(report.type)}/#{report.discord_message_id}"
-              )
-              |> Enum.join("\n")
+              message =
+                DiscordBridgeBot.get_report_message(report)
+                |> List.delete_at(-1)
+                |> List.insert_at(
+                  -1,
+                  "**Original:** https://discord.com/channels/#{Communication.get_guild_id()}/#{DiscordBridgeBot.get_channel_for_report_type(report.type)}/#{report.discord_message_id}"
+                )
+                |> Enum.join("\n")
+
+              components = [
+                %{
+                  type: 1,
+                  components: [
+                    %{
+                      type: 2,
+                      style: 1,
+                      label: "Post report",
+                      custom_id: "post_confirm"
+                    },
+                    %{
+                      type: 2,
+                      style: 4,
+                      label: "Cancel",
+                      custom_id: "post_cancel"
+                    }
+                  ]
+                }
+              ]
+
+              %{content: message, flags: @ephemeral, components: components}
           end
 
         "profile" ->
@@ -109,13 +138,28 @@ defmodule Teiserver.Bridge.Commands.PostCommand do
 
           case Account.get_user_by_name(name) do
             nil ->
-              "User \"#{name}\" not found"
+              %{content: "User \"#{name}\" not found"}
 
             user ->
-              "#{name}: https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
+              %{
+                content:
+                  "#{name}: https://#{Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]}/moderation/report/user/#{user.id}"
+              }
           end
       end
 
-    Communication.new_interaction_response(content)
+    Communication.new_interaction_response(data)
+  end
+
+  def post(interaction) do
+    Communication.respond_to_interaction(interaction, %{type: 6})
+
+    {:ok, message} = Communication.get_original_interaction_response(interaction)
+
+    Communication.delete_interaction_response(interaction)
+
+    Communication.create_interaction_followup_message(interaction.token, %{
+      content: message.content
+    })
   end
 end
