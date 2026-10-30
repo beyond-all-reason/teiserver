@@ -5,7 +5,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
   alias Nostrum.Api
   alias Nostrum.Api.ApplicationCommand
-  alias Nostrum.Api.Interaction
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Bridge.CommandLib
   alias Teiserver.Bridge.Commands.PostCommand
