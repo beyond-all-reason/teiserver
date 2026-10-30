@@ -88,8 +88,7 @@ defmodule Teiserver.Bridge.Commands.TextCommand do
           })
 
           Communication.set_last_triggered_time(text_callback, interaction.channel_id)
-
-          Communication.new_interaction_response(text_callback.response)
+          Communication.new_interaction_response(%{content: text_callback.response})
         else
           Communication.new_interaction_response(%{
             content:
