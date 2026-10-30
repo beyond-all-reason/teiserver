@@ -61,7 +61,7 @@ defmodule Teiserver.Bridge.Commands.FindreportsCommand do
         end
       end
 
-    Communication.new_interaction_response(%{content: content, flags: @ephemeral})
+    Communication.new_interaction_response(content, @ephemeral)
   end
 
   # Helper Functions
