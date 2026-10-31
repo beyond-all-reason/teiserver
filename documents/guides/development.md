@@ -75,6 +75,23 @@ You should first have a oauth token available, connecting for example with
 - Plaintext: `websocat -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" ws://localhost:4000/tachyon`
 - SSL: `websocat -k -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" wss://localhost:8888/tachyon`
 
+### Multi-node (Pure IEX)
+
+Teiserver can be launched on multiple nodes within the same box by running each of these commands in a separate terminal window.
+
+```sh
+# node1
+iex --sname node1@localhost -S mix phx.server
+
+# node2
+TEI_PORT=8889 TEI_HTTPS_PORT=8890 TEI_METRICS_SERVER_PORT=4003 TEI_SPRING_TCP_PORT=8220 TEI_SPRING_TLS_PORT=8221 TEI_ENABLE_EMAIL_INTEGRATION=false iex --sname node2@localhost -S mix app.start
+
+# node3
+TEI_PORT=8891 TEI_HTTPS_PORT=8892 TEI_METRICS_SERVER_PORT=4004 TEI_SPRING_TCP_PORT=8222 TEI_SPRING_TLS_PORT=8223 TEI_ENABLE_EMAIL_INTEGRATION=false iex --sname node3@localhost -S mix app.start
+```
+
+You can then access each website at http://localhost:4000, http://localhost:8889 and http://localhost:8891.
+
 ## Configuration
 
 Most of the configuration takes place in [config/config.exs](config/config.exs),
