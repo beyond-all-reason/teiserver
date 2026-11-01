@@ -71,6 +71,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           algo: algo(),
           engines: [%{version: String.t()}],
           games: [%{spring_game: String.t()}],
+          queue_id_for_maps: id(),
           maps: [Teiserver.Asset.Map.t()],
           version: String.t()
         }
@@ -118,7 +119,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           required(:name) => String.t(),
           required(:team_size) => pos_integer(),
           required(:team_count) => pos_integer(),
-          required(:maps) => [Teiserver.Asset.Map.t()],
+          optional(:queue_id_for_maps) => id(),
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
           optional(:algo) => :ignore_os | :bruteforce_filter
@@ -140,7 +141,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         team_count: attrs.team_count,
         algo: {alg_module, alg_state},
         ranked: true,
-        maps: attrs.maps
+        queue_id_for_maps: Map.get(attrs, :queue_id_for_maps, attrs.id)
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -261,6 +262,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
     engines = get_engines()
     games = get_games()
+    maps = Asset.get_maps_for_queue(state.queue.queue_id_for_maps)
 
     if state.settings.tick_interval_ms != :manual do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
@@ -270,14 +272,10 @@ defmodule Teiserver.Matchmaking.QueueServer do
       state
       |> put_in([:queue, :engines], engines)
       |> put_in([:queue, :games], games)
-      |> put_in([:queue, :version], compute_version(engines, games, state.queue.maps))
+      |> put_in([:queue, :maps], maps)
+      |> put_in([:queue, :version], compute_version(engines, games, maps))
 
-    QueueRegistry.update_value(state.id, fn old ->
-      old
-      |> Map.put(:engines, engines)
-      |> Map.put(:games, games)
-      |> Map.put(:version, state.queue.version)
-    end)
+    QueueRegistry.update_value(state.id, fn _old -> state.queue end)
 
     {:ok, state}
   end

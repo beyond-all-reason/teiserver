@@ -11,7 +11,7 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
 
   def queue_attrs(overrides \\ %{}) do
     id = UUID.uuid4()
-    map = id |> stg_attr() |> AssetFixtures.create_map()
+    id |> stg_attr() |> AssetFixtures.create_map()
     ensure_mm_engine()
     ensure_mm_game()
 
@@ -20,7 +20,6 @@ defmodule Teiserver.Support.Tachyon.Matchmaking do
       name: id,
       team_size: 1,
       team_count: 2,
-      maps: [map],
       algo: :ignore_os
     }
 
