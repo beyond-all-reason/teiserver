@@ -12,11 +12,10 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   setup _context do
     user = mk_user()
-    %{state: initial_state, id: id, pid: pid} = SupportMM.start_queue()
+    %{state: initial_state, id: id, pid: pid, version: version} = SupportMM.start_queue()
     map = List.first(initial_state.queue.maps)
 
-    {:ok,
-     user: user, queue_id: id, queue_pid: pid, version: initial_state.queue.version, map: map}
+    {:ok, user: user, queue_id: id, queue_pid: pid, version: version, map: map}
   end
 
   describe "listing" do
