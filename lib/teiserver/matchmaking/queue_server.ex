@@ -469,6 +469,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
           state
 
         {:match, matches} ->
+          :telemetry.execute([:matchmaking, :match], %{count: length(matches)}, %{id: state.id})
+
           {pairings, monitors} =
             Enum.reduce(matches, {[], state.monitors}, fn teams, {ts, monitors} ->
               {:ok, pid} =
@@ -478,6 +480,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
                 for team <- teams, member <- team, player_id <- member.player_ids do
                   player_id
                 end
+
+              now = DateTime.utc_now()
+
+              for team <- teams, member <- team do
+                wait_s = DateTime.diff(now, member.joined_at)
+                # to avoid too many metrics, clamp rating by bands of 10
+                rating_bracket = (member.rating.skill |> trunc() |> div(10)) * 10
+
+                :telemetry.execute([:matchmaking, :wait_time], %{wait_s: wait_s}, %{
+                  rating: rating_bracket,
+                  id: state.id
+                })
+              end
 
               monitors = MC.monitor(monitors, pid, {:room, pid, player_ids})
 
@@ -685,5 +700,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
     player_count = calculate_player_count(state)
     stats = Map.put(state.stats, :player_count, player_count)
     Matchmaking.broadcast_queue_update(state.id, stats)
+    :telemetry.execute([:matchmaking, :queue_size], %{count: player_count}, %{id: state.id})
   end
 end
