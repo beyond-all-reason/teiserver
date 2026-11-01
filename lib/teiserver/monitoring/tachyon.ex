@@ -17,8 +17,7 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   @impl PromEx.Plugin
   def event_metrics(_opts) do
-    Event.build(
-      :teiserver_tachyon_event_metrics,
+    transport_events =
       [
         distribution(
           [:teiserver, :tachyon, :request, :duration],
@@ -36,17 +35,6 @@ defmodule Teiserver.Monitoring.Tachyon do
           reporter_options: [
             buckets: @duration_buckets
           ]
-        ),
-        counter(
-          [:teiserver, :tachyon, :login, :ok],
-          event_name: [:tachyon, :login, :ok],
-          measurement: :count
-        ),
-        counter(
-          [:teiserver, :tachyon, :login, :error],
-          event_name: [:tachyon, :login, :error],
-          measurement: :count,
-          tags: [:reason]
         ),
         counter(
           [:teiserver, :tachyon, :disconnect],
@@ -73,6 +61,24 @@ defmodule Teiserver.Monitoring.Tachyon do
           tags: [:command_id]
         )
       ]
+
+    login_events = [
+      counter(
+        [:teiserver, :tachyon, :login, :ok],
+        event_name: [:tachyon, :login, :ok],
+        measurement: :count
+      ),
+      counter(
+        [:teiserver, :tachyon, :login, :error],
+        event_name: [:tachyon, :login, :error],
+        measurement: :count,
+        tags: [:reason]
+      )
+    ]
+
+    Event.build(
+      :teiserver_tachyon_event_metrics,
+      transport_events ++ login_events
     )
   end
 
