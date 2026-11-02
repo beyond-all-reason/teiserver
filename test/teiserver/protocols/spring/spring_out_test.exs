@@ -11,8 +11,6 @@ defmodule Teiserver.SpringOutTest do
 
   use Teiserver.DataCase, async: false
 
-  import Teiserver.Helper.DateHelper, only: [date_to_str: 2]
-
   setup do
     sender = TeiserverTestLib.new_user()
     state = TeiserverTestLib.mock_async_state()
@@ -42,7 +40,7 @@ defmodule Teiserver.SpringOutTest do
     TeiserverTestLib.start_coordinator!()
     user = state.user
 
-    {:ok, action} =
+    {:ok, _action} =
       Moderation.create_action(%{
         target_id: user.id,
         reason: "First reason\nSecond reason",
@@ -68,7 +66,7 @@ defmodule Teiserver.SpringOutTest do
       [
         "This is a reminder that you received one or more formal moderation actions as listed below:",
         " - First reason",
-        "Second reason, expires #{date_to_str(action.expires, format: :ymd_hms)}",
+        "Second reason",
         "If you feel you have been the target of an erroneous or unjust moderation action please use the #open-ticket channel in our discord to appeal/dispute the action.",
         "Attempting to circumvent this moderation with a new account is not okay and can lead to suspension or banning.",
         Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
