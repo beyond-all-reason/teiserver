@@ -138,7 +138,6 @@
 
   # Added with OTP-28 migration
   {"test/support/teiserver_test_lib.ex", :call},
-  {"test/support/tachyon/matchmaking.ex", :call_without_opaque},
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :call_without_opaque},
   {"lib/teiserver/account/reports/growth_report.ex", :invalid_contract},
   {"lib/teiserver/account/servers/login_throttle_server.ex", :contract_with_opaque},
@@ -155,7 +154,6 @@
   {"lib/teiserver/lobby/libs/lobby_lib.ex", :invalid_contract},
   {"lib/teiserver/lobby/servers/lobby_server.ex", :invalid_contract},
   {"lib/teiserver/logging/tasks/aggregate_logs_task.ex", :invalid_contract},
-  {"lib/teiserver/matchmaking/queue_server.ex", :contract_with_opaque},
   {"lib/teiserver/mix_tasks/fake_data.ex", :invalid_contract},
   {"lib/teiserver/mix_tasks/fake_data.ex", :call_without_opaque},
   {"lib/teiserver/mix_tasks/seasonal_uncertainty_reset_task.ex", :call_without_opaque},

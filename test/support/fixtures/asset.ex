@@ -13,7 +13,11 @@ defmodule Teiserver.AssetFixtures do
     %Engine{} |> Engine.changeset(attrs) |> Repo.insert!()
   end
 
+  def drop_engines, do: Repo.delete_all(Engine)
+
   def create_game(attrs) do
     %Game{} |> Game.changeset(attrs) |> Repo.insert!()
   end
+
+  def drop_games, do: Repo.delete_all(Game)
 end

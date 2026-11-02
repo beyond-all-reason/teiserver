@@ -9,6 +9,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
 
   alias Teiserver.Account.User
+  alias Teiserver.Asset
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
@@ -27,12 +28,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type id :: String.t()
 
   # Internal queue statistics (without player_count)
-  @typep internal_stats :: %{
-           total_joined: non_neg_integer(),
-           total_left: non_neg_integer(),
-           total_wait_time_s: non_neg_integer(),
-           total_matched: non_neg_integer()
-         }
+  @type internal_stats :: %{
+          total_joined: non_neg_integer(),
+          total_left: non_neg_integer(),
+          total_wait_time_s: non_neg_integer(),
+          total_matched: non_neg_integer()
+        }
   @typedoc """
   Queue statistics for monitoring (includes player_count)
   """
@@ -60,7 +61,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type algo :: {module(), term()}
 
   @typedoc """
-  immutable specification of the queue
+  specification of the queue
   """
   @type queue :: %{
           name: String.t(),
@@ -70,6 +71,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           algo: algo(),
           engines: [%{version: String.t()}],
           games: [%{spring_game: String.t()}],
+          queue_id_for_maps: id(),
           maps: [Teiserver.Asset.Map.t()],
           version: String.t()
         }
@@ -117,13 +119,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
           required(:name) => String.t(),
           required(:team_size) => pos_integer(),
           required(:team_count) => pos_integer(),
-          required(:engines) => [%{version: String.t()}],
-          required(:games) => [%{spring_game: String.t()}],
-          required(:maps) => [Teiserver.Asset.Map.t()],
+          optional(:queue_id_for_maps) => id(),
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
           optional(:algo) => :ignore_os | :bruteforce_filter
-        }) :: state()
+        }) :: term()
   def init_state(attrs) do
     alg_module =
       case Map.get(attrs, :algo, :ignore_os) do
@@ -141,10 +141,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         team_count: attrs.team_count,
         algo: {alg_module, alg_state},
         ranked: true,
-        engines: attrs.engines,
-        games: attrs.games,
-        maps: attrs.maps,
-        version: compute_version(attrs.engines, attrs.games, attrs.maps)
+        queue_id_for_maps: Map.get(attrs, :queue_id_for_maps, attrs.id)
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -263,11 +260,38 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
+    engines = get_engines()
+    games = get_games()
+    maps = Asset.get_maps_for_queue(state.queue.queue_id_for_maps)
+
     if state.settings.tick_interval_ms != :manual do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
     end
 
+    state =
+      state
+      |> put_in([:queue, :engines], engines)
+      |> put_in([:queue, :games], games)
+      |> put_in([:queue, :maps], maps)
+      |> put_in([:queue, :version], compute_version(engines, games, maps))
+
+    QueueRegistry.update_value(state.id, fn _old -> state.queue end)
+
     {:ok, state}
+  end
+
+  defp get_engines do
+    case Asset.get_engine(in_matchmaking: true) do
+      nil -> []
+      e -> [%{version: e.name}]
+    end
+  end
+
+  defp get_games do
+    case Asset.get_game(in_matchmaking: true) do
+      nil -> []
+      g -> [%{spring_game: g.name}]
+    end
   end
 
   @impl GenServer

@@ -1,4 +1,5 @@
 defmodule Teiserver.Matchmaking.QueueTest do
+  alias Teiserver.Asset
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.PairingRoom
@@ -12,11 +13,10 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   setup _context do
     user = mk_user()
-    %{state: initial_state, id: id, pid: pid} = SupportMM.start_queue()
-    map = List.first(initial_state.queue.maps)
+    %{id: id, pid: pid, version: version} = SupportMM.start_queue()
+    %Asset.Map{} = map = Asset.get_maps_for_queue(id) |> List.first()
 
-    {:ok,
-     user: user, queue_id: id, queue_pid: pid, version: initial_state.queue.version, map: map}
+    {:ok, user: user, queue_id: id, queue_pid: pid, version: version, map: map}
   end
 
   describe "listing" do

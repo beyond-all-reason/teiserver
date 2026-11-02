@@ -3,7 +3,6 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
   cluster wide supervisor for all matchmaking queues
   """
 
-  alias Teiserver.Asset
   alias Teiserver.Matchmaking.Config
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
@@ -11,16 +10,13 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
 
   use DynamicSupervisor
 
-  def default_queues(engines, games) do
+  def default_queues do
     [
       QueueServer.init_state(%{
         id: "1v1",
         name: "Duel",
         team_size: 1,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("1v1"),
         algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
@@ -28,9 +24,6 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         name: "2v2",
         team_size: 2,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("2v2"),
         algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
@@ -38,9 +31,6 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         name: "3v3",
         team_size: 3,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("3v3"),
         algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
@@ -48,9 +38,6 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         name: "4v4",
         team_size: 4,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("4v4"),
         algo: :bruteforce_filter
       }),
       QueueServer.init_state(%{
@@ -58,46 +45,29 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
         name: "5v5",
         team_size: 5,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("5v5"),
         algo: :bruteforce_filter
       })
     ]
   end
 
-  def test_queues(engines, games) do
+  def test_queues do
     [
       QueueServer.init_state(%{
         id: "test-1v1",
         name: "Test 1v1",
         team_size: 1,
         team_count: 2,
-        engines: engines,
-        games: games,
-        maps: Asset.get_maps_for_queue("1v1"),
+        queue_id_for_maps: "1v1",
         algo: :ignore_os
       })
     ]
   end
 
   def get_queues do
-    engines =
-      case Asset.get_engine(in_matchmaking: true) do
-        nil -> []
-        e -> [%{version: e.name}]
-      end
-
-    games =
-      case Asset.get_game(in_matchmaking: true) do
-        nil -> []
-        g -> [%{spring_game: g.name}]
-      end
-
     if Config.test_queues_enabled?() do
-      default_queues(engines, games) ++ test_queues(engines, games)
+      default_queues() ++ test_queues()
     else
-      default_queues(engines, games)
+      default_queues()
     end
   end
 
