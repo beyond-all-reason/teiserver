@@ -17,8 +17,7 @@ defmodule Teiserver.Monitoring.Tachyon do
 
   @impl PromEx.Plugin
   def event_metrics(_opts) do
-    Event.build(
-      :teiserver_tachyon_event_metrics,
+    transport_events =
       [
         distribution(
           [:teiserver, :tachyon, :request, :duration],
@@ -36,17 +35,6 @@ defmodule Teiserver.Monitoring.Tachyon do
           reporter_options: [
             buckets: @duration_buckets
           ]
-        ),
-        counter(
-          [:teiserver, :tachyon, :login, :ok],
-          event_name: [:tachyon, :login, :ok],
-          measurement: :count
-        ),
-        counter(
-          [:teiserver, :tachyon, :login, :error],
-          event_name: [:tachyon, :login, :error],
-          measurement: :count,
-          tags: [:reason]
         ),
         counter(
           [:teiserver, :tachyon, :disconnect],
@@ -73,6 +61,65 @@ defmodule Teiserver.Monitoring.Tachyon do
           tags: [:command_id]
         )
       ]
+
+    login_events = [
+      counter(
+        [:teiserver, :tachyon, :login, :ok],
+        event_name: [:tachyon, :login, :ok],
+        measurement: :count
+      ),
+      counter(
+        [:teiserver, :tachyon, :login, :error],
+        event_name: [:tachyon, :login, :error],
+        measurement: :count,
+        tags: [:reason]
+      )
+    ]
+
+    matchmaking_events = [
+      sum(
+        [:teiserver, :matchmaking, :match],
+        event_name: [:matchmaking, :match],
+        measurement: :count,
+        tags: [:id],
+        description: "successful pairing made"
+      ),
+      distribution(
+        [:teiserver, :matchmaking, :wait_time],
+        event_name: [:matchmaking, :wait_time],
+        measurement: :wait_s,
+        reporter_options: [
+          buckets: [5, 10, 15, 30, 60, 180, 300, 600, 1200]
+        ],
+        tags: [:id, :rating],
+        description: "how long a paired member spent in queue before being matched"
+      ),
+      last_value(
+        [:teiserver, :matchmaking, :queue_size],
+        event_name: [:matchmaking, :queue_size],
+        measurement: :count,
+        tags: [:id],
+        description: "how many players in the queue"
+      ),
+      last_value(
+        [:teiserver, :matchmaking, :total_joined],
+        event_name: [:matchmaking, :total_joined],
+        measurement: :count,
+        tags: [:id],
+        description: "how many players joined the queue"
+      ),
+      last_value(
+        [:teiserver, :matchmaking, :total_left],
+        event_name: [:matchmaking, :total_left],
+        measurement: :count,
+        tags: [:id],
+        description: "how many players left the queue"
+      )
+    ]
+
+    Event.build(
+      :teiserver_tachyon_event_metrics,
+      transport_events ++ login_events ++ matchmaking_events
     )
   end
 
