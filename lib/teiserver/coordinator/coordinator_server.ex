@@ -274,10 +274,15 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           end)
           |> Enum.map(fn action ->
             expires =
-              if action.expires do
-                ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
-              else
-                ""
+              cond do
+                action.restrictions == ["Warning reminder"] ->
+                  ""
+
+                action.expires ->
+                  ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
+
+                true ->
+                  ""
               end
 
             " - #{action.reason}#{expires}"
