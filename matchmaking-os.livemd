@@ -36,10 +36,10 @@ alg_module = Algo.BruteforceFilter
 
 ```elixir
 gen_rating = fn() ->
-  rating = Statistics.Distributions.Normal.rand(mu, sigma)
+  skill = Statistics.Distributions.Normal.rand(mu, sigma)
   # completely arbitrary
   uncertainty = :rand.uniform() * (7.0 - 2.0) + 2.0
-  %{rating: rating, uncertainty: uncertainty}
+  %{skill: skill, uncertainty: uncertainty}
 end
 
 gen_player = fn(p_id) ->
@@ -51,7 +51,7 @@ gen_player = fn(p_id) ->
   }
 end
 
-game_type = Teiserver.Battle.MatchLib.game_type(team_size, team_count)
+# game_type = Teiserver.Battle.MatchLib.game_type(team_size, team_count)
 
 # eyeballing the graphs of matches, there are roughly, per day
 # 650 duels
@@ -103,8 +103,9 @@ match_stream =
     |> Stream.with_index()
     |> Stream.transform([], fn {members, tick}, members_in_queue ->
     members_in_queue = members_in_queue ++ members
+    env = Algo.Env.default_env()
 
-    result = apply(alg_module, :get_matches, [members_in_queue, alg_st])  
+    result = apply(alg_module, :get_matches, [members_in_queue, alg_st, env])  
       
     case result do
       :no_match ->
@@ -117,7 +118,7 @@ match_stream =
             ratings =
               for team <- match do
                 Enum.map(team, fn m ->
-                  {m.rating.rating, m.rating.uncertainty}
+                  {m.rating.skill, m.rating.uncertainty}
                 end)
               end
 
@@ -154,7 +155,7 @@ data = match_stream
   |> Enum.map(&Map.from_struct/1)
   |> Enum.map(fn m ->
     m
-    |> Map.put(:skill, m.rating.rating)
+    |> Map.put(:skill, m.rating.skill)
     |> Map.put(:display_win_proba, Float.round(m.win_proba, 2))
   end)
 
@@ -175,7 +176,7 @@ Vl.new(width: 700)
 Enum.each(match_stream, fn match ->
   for team <- match do
     for member <- team do
-      Float.round(member.rating.rating, 2)
+      Float.round(member.rating.skill, 2)
     end
   end
   |> IO.inspect()

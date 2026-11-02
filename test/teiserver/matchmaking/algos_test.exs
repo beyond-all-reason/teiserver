@@ -10,9 +10,10 @@ defmodule Teiserver.Matchmaking.AlgosTest do
     IgnoreOs.get_matches(members, st, Env.default_env())
   end
 
-  def brutefore_filter(members, team_size, team_count) do
+  def brutefore_filter(members, team_size, team_count, env \\ nil) do
     st = BruteforceFilter.init(team_size, team_count)
-    BruteforceFilter.get_matches(members, st, Env.default_env())
+    env = env || Env.default_env()
+    BruteforceFilter.get_matches(members, st, env)
   end
 
   describe "ignore OS" do
@@ -87,6 +88,25 @@ defmodule Teiserver.Matchmaking.AlgosTest do
       assert {:match, [match]} = brutefore_filter(members, 1, 2)
       matched_ids = for team <- match, member <- team, p_id <- member.player_ids, do: p_id
       assert MapSet.new(matched_ids) == MapSet.new([1, 3])
+    end
+
+    test "take into account how long a member has been in queue" do
+      members = [mk_member(1, 10), mk_member(2, 20)]
+      assert :no_match = brutefore_filter(members, 1, 2)
+
+      env = %Env{now: DateTime.utc_now() |> DateTime.shift(second: 30)}
+      assert {:match, [_match]} = brutefore_filter(members, 1, 2, env)
+    end
+
+    test "both members should have waited long enough" do
+      members = [
+        # only member 1 has been waiting for some time
+        mk_member(1, 10)
+        |> Map.put(:joined_at, DateTime.utc_now() |> DateTime.shift(second: -30)),
+        mk_member(2, 20)
+      ]
+
+      assert :no_match = brutefore_filter(members, 1, 2)
     end
   end
 
