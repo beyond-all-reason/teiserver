@@ -131,7 +131,7 @@ defmodule Teiserver.MixProject do
       {:mdex, "~> 0.14.2"},
       {:ranch, "~> 1.8"},
       {:etop, "~> 0.7.0"},
-      {:json_xema, "~> 0.3"},
+      {:jsv, "~> 0.26"},
       {:nostrum, "~> 0.10.4"},
       {:decorator, "~> 1.2"},
 

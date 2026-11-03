@@ -24,6 +24,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias TeiserverWeb.Tachyon.Versioning
 
   require Logger
 
@@ -37,10 +38,12 @@ defmodule Teiserver.Player.TachyonHandler do
   @type state ::
           %{
             user: User.t(),
+            version: Versioning.version(),
             status: :waiting
           }
           | %{
               user: User.t(),
+              version: Versioning.version(),
               status: :admitted,
               sess_monitor: reference(),
               pending_responses: Handler.pending_responses()
@@ -53,7 +56,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
     with addr when is_list(addr) <- :inet.ntoa(conn.remote_ip),
          {:ok, user} <- Login.tachyon_login(user, to_string(addr), lobby_client) do
-      {:ok, %{user: user}}
+      {:ok, %{user: user, version: conn.assigns.tachyon_version}}
     else
       {:error, :einval} ->
         {:error, 404, "Invalid remote address"}
@@ -67,7 +70,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  @spec init(%{user: User.t()}) :: Handler.result()
+  @spec init(%{user: User.t(), version: Versioning.version()}) :: Handler.result()
   def init(initial_state) do
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))

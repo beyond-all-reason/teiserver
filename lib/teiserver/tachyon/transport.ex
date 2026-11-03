@@ -8,6 +8,7 @@ defmodule Teiserver.Tachyon.Transport do
   alias Teiserver.Helpers.BurstyRateLimiter
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
+  alias TeiserverWeb.Tachyon.Versioning
 
   require Logger
 
@@ -16,6 +17,7 @@ defmodule Teiserver.Tachyon.Transport do
   @type connection_state() :: %{
           handler: term(),
           handler_state: term(),
+          version: Versioning.version(),
           rate_limiter: BurstyRateLimiter.t() | nil,
           pending_responses: Handler.pending_responses()
         }
@@ -207,7 +209,9 @@ defmodule Teiserver.Tachyon.Transport do
         ) ::
           WebSock.handle_result()
   def handle_command(command_id, message_type, message_id, message, state) do
-    case Schema.parse_message(command_id, message_type, message) do
+    {major_version, _minor_version} = state.version
+
+    case Schema.parse_message(major_version, command_id, message_type, message) do
       :ok ->
         do_handle_command(command_id, message_type, message_id, message, state)
 
@@ -218,7 +222,7 @@ defmodule Teiserver.Tachyon.Transport do
 
         {:reply, :ok, {:text, resp}, state}
 
-      {:error, %JsonXema.ValidationError{} = err} ->
+      {:error, %JSV.ValidationError{} = err} ->
         resp =
           Schema.error_response(command_id, message_id, :invalid_request, inspect(err))
           |> Jason.encode!()
