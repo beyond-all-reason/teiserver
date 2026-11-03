@@ -85,5 +85,6 @@ defmodule Teiserver.Bridge.Commands.LinkCommand do
     end
   end
 
-  defp respond(message), do: Communication.new_interaction_response(message, @ephemeral)
+  defp respond(message),
+    do: Communication.new_interaction_response(%{content: message, flags: @ephemeral})
 end
