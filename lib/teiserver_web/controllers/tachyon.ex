@@ -35,8 +35,6 @@ defmodule TeiserverWeb.TachyonController do
             do: handler.init_rate_limiter(state),
             else: nil
 
-        state = %{state | version: version}
-
         conn_state = %{
           handler_state: state,
           handler: handler,

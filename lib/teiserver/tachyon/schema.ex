@@ -95,7 +95,7 @@ defmodule Teiserver.Tachyon.Schema do
         {:ok, json}
       else
         {:error, :enoent} -> {:missing_schema, command_id, type}
-        {:error, err} -> {:error, err}
+        {:error, error} -> {:error, error}
       end
     end
   end
@@ -107,16 +107,16 @@ defmodule Teiserver.Tachyon.Schema do
           {:ok, json} ->
             JSV.build(json, resolver: [{SchemaResolver, major_version: major_version}])
 
-          {:missing_schema, _, _} = missing ->
+          {:missing_schema, _command_id, _type} = missing ->
             {:error, missing}
 
-          {:error, _} = err ->
-            err
+          {:error, _error} = error ->
+            error
         end
       end)
 
     case result do
-      {:error, {:missing_schema, _, _} = missing} -> missing
+      {:error, {:missing_schema, _command_id, _type} = missing} -> missing
       other -> other
     end
   end
