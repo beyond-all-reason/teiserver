@@ -32,7 +32,6 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()

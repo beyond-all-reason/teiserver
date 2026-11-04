@@ -28,7 +28,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
     socket =
       socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, Lobby.colours())
