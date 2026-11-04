@@ -1,58 +1,35 @@
 defmodule Teiserver.Account.RetentionReport do
   @moduledoc false
-  alias Teiserver.Account
-  alias Teiserver.Helper.DateHelper
-  alias Teiserver.Helper.DatePresets
+  alias Ecto.Type
+  alias Teiserver.Account.UserQueries
   alias Teiserver.Logging
+  alias Teiserver.Repo
 
-  @spec icon() :: String.t()
-  def icon, do: "fa-solid fa-campground"
+@spec build_chart(Date.t(), Date.t(), binary() | boolean()) :: tuple()
+  def build_chart(start_date, end_date, skip0) do
 
-  @spec permissions() :: String.t()
-  def permissions, do: "Moderator"
+    skip0 = maybe_cast_boolean(skip0)
+    registered_after = DateTime.new!(start_date, ~T"00:00:00")
+    registered_before = DateTime.new!(end_date, ~T"00:00:00")
+    range_length =
+      Date.range(start_date, end_date) |> Enum.count()
 
-  @max_key 30
-
-  @doc """
-  Gets a list of players that:
-    - Have logged in
-    - Are verified
-    - Registered within a certain date range
-    - Have played at least once
-  and splits them into groups of how long after they registered they last played
-  """
-  @spec run(Plug.Conn.t(), map()) :: map()
-  def run(_conn, params) do
-    params = apply_defaults(params)
-    skip0 = params["skip0"] == "true"
-
-    # Date range
-    {start_date, _end_date} =
-      DatePresets.parse(
-        params["date_preset"],
-        params["start_date"],
-        params["end_date"]
-      )
-
-    start_datetime = DateHelper.to_datetime(start_date)
+    range_length = range_length - 1
 
     day_logs =
       Logging.list_user_activity_day_logs(
-        search: [start_date: start_date],
+        search: [start_date: start_date, end_date: end_date],
         order: "Newest first",
         limit: :infinity
       )
 
-    # Get the accounts then calculate their last played time
     accounts =
-      Account.list_users(
-        search: [
-          inserted_after: start_datetime,
-          has_logged_in: true,
-          has_role: "Verified"
-        ],
-        limit: :infinity
-      )
+      UserQueries.users()
+      |> UserQueries.where_has_role("Verified")
+      |> UserQueries.where_registered_before(registered_before)
+      |> UserQueries.where_registered_after(registered_after)
+      |> UserQueries.where_logged_in_before(DateTime.utc_now())
+      |> Repo.all()
       |> Enum.map(fn user ->
         last_login = user.last_login
 
@@ -121,35 +98,33 @@ defmodule Teiserver.Account.RetentionReport do
         play_retention_grouping
       end
 
-    graph_data = [
-      ["Login" | build_line(login_retention)],
-      ["Play" | build_line(play_retention_grouping)]
-    ]
-
-    %{
-      params: params,
-      presets: DatePresets.long_ranges(),
-      user_count: Enum.count(accounts),
-      play_retention_grouping: play_retention_grouping,
-      max_key: @max_key,
-      graph_data: graph_data
-    }
+    chart =
+      LiveCharts.build(%{
+        id: "retention_report",
+        type: :line,
+        series: [%{name: "Login", data: build_line(login_retention, range_length)},
+        %{name: "Play", data: build_line(play_retention_grouping, range_length)}],
+        options: %{
+          xaxis: %{
+            categories: Date.range(start_date, end_date) |> Enum.to_list()
+          }
+        },
+        adapter: LiveCharts.Adapter.ApexCharts
+      })
+      {chart, Enum.count(accounts)}
   end
 
-  @spec build_line(map()) :: list()
-  defp build_line(value_map) do
-    for key <- Range.new(0, @max_key), do: Map.get(value_map, key, 0)
+  defp maybe_cast_boolean(boolean) when is_binary(boolean) do
+   case Type.cast(:boolean, boolean) do
+     {:ok, value} ->
+      value
+    {:error, _reason} ->
+      true
+   end
   end
+  defp maybe_cast_boolean(boolean) when is_boolean(boolean), do: boolean
 
-  defp apply_defaults(params) do
-    Map.merge(
-      %{
-        "date_preset" => "Last 3 months",
-        "start_date" => "",
-        "end_date" => "",
-        "skip0" => "true"
-      },
-      Map.get(params, "report", %{})
-    )
+  defp build_line(value_map, max_key) do
+    for key <- Range.new(0, max_key), do: Map.get(value_map, key, 0)
   end
 end
