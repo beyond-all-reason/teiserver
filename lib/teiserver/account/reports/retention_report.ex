@@ -5,12 +5,12 @@ defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.Logging
   alias Teiserver.Repo
 
-@spec build_chart(Date.t(), Date.t(), binary() | boolean()) :: tuple()
+  @spec build_chart(Date.t(), Date.t(), binary() | boolean()) :: tuple()
   def build_chart(start_date, end_date, skip0) do
-
     skip0 = maybe_cast_boolean(skip0)
     registered_after = DateTime.new!(start_date, ~T"00:00:00")
     registered_before = DateTime.new!(end_date, ~T"00:00:00")
+
     range_length =
       Date.range(start_date, end_date) |> Enum.count()
 
@@ -102,8 +102,10 @@ defmodule Teiserver.Account.RetentionReport do
       LiveCharts.build(%{
         id: "retention_report",
         type: :line,
-        series: [%{name: "Login", data: build_line(login_retention, range_length)},
-        %{name: "Play", data: build_line(play_retention_grouping, range_length)}],
+        series: [
+          %{name: "Login", data: build_line(login_retention, range_length)},
+          %{name: "Play", data: build_line(play_retention_grouping, range_length)}
+        ],
         options: %{
           xaxis: %{
             categories: Date.range(start_date, end_date) |> Enum.to_list()
@@ -111,17 +113,20 @@ defmodule Teiserver.Account.RetentionReport do
         },
         adapter: LiveCharts.Adapter.ApexCharts
       })
-      {chart, Enum.count(accounts)}
+
+    {chart, Enum.count(accounts)}
   end
 
   defp maybe_cast_boolean(boolean) when is_binary(boolean) do
-   case Type.cast(:boolean, boolean) do
-     {:ok, value} ->
-      value
-    {:error, _reason} ->
-      true
-   end
+    case Type.cast(:boolean, boolean) do
+      {:ok, value} ->
+        value
+
+      {:error, _reason} ->
+        true
+    end
   end
+
   defp maybe_cast_boolean(boolean) when is_boolean(boolean), do: boolean
 
   defp build_line(value_map, max_key) do
