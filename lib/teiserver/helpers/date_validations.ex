@@ -98,7 +98,7 @@ defmodule Teiserver.Helpers.DateValidations do
   defp valid_date?(_value), do: false
 
   defp valid_dates?(%Date{}, %Date{}), do: true
-  defp valid_dates?(_value, _value), do: false
+  defp valid_dates?(_value1, _value2), do: false
 
   defp parse_max_range(days) do
     case Integer.parse(days) do
