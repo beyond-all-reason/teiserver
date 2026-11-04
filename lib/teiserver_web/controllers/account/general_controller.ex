@@ -7,8 +7,6 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   use TeiserverWeb, :controller
 
-  plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
-
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
     sub_menu_active: "account"
@@ -25,7 +23,6 @@ defmodule TeiserverWeb.Account.GeneralController do
 
     if AuthLib.need_to_mfa_refresh?(user.id) do
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/details")
       |> render("mfa_refresh.html")
@@ -33,7 +30,6 @@ defmodule TeiserverWeb.Account.GeneralController do
       changeset = Account.change_user(user)
 
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:changeset, changeset)
       |> assign(:user, user)
       |> render("edit_details.html")
@@ -46,7 +42,6 @@ defmodule TeiserverWeb.Account.GeneralController do
 
     if AuthLib.need_to_mfa_refresh?(user.id) do
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/details")
       |> render("mfa_refresh.html")
