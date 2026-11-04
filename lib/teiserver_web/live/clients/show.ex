@@ -34,7 +34,7 @@ defmodule TeiserverWeb.ClientLive.Show do
 
     socket =
       socket
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: "/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:current_client, current_client)
       |> assign(:site_menu_active, "teiserver_user")
