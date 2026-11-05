@@ -5,8 +5,6 @@ defmodule Teiserver.Tachyon.Schema do
   alias Teiserver.Helpers.CacheHelper
   alias Teiserver.Tachyon.SchemaResolver
 
-  require Logger
-
   @type command_id :: String.t()
   @type message_id :: String.t()
   @type message_type :: String.t()
