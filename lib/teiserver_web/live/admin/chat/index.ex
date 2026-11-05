@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Admin.ChatLive.Index do
           |> assign(:view_colour, SpringLobbyMessageLib.colours())
           |> assign(:messages, [])
           |> assign(:usernames, %{})
-          |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+          |> add_breadcrumb(name: "Admin", url: "/admin")
           |> add_breadcrumb(name: "Chat", url: "/admin/chat")
           |> default_filters()
           |> assign(:searching, false)

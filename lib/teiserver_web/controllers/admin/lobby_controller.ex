@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Admin", url: "/admin")
   plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @page_size 500

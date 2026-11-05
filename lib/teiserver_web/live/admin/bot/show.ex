@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.BotLive.Show do
   def mount(_params, _session, socket) do
     socket =
       socket
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: "/admin")
       |> add_breadcrumb(name: "Bots", url: "/teiserver/admin/bot")
       |> assign(:client_secret, nil)
 

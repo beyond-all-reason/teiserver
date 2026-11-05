@@ -47,7 +47,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     socket =
       socket
       |> ServerUserPlug.live_call()
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:friends, friends)
       |> assign(:ignored, ignored)

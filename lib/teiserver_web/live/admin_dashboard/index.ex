@@ -35,7 +35,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: "/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, AdminLib.colours())

@@ -36,7 +36,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Admin", url: "/admin")
   plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()

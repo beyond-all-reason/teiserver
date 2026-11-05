@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.BotLive.Index do
 
     socket =
       socket
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: "/admin")
       |> add_breadcrumb(name: "Bots", url: "/teiserver/admin/bot")
       |> stream(:bots, bots)
       |> assign(:cred_counts, cred_count)

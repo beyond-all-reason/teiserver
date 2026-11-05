@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Admin", url: "/admin"
   plug :add_breadcrumb, name: "Matches", url: "/teiserver/admin/matches"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()

@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.MatchmakingLive.Index do
           |> assign(:site_menu_active, "matchmaking")
           |> assign(:view_colour, MatchLib.colours())
           |> assign(:queues, [])
-          |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+          |> add_breadcrumb(name: "Admin", url: "/admin")
           |> add_breadcrumb(name: "Matchmaking", url: "/admin/matchmaking")
 
         Matchmaking.subscribe_to_queue_updates()
