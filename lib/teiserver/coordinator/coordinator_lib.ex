@@ -244,7 +244,7 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> Auth.admin?(user) or Auth.moderator?(user) or host
       :moderator -> Auth.admin?(user) or Auth.moderator?(user)
-      :event_organizer -> can_use?(user, host, :moderator) or Auth.is_event_organizer?(user)
+      :event_organizer -> Auth.moderator?(user) or Auth.is_event_organizer?(user)
       _other -> false
     end
   end
