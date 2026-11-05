@@ -275,62 +275,6 @@ defmodule Teiserver.Account.UserLibTest do
     end
   end
 
-  defp user_stat_data_fixtures(_state) do
-    %{id: user1} = AccountFixtures.user_fixture()
-    %{id: user2} = AccountFixtures.user_fixture()
-    %{id: user3} = AccountFixtures.user_fixture()
-
-    # These users will have empty, nil or missing fields, they should
-    # not show up in the searches
-    %{id: user_empty_str} = AccountFixtures.user_fixture()
-    %{id: user_empty_map} = AccountFixtures.user_fixture()
-    %{id: user_none} = AccountFixtures.user_fixture()
-
-    Account.update_user_stat(user1, %{
-      "hardware:gpuinfo" => "AMD",
-      "hardware:cpuinfo" => "AMD",
-      "hardware:osinfo" => "Linux",
-      "hardware:raminfo" => "16GB",
-      "hardware:displaymax" => "1440",
-      "last_ip" => "192.168.0.1",
-      "some_key" => "some_value"
-    })
-
-    Account.update_user_stat(user2, %{
-      "hardware:gpuinfo" => "AMD",
-      "hardware:cpuinfo" => "Intel",
-      "hardware:osinfo" => "Windows",
-      "hardware:raminfo" => "8GB",
-      "hardware:displaymax" => "2560",
-      "last_ip" => "192.168.0.3",
-      "some_key" => "some_other_value"
-    })
-
-    Account.update_user_stat(user3, %{
-      "hardware:gpuinfo" => "NVIDIA",
-      "hardware:cpuinfo" => "Intel",
-      "hardware:osinfo" => "Windows",
-      "hardware:raminfo" => "16GB",
-      "hardware:displaymax" => "2560",
-      "last_ip" => "127.0.0.1",
-      "some_key" => "some_value"
-    })
-
-    Account.update_user_stat(user_empty_str, %{
-      "hardware:gpuinfo" => "",
-      "hardware:cpuinfo" => "",
-      "hardware:osinfo" => "",
-      "hardware:raminfo" => "",
-      "hardware:displaymax" => "",
-      "last_ip" => "",
-      "some_key" => ""
-    })
-
-    Account.update_user_stat(user_empty_map, %{})
-
-    %{users: [user1, user2, user3, user_empty_str, user_empty_map, user_none]}
-  end
-
   defp smurf_users(_data) do
     %User{} = moderator = AccountFixtures.user_fixture()
     %User{} = origin = AccountFixtures.user_fixture()
