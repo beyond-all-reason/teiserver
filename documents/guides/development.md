@@ -188,6 +188,16 @@ mix teiserver.gen_token --user CheerfulBeigeKarganeth --app generic_lobby
 
 which generates an access token valid for 24h. These help a lot when attempting to manually test the API.
 
+You can use
+
+```bash
+./scripts/update_tachyon_schema.sh <major_version> [ref] [schemas]
+```
+to download the JSON shemas from the Tachyon repository and put them in `priv/tachyon/v<major_version>/schema`, replacing existing files.
+- `major_version` is the Tachyon protocol version the schemas are for
+- `ref` is the branch, tag or commit of the Tachyon repository, defaults to `master`
+- `schema` are the schemas to update, e.g. autohost or clan, defaults to all of them
+
 ### Spring protocol
 
 The [Spring Lobby protocol](https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html) is the old protocol, in use until everything is ready to fully switch to Tachyon.
