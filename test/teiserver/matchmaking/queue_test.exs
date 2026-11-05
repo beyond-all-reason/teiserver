@@ -22,15 +22,23 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   describe "listing" do
     test "has correct data", %{queue_id: queue_id, map: map} do
-      queues =
-        Polling.poll_until(
-          fn -> Matchmaking.list_queues() |> Enum.into(%{}) end,
-          fn queues ->
-            is_map_key(queues, queue_id) && queues[queue_id].maps != []
-          end
-        )
-
+      queues = Matchmaking.list_queues() |> Enum.into(%{})
+      assert is_map_key(queues, queue_id)
       assert queues[queue_id].maps == [map]
+    end
+
+    test "no race with invalid queue data" do
+      # make sure there is at least one queue, otherwise this test dosn't do anything
+      [_q | _rest] = Matchmaking.list_queues()
+
+      {:ok, %Asset.Engine{} = engine} = Asset.create_engine(%{name: "new engine"})
+      {:ok, _engine} = Asset.set_engine_matchmaking(engine.id)
+
+      queues = Matchmaking.list_queues()
+
+      Enum.each(queues, fn {qid, data} ->
+        assert is_map(data) && data.engines == [%{version: engine.name}], "#{qid} has valid data"
+      end)
     end
   end
 

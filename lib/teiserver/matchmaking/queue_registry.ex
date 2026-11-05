@@ -47,4 +47,6 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
   def update_value(id, callback) do
     Registry.update_value(__MODULE__, id, callback)
   end
+
+  def unregister(id), do: Registry.unregister(__MODULE__, id)
 end

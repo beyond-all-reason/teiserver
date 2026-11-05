@@ -32,6 +32,16 @@ defmodule Teiserver.Matchmaking do
   @spec list_queues() :: [{queue_id(), queue()}]
   def list_queues do
     QueueRegistry.list()
+    |> Enum.reduce([], fn
+      {q_id, nil}, acc ->
+        case QueueServer.get_list_data(q_id) do
+          {:ok, data} -> [{q_id, data} | acc]
+          {:error, _invalid_queue} -> acc
+        end
+
+      {q_id, data}, acc ->
+        [{q_id, data} | acc]
+    end)
   end
 
   @doc """
