@@ -161,10 +161,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.via_tuple(queue_id)
   end
 
-  def via_tuple(queue_id, queue) do
-    QueueRegistry.via_tuple(queue_id, queue)
-  end
-
   @type join_error ::
           {:error,
            :invalid_queue
@@ -253,13 +249,14 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @spec refresh_assets(id()) :: :ok
   def refresh_assets(queue_id) do
     queue_id |> via_tuple() |> GenServer.call(:refresh_assets)
+  catch
+    :exit, {:shutdown, _reason} -> :ok
+    :exit, {:noproc, _details} -> :ok
   end
 
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
-    GenServer.start_link(__MODULE__, initial_state,
-      name: via_tuple(initial_state.id, initial_state.queue)
-    )
+    GenServer.start_link(__MODULE__, initial_state, name: via_tuple(initial_state.id))
   end
 
   @doc """
@@ -267,6 +264,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
   of the flow.
   """
   def match_players(queue_pid) when is_pid(queue_pid), do: send(queue_pid, :tick)
+
+  @spec get_list_data(id()) :: {:ok, queue()} | {:error, :invalid_queue}
+  def get_list_data(queue_id) do
+    queue_id |> via_tuple() |> GenServer.call(:get_list_data)
+  end
 
   @impl GenServer
   def init(state) do
@@ -458,8 +460,13 @@ defmodule Teiserver.Matchmaking.QueueServer do
     if new_state.queue.version == state.queue.version do
       {:reply, :ok, new_state}
     else
-      {:stop, {:shutdown, :asset_changded}, :ok, new_state}
+      QueueRegistry.unregister(state.id)
+      {:stop, {:shutdown, :asset_changed}, :ok, new_state}
     end
+  end
+
+  def handle_call(:get_list_data, _from, state) do
+    {:reply, {:ok, state.queue}, state}
   end
 
   @impl GenServer
