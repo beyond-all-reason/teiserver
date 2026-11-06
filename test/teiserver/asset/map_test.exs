@@ -1,7 +1,7 @@
 defmodule Teiserver.Asset.MapTest do
   alias Teiserver.Asset
   alias Teiserver.AssetFixtures
-  use Teiserver.DataCase, async: true
+  use Teiserver.DataCase
 
   # define some valid map attr for convenience
   def qs_attr,

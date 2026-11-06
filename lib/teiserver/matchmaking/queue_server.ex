@@ -161,10 +161,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.via_tuple(queue_id)
   end
 
-  def via_tuple(queue_id, queue) do
-    QueueRegistry.via_tuple(queue_id, queue)
-  end
-
   @type join_error ::
           {:error,
            :invalid_queue
@@ -243,11 +239,24 @@ defmodule Teiserver.Matchmaking.QueueServer do
     :exit, {:noproc, _details} -> :ok
   end
 
+  @doc """
+  refresh the assets for the given queue. If this results in a new version, that
+  is, something changed, the queue restarts.
+  We don't have (yet?) a mechanism to force player to acknowledge the new assets
+  so we can't guarantee that the players currently in queue have all the new
+  assets.
+  """
+  @spec refresh_assets(id()) :: :ok
+  def refresh_assets(queue_id) do
+    queue_id |> via_tuple() |> GenServer.call(:refresh_assets)
+  catch
+    :exit, {:shutdown, _reason} -> :ok
+    :exit, {:noproc, _details} -> :ok
+  end
+
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
-    GenServer.start_link(__MODULE__, initial_state,
-      name: via_tuple(initial_state.id, initial_state.queue)
-    )
+    GenServer.start_link(__MODULE__, initial_state, name: via_tuple(initial_state.id))
   end
 
   @doc """
@@ -256,13 +265,16 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   def match_players(queue_pid) when is_pid(queue_pid), do: send(queue_pid, :tick)
 
+  @spec get_list_data(id()) :: {:ok, queue()} | {:error, :invalid_queue}
+  def get_list_data(queue_id) do
+    queue_id |> via_tuple() |> GenServer.call(:get_list_data)
+  end
+
   @impl GenServer
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
-    engines = get_engines()
-    games = get_games()
-    maps = Asset.get_maps_for_queue(state.queue.queue_id_for_maps)
+    {engines, games, maps} = fetch_assets(state.queue.queue_id_for_maps)
 
     if state.settings.tick_interval_ms != :manual do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
@@ -278,20 +290,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
     QueueRegistry.update_value(state.id, fn _old -> state.queue end)
 
     {:ok, state}
-  end
-
-  defp get_engines do
-    case Asset.get_engine(in_matchmaking: true) do
-      nil -> []
-      e -> [%{version: e.name}]
-    end
-  end
-
-  defp get_games do
-    case Asset.get_game(in_matchmaking: true) do
-      nil -> []
-      g -> [%{spring_game: g.name}]
-    end
   end
 
   @impl GenServer
@@ -447,6 +445,28 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
         {:reply, {:ok, self()}, state}
     end
+  end
+
+  def handle_call(:refresh_assets, _from, state) do
+    {engines, games, maps} = fetch_assets(state.queue.queue_id_for_maps)
+
+    new_state =
+      state
+      |> put_in([:queue, :engines], engines)
+      |> put_in([:queue, :games], games)
+      |> put_in([:queue, :maps], maps)
+      |> put_in([:queue, :version], compute_version(engines, games, maps))
+
+    if new_state.queue.version == state.queue.version do
+      {:reply, :ok, new_state}
+    else
+      QueueRegistry.unregister(state.id)
+      {:stop, {:shutdown, :asset_changed}, :ok, new_state}
+    end
+  end
+
+  def handle_call(:get_list_data, _from, state) do
+    {:reply, {:ok, state.queue}, state}
   end
 
   @impl GenServer
@@ -725,5 +745,22 @@ defmodule Teiserver.Matchmaking.QueueServer do
     stats = Map.put(state.stats, :player_count, player_count)
     Matchmaking.broadcast_queue_update(state.id, stats)
     :telemetry.execute([:matchmaking, :queue_size], %{count: player_count}, %{id: state.id})
+  end
+
+  defp fetch_assets(id_for_maps) do
+    engines =
+      case Asset.get_engine(in_matchmaking: true) do
+        nil -> []
+        e -> [%{version: e.name}]
+      end
+
+    games =
+      case Asset.get_game(in_matchmaking: true) do
+        nil -> []
+        g -> [%{spring_game: g.name}]
+      end
+
+    maps = Asset.get_maps_for_queue(id_for_maps)
+    {engines, games, maps}
   end
 end
