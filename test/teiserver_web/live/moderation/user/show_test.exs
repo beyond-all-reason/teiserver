@@ -116,6 +116,43 @@ defmodule TeiserverWeb.Moderation.UserLive.ShowTest do
       # Ensure it has changed over
       assert Account.get_user_by_id!(user.id).roles == ["Bot", "Contributor", "Trusted"]
     end
+
+    test "clear smurf link - with smurf", %{conn: conn} do
+      origin = AccountFixtures.user_fixture()
+      smurf = AccountFixtures.user_fixture()
+
+      {:ok, smurf} = Account.update_user_smurf(smurf, %{smurf_of_id: origin.id})
+      assert smurf.smurf_of_id == origin.id
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users/#{smurf.id}")
+
+      live
+      |> element("span", "Clear smurf link")
+      |> render_click()
+
+      assert_redirect(live, "/moderation/users/#{smurf.id}")
+
+      # Ensure it has changed over
+      assert Account.get_user_by_id!(smurf.id).smurf_of_id == nil
+    end
+
+    test "clear smurf link - no smurf", %{conn: conn} do
+      not_smurf = AccountFixtures.user_fixture()
+      assert is_nil(not_smurf.smurf_of_id)
+
+      {:ok, live, _html} = live(conn, ~p"/moderation/users/#{not_smurf.id}")
+
+      live
+      |> element("span", "Clear smurf link")
+      |> render_click()
+
+      html = render(live)
+
+      assert html =~ ~s(Unable to clear smurf link)
+
+      # Ensure it stayed the same
+      assert Account.get_user_by_id!(not_smurf.id).smurf_of_id == nil
+    end
   end
 
   describe "rendering data" do
