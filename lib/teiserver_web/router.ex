@@ -829,7 +829,6 @@ defmodule TeiserverWeb.Router do
 
     get("/metrics", GeneralController, :metrics)
 
-    get("/users/relationships/:id", UserController, :relationships)
     get("/users/smurf_search/:id", UserController, :smurf_search)
     post("/users/create_smurf_key/:userid", UserController, :create_smurf_key)
 
