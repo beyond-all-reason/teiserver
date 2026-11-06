@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
@@ -72,6 +73,34 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       assert_receive(%{channel: ^channel, event: :announce, message: ^message}, 2000)
 
       PubSub.unsubscribe(Teiserver.PubSub, channel)
+    end
+  end
+
+  describe "handle_command(%{ command: playerlimit, ... })" do
+    setup [:setup_lobby]
+
+    test "event organizers can set the player limit", %{lobby_id: lobby_id} do
+      user = TeiserverTestLib.new_user()
+      Client.login(user, :test, "127.0.0.1")
+      original_limit = Coordinator.call_consul(lobby_id, {:get, :player_limit})
+
+      Coordinator.send_consul(lobby_id, %{
+        command: "playerlimit",
+        senderid: user.id,
+        remaining: "20"
+      })
+
+      assert Coordinator.call_consul(lobby_id, {:get, :player_limit}) == original_limit
+
+      Auth.add_roles(user.id, ["Event Organizer"])
+
+      Coordinator.send_consul(lobby_id, %{
+        command: "playerlimit",
+        senderid: user.id,
+        remaining: "20"
+      })
+
+      assert Coordinator.call_consul(lobby_id, {:get, :player_limit}) == 20
     end
   end
 end
