@@ -255,8 +255,6 @@ config :teiserver, Oban,
 
 config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 
-config :xema, loader: Teiserver.Tachyon.SchemaLoader
-
 config :peep, :bucket_calculator, Teiserver.Monitoring.Buckets
 config :prom_ex, :storage_adapter, Teiserver.Monitoring.StripedPeep
 

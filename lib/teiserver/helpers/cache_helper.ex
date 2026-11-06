@@ -21,6 +21,16 @@ defmodule Teiserver.Helpers.CacheHelper do
       func.()
   end
 
+  @spec cache_fetch_or_store(atom, any, (-> {:ok, any} | {:error, any})) ::
+          {:ok, any} | {:error, any}
+  def cache_fetch_or_store(table, key, func) do
+    ConCache.fetch_or_store(table, key, func)
+  catch
+    :exit, :noproc ->
+      Logger.warning("Cache #{table} is down (fetch_or_store)")
+      func.()
+  end
+
   @doc """
   Deletes the `key` from `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
   """

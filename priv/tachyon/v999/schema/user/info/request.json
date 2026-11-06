@@ -1,0 +1,25 @@
+{
+    "$id": "https://schema.beyondallreason.dev/tachyon/user/info/request.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "UserInfoRequest",
+    "tachyon": {
+        "source": "user",
+        "target": "server",
+        "scopes": ["tachyon.lobby"]
+    },
+    "type": "object",
+    "properties": {
+        "type": { "const": "request" },
+        "messageId": { "type": "string" },
+        "commandId": { "const": "user/info" },
+        "data": {
+            "title": "UserInfoRequestData",
+            "type": "object",
+            "properties": {
+                "testId": { "$ref": "../../definitions/testId.json" }
+            },
+            "required": ["testId"]
+        }
+    },
+    "required": ["type", "messageId", "commandId", "data"]
+}

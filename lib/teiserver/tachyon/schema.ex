@@ -3,10 +3,12 @@ defmodule Teiserver.Tachyon.Schema do
   utilities to parse tachyon schemas
   """
   alias Teiserver.Helpers.CacheHelper
+  alias Teiserver.Tachyon.SchemaResolver
 
   @type command_id :: String.t()
   @type message_id :: String.t()
   @type message_type :: String.t()
+  @type major_version :: non_neg_integer()
 
   @cache_name :tachyon_schema_cache
 
@@ -64,21 +66,26 @@ defmodule Teiserver.Tachyon.Schema do
     end
   end
 
-  @spec parse_message(command_id(), message_type(), term()) ::
+  @spec parse_message(major_version(), command_id(), message_type(), term()) ::
           :ok | {:missing_schema, command_id(), message_type()} | {:error, map()}
-  def parse_message(command_id, type, json) do
-    with {:ok, schema} <- get_schema(command_id, type) do
-      JsonXema.validate(schema, json)
+  def parse_message(major_version, command_id, type, json) do
+    with {:ok, root} <- get_schema(major_version, command_id, type),
+         {:ok, _data} <- JSV.validate(json, root) do
+      :ok
     end
   end
 
-  def parse_schema(command_id, type) do
+  @spec parse_schema(major_version(), command_id(), message_type()) ::
+          {:ok, map()} | {:missing_schema, command_id(), message_type()} | {:error, map()}
+  def parse_schema(major_version, command_id, type) do
     # basic check to avoid attack where the client could construct an
     # arbitrary path
     if String.contains?(command_id, ".") do
       {:error, "Invalid command id #{command_id}"}
     else
-      schema_path = Path.join(["priv", "tachyon", "schema", command_id, "#{type}.json"])
+      schema_path =
+        Path.join(["priv", "tachyon", "v#{major_version}", "schema", command_id, "#{type}.json"])
+
       path = Application.app_dir(:teiserver, schema_path)
 
       with {:ok, content} <- File.read(path),
@@ -86,17 +93,30 @@ defmodule Teiserver.Tachyon.Schema do
         {:ok, json}
       else
         {:error, :enoent} -> {:missing_schema, command_id, type}
-        {:error, err} -> {:error, err}
+        {:error, error} -> {:error, error}
       end
     end
   end
 
-  defp get_schema(command_id, type) do
-    Teiserver.cache_get_or_store(@cache_name, {command_id, type}, fn ->
-      with {:ok, json} <- parse_schema(command_id, type) do
-        {:ok, JsonXema.new(json)}
-      end
-    end)
+  defp get_schema(major_version, command_id, type) do
+    result =
+      CacheHelper.cache_fetch_or_store(@cache_name, {major_version, command_id, type}, fn ->
+        case parse_schema(major_version, command_id, type) do
+          {:ok, json} ->
+            JSV.build(json, resolver: [{SchemaResolver, major_version: major_version}])
+
+          {:missing_schema, _command_id, _type} = missing ->
+            {:error, missing}
+
+          {:error, _error} = error ->
+            error
+        end
+      end)
+
+    case result do
+      {:error, {:missing_schema, _command_id, _type} = missing} -> missing
+      other -> other
+    end
   end
 
   @doc """
