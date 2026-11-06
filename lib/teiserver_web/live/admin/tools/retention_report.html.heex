@@ -1,0 +1,99 @@
+<ToolsComponents.section_menu
+  active="retention_report"
+  scope={@scope}
+/>
+<.header>
+  Retention
+</.header>
+<.simple_form
+  :if={@connected?}
+  for={@form}
+  id="retention_form"
+  phx-change="update"
+  phx-submit="update"
+  phx-debounce="blur"
+  class="w-full xl:w-[75%] mx-auto"
+>
+  <div class="flex-col flex my-2">
+    <div class="md:flex-row flex-col flex">
+      <div class="flex-1 m-2">
+        <.input_tw
+          field={@form[:date_range]}
+          type="select"
+          label="Preset:"
+          options={@dates}
+          phx-change="update_range"
+        />
+      </div>
+      <div class="flex-2 m-2">
+        <.input_tw
+          field={@form[:start_date]}
+          type="date"
+          label="Start date:"
+          max={Date.utc_today()}
+          value={@form[:start_date].value}
+        />
+      </div>
+
+      <div class="flex-2 m-2">
+        <.input_tw
+          field={@form[:end_date]}
+          type="date"
+          label="End date:"
+          min={@form[:start_date].value}
+          value={@form[:end_date].value}
+        />
+      </div>
+
+      <div class="flex-2 m-2">
+        <.input_tw
+          field={@form[:skip0]}
+          type="checkbox"
+          label="Skip 0"
+          value={@form[:skip0].value}
+        />
+      </div>
+    </div>
+
+    <%= for {message, _opts} <- Keyword.get_values(@form.source.errors, :base) do %>
+      <div class="flex-2 m-2 self-center">
+        <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600 bg-danger_transparent p-2">
+          <i class="fa-fw fa-solid fa-circle-exclamation "></i>
+          {message}
+        </p>
+      </div>
+    <% end %>
+    <div class="flex-2 m-2 self-center">
+      <%= if @form.source.valid? do %>
+        <.button type="button" phx-click="fetch">
+          UPDATE
+        </.button>
+      <% else %>
+        <.button type="button" disabled={true}>
+          UPDATE
+        </.button>
+      <% end %>
+    </div>
+  </div>
+</.simple_form>
+
+<div class="flex">
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Retention Chart</h3>
+    <LiveCharts.chart
+      :if={@connected? == true and not is_nil(@retention_chart)}
+      chart={@retention_chart}
+    />
+  </div>
+</div>
+<div class="data-explain">
+  Lists players that:
+  <ul class="ml-4 list-disc">
+    <li>Have logged in.</li>
+    <li>Are verified.</li>
+    <li>Registered within a certain date range.</li>
+    If skip0 is set then the 1st day of results will be skipped (the day their account was created) for the graph.
+  </ul>
+</div>
+
+<.back navigate={~p"/admin"}>Back to Admin</.back>

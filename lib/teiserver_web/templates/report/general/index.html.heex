@@ -49,16 +49,6 @@
     </.menu_card>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.RetentionReport.icon()}
-      url={~p"/teiserver/reports/show/retention"}
-    >
-      Retention
-    </.menu_card>
-  <% end %>
-
   <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
     <.menu_card
       size={:small}
