@@ -581,61 +581,12 @@ defmodule TeiserverWeb.Admin.UserController do
       :ok ->
         conn
         |> put_flash(:success, "Applied the changes")
-        |> redirect(to: ~p"/teiserver/admin/user/#{smurf_user.id}")
+        |> redirect(to: ~p"/moderation/users/#{smurf_user.id}")
 
       {:error, reason} ->
         conn
         |> put_flash(:danger, "Marking failed: #{reason}")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec cancel_smurf_mark(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def cancel_smurf_mark(conn, %{"user_id" => id}) do
-    user = Account.get_user!(id)
-    origin_user_id = user.smurf_of_id
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        case Account.update_user_smurf(user, %{smurf_of_id: nil}) do
-          {:ok, user} ->
-            add_audit_log(conn, "Moderation:Cancel smurf mark", %{
-              smurf_userid: user.id,
-              origin_id: user.smurf_of_id
-            })
-
-            # Now we update stats for the origin
-            smurf_count =
-              Account.list_users(
-                search: [
-                  smurf_of: origin_user_id
-                ],
-                select: [:id]
-              )
-              |> Enum.count()
-
-            # And give the origin the smurfer role
-            if smurf_count == 0 do
-              Auth.remove_roles(origin_user_id, ["Smurfer"])
-            end
-
-            # If we call this URL without the person being a smurf it can cause
-            # an error, this is a temporary fix and will be resolved as a priority.
-            origin_user_id &&
-              Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
-
-            conn
-            |> put_flash(:info, "Smurf link broken.")
-            |> redirect(to: ~p"/moderation/users/#{user.id}")
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "edit.html", user: user, changeset: changeset)
-        end
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
+        |> redirect(to: ~p"/moderation/users")
     end
   end
 

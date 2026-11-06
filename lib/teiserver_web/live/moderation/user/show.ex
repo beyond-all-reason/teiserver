@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.TOTPLib
@@ -148,6 +149,57 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       {:error, _error} ->
         socket
         |> put_flash(:error, "Unable to delete user note")
+        |> noreply()
+    end
+  end
+
+  def handle_event(
+        "cancel-smurf-mark",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+    origin_user_id = user.smurf_of_id
+
+    result =
+      Repo.transact(fn ->
+        with true <- origin_user_id != nil,
+             {:ok, _user_note} <- Account.update_user_smurf(user, %{smurf_of_id: nil}),
+             %{} <-
+               add_audit_log(scope, "Moderation:Cancel smurf mark", %{
+                 smurf_userid: user.id,
+                 origin_id: origin_user_id
+               }) do
+          # Now we update stats for the origin
+          smurf_count =
+            UserQueries.users()
+            |> UserQueries.where_smurf_of(origin_user_id)
+            |> QueryHelpers.count()
+
+          # And potentially remove their smurfer role
+          if smurf_count == 0 do
+            Auth.remove_roles(origin_user_id, ["Smurfer"])
+          end
+
+          Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
+
+          {:ok, :success}
+        else
+          _error -> {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+        |> put_flash(:success, "Smurf link cleared")
+        |> switch_tab("notes", nil)
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to clear smurf link")
         |> noreply()
     end
   end
