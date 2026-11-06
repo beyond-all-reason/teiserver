@@ -204,5 +204,6 @@
   {"lib/teiserver_web/live/moderation/user/form_email_component.ex"},
   {"lib/teiserver_web/live/moderation/user/form_roles_component.ex"},
   {"lib/teiserver/moderation/tasks/delete_expired_anti_abuse_records_task.ex"},
+  {"lib/teiserver/logging/tasks/persist_server_minute_task.ex"},
   {"lib/teiserver_web/controllers/account/session_controller.ex"}
 ]
