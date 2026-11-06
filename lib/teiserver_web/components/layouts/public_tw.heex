@@ -5,6 +5,17 @@
     scope={@scope}
   />
 
+  <.live_component
+    :if={
+      assigns[:scope] != nil and
+        get_user_config_cache(assigns[:current_user], "general.Command palette")
+    }
+    module={TeiserverWeb.LiveComponents.CommandPalette}
+    id="cmd-palette"
+    scope={assigns[:scope]}
+    extra_commands={assigns[:extra_commands]}
+  />
+
   <.flash_group flash={@flash} />
 
   <main>

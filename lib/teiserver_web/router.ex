@@ -91,7 +91,6 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, :ensure_authenticated}
       ] do
       live "/", Menu, :index
-      live "/palette", Palette, :show
     end
   end
 

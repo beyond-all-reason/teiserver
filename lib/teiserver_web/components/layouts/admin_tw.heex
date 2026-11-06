@@ -4,6 +4,17 @@
     scope={@scope}
   />
 
+  <.live_component
+    :if={
+      assigns[:scope] != nil and
+        get_user_config_cache(assigns[:current_user], "general.Command palette")
+    }
+    module={TeiserverWeb.LiveComponents.CommandPalette}
+    id="cmd-palette"
+    scope={assigns[:scope]}
+    extra_commands={assigns[:extra_commands]}
+  />
+
   <div class={[assigns[:sensitive_data] && "mt-10"]}>
     <TeiserverWeb.NavComponents.top_navbar_tw
       active={assigns[:site_menu_active]}
