@@ -26,6 +26,16 @@ defmodule Teiserver.Config.UserConfigTypes.ProfileConfigs do
   @spec create() :: :ok
   def create do
     add_user_config_type(%{
+      key: "general.Command palette",
+      section: "Interface",
+      type: "boolean",
+      visible: true,
+      permissions: [],
+      default: true,
+      description: "Enable the command palette, accessed by hitting Ctrl + k."
+    })
+
+    add_user_config_type(%{
       key: "general.Colour scheme",
       section: "Interface",
       type: "select",

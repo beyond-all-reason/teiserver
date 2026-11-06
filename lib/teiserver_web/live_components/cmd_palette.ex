@@ -1,9 +1,9 @@
-defmodule TeiserverWeb.LiveComponents.CmdPalette do
+defmodule TeiserverWeb.LiveComponents.CommandPalette do
   @moduledoc """
   Adds a command palette to any liveview.
 
   <.live_component
-    module={TeiserverWeb.LiveComponents.CmdPalette}
+    module={TeiserverWeb.LiveComponents.CommandPalette}
     id="cmd-palette"
     scope={@scope}
     extra_commands={[]}
