@@ -1,6 +1,10 @@
 defmodule TeiserverWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :teiserver
 
+  if Application.compile_env(:teiserver, Teiserver.Repo)[:use_sql_sandbox?] do
+    plug Phoenix.Ecto.SQL.Sandbox
+  end
+
   @session_options [
     store: :cookie,
     key: "_teiserver_key",
