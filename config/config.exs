@@ -200,6 +200,9 @@ config :teiserver, Teiserver.Account.Guardian,
   secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
+config :db_cluster,
+  repo: Teiserver.Repo
+
 config :teiserver, Oban,
   repo: Teiserver.Repo,
   plugins: [
