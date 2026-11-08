@@ -16,12 +16,12 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     host = AccountFixtures.user_fixture()
     user = AccountFixtures.user_fixture()
 
-    {:ok, _pid, %LT.Details{id: id}} =
+    {:ok, pid, %LT.Details{id: id}} =
       mk_start_params([2, 2], host.id)
       |> Map.put(:boss_enabled?, true)
       |> Lobby.create()
 
-    %{id: id, host: host, user: user}
+    %{id: id, lobby_pid: pid, host: host, user: user}
   end
 
   defp logs(lobby_id) do
@@ -31,9 +31,12 @@ defmodule Teiserver.TachyonLobby.LobbyLogTest do
     |> Repo.all()
   end
 
-  test "lobby", %{id: id, host: host} do
+  test "lobby", %{id: id, lobby_pid: lobby_pid, host: host} do
+    ref = Process.monitor(lobby_pid)
     # Leaving the lobby will result in it closing
     :ok = Lobby.leave(id, host.id)
+
+    assert_receive {:DOWN, ^ref, :process, _pid, _reason}
 
     [lobby_open, _lobby_leave, _boss_remove, lobby_close] = logs(id)
 
