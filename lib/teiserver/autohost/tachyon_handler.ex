@@ -52,7 +52,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   catch
     # in case the connection is terminating midway
-    :exit, {:normal, _details} -> :ok
+    :exit, {:normal, _details} ->
+      :ok
+
+    :exit, {{:shutdown, reason}, _mfa} when reason in [:peer_closed, :local_closed] ->
+      :ok
   end
 
   @doc """
