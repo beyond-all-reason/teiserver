@@ -2,6 +2,7 @@ defmodule Teiserver.Helpers.DateValidations do
   @moduledoc """
     Date-related changeset validations.
   """
+  alias Ecto.Changeset
   import Ecto.Changeset
   @default_max_range 365
 
@@ -16,8 +17,12 @@ defmodule Teiserver.Helpers.DateValidations do
   - `end_field` - Field containing the end date, defaults to `:end_date`
 
   """
-  @spec validate_date_order(Ecto.Changeset.t(), atom(), atom()) :: Ecto.Changeset.t()
-  def validate_date_order(changeset, start_field \\ :start_date, end_field \\ :end_date) do
+  @spec validate_date_order(Changeset.t(), atom(), atom()) :: Changeset.t()
+  def validate_date_order(
+        %Changeset{} = changeset,
+        start_field \\ :start_date,
+        end_field \\ :end_date
+      ) do
     start_date = get_field(changeset, start_field)
     end_date = get_field(changeset, end_field)
 
@@ -52,11 +57,11 @@ defmodule Teiserver.Helpers.DateValidations do
       <% end %>
 
   """
-  @spec validate_max_range(Ecto.Changeset.t(), binary() | integer(), atom(), atom()) ::
-          Ecto.Changeset.t()
+  @spec validate_max_range(Changeset.t(), binary() | integer(), atom(), atom()) ::
+          Changeset.t()
   def validate_max_range(changeset, days, start_field \\ :start_date, end_field \\ :end_date)
 
-  def validate_max_range(changeset, days, start_field, end_field)
+  def validate_max_range(%Changeset{} = changeset, days, start_field, end_field)
       when is_integer(days) and days >= 0 do
     start_date = get_field(changeset, start_field)
     end_date = get_field(changeset, end_field)
@@ -68,12 +73,14 @@ defmodule Teiserver.Helpers.DateValidations do
     end
   end
 
-  def validate_max_range(changeset, days, start_field, end_field) when is_binary(days) do
+  def validate_max_range(%Changeset{} = changeset, days, start_field, end_field)
+      when is_binary(days) do
     changeset
     |> validate_max_range(parse_max_range(days), start_field, end_field)
   end
 
-  def validate_max_range(changeset, days, start_field, end_field) when is_integer(days) do
+  def validate_max_range(%Changeset{} = changeset, days, start_field, end_field)
+      when is_integer(days) do
     changeset
     |> validate_max_range(@default_max_range, start_field, end_field)
   end
@@ -83,7 +90,7 @@ defmodule Teiserver.Helpers.DateValidations do
 
   Adds an error to `field` when its value is later than the current UTC date.
   """
-  @spec validate_date_not_in_future(Ecto.Changeset.t(), atom()) :: Ecto.Changeset.t()
+  @spec validate_date_not_in_future(Changeset.t(), atom()) :: Changeset.t()
   def validate_date_not_in_future(changeset, field) do
     date = get_field(changeset, field)
 
