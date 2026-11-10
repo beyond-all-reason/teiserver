@@ -151,12 +151,15 @@ if use_tls? do
   config :teiserver, Teiserver.SpringTcpServer, listeners: spring_listeners
 
   if Keyword.get(endpoint_defaults, :https) do
+    default_port = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:https][:port]
+
     config :teiserver, TeiserverWeb.Endpoint,
       force_ssl: [hsts: true],
       root: ".",
       cache_static_manifest: "priv/static/cache_manifest.json",
       server: true,
       https: [
+        port: Teiserver.ConfigHelpers.get_env("TEI_HTTPS_PORT", default_port, :int),
         keyfile: cert_opts[:keyfile],
         certfile: cert_opts[:certfile]
       ]

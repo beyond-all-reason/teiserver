@@ -75,6 +75,10 @@ You should first have a oauth token available, connecting for example with
 - Plaintext: `websocat -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" ws://localhost:4000/tachyon`
 - SSL: `websocat -k -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" wss://localhost:8888/tachyon`
 
+### Multi-node (Pure IEX)
+
+For more information, see the [clustering guide](clustering.md).
+
 ## Configuration
 
 Most of the configuration takes place in [config/config.exs](config/config.exs),

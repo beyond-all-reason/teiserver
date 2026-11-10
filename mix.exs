@@ -92,6 +92,8 @@ defmodule Teiserver.MixProject do
       {:phoenix_view, "~> 2.0"},
 
       # Extra deps
+      {:libcluster, "~> 3.6"},
+      {:libcluster_postgres, "~> 0.2"},
       {:logger_file_backend, "~> 0.0.14"},
       {:logger_backends, "~> 1.0"},
       {:logger_json, "~> 7.0"},
