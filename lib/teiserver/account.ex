@@ -100,6 +100,20 @@ defmodule Teiserver.Account do
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate register_user(attrs, pass_type \\ nil, ip \\ nil), to: UserLib
 
+  @spec register_steam_user(
+          attrs :: map(),
+          ip :: String.t() | nil
+        ) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  defdelegate register_steam_user(attrs, ip), to: UserLib
+
+  @spec get_or_create_steam_user(
+          steam_id :: pos_integer(),
+          ip :: String.t() | nil
+        ) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t() | :steam_error}
+  defdelegate get_or_create_steam_user(attrs, ip), to: UserLib
+
   @spec script_create_user(map, pass_type :: :md5_password | :plain_password | :hash | nil) ::
           {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   defdelegate script_create_user(attrs, pass_type \\ :md5_password), to: UserLib
@@ -2176,8 +2190,11 @@ defmodule Teiserver.Account do
   @spec get_user_by_email(String.t()) :: User.t() | nil
   defdelegate get_user_by_email(email), to: UserCacheLib
 
-  @spec get_user_by_discord_id(integer() | String.t()) :: User.t() | nil
+  @spec get_user_by_discord_id(pos_integer() | String.t()) :: User.t() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCacheLib
+
+  @spec get_user_by_steam_id(pos_integer()) :: User.t() | nil
+  defdelegate get_user_by_steam_id(steam_id), to: UserCacheLib
 
   @spec get_userid_by_discord_id(String.t()) :: User.id() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCacheLib
@@ -2320,12 +2337,17 @@ defmodule Teiserver.Account do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
 
-  @spec verify_md5_password(String.t(), String.t()) :: boolean
+  @spec verify_md5_password(String.t(), String.t() | nil) :: boolean
+  def verify_md5_password(_md5_password, nil) do
+    # Users without a password (e.g. Steam users)
+    Argon2.no_user_verify()
+  end
+
   def verify_md5_password(md5_password, argon_hash) do
     Argon2.verify_pass(md5_password, argon_hash)
   end
 
-  @spec verify_plain_password(String.t(), String.t()) :: boolean
+  @spec verify_plain_password(String.t(), String.t() | nil) :: boolean
   def verify_plain_password(plain_text_password, argon_hash) do
     spring_md5_password(plain_text_password)
     |> verify_md5_password(argon_hash)

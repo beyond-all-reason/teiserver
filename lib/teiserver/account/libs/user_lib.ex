@@ -21,9 +21,12 @@ defmodule Teiserver.Account.UserLib do
   alias Teiserver.Moderation
   alias Teiserver.Plugins
   alias Teiserver.Repo
+  alias Teiserver.Steam
 
   use Plugins
   use TeiserverWeb, :library_newform
+
+  require Logger
 
   import Teiserver.Helpers.CacheHelper,
     only: [cache_put_on_ok: 2, cache_delete_on_ok: 2]
@@ -175,8 +178,56 @@ defmodule Teiserver.Account.UserLib do
       |> Repo.insert()
 
     case res do
-      {:ok, user} -> {:ok, Registration.post_user_creation_actions(user, ip)}
-      err -> err
+      {:ok, user} ->
+        Logger.info("New user registered #{user.id} #{user.name}")
+        {:ok, Registration.post_user_creation_actions(user, ip)}
+
+      err ->
+        err
+    end
+  end
+
+  @spec register_steam_user(map(), String.t() | nil) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def register_steam_user(attrs, ip) do
+    # Steam users are verified by default
+    roles = ["Verified"]
+    attrs = Map.merge(attrs, %{roles: roles, permissions: RoleLib.calculate_permissions(roles)})
+
+    res =
+      %User{}
+      |> User.steam_registration_changeset(attrs)
+      |> Repo.insert()
+
+    case res do
+      {:ok, user} ->
+        Logger.info(
+          "New Steam user registered ID #{user.id} Steam ID #{user.steam_id} #{user.name}"
+        )
+
+        user = Registration.post_user_creation_actions(user, ip)
+        Account.delete_user_stat_keys(user.id, ["verification_code"])
+        {:ok, user}
+
+      err ->
+        err
+    end
+  end
+
+  @spec get_or_create_steam_user(
+          steam_id :: pos_integer(),
+          ip :: String.t() | nil
+        ) ::
+          {:ok, User.t()} | {:error, Ecto.Changeset.t() | :steam_error}
+  def get_or_create_steam_user(steam_id, ip) do
+    case Account.get_user_by_steam_id(steam_id) do
+      %User{} = user ->
+        {:ok, user}
+
+      nil ->
+        with {:ok, name} <- Steam.get_persona_name(steam_id) do
+          register_steam_user(%{steam_id: steam_id, name: name}, ip)
+        end
     end
   end
 

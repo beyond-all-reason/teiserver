@@ -427,7 +427,8 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
                "grant_types_supported" => [
                  "authorization_code",
                  "refresh_token",
-                 "client_credentials"
+                 "client_credentials",
+                 "urn:ietf:params:oauth:grant-type:token-exchange"
                ],
                "code_challenge_methods_supported" => ["S256"],
                "response_types_supported" => ["code", "token"],

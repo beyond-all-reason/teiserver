@@ -1,8 +1,14 @@
 defmodule TeiserverWeb.OAuth.CodeController do
+  alias Teiserver.Account
   alias Teiserver.OAuth
+  alias Teiserver.Steam
+
   use TeiserverWeb, :controller
 
   require Logger
+
+  @steam_session_ticket_token_type "urn:tachyon:oauth:token-type:steam_session_ticket"
+  @access_token_type "urn:ietf:params:oauth:token-type:access_token"
 
   # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3
   @spec token(Plug.Conn.t(), %{}) :: Plug.Conn.t()
@@ -43,6 +49,19 @@ defmodule TeiserverWeb.OAuth.CodeController do
     end
   end
 
+  # https://datatracker.ietf.org/doc/html/rfc8693
+  # Only Steam session tickets are supported as subject tokens
+  def token(conn, %{"grant_type" => "urn:ietf:params:oauth:grant-type:token-exchange"} = params) do
+    with :ok <-
+           check_required_keys(params, ["subject_token", "subject_token_type"]),
+         {:ok, client_id} <- get_client_id(conn, params) do
+      steam_token_exchange(conn, client_id, params)
+    else
+      {:error, msg} ->
+        conn |> put_status(400) |> render(:error, error_description: msg)
+    end
+  end
+
   def token(conn, _params) do
     conn
     |> put_status(400)
@@ -76,6 +95,87 @@ defmodule TeiserverWeb.OAuth.CodeController do
         conn
         |> put_status(400)
         |> render(:error, error_description: "invalid request: #{err_message(err)}")
+    end
+  end
+
+  defp steam_token_exchange(conn, client_id, params) do
+    with :ok <- check_steam_exchange_params(params),
+         {:ok, app} <- get_app_by_uid(client_id),
+         {:ok, scopes} <- check_scopes(app, params),
+         {:ok, steam_id} <- Steam.authenticate_ticket(params["subject_token"]),
+         :ok <- Steam.check_app_ownership(steam_id),
+         {:ok, user} <- Account.get_or_create_steam_user(steam_id, remote_ip(conn)),
+         {:ok, token} <- OAuth.create_token(user, app, scopes: scopes) do
+      conn
+      |> put_status(200)
+      |> render(:token,
+        token: token,
+        issued_token_type: @access_token_type,
+        scope: Enum.join(scopes, " ")
+      )
+    else
+      {:error, :unsupported_grant_type} ->
+        conn |> put_status(400) |> render(:error, error: "unsupported_grant_type")
+
+      {:error, msg} when is_binary(msg) ->
+        conn |> put_status(400) |> render(:error, error_description: msg)
+
+      {:error, :invalid_scope, desc} ->
+        conn
+        |> put_status(400)
+        |> render(:error, error: "invalid_scope", error_description: desc)
+
+      {:error, :invalid_ticket} ->
+        conn
+        |> put_status(400)
+        |> render(:error, error_description: "invalid Steam session ticket")
+
+      {:error, :publisher_banned} ->
+        conn |> put_status(400) |> render(:error, error_description: "Steam account banned")
+
+      {:error, :not_owned} ->
+        conn
+        |> put_status(400)
+        |> render(:error, error_description: "Steam account does not own the game")
+
+      {:error, :steam_error} ->
+        # Steam unreachable
+        conn
+        |> put_status(503)
+        |> render(:error,
+          error: "temporarily_unavailable",
+          error_description: "please try again later"
+        )
+
+      error ->
+        Logger.error("Steam token exchange failed: #{inspect(error)}")
+
+        conn
+        |> put_status(500)
+        |> render(:error, error: "server_error", error_description: "internal server error")
+    end
+  end
+
+  defp check_steam_exchange_params(params) do
+    cond do
+      not Steam.enabled?() ->
+        {:error, :unsupported_grant_type}
+
+      params["subject_token_type"] != @steam_session_ticket_token_type ->
+        {:error, "unsupported subject_token_type"}
+
+      Map.get(params, "requested_token_type", @access_token_type) != @access_token_type ->
+        {:error, "unsupported requested_token_type"}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp remote_ip(conn) do
+    case :inet.ntoa(conn.remote_ip) do
+      addr when is_list(addr) -> to_string(addr)
+      {:error, :einval} -> nil
     end
   end
 

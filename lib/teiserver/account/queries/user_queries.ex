@@ -127,6 +127,16 @@ defmodule Teiserver.Account.UserQueries do
       where: users.discord_id == ^discord_id
   end
 
+  def _where(query, :has_steam_id, false) do
+    from users in query,
+      where: is_nil(users.steam_id)
+  end
+
+  def _where(query, :steam_id, steam_id) do
+    from users in query,
+      where: users.steam_id == ^steam_id
+  end
+
   def _where(query, :has_role, role_name) do
     from users in query,
       where: ^role_name in users.roles
