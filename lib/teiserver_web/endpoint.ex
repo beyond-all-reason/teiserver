@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :teiserver
 
-  if Application.compile_env(:teiserver, Teiserver.Repo)[:use_sql_sandbox?] do
+  if Application.compile_env(:teiserver, [Teiserver.Repo, :use_sql_sandbox?], false) do
     plug Phoenix.Ecto.SQL.Sandbox
   end
 
