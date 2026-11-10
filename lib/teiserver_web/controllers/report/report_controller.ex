@@ -27,9 +27,6 @@ defmodule TeiserverWeb.Report.ReportController do
         "verified" ->
           Teiserver.Account.VerifiedReport
 
-        "retention" ->
-          Teiserver.Account.RetentionReport
-
         "new_user_funnel" ->
           Teiserver.Account.NewUserFunnelReport
 
