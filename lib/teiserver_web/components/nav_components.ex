@@ -155,6 +155,16 @@ defmodule TeiserverWeb.NavComponents do
     <nav>
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
         <li>
+          <div
+            phx-hook="ServerClock"
+            id="server_clock"
+            title="Server Time"
+            class="p-0 font-semibold text-lg hover:bg-inherit active:bg-inherit hover:cursor-default active:cursor-default active:text-inherit"
+          >
+            {DateTime.utc_now() |> Calendar.strftime("%H:%M")}
+          </div>
+        </li>
+        <li>
           <%!--
             Hiding this as when selected will swap to dark as part of tweaks made
             to keep things consistent between system and dark mode. First loading of the site
