@@ -3,6 +3,8 @@ defmodule Teiserver.Account.UserCacheLib do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserQueries
+  alias Teiserver.Repo
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -154,13 +156,18 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_steam_id(steam_id) do
     case Teiserver.cache_get(:users_lookup_id_with_steam_id, steam_id) do
       nil ->
-        case Account.query_user(search: [steam_id: steam_id], select: [:id]) do
+        user =
+          UserQueries.users()
+          |> UserQueries.where_steam_id(steam_id)
+          |> Repo.one()
+
+        case user do
           nil ->
             nil
 
-          %{id: id} ->
-            recache_user(id)
-            id
+          %User{} = user ->
+            recache_user(user)
+            user.id
         end
 
       id ->
