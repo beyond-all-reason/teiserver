@@ -125,6 +125,14 @@ defmodule TeiserverWeb.OAuth.CodeController do
         |> put_status(400)
         |> render(:error, error: "invalid_scope", error_description: desc)
 
+      {:error, :invalid_target} ->
+        conn
+        |> put_status(400)
+        |> render(:error,
+          error: "invalid_target",
+          error_description: "audience and resource are not supported"
+        )
+
       {:error, :invalid_ticket} ->
         conn
         |> put_status(400)
@@ -166,6 +174,16 @@ defmodule TeiserverWeb.OAuth.CodeController do
 
       Map.get(params, "requested_token_type", @access_token_type) != @access_token_type ->
         {:error, "unsupported requested_token_type"}
+
+      Map.has_key?(params, "actor_token") ->
+        {:error, "actor_token is not supported"}
+
+      # https://www.rfc-editor.org/rfc/rfc8693.html#section-2.1
+      Map.has_key?(params, "actor_token_type") ->
+        {:error, "actor_token_type must not be provided without actor_token"}
+
+      Map.has_key?(params, "audience") or Map.has_key?(params, "resource") ->
+        {:error, :invalid_target}
 
       true ->
         :ok
