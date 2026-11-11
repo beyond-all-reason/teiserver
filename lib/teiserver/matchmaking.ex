@@ -32,6 +32,16 @@ defmodule Teiserver.Matchmaking do
   @spec list_queues() :: [{queue_id(), queue()}]
   def list_queues do
     QueueRegistry.list()
+    |> Enum.reduce([], fn
+      {q_id, nil}, acc ->
+        case QueueServer.get_list_data(q_id) do
+          {:ok, data} -> [{q_id, data} | acc]
+          {:error, _invalid_queue} -> acc
+        end
+
+      {q_id, data}, acc ->
+        [{q_id, data} | acc]
+    end)
   end
 
   @doc """
@@ -118,19 +128,15 @@ defmodule Teiserver.Matchmaking do
     )
   end
 
+  @spec refresh_assets(queue_id()) :: :ok
+  defdelegate refresh_assets(queue_id), to: QueueServer
+
   @doc """
-  Kill and restart all matchmaking queues. This can be used to reset the
-  matchmaking state, for example when a new asset (game/engine) is set
-  It is a bit brutal but simple
+  refresh assets for all mm queues
   """
-  def restart_queues do
-    Logger.info("Restarting all matchmaking queues")
-
-    :ok =
-      Supervisor.terminate_child(Matchmaking.System, Matchmaking.QueueSupervisor)
-
-    {:ok, _pid} =
-      Supervisor.restart_child(Matchmaking.System, Matchmaking.QueueSupervisor)
+  def refresh_all_assets do
+    list_queues()
+    |> Enum.each(fn {q_id, _data} -> refresh_assets(q_id) end)
 
     :ok
   end

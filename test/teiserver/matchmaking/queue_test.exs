@@ -1,5 +1,6 @@
 defmodule Teiserver.Matchmaking.QueueTest do
   alias Teiserver.Asset
+  alias Teiserver.AssetFixtures
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.PairingRoom
@@ -21,15 +22,23 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
   describe "listing" do
     test "has correct data", %{queue_id: queue_id, map: map} do
-      queues =
-        Polling.poll_until(
-          fn -> Matchmaking.list_queues() |> Enum.into(%{}) end,
-          fn queues ->
-            is_map_key(queues, queue_id) && queues[queue_id].maps != []
-          end
-        )
-
+      queues = Matchmaking.list_queues() |> Enum.into(%{})
+      assert is_map_key(queues, queue_id)
       assert queues[queue_id].maps == [map]
+    end
+
+    test "no race with invalid queue data" do
+      # make sure there is at least one queue, otherwise this test dosn't do anything
+      [_q | _rest] = Matchmaking.list_queues()
+
+      {:ok, %Asset.Engine{} = engine} = Asset.create_engine(%{name: "new engine"})
+      {:ok, _engine} = Asset.set_engine_matchmaking(engine.id)
+
+      queues = Matchmaking.list_queues()
+
+      Enum.each(queues, fn {qid, data} ->
+        assert is_map(data) && data.engines == [%{version: engine.name}], "#{qid} has valid data"
+      end)
     end
   end
 
@@ -133,6 +142,29 @@ defmodule Teiserver.Matchmaking.QueueTest do
 
       {:ok, _pid} = Matchmaking.join_queue(queue_id, version, user.id)
       assert :ok = Matchmaking.leave_queue(queue_id, user.id)
+    end
+  end
+
+  describe "assets" do
+    test "no-op when no asset has changed", ctx do
+      ref = Process.monitor(ctx.queue_pid)
+      :ok = Matchmaking.refresh_assets(ctx.queue_id)
+      refute_receive {:DOWN, ^ref, :process, _pid, _reason}
+    end
+
+    test "queue restarts when map changes", ctx do
+      ref = Process.monitor(ctx.queue_pid)
+
+      AssetFixtures.create_map(%{
+        spring_name: "new map",
+        display_name: "new map",
+        thumbnail_url: "https://www.beyondallreason.info/map/?!",
+        matchmaking_queues: [ctx.queue_id]
+      })
+
+      :ok = Matchmaking.refresh_assets(ctx.queue_id)
+      assert_receive {:DOWN, ^ref, :process, _pid, _reason}
+      Polling.poll_until_some(fn -> Matchmaking.lookup_queue(ctx.queue_id) end)
     end
   end
 

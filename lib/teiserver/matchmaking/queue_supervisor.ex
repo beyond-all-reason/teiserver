@@ -107,7 +107,9 @@ defmodule Teiserver.Matchmaking.QueueSupervisor do
 
   @impl DynamicSupervisor
   def init(_init_arg) do
-    DynamicSupervisor.init(strategy: :one_for_one)
+    # when changing assets, like game or engine, it'll trigger the restart of
+    # all queues, so we need at least the number of queue for max_restarts
+    DynamicSupervisor.init(strategy: :one_for_one, max_restarts: 10)
   end
 
   def setup_queues!, do: get_queues() |> setup_queues!()
