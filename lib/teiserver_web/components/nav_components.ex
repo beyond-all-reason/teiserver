@@ -49,7 +49,9 @@ defmodule TeiserverWeb.NavComponents do
         <a class="navbar-brand" href="/">
           <img src={~p"/images/logo/logo.svg"} alt="BAR Logo" style="height: 24px; width: auto;" />
         </a>
-
+        <div class="p-2 text-lg font-semibold" id="server_clock" phx-hook="ServerClock">
+          {DateTime.utc_now() |> Calendar.strftime("%H:%M")}
+        </div>
         <button
           class="navbar-toggler"
           type="button"
@@ -154,6 +156,16 @@ defmodule TeiserverWeb.NavComponents do
     ~H"""
     <nav>
       <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+        <li>
+          <div
+            phx-hook="ServerClock"
+            id="server_clock"
+            title="Server Time"
+            class="p-0 font-semibold text-lg hover:bg-inherit active:bg-inherit hover:cursor-default active:cursor-default active:text-inherit"
+          >
+            {DateTime.utc_now() |> Calendar.strftime("%H:%M")}
+          </div>
+        </li>
         <li>
           <%!--
             Hiding this as when selected will swap to dark as part of tweaks made
