@@ -346,9 +346,8 @@ defmodule Teiserver.Account.User do
   Steam users have no email or password
   """
   def steam_registration_changeset(user, attrs) do
-    # Same defaults as other registrations
     defaults = %{
-      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
+      icon: "fa-brands fa-steam",
       colour: StylingHelper.random_colour()
     }
 
