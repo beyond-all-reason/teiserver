@@ -1,11 +1,18 @@
 defmodule TeiserverWeb.OAuth.CodeControllerTest do
   alias Phoenix.ConnTest
+  alias Teiserver.Account
   alias Teiserver.Bot
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
+  alias Teiserver.Player
+  alias Teiserver.Steam
+  alias Teiserver.Support.Tachyon
   alias TeiserverWeb.Endpoint
+
   use TeiserverWeb.ConnCase
+
+  import Mock
 
   defp get_valid_data(%{app: app, code: code, code_attrs: code_attrs}) do
     %{
@@ -57,6 +64,32 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
   defp setup_token(context) do
     {:ok, token} = OAuth.create_token(context[:user], context[:app], scopes: context[:app].scopes)
     %{token: token}
+  end
+
+  # Steam token exchange
+  defp exchange_data(app, overrides \\ %{}) do
+    Map.merge(
+      %{
+        client_id: app.uid,
+        grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+        scope: "tachyon.lobby",
+        requested_token_type: "urn:ietf:params:oauth:token-type:access_token",
+        subject_token_type: "urn:tachyon:oauth:token-type:steam_session_ticket",
+        subject_token: "1234567890abcde"
+      },
+      overrides
+    )
+  end
+
+  defp steam_mock(steam_id, overrides \\ []) do
+    Keyword.merge(
+      [
+        authenticate_ticket: fn _ticket -> {:ok, steam_id} end,
+        check_app_ownership: fn _steam_id -> :ok end,
+        get_persona_name: fn _steam_id -> {:ok, "SteamUser"} end
+      ],
+      overrides
+    )
   end
 
   describe "exchange code for token" do
@@ -207,6 +240,186 @@ defmodule TeiserverWeb.OAuth.CodeControllerTest do
 
     # Note: verifier code and redirect URI matching is tested in OAuth.exchange_code
     # so they are omitted here
+  end
+
+  describe "Steam token exchnage" do
+    setup do
+      original = Application.get_env(:teiserver, Steam)
+
+      Application.put_env(:teiserver, Steam, Keyword.put(original, :api_key, "test-key"))
+
+      on_exit(fn -> Application.put_env(:teiserver, Steam, original) end)
+
+      owner = GeneralTestLib.make_user()
+
+      {:ok, app} =
+        OAuth.create_application(%{
+          name: "Steam client",
+          uid: "steam_test_app",
+          owner_id: owner.id,
+          scopes: ["tachyon.lobby"]
+        })
+
+      {:ok, app: app, steam_id: :rand.uniform(100_000_000)}
+    end
+
+    @tag :tachyon
+    test "successful exchange", ctx do
+      with_mock Steam, [:passthrough], steam_mock(ctx.steam_id) do
+        json_resp =
+          post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app))
+          |> json_response(200)
+
+        assert json_resp["issued_token_type"] == "urn:ietf:params:oauth:token-type:access_token"
+        assert json_resp["scope"] == "tachyon.lobby"
+        assert is_binary(json_resp["access_token"]), "has access_token"
+        assert is_integer(json_resp["expires_in"]), "has expires_in"
+        assert is_binary(json_resp["refresh_token"]), "has refresh_token"
+        assert json_resp["token_type"] == "Bearer", "bearer token type"
+
+        {:ok, token} = OAuth.get_valid_token(json_resp["access_token"])
+
+        user = Account.get_user_by_steam_id(ctx.steam_id)
+
+        assert token.owner_id == user.id
+
+        # Can connect via Tachyon
+        _client = Tachyon.connect(token)
+        assert is_pid(Player.lookup_connection(token.owner_id))
+      end
+    end
+
+    test "requested_token_type and scope are optional", ctx do
+      data =
+        ctx.app
+        |> exchange_data()
+        |> Map.drop([:requested_token_type, :scope])
+
+      with_mock Steam, [:passthrough], steam_mock(ctx.steam_id) do
+        json_resp = post(ctx.conn, ~p"/oauth/token", data) |> json_response(200)
+
+        assert json_resp["scope"] == "tachyon.lobby"
+      end
+    end
+
+    test "Steam users can share a name", ctx do
+      GeneralTestLib.make_user(%{"name" => "ExistingName"})
+
+      mock = steam_mock(ctx.steam_id, get_persona_name: fn _id -> {:ok, "ExistingName"} end)
+
+      with_mock Steam, [:passthrough], mock do
+        post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app)) |> json_response(200)
+      end
+
+      assert Account.get_user_by_steam_id(ctx.steam_id).name == "ExistingName"
+    end
+
+    test "not owning the game", ctx do
+      mock =
+        steam_mock(ctx.steam_id, check_app_ownership: fn _steam_id -> {:error, :not_owned} end)
+
+      with_mock Steam, [:passthrough], mock do
+        assert %{
+                 "error" => "invalid_request",
+                 "error_description" => "Steam account does not own the game"
+               } = post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app)) |> json_response(400)
+      end
+
+      assert Account.get_user_by_steam_id(ctx.steam_id) == nil
+    end
+
+    test "publisher banned", ctx do
+      mock =
+        steam_mock(ctx.steam_id,
+          check_app_ownership: fn _steam_id -> {:error, :publisher_banned} end
+        )
+
+      with_mock Steam, [:passthrough], mock do
+        assert %{
+                 "error" => "invalid_request",
+                 "error_description" => "Steam account banned"
+               } = post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app)) |> json_response(400)
+      end
+
+      assert Account.get_user_by_steam_id(ctx.steam_id) == nil
+    end
+
+    test "Steam unavailable", ctx do
+      mock =
+        steam_mock(ctx.steam_id, authenticate_ticket: fn _ticket -> {:error, :steam_error} end)
+
+      with_mock Steam, [:passthrough], mock do
+        assert %{"error" => "temporarily_unavailable"} =
+                 post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app)) |> json_response(503)
+      end
+    end
+
+    test "unsupported when Steam isn't configured", %{conn: conn, app: app} do
+      Application.put_env(
+        :teiserver,
+        Steam,
+        Keyword.put(Application.get_env(:teiserver, Steam), :api_key, nil)
+      )
+
+      assert %{"error" => "unsupported_grant_type"} =
+               post(conn, ~p"/oauth/token", exchange_data(app)) |> json_response(400)
+    end
+
+    test "missing required parameters", %{conn: conn, app: app} do
+      for key <- [:subject_token, :subject_token_type, :client_id] do
+        data = app |> exchange_data() |> Map.delete(key)
+
+        assert %{"error" => "invalid_request", "error_description" => "missing #{key}"} ==
+                 post(conn, ~p"/oauth/token", data) |> json_response(400)
+      end
+    end
+
+    test "unsupported subject_token_type", %{conn: conn, app: app} do
+      data = exchange_data(app, %{subject_token_type: "urn:ietf:params:oauth:token-type:jwt"})
+
+      with_mock Steam, [:passthrough], [] do
+        assert %{
+                 "error" => "invalid_request",
+                 "error_description" => "unsupported subject_token_type"
+               } == post(conn, ~p"/oauth/token", data) |> json_response(400)
+      end
+    end
+
+    test "unsupported requested_token_type", %{conn: conn, app: app} do
+      data =
+        exchange_data(app, %{requested_token_type: "urn:ietf:params:oauth:token-type:id_token"})
+
+      assert %{
+               "error" => "invalid_request",
+               "error_description" => "unsupported requested_token_type"
+             } == post(conn, ~p"/oauth/token", data) |> json_response(400)
+    end
+
+    test "unknown client_id", %{conn: conn, app: app} do
+      data = exchange_data(app, %{client_id: "unknown_client"})
+
+      assert %{"error" => "invalid_request"} =
+               post(conn, ~p"/oauth/token", data) |> json_response(400)
+    end
+
+    test "scope not allowed for the client", %{conn: conn, app: app} do
+      data = exchange_data(app, %{scope: "admin.map"})
+
+      assert %{"error" => "invalid_scope"} =
+               post(conn, ~p"/oauth/token", data) |> json_response(400)
+    end
+
+    test "invalid ticket", ctx do
+      mock =
+        steam_mock(ctx.steam_id, authenticate_ticket: fn _ticket -> {:error, :invalid_ticket} end)
+
+      with_mock Steam, [:passthrough], mock do
+        assert %{
+                 "error" => "invalid_request",
+                 "error_description" => "invalid Steam session ticket"
+               } == post(ctx.conn, ~p"/oauth/token", exchange_data(ctx.app)) |> json_response(400)
+      end
+    end
   end
 
   describe "get token from client credentials" do
