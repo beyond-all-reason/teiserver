@@ -49,7 +49,9 @@ defmodule TeiserverWeb.NavComponents do
         <a class="navbar-brand" href="/">
           <img src={~p"/images/logo/logo.svg"} alt="BAR Logo" style="height: 24px; width: auto;" />
         </a>
-
+        <div class="p-2 text-lg font-semibold" id="server_clock" phx-hook={"ServerClock"}>
+        {DateTime.utc_now() |> Calendar.strftime("%H:%M")}
+        </div>
         <button
           class="navbar-toggler"
           type="button"
