@@ -7,7 +7,7 @@ class CommandPalette extends ViewHook {
   mounted() {
     this.handleKeydown = (event) => {
       if (
-        event.event.code === "KeyK" &&
+        event.code === "KeyK" &&
         (event.metaKey || event.ctrlKey)
       ) {
         event.preventDefault()
