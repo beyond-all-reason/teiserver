@@ -110,7 +110,7 @@ defmodule Teiserver.Account.Registration do
     # Now add them to the cache
     Account.recache_user(user.id)
 
-    if not String.ends_with?(user.email, "@agents") do
+    if user.email != nil and not String.ends_with?(user.email, "@agents") do
       case EmailHelper.new_user(user) do
         {:error, error} ->
           Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect(error)}")

@@ -87,9 +87,10 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id country bot email_change_code lobby_hash chobby_hash lobby_client)a
     )
-    |> validate_required([:name, :email, :password, :permissions])
+    |> validate_required_identity()
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
+    |> unique_constraint(:steam_id)
     |> validate_name_change()
     |> put_md5_password_hash()
   end
@@ -105,9 +106,10 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id rank country bot email_change_code lobby_hash chobby_hash lobby_client email_last_changed_at)a
     )
-    |> validate_required([:name, :email, :password, :permissions])
+    |> validate_required_identity()
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
+    |> unique_constraint(:steam_id)
     |> validate_change(:email, fn :email, email ->
       case Account.valid_email?(email) do
         :ok -> []
@@ -223,9 +225,10 @@ defmodule Teiserver.Account.User do
       attrs,
       ~w(name email password icon colour data roles permissions restrictions restricted_until last_login last_played last_logout discord_id steam_id)a
     )
-    |> validate_required([:name, :email, :password, :permissions])
+    |> validate_required_identity()
     |> unique_constraint(:email)
     |> unique_constraint(:discord_id)
+    |> unique_constraint(:steam_id)
     |> validate_change(:email, fn :email, email ->
       case Account.valid_email?(email) do
         :ok -> []
@@ -337,6 +340,38 @@ defmodule Teiserver.Account.User do
     user
     |> cast(attrs, [:discord_id])
     |> unique_constraint(:discord_id)
+  end
+
+  @doc """
+  Steam users have no email or password
+  """
+  def steam_registration_changeset(user, attrs) do
+    defaults = %{
+      icon: "fa-brands fa-steam",
+      colour: StylingHelper.random_colour()
+    }
+
+    user
+    |> cast(Map.merge(defaults, attrs), [
+      :steam_id,
+      :name,
+      :icon,
+      :colour,
+      :roles,
+      :permissions
+    ])
+    |> unique_constraint(:steam_id)
+    |> validate_required([:steam_id, :name, :roles, :permissions])
+  end
+
+  defp validate_required_identity(changeset) do
+    changeset = validate_required(changeset, [:name, :permissions])
+
+    if get_field(changeset, :steam_id) == nil do
+      validate_required(changeset, [:email, :password])
+    else
+      changeset
+    end
   end
 
   defp change_plain_password(user, attrs) do

@@ -268,6 +268,11 @@ config :teiserver, Teiserver.PromEx,
 
 config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Api
 
+config :teiserver, Teiserver.Steam,
+  api_key: nil,
+  app_id: nil,
+  identity: nil
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

@@ -176,11 +176,12 @@ defmodule Teiserver.OAuth do
 
   @spec create_token(
           User.t() | Bot.t(),
-          %{
-            :id => integer(),
-            :scopes => Application.scopes(),
-            optional(:original_scopes) => Application.scopes()
-          },
+          Application.t()
+          | %{
+              :id => integer(),
+              :scopes => Application.scopes(),
+              optional(:original_scopes) => Application.scopes()
+            },
           create_refresh: boolean() | options(),
           scopes: Application.scopes()
         ) ::

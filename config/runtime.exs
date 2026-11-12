@@ -196,6 +196,24 @@ config :teiserver, Teiserver.OAuth,
     Teiserver.ConfigHelpers.get_env("TEI_OAUTH_ISSUER", nil) ||
       Application.get_env(:teiserver, Teiserver.OAuth)[:issuer] || "https://#{domain_name}"
 
+config :teiserver, Teiserver.Steam,
+  api_key:
+    Teiserver.ConfigHelpers.get_env(
+      "TEI_STEAM_API_KEY",
+      Application.get_env(:teiserver, Teiserver.Steam)[:api_key]
+    ),
+  app_id:
+    Teiserver.ConfigHelpers.get_env(
+      "TEI_STEAM_APP_ID",
+      Application.get_env(:teiserver, Teiserver.Steam)[:app_id],
+      :int
+    ),
+  identity:
+    Teiserver.ConfigHelpers.get_env(
+      "TEI_STEAM_IDENTITY",
+      Application.get_env(:teiserver, Teiserver.Steam)[:identity]
+    )
+
 if Teiserver.ConfigHelpers.get_env("TEI_ENABLE_EMAIL_INTEGRATION", false, :bool) do
   default_config = Application.get_env(:teiserver, Teiserver.Mailer)
 

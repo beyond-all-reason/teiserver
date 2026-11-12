@@ -37,7 +37,7 @@
   <:col :let={user} label="User">{user.name}</:col>
   <:col :let={user} :if={@is_moderator?} label="Email">
     <span :if={@preferences.email == "partial"}>
-      {user.email |> String.split("@") |> List.last()}
+      {user.email && user.email |> String.split("@") |> List.last()}
     </span>
     <span :if={@preferences.email == "full"}>{user.email}</span>
   </:col>

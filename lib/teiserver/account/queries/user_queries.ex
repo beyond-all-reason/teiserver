@@ -358,6 +358,12 @@ defmodule Teiserver.Account.UserQueries do
       where: users.id not in ^ids
   end
 
+  @spec where_steam_id(t(), pos_integer()) :: t()
+  def where_steam_id(query, steam_id) do
+    from users in query,
+      where: users.steam_id == ^steam_id
+  end
+
   # Where name
   @spec where_name(t(), String.t()) :: t()
   def where_name(query, ""), do: query
