@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
 
   use TeiserverWeb, :live_view
 
+  @impl LiveView
   def render(assigns) do
     ~H"""
     <div class="single-block-content">
@@ -17,7 +18,7 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
             for={@form}
             id="login_form"
             action={~p"/login"}
-            phx-update="ignore"
+            phx-change="validate"
             class="w-full"
           >
             <.input
@@ -62,10 +63,39 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
     """
   end
 
+  @impl LiveView
   def mount(_params, _session, socket) do
     email = Flash.get(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
 
     {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
+  end
+
+  @impl LiveView
+  def handle_event("validate", %{"user" => params}, socket) do
+    form = socket.assigns.form
+
+    form =
+      cond do
+        String.trim(params["email"]) == "" ->
+          to_form(params, as: "user")
+
+        not String.contains?(params["email"], "@") ->
+          form
+          |> to_form(errors: [email: {"Must be an email, not a username", []}])
+
+        not String.contains?(params["email"], ".") ->
+          form
+          |> to_form(errors: [email: {"Must be an email, not a username", []}])
+
+        true ->
+          # Clear the errors, we are not using a changeset and it will only ever
+          # be one field so we're using this method
+          to_form(params, as: "user")
+      end
+
+    socket
+    |> assign(form: form)
+    |> noreply()
   end
 end
