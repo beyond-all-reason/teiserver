@@ -2,6 +2,7 @@ defmodule Teiserver.Account.GrowthReport do
   @moduledoc false
 
   alias Teiserver.Helper.ChartHelper
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Logging
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
@@ -140,23 +141,23 @@ defmodule Teiserver.Account.GrowthReport do
       ])
 
     # Singleplayer
-    singleplayer_counts =
-      ChartHelper.build_lines(logs, [
-        %{
-          name: "Scenarios started",
-          paths: [
-            ~w"events complex_anon game_start:singleplayer:scenario_start",
-            ~w"events complex_client game_start:singleplayer:scenario_start"
-          ]
-        },
-        %{
-          name: "Skirmishes",
-          paths: [
-            ~w"events complex_anon game_start:singleplayer:lone_other_skirmish",
-            ~w"events complex_client game_start:singleplayer:lone_other_skirmish"
-          ]
-        }
-      ])
+    singleplayer_counts = []
+    # ChartHelper.build_lines(logs, [
+    #   %{
+    #     name: "Scenarios started",
+    #     paths: [
+    #       ~w"events complex_anon game_start:singleplayer:scenario_start",
+    #       ~w"events complex_client game_start:singleplayer:scenario_start"
+    #     ]
+    #   },
+    #   %{
+    #     name: "Skirmishes",
+    #     paths: [
+    #       ~w"events complex_anon game_start:singleplayer:lone_other_skirmish",
+    #       ~w"events complex_client game_start:singleplayer:lone_other_skirmish"
+    #     ]
+    #   }
+    # ])
 
     %{
       unique_counts: [date_keys | unique_counts],
@@ -168,7 +169,7 @@ defmodule Teiserver.Account.GrowthReport do
     }
   end
 
-  defp get_server_logs(time_unit, limit) do
+  def get_server_logs(time_unit, limit) do
     logs =
       case time_unit do
         "Day" ->
@@ -203,5 +204,41 @@ defmodule Teiserver.Account.GrowthReport do
       end
 
     Enum.reverse(logs)
+  end
+
+  def build_charts(time_unit, log_count) do
+    case get_server_logs(time_unit, log_count) do
+      [] ->
+        {:error, :no_data}
+      logs ->
+
+
+    date_keys = Enum.map(logs, fn log -> log.date |> DateHelper.date_to_str(format: :ymd)  end)
+
+       chart =
+      LiveCharts.build(%{
+        id: "unique_users_players",
+        type: :area,
+        series: [
+          %{name: "Unique users", data: get_unique_players(logs)},
+          %{name: "Unique players", data: get_unique_users(logs)}
+        ],
+        options: %{
+          xaxis: %{
+            categories: date_keys
+          }
+        },
+        adapter: LiveCharts.Adapter.ApexCharts
+      })
+      {:ok, chart}
+  end
+
+  end
+  defp get_unique_players(logs) do
+
+    Enum.map(logs, fn log -> log.data["aggregates"]["stats"]["unique_players"] end) |> IO.inspect
+  end
+  defp get_unique_users(logs) do
+    Enum.map(logs, fn log -> log.data["aggregates"]["stats"]["unique_users"] end)
   end
 end
