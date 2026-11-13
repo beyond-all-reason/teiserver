@@ -72,6 +72,14 @@ defmodule TeiserverWeb.AdminLive.ToolsComponents do
           Retention Report
         </.section_menu_link>
 
+        <.section_menu_link
+          icon="fa-seedling"
+          url={~p"/admin/tools/growth_report"}
+          active={@active == "growth_report"}
+        >
+          Growth Report
+        </.section_menu_link>
+
         {render_slot(@extra_links)}
       </ul>
 

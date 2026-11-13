@@ -125,6 +125,14 @@ defmodule TeiserverWeb.AdminLive.Menu do
       >
         Retention Report
       </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@scope, ~w(Admin))}
+        icon="fa-seedling"
+        url={~p"/admin/tools/growth_report"}
+      >
+        Growth Report
+      </.menu_page_link>
     </div>
 
     <div class="menu-grid">
