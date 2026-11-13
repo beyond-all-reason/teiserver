@@ -1,0 +1,73 @@
+<ToolsComponents.section_menu
+  active="growth_report"
+  scope={@scope}
+/>
+
+<.header>
+  Growth report
+</.header>
+
+<.simple_form
+  :if={@connected?}
+  for={@form}
+  id="growth_form"
+  phx-change="update"
+>
+  <div class="flex-col flex my-2">
+    <div class="md:flex-row flex-col flex">
+      <div class="flex-1 m-2">
+        <.input_tw
+          field={@form[:time_unit]}
+          type="select"
+          label="Time unit:"
+          options={@time_units}
+        />
+      </div>
+      <div class="flex-1 m-2">
+        <.input_tw
+          field={@form[:log_count]}
+          type="text"
+          inputmode="numeric"
+          label="Log count:"
+        />
+      </div>
+      <div class="flex-1 m-2">
+        <.input_tw
+          field={@form[:columns]}
+          type="text"
+          inputmode="numeric"
+          label="Columns:"
+        />
+      </div>
+
+      <div class="flex-1 m-2">
+        <.input_tw
+          field={@form[:chart_type]}
+          type="select"
+          options={@chart_types}
+          label="Chart type:"
+        />
+      </div>
+    </div>
+    <div class="flex-1 m-2 self-center">
+      <%= if @form.source.valid? do %>
+        <.button type="button" phx-click="fetch">
+          UPDATE
+        </.button>
+      <% else %>
+        <.button type="button" disabled={true}>
+          UPDATE
+        </.button>
+      <% end %>
+    </div>
+  </div>
+</.simple_form>
+<div class="flex">
+  <div class="flex-1 apexchart-container">
+    <h3 class="text-large font-bold">Chart</h3>
+    <LiveCharts.chart
+      :if={@connected? == true and not is_nil(@charts.unique)}
+      chart={@charts.unique}
+    />
+  </div>
+</div>
