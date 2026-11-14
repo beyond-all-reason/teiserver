@@ -7,20 +7,25 @@
     <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
   </.link>
 
-  <.form
-    :if={
-      @user &&
-        Teiserver.Account.ViewAs.can_view_as?(@real_user || @current_user, @user)
-    }
-    for={%{}}
-    action={~p"/view_as/#{@user_id}"}
-    method="post"
-    class="inline me-4"
-  >
-    <.button type="submit" class="btn btn-sm btn-warning btn-soft">
-      View site as this user
-    </.button>
-  </.form>
+  <%= if @user && Teiserver.Account.ViewAs.can_use?(@real_user || @current_user) do %>
+    <% view_as_actor = @real_user || @current_user %>
+    <%= if Teiserver.Account.ViewAs.can_view_as?(view_as_actor, @user) do %>
+      <.form for={%{}} action={~p"/view_as/#{@user_id}"} method="post" class="inline me-4">
+        <.button type="submit" class="btn btn-sm btn-warning btn-soft">
+          View site as this user
+        </.button>
+      </.form>
+    <% else %>
+      <span
+        class="tooltip tooltip-bottom me-4"
+        data-tip={Teiserver.Account.ViewAs.denial_reason(view_as_actor, @user)}
+      >
+        <.button type="button" class="btn btn-sm btn-warning btn-soft" disabled>
+          View site as this user
+        </.button>
+      </span>
+    <% end %>
+  <% end %>
 
   <.link
     navigate={~p"/moderation/users/#{@user_id}/new/note"}

@@ -30,6 +30,36 @@ defmodule Teiserver.Account.ViewAs do
   def can_view_as?(_real, _target), do: false
 
   @doc """
+  Whether the viewer is allowed to use "view as" at all (used to decide if the
+  button should be shown, enabled or not).
+  """
+  @spec can_use?(User.t() | nil) :: boolean()
+  def can_use?(%User{} = real), do: AuthLib.allow?(real, @permission)
+  def can_use?(_real), do: false
+
+  @doc """
+  Human readable reason why `real` can't view as `target`, or nil if they can.
+  """
+  @spec denial_reason(User.t() | nil, User.t() | nil) :: String.t() | nil
+  def denial_reason(%User{} = real, %User{} = target) do
+    cond do
+      can_view_as?(real, target) ->
+        nil
+
+      real.id == target.id ->
+        "You can't view the site as yourself."
+
+      AuthLib.allow?(target, @permission) ->
+        "You can't view the site as users with Admin permissions (this includes Server accounts), to prevent privilege escalation."
+
+      true ->
+        "You can't view the site as this user."
+    end
+  end
+
+  def denial_reason(_real, _target), do: nil
+
+  @doc """
   Given the logged-in user and the session value, returns
   `{effective_user, real_user_or_nil}`. Falls back to the real user if the
   request is invalid or no longer permitted.

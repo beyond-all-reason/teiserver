@@ -27,4 +27,18 @@ defmodule Teiserver.Account.ViewAsTest do
     assert {^admin, nil} = ViewAs.resolve(admin, "abc")
     assert {^admin, nil} = ViewAs.resolve(admin, nil)
   end
+
+  test "denial_reason explains why viewing as is not allowed", %{admin: admin, other: other} do
+    other_admin = AccountFixtures.user_fixture(%{roles: ["Admin"]})
+
+    assert ViewAs.denial_reason(admin, other) == nil
+    assert ViewAs.denial_reason(admin, admin) =~ "yourself"
+    assert ViewAs.denial_reason(admin, other_admin) =~ "Admin permissions"
+  end
+
+  test "can_use? is only true for admins", %{admin: admin, other: other} do
+    assert ViewAs.can_use?(admin)
+    refute ViewAs.can_use?(other)
+    refute ViewAs.can_use?(nil)
+  end
 end

@@ -19,10 +19,22 @@
   on the Teiserver repo so we can ensure it's not missed.
 </div>
 
-<%= if Teiserver.Account.ViewAs.can_view_as?(@conn.assigns[:real_user] || @current_user, @user) do %>
-  <.form :let={_f} for={%{}} action={~p"/view_as/#{@user.id}"} method="post" class="mb-3">
-    <button type="submit" class="btn btn-outline-warning">View site as this user</button>
-  </.form>
+<% view_as_actor = @conn.assigns[:real_user] || @current_user %>
+<%= if Teiserver.Account.ViewAs.can_use?(view_as_actor) do %>
+  <%= if Teiserver.Account.ViewAs.can_view_as?(view_as_actor, @user) do %>
+    <.form :let={_f} for={%{}} action={~p"/view_as/#{@user.id}"} method="post" class="mb-3">
+      <button type="submit" class="btn btn-outline-warning">View site as this user</button>
+    </.form>
+  <% else %>
+    <span
+      class="d-inline-block mb-3"
+      title={Teiserver.Account.ViewAs.denial_reason(view_as_actor, @user)}
+    >
+      <button type="button" class="btn btn-outline-warning" disabled style="pointer-events: none;">
+        View site as this user
+      </button>
+    </span>
+  <% end %>
 <% end %>
 
 <div class="row section-menu">
