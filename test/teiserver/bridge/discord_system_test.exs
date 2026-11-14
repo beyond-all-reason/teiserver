@@ -73,7 +73,9 @@ defmodule Teiserver.Bridge.DiscordSystemTest do
 
   test "nostrum still raises the error text we use to recognise a rejected token" do
     # start_error_message/1 matches on this text, if a nostrum upgrade changes it
-    # this fails and the matching needs to be updated
+    # this fails and the matching needs to be updated.
+    # TODO: remove this test together with the text matching once
+    # https://github.com/Kraigie/nostrum/pull/736 is released and we upgrade.
     source = :compile |> Util.module_info() |> Keyword.fetch!(:source) |> to_string()
     assert File.read!(source) =~ "Authentication rejected"
   end

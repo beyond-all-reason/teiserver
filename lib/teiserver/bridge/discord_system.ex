@@ -42,6 +42,8 @@ defmodule Teiserver.Bridge.DiscordSystem do
   def start_error_message(reason) do
     # Nostrum raises this while fetching the gateway url, so by the time we see
     # it, it is buried in nested supervisor start errors.
+    # TODO: once https://github.com/Kraigie/nostrum/pull/736 is released and we
+    # upgrade, match on %Nostrum.Error.ApiError{status_code: 401} instead of the text.
     if inspect(reason, limit: :infinity) =~ "Authentication rejected" do
       "Discord bridge not started, Discord rejected TEI_DISCORD_BOT_TOKEN (invalid or revoked token)"
     else
