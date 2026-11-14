@@ -15,9 +15,23 @@ defmodule Teiserver.Bridge.DiscordSystem do
   def init(_init_arg) do
     {:ok, sup_flags} = DynamicSupervisor.init(strategy: :one_for_one)
 
-    Task.Supervisor.start_child(Teiserver.TaskSupervisor, &start/0)
+    Task.Supervisor.start_child(Teiserver.TaskSupervisor, &start_and_log/0)
 
     {:ok, sup_flags}
+  end
+
+  defp start_and_log do
+    case start() do
+      {:error, reason} ->
+        Logger.error(
+          "Failed to start Discord bridge (check TEI_DISCORD_BOT_TOKEN is a valid bot token): #{inspect(reason)}"
+        )
+
+      _other ->
+        :ok
+    end
+
+    :ok
   end
 
   @spec start :: Supervisor.on_start_child() | :disabled
