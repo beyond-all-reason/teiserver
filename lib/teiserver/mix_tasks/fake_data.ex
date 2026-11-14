@@ -59,7 +59,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     :timer.sleep(50)
 
     IO.puts(
-      "\nFake data insertion complete. You can now login with the email 'root@localhost' and password 'password'\nA one-time link has been created: http://localhost:4000/one_time_login/fakedata_code\n"
+      "\nFake data insertion complete. You can now login with the email 'root@teiserver.local' and password 'password'\nA one-time link has been created: http://localhost:4000/one_time_login/fakedata_code\n"
     )
   end
 
@@ -67,7 +67,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     {:ok, user} =
       Account.create_user(%{
         name: "root",
-        email: "root@localhost",
+        email: "root@teiserver.local",
         password: Account.spring_md5_password("password"),
         roles: ["Server", "Verified"],
         permissions: ["Server"],
@@ -494,7 +494,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   end
 
   defp make_one_time_code do
-    root_user = Account.get_user_by_email("root@localhost")
+    root_user = Account.get_user_by_email("root@teiserver.local")
 
     Config.update_site_config("user.Enable one time links", "true")
 

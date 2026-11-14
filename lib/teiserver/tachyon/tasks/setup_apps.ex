@@ -2,7 +2,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   @moduledoc """
   Ensure the database has the required OAuth applications for tachyon lobby
   and asset managements
-  This tasks requires the root user to be setup (root@localhost)
+  This tasks requires the root user to be setup (root@teiserver.local)
   """
 
   alias Teiserver.Account
@@ -73,8 +73,8 @@ defmodule Teiserver.Tachyon.Tasks.SetupApps do
   end
 
   defp find_root_user! do
-    case Account.query_user(search: [email_lower: "root@localhost"]) do
-      nil -> raise "Cannot find root user root@localhost, set it up first"
+    case Account.query_user(search: [email_lower: "root@teiserver.local"]) do
+      nil -> raise "Cannot find root user root@teiserver.local, set it up first"
       root -> root
     end
   end
