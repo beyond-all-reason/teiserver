@@ -1,5 +1,6 @@
 defmodule Teiserver.Bridge.DiscordSystem do
   @moduledoc false
+  alias Nostrum.Token
   alias Teiserver.Communication
 
   use DynamicSupervisor
@@ -23,9 +24,7 @@ defmodule Teiserver.Bridge.DiscordSystem do
   defp start_and_log do
     case start() do
       {:error, reason} ->
-        Logger.error(
-          "Failed to start Discord bridge (check TEI_DISCORD_BOT_TOKEN is a valid bot token): #{inspect(reason)}"
-        )
+        reason |> start_error_message() |> Logger.error()
 
       _other ->
         :ok
@@ -34,16 +33,46 @@ defmodule Teiserver.Bridge.DiscordSystem do
     :ok
   end
 
-  @spec start :: Supervisor.on_start_child() | :disabled
+  @doc false
+  @spec start_error_message(term()) :: String.t()
+  def start_error_message({:invalid_token, message}) do
+    "Discord bridge not started, TEI_DISCORD_BOT_TOKEN is missing or malformed: #{message}"
+  end
+
+  def start_error_message(reason) do
+    # Nostrum raises this while fetching the gateway url, so by the time we see
+    # it, it is buried in nested supervisor start errors.
+    if inspect(reason, limit: :infinity) =~ "Authentication rejected" do
+      "Discord bridge not started, Discord rejected TEI_DISCORD_BOT_TOKEN (invalid or revoked token)"
+    else
+      "Failed to start Discord bridge: #{inspect(reason)}"
+    end
+  end
+
+  @spec start :: Supervisor.on_start_child() | {:error, {:invalid_token, String.t()}} | :disabled
   def start do
     if Communication.use_discord?() do
-      DynamicSupervisor.start_child(
-        __MODULE__,
-        Supervisor.child_spec(Teiserver.Bridge.DiscordBotSupervisor, restart: :temporary)
-      )
+      case check_token() do
+        :ok ->
+          DynamicSupervisor.start_child(
+            __MODULE__,
+            Supervisor.child_spec(Teiserver.Bridge.DiscordBotSupervisor, restart: :temporary)
+          )
+
+        {:error, _reason} = error ->
+          error
+      end
     else
       :disabled
     end
+  end
+
+  # Nostrum raises on a missing or malformed token when it boots, which would
+  # otherwise surface as an opaque supervisor start error.
+  defp check_token do
+    Token.check_token!()
+  rescue
+    e -> {:error, {:invalid_token, Exception.message(e)}}
   end
 
   @spec restart(String.t()) :: Supervisor.on_start_child() | :disabled
