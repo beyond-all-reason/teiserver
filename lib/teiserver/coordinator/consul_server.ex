@@ -34,6 +34,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum fixids)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
   @admin_commands ~w(shuffle)
+  @event_organizer_commands ~w(playerlimit)
 
   # @handled_by_lobby ~w(explain)
   @splitter "########################################"
@@ -1057,6 +1058,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       # Allow all except Admin only commands for moderators
       Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
+        true
+
+      Enum.member?(@event_organizer_commands, cmd.command) and
+          Auth.is_event_organizer?(senderid) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
