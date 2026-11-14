@@ -121,21 +121,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     ApplicationCommand.delete_guild_command(guild_id, cmd_id)
   end
 
-  @spec new_dm_channel(atom | %{:recipients => any, optional(any) => any}) :: :ok
-  def new_dm_channel(dm_channel) do
-    case dm_channel.recipients do
-      [recipient] ->
-        Teiserver.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
-        Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
-        nil
-
-      _other ->
-        nil
-    end
-
-    :ok
-  end
-
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
     post_to_discord =

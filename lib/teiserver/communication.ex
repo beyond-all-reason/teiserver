@@ -201,9 +201,6 @@ defmodule Teiserver.Communication do
     |> Repo.all()
   end
 
-  @spec build_text_callback_cache() :: :ok
-  defdelegate build_text_callback_cache, to: TextCallbackLib
-
   @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
   defdelegate update_text_callback_cache(args), to: TextCallbackLib

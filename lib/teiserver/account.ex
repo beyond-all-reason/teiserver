@@ -2020,27 +2020,6 @@ defmodule Teiserver.Account do
                 }
               )
 
-              # Clear caches for both users
-              Teiserver.cache_delete(
-                :account_incoming_friend_request_cache,
-                existing_request.from_user_id
-              )
-
-              Teiserver.cache_delete(
-                :account_outgoing_friend_request_cache,
-                existing_request.from_user_id
-              )
-
-              Teiserver.cache_delete(
-                :account_incoming_friend_request_cache,
-                existing_request.to_user_id
-              )
-
-              Teiserver.cache_delete(
-                :account_outgoing_friend_request_cache,
-                existing_request.to_user_id
-              )
-
               {:ok, :auto_accepted}
 
             {:error, reason} ->
@@ -2074,16 +2053,6 @@ defmodule Teiserver.Account do
             userid: friend_request.to_user_id,
             from_id: friend_request.from_user_id
           }
-        )
-
-        Teiserver.cache_delete(
-          :account_incoming_friend_request_cache,
-          friend_request.to_user_id
-        )
-
-        Teiserver.cache_delete(
-          :account_outgoing_friend_request_cache,
-          friend_request.from_user_id
         )
 
         {:ok, friend_request}
@@ -2124,8 +2093,6 @@ defmodule Teiserver.Account do
 
   """
   def delete_friend_request(%FriendRequest{} = friend_request) do
-    Teiserver.cache_delete(:account_incoming_friend_request_cache, friend_request.to_user_id)
-    Teiserver.cache_delete(:account_outgoing_friend_request_cache, friend_request.from_user_id)
     Repo.delete(friend_request)
   end
 

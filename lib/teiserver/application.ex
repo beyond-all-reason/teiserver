@@ -48,13 +48,8 @@ defmodule Teiserver.Application do
 
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
-
-        concache_sup(:lists),
-        concache_sup(:codes),
         concache_sup(:config_user_cache),
         concache_sup(:account_friend_cache),
-        concache_sup(:account_incoming_friend_request_cache),
-        concache_sup(:account_outgoing_friend_request_cache),
         concache_sup(:account_follow_cache),
         concache_sup(:account_ignore_cache),
         concache_sup(:account_avoid_cache),
@@ -144,7 +139,6 @@ defmodule Teiserver.Application do
         # level to control access and scrape stuff
         {Bandit,
          scheme: :http, plug: TeiserverWeb.Monitoring.Router, port: MonitoringRouter.port()},
-        Teiserver.Communication.Cache,
 
         # Start the endpoint after the rest of the systems are up
         TeiserverWeb.Endpoint,

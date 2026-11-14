@@ -106,7 +106,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   def handle_event("refresh-user", _params, %Socket{} = socket) do
     %{user: user} = socket.assigns
 
-    ConCache.put(:teiserver_login_count, user.id, 0)
+    Teiserver.cache_put(:teiserver_login_count, user.id, 0)
     RefreshUserRestrictionsTask.refresh_user(user.id)
 
     socket
