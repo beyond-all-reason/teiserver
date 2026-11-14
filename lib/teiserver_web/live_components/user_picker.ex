@@ -4,11 +4,21 @@ defmodule TeiserverWeb.LiveComponents.UserPicker do
 
   It will submit the ID value of the selected user but will display the ID and name of the user.
 
+  # Normal usage
   <.live_component
     module={TeiserverWeb.LiveComponents.UserPicker}
     id="user-picker"
     field={@form[:smurf_user_id]}
     label="User to link to:"
+  />
+
+  # When you already have a user selected
+  <.live_component
+    module={TeiserverWeb.LiveComponents.UserPicker}
+    id="user-picker"
+    field={@form[:smurf_user_id]}
+    label="User to link to:"
+    value={@some_user}
   />
   """
   alias Teiserver.Account

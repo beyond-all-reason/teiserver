@@ -48,7 +48,6 @@ defmodule Teiserver.Application do
 
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
-
         concache_sup(:lists),
         concache_sup(:codes),
         concache_sup(:config_user_cache),
@@ -69,6 +68,10 @@ defmodule Teiserver.Application do
         Teiserver.Bridge.DiscordCacheSupervisor,
         concache_sup(:application_temp_cache),
         Teiserver.General.RateLimit,
+
+        # For when we want a short lived secret to use between pages
+        # secrets will be cleared after 5 seconds
+        concache_sup(:secrets, global_ttl: 5_000),
 
         # Teiserver stuff
         # Global/singleton registries

@@ -15,7 +15,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   def get_application_by_uid(nil), do: nil
 
   def get_application_by_uid(uid) do
-    base_query() |> where_uid(uid) |> Repo.one()
+    applications() |> where_uid(uid) |> Repo.one()
   end
 
   @doc """
@@ -25,7 +25,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   def get_application_by_id(nil), do: nil
 
   def get_application_by_id(id) do
-    base_query() |> preload(:owner) |> where_id(id) |> Repo.one()
+    applications() |> preload(:owner) |> where_id(id) |> Repo.one()
   rescue
     Ecto.Query.CastError -> nil
   end
@@ -37,7 +37,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
   """
   @spec list_applications() :: [Application.t()]
   def list_applications do
-    base_query() |> preload(:owner) |> Repo.all()
+    applications() |> preload(:owner) |> Repo.all()
   end
 
   def application_allows_code?(%Application{} = app) do
@@ -78,7 +78,7 @@ defmodule Teiserver.OAuth.ApplicationQueries do
     end)
   end
 
-  def base_query do
+  def applications do
     from app in Application, as: :app
   end
 
@@ -92,12 +92,21 @@ defmodule Teiserver.OAuth.ApplicationQueries do
       where: app.uid == ^uid
   end
 
+  def where_name_like(query, ""), do: query
+
+  def where_name_like(query, search_term) do
+    search_term = "%" <> search_term <> "%"
+
+    from [app: applications] in query,
+      where: ilike(applications.name, ^search_term)
+  end
+
   @doc """
   Returns all OAuth applications that the user has authorized (has tokens for, including expired ones).
   """
   @spec list_authorized_applications(User.id()) :: [Application.t()]
   def list_authorized_applications(user_id) do
-    base_query()
+    applications()
     |> join(:left, [app], token in Teiserver.OAuth.Token,
       on: token.application_id == app.id and token.owner_id == ^user_id
     )
@@ -158,4 +167,45 @@ defmodule Teiserver.OAuth.ApplicationQueries do
 
     count
   end
+
+  # Joins
+  def join_owners(query) do
+    if has_named_binding?(query, :owners) do
+      query
+    else
+      from [app: applications] in query,
+        left_join: owners in User,
+        as: :owners,
+        on: applications.owner_id == owners.id
+    end
+  end
+
+  # Loads
+  def load_owner(query) do
+    query = join_owners(query)
+
+    from [app: applications, owners: owners] in query,
+      preload: [owner: owners]
+  end
+
+  def order_by_name(query, direction \\ :asc) do
+    if direction == :asc do
+      from([app: applications] in query, order_by: [asc: applications.name])
+    else
+      from([app: applications] in query, order_by: [desc: applications.name])
+    end
+  end
+
+  def order_by_inserted_at(query, direction \\ :asc) do
+    if direction == :asc do
+      from([app: applications] in query, order_by: [asc: applications.inserted_at])
+    else
+      from([app: applications] in query, order_by: [desc: applications.inserted_at])
+    end
+  end
+
+  def order_by_from_string(query, "Alphabetical (A-Z)"), do: order_by_name(query, :asc)
+  def order_by_from_string(query, "Alphabetical (Z-A)"), do: order_by_name(query, :desc)
+  def order_by_from_string(query, "Newest first"), do: order_by_inserted_at(query, :desc)
+  def order_by_from_string(query, "Oldest first"), do: order_by_inserted_at(query, :asc)
 end

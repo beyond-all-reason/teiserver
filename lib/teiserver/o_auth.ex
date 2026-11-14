@@ -47,6 +47,9 @@ defmodule Teiserver.OAuth do
   @type option :: {:now, DateTime.t()}
   @type options :: [option]
 
+  @spec get_application_by_id(Application.id()) :: Application.t() | nil
+  defdelegate get_application_by_id(uid), to: ApplicationQueries
+
   @spec get_application_by_uid(Application.app_id()) :: Application.t() | nil
   defdelegate get_application_by_uid(uid), to: ApplicationQueries
 

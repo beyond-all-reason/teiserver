@@ -500,7 +500,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file month number password
-               search select tel text textarea time url week hidden)
+               search select tel text textarea checkbox-array textarea-array time url week hidden)
 
   attr :field, FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -512,6 +512,7 @@ defmodule TeiserverWeb.CoreComponents do
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
   attr :class, :any, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :any, default: nil, doc: "the input error class to use over defaults"
+  attr :description, :string, doc: "optional description to display if component allows"
 
   attr :fieldset?, :boolean,
     default: true,
@@ -563,7 +564,8 @@ defmodule TeiserverWeb.CoreComponents do
             checked={@checked}
             class={@class || "checkbox checkbox-sm"}
             {@rest}
-          />{@label}
+          /><span class="font-bold">{@label}</span>
+          {assigns[:description]}
         </span>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
@@ -586,6 +588,66 @@ defmodule TeiserverWeb.CoreComponents do
           <option :if={@prompt} value="">{@prompt}</option>
           {Phoenix.HTML.Form.options_for_select(@options, @value)}
         </select>
+      </label>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  # Expects options to either be a list of the options or a list of pairs, the first item
+  # being the key and the second being the label used
+  def input_tw(%{type: "checkbox-array"} = assigns) do
+    changeset_values = assigns[:value] || %{}
+    array_options = options_for_checkbox_array(assigns[:options])
+
+    assigns =
+      assigns
+      |> assign(changeset_values: changeset_values, options: array_options)
+
+    ~H"""
+    <div phx-feedback-for={@name}>
+      <label :for={{key, label} <- @options}>
+        <div class="label">
+          <input
+            type="checkbox"
+            id={"#{@id}-#{key}"}
+            name={"#{@name}[]"}
+            value={key}
+            checked={Enum.member?(@changeset_values, key)}
+            class={@class || "checkbox checkbox-sm"}
+            {@rest}
+          /><span class="font-bold">{key}</span>
+          &nbsp;{label && label}
+          {assigns[:description]}
+        </div>
+        <br />
+      </label>
+
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
+  def input_tw(%{type: "textarea-array"} = assigns) do
+    value =
+      (assigns[:value] || [])
+      |> List.wrap()
+
+    assigns = assign(assigns, value: value)
+
+    ~H"""
+    <div class="fieldset">
+      <label>
+        <span :if={@label} class="label mb-1">{@label}</span>
+        <textarea
+          id={@id}
+          name={@name}
+          class={[
+            @class || "w-full textarea",
+            @errors != [] && (@error_class || "textarea-error")
+          ]}
+          {@rest}
+        >{Form.normalize_value("textarea", @value |> Enum.join("\n"))}</textarea>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -933,5 +995,14 @@ defmodule TeiserverWeb.CoreComponents do
       on the Teiserver repo so we can ensure it's not missed.
     </div>
     """
+  end
+
+  defp options_for_checkbox_array(options) do
+    options
+    |> Enum.map(fn
+      {key, label} -> {key, label}
+      %{key: key, label: label} -> {key, label}
+      str -> {str, nil}
+    end)
   end
 end

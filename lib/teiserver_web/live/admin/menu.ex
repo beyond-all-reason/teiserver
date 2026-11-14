@@ -47,7 +47,7 @@ defmodule TeiserverWeb.AdminLive.Menu do
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.OAuth.ApplicationLib.icon()}
-        url={~p"/teiserver/admin/oauth_application"}
+        url={~p"/admin/oauth_applications"}
       >
         OAuth applications
       </.menu_page_link>
