@@ -10,6 +10,7 @@ defmodule Teiserver.Account.AuthPlug do
   alias Teiserver.Account.Guardian.Plug, as: GuardianPlug
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.User
+  alias Teiserver.Account.ViewAs
 
   use TeiserverWeb, :verified_routes
 
@@ -65,9 +66,13 @@ defmodule Teiserver.Account.AuthPlug do
         |> Controller.redirect(to: ~p"/logout")
 
       true ->
+        {effective_user, real_user} =
+          ViewAs.resolve(user, get_session(conn, ViewAs.session_key()))
+
         conn
         |> assign(:user_token, user_token)
-        |> assign(:current_user, user)
+        |> assign(:current_user, effective_user)
+        |> assign(:real_user, real_user)
         |> assign(:totp_status, totp_status)
     end
   end
@@ -90,8 +95,11 @@ defmodule Teiserver.Account.AuthPlug do
       |> Utils.assign(:user_token, nil)
       |> LiveView.redirect(to: ~p"/logout")
     else
+      {effective_user, real_user} = ViewAs.resolve(user, session[ViewAs.session_key()])
+
       socket
-      |> Utils.assign(:current_user, user)
+      |> Utils.assign(:current_user, effective_user)
+      |> Utils.assign(:real_user, real_user)
     end
   end
 

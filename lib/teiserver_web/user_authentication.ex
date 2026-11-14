@@ -12,6 +12,7 @@ defmodule TeiserverWeb.UserAuthentication do
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
+  alias Teiserver.Account.ViewAs
 
   use TeiserverWeb, :verified_routes
 
@@ -131,8 +132,8 @@ defmodule TeiserverWeb.UserAuthentication do
     end
   end
 
-  defp mount_current_user(socket, %{"guardian_default_token" => token} = _session) do
-    user =
+  defp mount_current_user(socket, %{"guardian_default_token" => token} = session) do
+    real_user =
       with {:ok, %{"sub" => user_id}} <- Guardian.decode_and_verify(token),
            %User{} = user <- Account.get_user(user_id) do
         user
@@ -141,8 +142,11 @@ defmodule TeiserverWeb.UserAuthentication do
           nil
       end
 
+    {user, viewing_as_from} = ViewAs.resolve(real_user, session[ViewAs.session_key()])
+
     socket
     |> Component.assign_new(:current_user, fn -> user end)
+    |> Component.assign_new(:real_user, fn -> viewing_as_from end)
     |> Component.assign_new(:tz, fn -> nil end)
     |> fetch_current_scope_for_user()
   end
@@ -150,6 +154,7 @@ defmodule TeiserverWeb.UserAuthentication do
   defp mount_current_user(socket, _session) do
     socket
     |> Component.assign_new(:current_user, fn -> nil end)
+    |> Component.assign_new(:real_user, fn -> nil end)
     |> Component.assign_new(:tz, fn -> nil end)
   end
 

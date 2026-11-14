@@ -7,6 +7,21 @@
     <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
   </.link>
 
+  <.form
+    :if={
+      @user &&
+        Teiserver.Account.ViewAs.can_view_as?(@real_user || @current_user, @user)
+    }
+    for={%{}}
+    action={~p"/view_as/#{@user_id}"}
+    method="post"
+    class="inline me-4"
+  >
+    <.button type="submit" class="btn btn-sm btn-warning btn-soft">
+      View site as this user
+    </.button>
+  </.form>
+
   <.link
     navigate={~p"/moderation/users/#{@user_id}/new/note"}
     phx-click={JS.push_focus()}

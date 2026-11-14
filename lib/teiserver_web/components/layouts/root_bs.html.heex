@@ -44,6 +44,17 @@
     </script>
   </head>
   <body class="container-fluid px-0 d-flex flex-column">
+    <div
+      :if={assigns[:real_user] && assigns[:current_user]}
+      id="view-as-banner"
+      style="background:#b45309;color:#fff;padding:6px 12px;text-align:center;"
+    >
+      Viewing as <strong>{@current_user.name}</strong>
+      (logged in as {@real_user.name}).
+      <.form :let={_f} for={%{}} action={~p"/view_as"} method="delete" style="display:inline">
+        <button type="submit" style="margin-left:8px;">Stop viewing as</button>
+      </.form>
+    </div>
     {@inner_content}
   </body>
 </html>

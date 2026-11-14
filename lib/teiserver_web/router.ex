@@ -181,6 +181,9 @@ defmodule TeiserverWeb.Router do
 
     post("/refresh_otp", SessionController, :refresh_totp)
 
+    post("/view_as/:user_id", ViewAsController, :start)
+    delete("/view_as", ViewAsController, :stop)
+
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
     delete("/logout", SessionController, :logout)
