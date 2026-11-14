@@ -10,9 +10,9 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   />
 
   TODO:
-  - Bound selected_idx to the number of commands listed
-  - The moving up or down feels oddly slow, can't work out why
-  - Add a way for additional contextual commands to be given to the component
+  - More customisable commands (we have goto and search so far)
+  - Ability to have favourites and recently used
+  - Styling preferences
   """
 
   alias Teiserver.Account.AuthLib
@@ -31,11 +31,15 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
       allow: ["Moderator"]
     },
     %{
-      id: "goto:users",
-      cmd: :goto,
-      label: "Goto: Users",
+      id: "search:users",
+      cmd: :search,
+      label: "Search: Users",
       path: "/moderation/users",
-      allow: ["Moderator"]
+      allow: ["Moderator"],
+      search: %{
+        input: :text,
+        name: "name_or_email"
+      }
     },
     %{
       id: "goto:actions",
@@ -60,7 +64,14 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   @impl LiveComponent
   def mount(socket) do
     socket
-    |> assign(palette_open: false, query: "", all_commands: [], commands: [], selected_idx: 0)
+    |> assign(
+      palette_open: false,
+      query: "",
+      all_commands: [],
+      commands: [],
+      selected_idx: 0,
+      mode: :list
+    )
     |> ok()
   end
 
@@ -94,14 +105,23 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
         %Socket{assigns: %{all_commands: all_commands, palette_open: _false?}} = socket
       ) do
     socket
-    |> assign(palette_open: true, query: "", commands: Enum.with_index(all_commands))
+    |> assign(palette_open: true, query: "", commands: Enum.with_index(all_commands), mode: :list)
     |> noreply()
   end
 
-  def handle_event("execute", _params, %Socket{assigns: assigns} = socket) do
-    case Enum.at(assigns.commands, assigns.selected_idx) do
+  def handle_event("execute-command", params, %Socket{assigns: assigns} = socket) do
+    command_and_idx =
+      if params["id"] do
+        assigns.commands
+        |> Enum.find(fn {cmd, _idx} -> cmd.id == params["id"] end)
+      else
+        Enum.at(assigns.commands, assigns.selected_idx)
+      end
+
+    case command_and_idx do
       {%{} = command, _idx} ->
         socket
+        |> assign(selected_command: command)
         |> execute(command)
         |> noreply()
 
@@ -112,6 +132,26 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     end
   end
 
+  def handle_event("execute-search", params, %Socket{assigns: assigns} = socket) do
+    %{selected_command: command} = assigns
+
+    # Drop any empty/nil params
+    params = Map.filter(params, fn {_key, v} -> v != nil and v != "" end)
+
+    # If no params then we just call the path as it is
+    path =
+      if Enum.empty?(params) do
+        command.path
+      else
+        query = URI.encode_query(params)
+        "#{command.path}?#{query}"
+      end
+
+    socket
+    |> redirect(to: path)
+    |> noreply()
+  end
+
   def handle_event("close", _params, %Socket{} = socket) do
     socket
     |> close()
@@ -119,13 +159,13 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   end
 
   # Close on Escape key
-  def handle_event("keydown", %{"key" => "Escape"}, %Socket{} = socket) do
+  def handle_event("list-keydown", %{"key" => "Escape"}, %Socket{} = socket) do
     socket
     |> close()
     |> noreply()
   end
 
-  def handle_event("keydown", %{"key" => "ArrowUp"}, %Socket{assigns: assigns} = socket) do
+  def handle_event("list-keydown", %{"key" => "ArrowUp"}, %Socket{assigns: assigns} = socket) do
     new_selected_idx =
       if assigns.selected_idx > 0 do
         assigns.selected_idx - 1
@@ -138,7 +178,7 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     |> noreply()
   end
 
-  def handle_event("keydown", %{"key" => "ArrowDown"}, %Socket{assigns: assigns} = socket) do
+  def handle_event("list-keydown", %{"key" => "ArrowDown"}, %Socket{assigns: assigns} = socket) do
     new_selected_idx =
       if assigns.selected_idx do
         assigns.selected_idx + 1
@@ -151,12 +191,24 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     |> noreply()
   end
 
-  def handle_event("keydown", _params, %Socket{} = socket) do
+  def handle_event("list-keydown", _params, %Socket{} = socket) do
     socket
     |> noreply()
   end
 
-  def handle_event("search", %{"query" => query}, %Socket{assigns: assigns} = socket) do
+  # Close on Escape key
+  def handle_event("search-keydown", %{"key" => "Escape"}, %Socket{} = socket) do
+    socket
+    |> close()
+    |> noreply()
+  end
+
+  def handle_event("search-keydown", _params, %Socket{} = socket) do
+    socket
+    |> noreply()
+  end
+
+  def handle_event("filter-list", %{"query" => query}, %Socket{assigns: assigns} = socket) do
     query = String.downcase(query)
 
     commands =
@@ -173,6 +225,11 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     |> noreply()
   end
 
+  def handle_event("ignore", _params, %Socket{} = socket) do
+    socket
+    |> noreply()
+  end
+
   defp close(%Socket{} = socket) do
     assign(socket, palette_open: false)
   end
@@ -180,6 +237,11 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   defp execute(%Socket{} = socket, %{cmd: :goto, path: path} = _cmd) do
     socket
     |> redirect(to: path)
+  end
+
+  defp execute(%Socket{} = socket, %{cmd: :search} = _cmd) do
+    socket
+    |> assign(mode: :search)
   end
 
   # Takes the supplied commands and ensures they work as expected
@@ -210,48 +272,94 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
           phx-click-away="close"
           phx-target={@myself}
         >
-          <form
-            id="cmd-palette-form"
-            phx-change="search"
-            phx-submit="execute"
-            phx-target={@myself}
-          >
-            <input
-              id="cmd-palette-input"
-              type="text"
-              name="query"
-              value={@query}
-              placeholder="Type to filter"
-              autocomplete="off"
-              phx-keydown="keydown"
-              phx-target={@myself}
-              class="w-full border-0 p-3 outline-none"
-            />
-          </form>
+          <.list_mode
+            :if={@mode == :list}
+            target={@myself}
+            query={@query}
+            commands={@commands}
+            selected_idx={@selected_idx}
+          />
 
-          <div class="mt-2">
-            <span
-              :for={{%{id: id, label: label}, idx} <- @commands}
-              phx-click="execute"
-              phx-target={@myself}
-              phx-value-id={id}
-              class={[
-                "block w-full rounded p-1 pl-2 text-left hover:bg-primary",
-                @selected_idx == idx && "bg-primary/50"
-              ]}
-            >
-              <span :if={@selected_idx == idx} class="float-right">
-                <Fontawesome.icon icon="arrow-right" style="regular" />
-              </span>
-              {label}
-            </span>
-
-            <div :if={Enum.empty?(@commands)} class="p-2 text-gray-500">
-              No results
-            </div>
-          </div>
+          <.search_mode
+            :if={@mode == :search}
+            target={@myself}
+            command={@selected_command}
+          />
         </div>
       </div>
+    </div>
+    """
+  end
+
+  defp list_mode(assigns) do
+    ~H"""
+    <div>
+      <form
+        id="cmd-palette-list-form"
+        phx-change="filter-list"
+        phx-submit="execute-command"
+        phx-target={@target}
+      >
+        <input
+          id="cmd-palette-list-filter"
+          type="text"
+          name="query"
+          value={@query}
+          placeholder="Type to filter"
+          autocomplete="off"
+          phx-keydown="list-keydown"
+          phx-target={@target}
+          class="w-full border-0 p-3 outline-none"
+        />
+      </form>
+
+      <div class="mt-2">
+        <span
+          :for={{%{id: id, label: label}, idx} <- @commands}
+          phx-click="execute-command"
+          phx-target={@target}
+          phx-value-id={id}
+          class={[
+            "block w-full rounded p-1 pl-2 text-left hover:bg-primary",
+            @selected_idx == idx && "bg-primary/50"
+          ]}
+        >
+          <span :if={@selected_idx == idx} class="float-right">
+            <Fontawesome.icon icon="arrow-right" style="regular" />
+          </span>
+          {label}
+        </span>
+
+        <div :if={Enum.empty?(@commands)} class="p-2 text-gray-500">
+          No results
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp search_mode(assigns) do
+    ~H"""
+    <div>
+      <form
+        id="cmd-palette-search-form"
+        phx-submit="execute-search"
+        phx-change="ignore"
+        phx-target={@target}
+      >
+        <input
+          :if={@command.search.input == :text}
+          id="cmd-palette-search-input"
+          type="text"
+          name={@command.search.name}
+          value=""
+          placeholder="Hit enter to search"
+          autocomplete="off"
+          phx-keydown="search-keydown"
+          phx-target={@target}
+          class="w-full border-0 p-3 outline-none"
+        />
+      </form>
     </div>
     """
   end
