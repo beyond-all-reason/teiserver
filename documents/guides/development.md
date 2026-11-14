@@ -127,7 +127,7 @@ When running locally it's likely you won't want to connect the server to an emai
 Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
 
 ```elixir
-user = Teiserver.Repo.get_by(Teiserver.Account.User, email: "root@localhost")
+user = Teiserver.Repo.get_by(Teiserver.Account.User, email: "root@teiserver.local")
 Teiserver.Account.update_user(user, %{"password" => "password"})
 ```
 

@@ -9,7 +9,7 @@ defmodule Teiserver.Tachyon.Tasks.SetupAppsTest do
   setup _context do
     user =
       GeneralTestLib.make_user(%{
-        "email" => "root@localhost",
+        "email" => "root@teiserver.local",
         "roles" => ["Verified", "Admin"]
       })
 

@@ -24,7 +24,7 @@ cat > /etc/motd << 'MOTD'
   Mail:    http://localhost:8025
   
   Login credentials:
-    Email:    root@localhost
+    Email:    root@teiserver.local
     Password: password
 
   GitHub:
