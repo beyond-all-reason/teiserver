@@ -76,14 +76,18 @@ defmodule Teiserver.Account.ViewAs do
     end
   end
 
-  defp parse_id(id) when is_integer(id), do: id
+  @doc """
+  Parses a user id from the session or from a route param.
+  """
+  @spec parse_id(term()) :: integer() | nil
+  def parse_id(id) when is_integer(id), do: id
 
-  defp parse_id(id) when is_binary(id) do
+  def parse_id(id) when is_binary(id) do
     case Integer.parse(id) do
       {int, ""} -> int
       _any -> nil
     end
   end
 
-  defp parse_id(_any), do: nil
+  def parse_id(_any), do: nil
 end

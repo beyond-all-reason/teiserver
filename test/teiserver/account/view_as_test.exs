@@ -1,8 +1,8 @@
 defmodule Teiserver.Account.ViewAsTest do
-  use Teiserver.DataCase, async: true
-
   alias Teiserver.Account.ViewAs
   alias Teiserver.AccountFixtures
+
+  use Teiserver.DataCase, async: true
 
   setup do
     admin = AccountFixtures.user_fixture(%{roles: ["Admin"]})
