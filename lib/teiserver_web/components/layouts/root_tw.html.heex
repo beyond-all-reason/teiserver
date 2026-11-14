@@ -62,6 +62,11 @@
           }
         });
 
+        window.addEventListener("phx:toggle-theme", () => {
+          const current = document.documentElement.getAttribute("data-theme");
+          setTheme(current === "dark" ? "light" : "dark");
+        });
+
         window.addEventListener("phx:set-theme", (e) => {
           setTheme(e.target.dataset.phxTheme);
         });
