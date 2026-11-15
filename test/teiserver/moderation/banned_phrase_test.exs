@@ -130,6 +130,16 @@ defmodule Teiserver.Moderation.BannedPhraseTest do
     end
   end
 
+  describe "load_phrase for raw phrases" do
+    test "splits and downcases the phrase once at load time" do
+      loaded =
+        %BannedPhrase{type: :raw, phrase: "Abc,DEF"}
+        |> BannedPhrase.load_phrase()
+
+      assert loaded.loaded_phrase == ["abc", "def"]
+    end
+  end
+
   describe "test banned_phrase matches" do
     test "raw" do
       phrase =

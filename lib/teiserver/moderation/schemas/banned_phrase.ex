@@ -110,8 +110,11 @@ defmodule Teiserver.Moderation.BannedPhrase do
     %BannedPhrase{banned_phrase | loaded_phrase: compiled_phrase}
   end
 
+  # Raw phrases are stored as a list of lowercase parts (a phrase can contain
+  # several comma separated alternatives) so no work is needed at match time
   def load_phrase(%BannedPhrase{phrase: phrase} = banned_phrase) do
-    %BannedPhrase{banned_phrase | loaded_phrase: String.downcase(phrase)}
+    parts = phrase |> String.downcase() |> String.split(",")
+    %BannedPhrase{banned_phrase | loaded_phrase: parts}
   end
 
   @doc """
@@ -128,10 +131,15 @@ defmodule Teiserver.Moderation.BannedPhrase do
         [:teiserver, :moderation, :message_is_banned?],
         %{use_case: use_case},
         fn ->
+          # Raw phrases are case insensitive, downcase the message once rather
+          # than once per phrase
+          lowered_message = String.downcase(message)
+
           found_phrase =
             Moderation.list_banned_phrases_cache(use_case)
             |> Enum.find(fn %BannedPhrase{type: type} = banned_phrase ->
-              Enum.member?(types, type) and phrase_match?(banned_phrase, message)
+              Enum.member?(types, type) and
+                phrase_match?(banned_phrase, message, lowered_message)
             end)
 
           {found_phrase, %{matched: found_phrase != nil}}
@@ -154,16 +162,27 @@ defmodule Teiserver.Moderation.BannedPhrase do
   trigger the banned phrase?
   """
   @spec phrase_match?(BannedPhrase.t(), String.t()) :: boolean()
-  def phrase_match?(%BannedPhrase{type: :raw, loaded_phrase: loaded_phrase}, message) do
-    # Downcase the message as we are case insensitive
-    message = String.downcase(message)
-    parts = String.split(loaded_phrase, ",")
-
-    String.contains?(message, parts)
+  def phrase_match?(%BannedPhrase{} = banned_phrase, message) do
+    phrase_match?(banned_phrase, message, String.downcase(message))
   end
 
-  def phrase_match?(%BannedPhrase{type: type, loaded_phrase: loaded_phrase}, message)
-      when type in [:regex, :fuzzy] do
+  # Same as phrase_match?/2 but takes the already downcased message so callers
+  # checking many phrases against one message only downcase it once
+  @spec phrase_match?(BannedPhrase.t(), String.t(), String.t()) :: boolean()
+  defp phrase_match?(
+         %BannedPhrase{type: :raw, loaded_phrase: parts},
+         _message,
+         lowered_message
+       ) do
+    String.contains?(lowered_message, parts)
+  end
+
+  defp phrase_match?(
+         %BannedPhrase{type: type, loaded_phrase: loaded_phrase},
+         message,
+         _lowered_message
+       )
+       when type in [:regex, :fuzzy] do
     Regex.match?(loaded_phrase, message)
   end
 end
