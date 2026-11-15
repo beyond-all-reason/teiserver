@@ -452,8 +452,6 @@ defmodule Teiserver.Account.UserLib do
         {:error, "Too many repeated symbols in name"}
 
       true ->
-        # TODO: create a unique index on lower(name) so that this check is fast
-        # (and also redundant)
         users = query_users(search: [name_lower: name], select: [:name])
 
         case users do
@@ -533,8 +531,6 @@ defmodule Teiserver.Account.UserLib do
       not String.match?(email, @valid_email_regex) ->
         {:error, "invalid email"}
 
-      # TODO: create a unique index on lower(email) so that this check is fast
-      # (and also redundant)
       Account.query_users(search: [email_lower: email], select: [:email]) != [] ->
         {:error, "Email already attached to a user"}
 
