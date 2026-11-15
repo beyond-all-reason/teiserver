@@ -57,7 +57,11 @@
     <UserComponents.show_tabset scope={@scope} tab={@tab1} set="1" />
 
     <div :if={@user}>
-      <UserComponents.show_details :if={@tab1 == "details"} user={@user} />
+      <UserComponents.show_details
+        :if={@tab1 == "details"}
+        user={@user}
+        user_stats={@user_stats}
+      />
 
       <UserComponents.show_audit :if={@tab1 == "audit"} audit_logs={@streams.audit_logs} />
 
@@ -92,7 +96,11 @@
     <UserComponents.show_tabset scope={@scope} tab={@tab2} set="2" />
 
     <div :if={@user}>
-      <UserComponents.show_details :if={@tab2 == "details"} user={@user} />
+      <UserComponents.show_details
+        :if={@tab2 == "details"}
+        user={@user}
+        user_stats={@user_stats}
+      />
 
       <UserComponents.show_audit :if={@tab2 == "audit"} audit_logs={@streams.audit_logs} />
 

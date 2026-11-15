@@ -436,6 +436,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   <UserComponents.show_details user={@user} />
   """
   attr :user, User
+  attr :user_stats, :map, default: %{}
 
   def show_details(assigns) do
     ~H"""
@@ -461,8 +462,15 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <:item title="Last played">
         {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
       </:item>
+      <:item title="Player time">{format_minutes(@user_stats["player_minutes"])}</:item>
+      <:item title="Spectator time">{format_minutes(@user_stats["spectator_minutes"])}</:item>
     </.list>
     """
+  end
+
+  defp format_minutes(minutes) do
+    minutes = trunc(minutes || 0)
+    "#{div(minutes, 60)} hours, #{rem(minutes, 60)} minutes"
   end
 
   @doc """
