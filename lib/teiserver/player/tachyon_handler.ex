@@ -777,34 +777,15 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
-    # TODO: the `lobby/update` has very similar logic. There should be a way
-    # to combine the parsing
-    create_data = %PT.LobbyStartParams{
-      name: msg["data"]["name"],
-      map_name: msg["data"]["mapName"],
-      ally_team_config:
-        for at <- msg["data"]["allyTeamConfig"] do
-          sb = at["startBox"]
-          teams = for t <- at["teams"], do: %{max_players: t["maxPlayers"]}
-
-          %LT.AllyTeamConfig{
-            max_teams: at["maxTeams"],
-            start_box: %{
-              top: sb["top"],
-              bottom: sb["bottom"],
-              left: sb["left"],
-              right: sb["right"]
-            },
-            teams: teams
-          }
-        end,
-      boss_enabled?: msg["data"]["areBossesEnabled"],
-      game_options:
-        Map.get(msg["data"], "gameOptions", %{})
-        |> Enum.map(fn {k, v} -> {k, v["value"]} end)
-        |> Enum.into(%{}),
-      tags: Map.get(msg["data"], "tags", %{})
-    }
+    create_data =
+      struct!(
+        PT.LobbyStartParams,
+        Map.merge(
+          %{game_options: %{}, tags: %{}},
+          Collections.transform_map(msg["data"], lobby_properties_mappings())
+        )
+        |> Map.put(:boss_enabled?, msg["data"]["areBossesEnabled"])
+      )
 
     case Session.create_lobby(state.user.id, create_data) do
       {:ok, details} ->
@@ -951,27 +932,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/update", "request", _msg_id, %{"data" => data}, state) do
-    mappings = %{
-      "name" => :name,
-      "mapName" => :map_name,
-      "allyTeamConfig" =>
-        {:ally_team_config, LT.AllyTeamConfig,
-         %{
-           "maxTeams" => :max_teams,
-           "startBox" =>
-             {:start_box,
-              %{"top" => :top, "bottom" => :bottom, "left" => :left, "right" => :right}},
-           "teams" => {:teams, %{"maxPlayers" => :max_players}}
-         }},
-      "gameOptions" =>
-        {:game_options,
-         fn opts ->
-           Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
-         end},
-      "tags" => :tags
-    }
-
-    update_data = Collections.transform_map(data, mappings)
+    update_data = Collections.transform_map(data, lobby_properties_mappings())
 
     case Session.lobby_update_properties(state.user.id, update_data) do
       :ok ->
@@ -1095,6 +1056,30 @@ defmodule Teiserver.Player.TachyonHandler do
 
   def handle_command(_command_id, _message_type, _message_id, _message, state) do
     {:error_response, :command_unimplemented, state}
+  end
+
+  # Mappings shared by `lobby/create` and `lobby/update` to parse the lobby
+  # properties from tachyon format into internal structures
+  defp lobby_properties_mappings() do
+    %{
+      "name" => :name,
+      "mapName" => :map_name,
+      "allyTeamConfig" =>
+        {:ally_team_config, LT.AllyTeamConfig,
+         %{
+           "maxTeams" => :max_teams,
+           "startBox" =>
+             {:start_box,
+              %{"top" => :top, "bottom" => :bottom, "left" => :left, "right" => :right}},
+           "teams" => {:teams, %{"maxPlayers" => :max_players}}
+         }},
+      "gameOptions" =>
+        {:game_options,
+         fn opts ->
+           Enum.map(opts, fn {k, v} -> {k, v["value"]} end) |> Enum.into(%{})
+         end},
+      "tags" => :tags
+    }
   end
 
   defp build_user_self_event(user, sess_state) do
