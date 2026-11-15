@@ -1060,7 +1060,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
   # Mappings shared by `lobby/create` and `lobby/update` to parse the lobby
   # properties from tachyon format into internal structures
-  defp lobby_properties_mappings() do
+  defp lobby_properties_mappings do
     %{
       "name" => :name,
       "mapName" => :map_name,
