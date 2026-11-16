@@ -5,6 +5,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserStat
   alias Teiserver.Client
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation.ActionLib
 
   use TeiserverWeb, :component
@@ -462,15 +463,12 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <:item title="Last played">
         {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
       </:item>
-      <:item title="Player time">{format_minutes(@user_stats["player_minutes"])}</:item>
-      <:item title="Spectator time">{format_minutes(@user_stats["spectator_minutes"])}</:item>
+      <:item title="Player time">{DateHelper.minutes_to_str(@user_stats["player_minutes"])}</:item>
+      <:item title="Spectator time">
+        {DateHelper.minutes_to_str(@user_stats["spectator_minutes"])}
+      </:item>
     </.list>
     """
-  end
-
-  defp format_minutes(minutes) do
-    minutes = trunc(minutes || 0)
-    "#{div(minutes, 60)} hours, #{rem(minutes, 60)} minutes"
   end
 
   @doc """

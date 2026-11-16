@@ -275,6 +275,15 @@ defmodule Teiserver.Helper.DateHelper do
     end
   end
 
+  @doc """
+  Formats a number of minutes as "X hours, Y minutes". `nil` is treated as 0.
+  """
+  @spec minutes_to_str(number() | nil) :: String.t()
+  def minutes_to_str(minutes) do
+    minutes = trunc(minutes || 0)
+    "#{div(minutes, 60)} hours, #{rem(minutes, 60)} minutes"
+  end
+
   def duration_to_str_short(nil), do: nil
 
   def duration_to_str_short(seconds) do
