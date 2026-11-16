@@ -70,6 +70,19 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
         <div class="m-2">
           <.input_tw
+            type="checkbox"
+            field={@form[:email_recently_changed]}
+            label="Email recently changed (last 30 days)"
+          />
+          <.input_tw
+            type="checkbox"
+            field={@form[:all_former_emails]}
+            label="All former emails"
+          />
+        </div>
+
+        <div class="m-2">
+          <.input_tw
             type="text"
             field={@form[:role]}
             label="Role"
@@ -444,6 +457,12 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
     <.list>
       <:item title="Name">{@user.name}</:item>
       <:item title="Email">{@user.email}</:item>
+      <:item :if={@user.email_last_changed_at} title="Email last changed">
+        {Calendar.strftime(@user.email_last_changed_at, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item :if={(@user.previous_emails || []) != []} title="Previous emails">
+        <div :for={email <- @user.previous_emails}>{email}</div>
+      </:item>
       <:item :if={@user.discord_id} title="Discord ID"><pre>{@user.discord_id}</pre></:item>
       <:item :if={@user.steam_id} title="Steam ID"><pre>{@user.steam_id}</pre></:item>
       <:item title="Roles">
