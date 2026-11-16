@@ -5,6 +5,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserStat
   alias Teiserver.Client
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation.ActionLib
 
   use TeiserverWeb, :component
@@ -436,6 +437,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   <UserComponents.show_details user={@user} />
   """
   attr :user, User
+  attr :user_stats, :map, default: %{}
 
   def show_details(assigns) do
     ~H"""
@@ -463,6 +465,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </:item>
       <:item title="Last played">
         {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Player time">{DateHelper.minutes_to_str(@user_stats["player_minutes"])}</:item>
+      <:item title="Spectator time">
+        {DateHelper.minutes_to_str(@user_stats["spectator_minutes"])}
       </:item>
     </.list>
     """
