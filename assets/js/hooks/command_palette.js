@@ -22,10 +22,13 @@ class CommandPalette extends ViewHook {
 
   // When updated, auto-focus on the input
   updated() {
-    const input = this.el.querySelector("#cmd-palette-input")
+    const list_input = this.el.querySelector("#cmd-palette-list-filter")
+    const search_input = this.el.querySelector("#cmd-palette-search-input")
 
-    if (input) {
-      input.focus()
+    if (list_input) {
+      list_input.focus()
+    } else if (search_input) {
+      search_input.focus()
     }
   }
 
