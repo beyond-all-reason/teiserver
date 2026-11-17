@@ -29,6 +29,8 @@ defmodule Teiserver.TachyonLobby.ListTest do
                max_player_count: 2,
                name: params.name,
                player_count: 1,
+               member_count: 1,
+               ally_team_count: 2,
                tags: %{}
              }
     end
@@ -99,6 +101,12 @@ defmodule Teiserver.TachyonLobby.ListTest do
       {:ok, _team_details} = Lobby.join_ally_team(details.id, user2.id, 1)
 
       id = details.id
+
+      # Joining as spectator changes member count
+      # this is used for filters and isn't bsent to clients atm
+      assert_receive %{event: :update_lobby, changes: changes, lobby_id: ^id}
+      assert changes == %{member_count: 2}
+
       assert_receive %{event: :update_lobby, changes: changes, counter: counter, lobby_id: ^id}
       assert changes == %{player_count: 2}
       assert counter > list[details.id].counter

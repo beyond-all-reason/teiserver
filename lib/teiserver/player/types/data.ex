@@ -7,6 +7,7 @@ defmodule Teiserver.Player.Types.Data do
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Player.Types, as: PT
   alias Teiserver.TachyonLobby
+  alias Teiserver.TachyonLobby.Types, as: LT
 
   @enforce_keys [:user, :matchmaking, :messaging_state, :party]
   defstruct [
@@ -19,7 +20,8 @@ defmodule Teiserver.Player.Types.Data do
     user_subscriptions: MapSet.new(),
     battle: nil,
     lobby: nil,
-    lobby_list_subscription: nil
+    lobby_list_subscription: nil,
+    filters: nil
   ]
 
   @type matchmaking_state ::
@@ -41,7 +43,15 @@ defmodule Teiserver.Player.Types.Data do
             nil
             | %{
                 timer_ref: :timer.tref(),
-                lobbies: %{TachyonLobby.id() => %{counter: integer(), changes: map()}}
-              }
+                lobbies: %{TachyonLobby.id() => lobby_list_entry()}
+              },
+          filters: LT.ListFilters.t() | nil
+        }
+
+  @type lobby_list_entry :: %{
+          counter: integer(),
+          overview: LT.ListOverview.t() | nil,
+          changes: map(),
+          visible?: boolean()
         }
 end

@@ -4,6 +4,7 @@ defmodule Teiserver.Player.SessionRegistry do
   """
 
   alias Teiserver.Account.User
+  alias Teiserver.TachyonLobby
 
   def start_link do
     Registry.start_link(keys: :unique, name: __MODULE__)
@@ -23,6 +24,20 @@ defmodule Teiserver.Player.SessionRegistry do
       [{pid, _value}] -> pid
       _other -> nil
     end
+  end
+
+  @spec get_lobby_id(User.id()) :: TachyonLobby.id() | nil
+  def get_lobby_id(user_id) do
+    case Registry.lookup(__MODULE__, user_id) do
+      [{_pid, %{lobby_id: lobby_id}}] -> lobby_id
+      _other -> nil
+    end
+  end
+
+  @spec set_lobby_id(User.id(), TachyonLobby.id() | nil) :: :ok
+  def set_lobby_id(user_id, lobby_id) do
+    Registry.update_value(__MODULE__, user_id, fn _old -> %{lobby_id: lobby_id} end)
+    :ok
   end
 
   @doc """

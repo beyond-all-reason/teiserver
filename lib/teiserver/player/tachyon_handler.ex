@@ -274,6 +274,15 @@ defmodule Teiserver.Player.TachyonHandler do
     {:event, "lobby/left", data, state}
   end
 
+  def handle_info({:lobby_list, {:reset, lobbies}}, state) do
+    data = %{
+      lobbies:
+        Map.new(lobbies, fn {id, overview} -> {id, lobby_overview_to_tachyon(id, overview)} end)
+    }
+
+    {:event, "lobby/listReset", data, state}
+  end
+
   def handle_info({:lobby_list, {:update_lobbies, changes}}, state) do
     data = %{
       lobbies:
@@ -1056,20 +1065,11 @@ defmodule Teiserver.Player.TachyonHandler do
     end
   end
 
-  def handle_command("lobby/subscribeList", "request", _msg_id, _msg, state) do
-    case Session.subscribe_lobby_list(state.user.id) do
-      {:ok, list} ->
-        ev =
-          Schema.event("lobby/listReset", %{
-            lobbies:
-              Enum.map(list, fn {id, overview} ->
-                {id, lobby_overview_to_tachyon(id, overview)}
-              end)
-              |> Enum.into(%{})
-          })
+  def handle_command("lobby/subscribeList", "request", _msg_id, msg, state) do
+    filters = lobby_filters_from_tachyon(msg)
 
-        {:response, {nil, [ev]}, state}
-    end
+    :ok = Session.subscribe_lobby_list(state.user.id, filters)
+    {:response, state}
   end
 
   def handle_command("lobby/unsubscribeList", "request", _msg_id, _msg, state) do
@@ -1209,6 +1209,27 @@ defmodule Teiserver.Player.TachyonHandler do
       timestamp: message.timestamp,
       marker: to_string(message.marker)
     }
+  end
+
+  defp lobby_filters_from_tachyon(msg) do
+    range = %{"min" => :min, "max" => :max}
+
+    mappings = %{
+      "hasFriend" => :has_friend?,
+      "hasPartyMember" => :has_party_member?,
+      "mapNames" => {:map_names, &MapSet.new/1},
+      "playerCount" => {:player_count, range},
+      "allyTeams" => {:ally_teams, range},
+      "name" => {:name, &String.downcase/1},
+      "tags" => {:tags, &MapSet.new/1},
+      "isBattleInProgress" => :battle_in_progress?,
+      "areBossesEnabled" => :bosses_enabled?,
+      "engineVersions" => {:engine_versions, &MapSet.new/1},
+      "gameVersions" => {:game_versions, &MapSet.new/1}
+    }
+
+    (get_in(msg, ["data", "filters"]) || %{})
+    |> Collections.transform_map(mappings)
   end
 
   defp parse_since(nil), do: :latest

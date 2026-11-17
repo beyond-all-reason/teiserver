@@ -116,7 +116,9 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateA
       )
 
     overview_changes =
-      Map.put(new_aggregate.overview_changes, :max_player_count, new_max_player_count)
+      new_aggregate.overview_changes
+      |> Map.put(:max_player_count, new_max_player_count)
+      |> Map.put(:ally_team_count, length(ev.new_config))
 
     %{new_aggregate | changes: changes, overview_changes: overview_changes}
   end

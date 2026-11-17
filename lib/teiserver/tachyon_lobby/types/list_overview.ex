@@ -10,6 +10,8 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
     :counter,
     :name,
     :player_count,
+    :member_count,
+    :ally_team_count,
     :max_player_count,
     :map_name,
     :engine_version,
@@ -20,6 +22,8 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
     :counter,
     :name,
     :player_count,
+    :member_count,
+    :ally_team_count,
     :max_player_count,
     :map_name,
     :engine_version,
@@ -33,6 +37,11 @@ defmodule Teiserver.TachyonLobby.Types.ListOverview do
           counter: integer(),
           name: String.t(),
           player_count: non_neg_integer(),
+          # Total member count, not sent to clients atm
+          # but used to trigger friend/party membership filtering
+          member_count: non_neg_integer(),
+          # Not sent to clients atm, used for the ally teams filter
+          ally_team_count: pos_integer(),
           max_player_count: non_neg_integer(),
           map_name: String.t(),
           engine_version: String.t(),

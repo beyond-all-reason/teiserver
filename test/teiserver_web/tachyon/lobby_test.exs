@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Tachyon.LobbyTest do
   alias ExUnit.Callbacks
+  alias Teiserver.Account
   alias Teiserver.AssetFixtures
   alias Teiserver.Player
   alias Teiserver.Player.Session
@@ -851,10 +852,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
+      # Subscribing again with the same filters has no effect
       %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
-
-      # still get the full list on subsequent subscribes
-      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
 
       {:ok, _lobby} =
         setup_lobby(%{client: ctx2[:client]}, %{
@@ -863,6 +862,109 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
 
       %{"commandId" => "lobby/listUpdated"} = Tachyon.recv_message!(client)
       {:error, :timeout} = Tachyon.recv_message(client)
+    end
+
+    test "filtered list follows lobby changes", %{client: client, user: user} do
+      subscribe_lobby_list!(client, user.id, %{mapNames: ["Supreme That Glitters"]})
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert lobbies == %{}
+
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      {:ok, lobby_id: lobby_a} =
+        setup_lobby(%{client: ctx2[:client]}, %{map_name: "Supreme That Glitters"})
+
+      {:ok, ctx3} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_b} = setup_lobby(%{client: ctx3[:client]}, %{map_name: "Rosetta"})
+
+      # Only the lobby on "Supreme That Glitters" is listed
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert Map.keys(lobbies) == [lobby_a]
+      assert lobbies[lobby_a]["mapName"] == "Supreme That Glitters"
+      {:error, :timeout} = Tachyon.recv_message(client)
+
+      # lobby_b moves to "Supreme That Glitters", it starts matching as well so it is sent fully
+      %{"status" => "success"} =
+        Tachyon.lobby_update!(ctx3[:client], %{mapName: "Supreme That Glitters"})
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert Map.keys(lobbies) == [lobby_b]
+
+      # Lobby changes map, it stops matching and is removed
+      %{"status" => "success"} = Tachyon.lobby_update!(ctx2[:client], %{mapName: "Altored"})
+      %{"commandId" => "lobby/updated"} = Tachyon.recv_message!(ctx2[:client])
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert lobbies == %{lobby_a => nil}
+    end
+
+    test "list follows filter changes", %{client: client, user: user} do
+      subscribe_lobby_list!(client, user.id)
+      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
+
+      {:ok, ctx2} = Tachyon.setup_client()
+
+      {:ok, lobby_id: lobby_a} =
+        setup_lobby(%{client: ctx2[:client]}, %{map_name: "Supreme That Glitters"})
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => %{^lobby_a => _lobby_a}}} =
+        Tachyon.recv_message!(client)
+
+      {:ok, ctx3} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_b} = setup_lobby(%{client: ctx3[:client]}, %{map_name: "Rosetta"})
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => %{^lobby_b => _lobby_b}}} =
+        Tachyon.recv_message!(client)
+
+      # New filters reset list
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client, %{mapNames: ["Rosetta"]})
+
+      %{"commandId" => "lobby/listReset", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert Map.keys(lobbies) == [lobby_b]
+      assert lobbies[lobby_b]["mapName"] == "Rosetta"
+
+      # Same filters don't reset list
+      %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client, %{mapNames: ["Rosetta"]})
+      {:error, :timeout} = Tachyon.recv_message(client)
+    end
+
+    test "lobby with a friend in it", %{client: client, user: user} do
+      {:ok, friend_ctx} = Tachyon.setup_client()
+      {:ok, _friend} = Account.create_friend(user.id, friend_ctx[:user].id)
+
+      subscribe_lobby_list!(client, user.id, %{hasFriend: true})
+      %{"commandId" => "lobby/listReset"} = Tachyon.recv_message!(client)
+
+      {:ok, ctx2} = Tachyon.setup_client()
+      {:ok, lobby_id: lobby_id} = setup_lobby(%{client: ctx2[:client]})
+      {:error, :timeout} = Tachyon.recv_message(client)
+
+      # The friend joins as spectator
+      %{"status" => "success"} = Tachyon.join_lobby!(friend_ctx[:client], lobby_id)
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert Map.keys(lobbies) == [lobby_id]
+      assert %{"name" => "test lobby", "playerCount" => 1} = lobbies[lobby_id]
+
+      %{"status" => "success"} = Tachyon.leave_lobby!(friend_ctx[:client])
+
+      %{"commandId" => "lobby/listUpdated", "data" => %{"lobbies" => lobbies}} =
+        Tachyon.recv_message!(client)
+
+      assert lobbies == %{lobby_id => nil}
     end
   end
 
@@ -999,8 +1101,8 @@ defmodule TeiserverWeb.Tachyon.LobbyTest do
     {:ok, game: game, engine: engine}
   end
 
-  defp subscribe_lobby_list!(client, user_id) do
-    %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client)
+  defp subscribe_lobby_list!(client, user_id, filters \\ nil) do
+    %{"status" => "success"} = Tachyon.subscribe_lobby_list!(client, filters)
     Callbacks.start_link_supervised!({Task, fn -> continuously_flush_list_updates(user_id) end})
   end
 
