@@ -183,20 +183,17 @@ defmodule TeiserverWeb.NavComponents do
         </li>
         <li>
           <button
-            class="flex p-2 cursor-pointer [[data-theme=light]_&]:bg-blue-200"
-            phx-click={JS.dispatch("phx:set-theme")}
-            data-phx-theme="light"
+            type="button"
+            class="flex p-2 cursor-pointer rounded"
+            phx-click={JS.dispatch("phx:toggle-theme")}
+            title="Toggle light/dark theme"
+            aria-label="Toggle light/dark theme"
           >
-            <Fontawesome.icon icon="sun" style="solid" class="opacity-75 hover:opacity-100" />
-          </button>
-        </li>
-        <li>
-          <button
-            class="flex p-2 cursor-pointer [[data-theme=dark]_&]:bg-blue-900"
-            phx-click={JS.dispatch("phx:set-theme")}
-            data-phx-theme="dark"
-          >
-            <Fontawesome.icon icon="moon" style="solid" class="opacity-75 hover:opacity-100" />
+            <Fontawesome.icon
+              icon="circle-half-stroke"
+              style="solid"
+              class="opacity-75 hover:opacity-100"
+            />
           </button>
         </li>
         <li class={[@active == "home" && "menu-active"]}>
