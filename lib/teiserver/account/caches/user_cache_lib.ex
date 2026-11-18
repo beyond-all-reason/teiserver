@@ -62,27 +62,22 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_user_by_email(""), do: nil
 
   def get_user_by_email(email) do
-    id =
-      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename(email), fn ->
-        user =
-          Account.query_user(
-            search: [
-              email_lower: email
-            ],
-            select: [:id]
-          )
+    case Teiserver.cache_get(:users_lookup_id_with_email, cachename(email)) do
+      id when not is_nil(id) ->
+        get_user_by_id(id)
+
+      nil ->
+        user = Account.query_user(search: [email_lower: email])
 
         case user do
+          %User{} ->
+            recache_user(user)
+            get_user_by_id(user.id)
+
           nil ->
             nil
-
-          %{id: id} ->
-            recache_user(id)
-            id
         end
-      end)
-
-    get_user_by_id(id)
+    end
   end
 
   @doc """
@@ -117,24 +112,23 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
-    Teiserver.cache_get_or_store(:users_lookup_id_with_discord_id, discord_id, fn ->
-      user =
-        Account.query_user(
-          search: [
-            discord_id: discord_id
-          ],
-          select: [:id]
-        )
+    case Teiserver.cache_get(:users_lookup_id_with_discord_id, discord_id) do
+      id when not is_nil(id) ->
+        id
 
-      case user do
-        nil ->
-          nil
+      nil ->
+        user =
+          Account.query_user(search: [discord_id: discord_id])
 
-        %{id: id} ->
-          recache_user(id)
-          id
-      end
-    end)
+        case user do
+          %User{} ->
+            recache_user(user)
+            user.id
+
+          nil ->
+            nil
+        end
+    end
   end
 
   @spec get_user_by_discord_id(integer() | String.t() | nil) :: User.t() | nil

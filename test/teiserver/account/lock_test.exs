@@ -2,7 +2,7 @@ defmodule Teiserver.Account.UserCacheLibTest do
   alias Teiserver.Account
 
   use Teiserver.DataCase, async: false
-  import Teiserver.AccountFixtures, only: [user_fixture: 0]
+  import Teiserver.AccountFixtures, only: [user_fixture: 0, user_fixture: 1]
 
   describe "deadlocks on cache population" do
     # see https://github.com/beyond-all-reason/teiserver/issues/1394
@@ -38,6 +38,23 @@ defmodule Teiserver.Account.UserCacheLibTest do
       # sanity check
       assert Account.get_username_by_id(user.id) == user.name
       assert Account.get_user_by_email(user.email).email == user.email
+    end
+
+    test "get by email and discord id" do
+      user = user_fixture(%{discord_id: 123})
+
+      fns = [
+        fn -> Account.get_user_by_email(user.email) end,
+        fn -> Account.get_userid_by_discord_id(user.discord_id) end
+      ]
+
+      {deadlocks, at_round} = check_deadlocks(fn -> Account.decache_user(user.id) end, fns)
+
+      assert deadlocks == [], "Deadlock detected on round #{at_round}"
+
+      # sanity check
+      assert Account.get_user_by_email(user.email) == user
+      assert Account.get_userid_by_discord_id(user.discord_id) == user.id
     end
   end
 
