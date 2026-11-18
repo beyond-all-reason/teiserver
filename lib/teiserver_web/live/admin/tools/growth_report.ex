@@ -1,10 +1,8 @@
 defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
   @moduledoc false
 
-  alias Teiserver.Helper.DateHelper
-  alias Teiserver.Helpers.LiveChartsHelper
-
   alias Teiserver.Account.GrowthReport
+  alias Teiserver.Helpers.LiveChartsHelper
 
   alias TeiserverWeb.AdminLive.ToolsComponents
   use TeiserverWeb, :live_view
@@ -17,75 +15,143 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
     "Quarter",
     "Year"
   ]
-  @chart_types LiveChartsHelper.get_chart_types()
-  @form_types %{time_unit: :string, log_count: :integer, columns: :integer, type: :atom}
-
+  @cols_options [1, 2, 4, 6]
+  @chart_types LiveChartsHelper.get_multi_series_maps_chart_types()
+  @data_form_types %{time_unit: :string, log_count: :integer}
+  @render_form_types %{columns: :integer, chart_type: :string}
   @impl LiveView
   def mount(_params, _session, socket) do
-    {:ok, socket |> assign(:charts, %{unique: nil})}
+    {:ok,
+     socket
+     |> assign(
+       chart_series: [],
+       chart_types: @chart_types,
+       cols_options: @cols_options
+     )}
   end
 
   @impl LiveView
   def handle_params(_params, _uri, socket) when is_connected?(socket) do
-    form =
-      {%{}, @form_types}
-      |> validate(prep_params())
+    data_form =
+      {%{}, @data_form_types}
+      |> validate_data(prep_data_params())
+      |> to_form(as: :data_form)
+
+    render_form =
+      {%{}, @render_form_types}
+      |> validate_render(prep_render_params())
+      |> to_form(as: :render_form)
+
+    {date_keys, chart_series} =
+      GrowthReport.build_series(data_form[:time_unit].value, data_form[:log_count].value)
 
     {:noreply,
      socket
-     |> assign(connected?: true, form: to_form(form, as: :growth_form), time_units: @time_units)}
+     |> assign(
+       connected?: true,
+       data_form: data_form,
+       render_form: render_form,
+       time_units: @time_units,
+       chart_types: @chart_types,
+       chart_series: chart_series,
+       date_keys: date_keys
+     )}
   end
 
   def handle_params(_params, _uri, socket) do
-    {:noreply, socket |> assign(connected?: false, form: nil)}
+    {:noreply, socket |> assign(connected?: false, data_form: nil, render_form: nil)}
   end
 
   @impl LiveView
   def handle_event(
-        "update",
-        %{"growth_form" => growth_form},
+        "update_data",
+        %{"data_form" => data_form},
         socket
       ) do
+    data_form =
+      {%{}, @data_form_types}
+      |> validate_data(data_form)
+      |> to_form(as: :data_form)
 
-    form =
-      {%{}, @form_types}
-      |> validate(growth_form)
-      |> to_form(as: :growth_form)
-
-    {:noreply, socket |> assign(:form, to_form(form, as: :growth_form))}
+    {:noreply, socket |> assign(:data_form, to_form(data_form, as: :data_form))}
   end
+
+  def handle_event(
+        "update_render",
+        %{"render_form" => render_form},
+        socket
+      ) do
+    render_form =
+      {%{}, @render_form_types}
+      |> validate_render(render_form)
+      |> to_form(as: :render_form)
+
+    {:noreply, socket |> assign(:render_form, to_form(render_form, as: :render_form))}
+  end
+
   def handle_event("fetch", _params, socket) do
-    form = socket.assigns.form
-    if form.source.valid? do
-      time_unit = get_field(form.source, :time_unit)
-      log_count = get_field(form.source, :log_count)
-      columns = get_field(form.source, :columns)
+    data_form = socket.assigns.data_form
 
+    if data_form.source.valid? do
+      time_unit = get_field(data_form.source, :time_unit)
+      log_count = get_field(data_form.source, :log_count)
 
+      {date_keys, chart_series} =
+        GrowthReport.build_series(time_unit, log_count)
 
-     case GrowthReport.build_charts(time_unit, log_count) do
-       {:ok, charts} ->
-          {:noreply, socket |> assign(charts: %{unique: charts})}
-        {:error, _reason} ->
-          {:noreply, socket |> assign(charts: %{unique: nil})}
-     end
-
+      IO.inspect(chart_series)
+      {:noreply, socket |> assign(chart_series: chart_series, date_keys: date_keys)}
     else
-
       {:noreply, socket}
     end
   end
 
-  defp prep_params() do
-    %{"time_unit" => Enum.at(@time_units, 0), "log_count" => 31, "columns" => 1}
+  defp prep_data_params do
+    %{
+      "time_unit" => Enum.at(@time_units, 0),
+      "log_count" => 31
+    }
   end
 
-  defp validate(form, attrs) do
+  defp prep_render_params do
+    %{"columns" => 1, "chart_type" => "line"}
+  end
+
+  defp validate_data(form, attrs) do
     form
-    |> cast(attrs, [:time_unit, :log_count, :columns])
-    |> validate_required([:time_unit, :log_count, :columns])
-    |> validate_number(:columns, greater_than: 0)
+    |> cast(attrs, [:time_unit, :log_count])
+    |> validate_required([:time_unit, :log_count])
     |> validate_number(:log_count, greater_than: 0)
+    |> validate_inclusion(:time_unit, @time_units)
     |> Map.put(:action, :validate)
+  end
+
+  defp validate_render(form, attrs) do
+    form
+    |> cast(attrs, [:columns, :chart_type])
+    |> validate_required([:columns, :chart_type])
+    |> validate_number(:columns, greater_than: 0)
+    |> validate_inclusion(:columns, @cols_options)
+    |> Map.put(:action, :validate)
+  end
+
+  defp calc_cols(form) do
+    if is_nil(form[:columns]) do
+      "grid-cols-1"
+    else
+      case form[:columns].value do
+        2 ->
+          "grid-cols-2"
+
+        4 ->
+          "grid-cols-4"
+
+        6 ->
+          "grid-cols-6"
+
+        _columns ->
+          "grid-cols-1"
+      end
+    end
   end
 end
