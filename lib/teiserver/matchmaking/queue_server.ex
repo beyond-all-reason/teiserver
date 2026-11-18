@@ -591,6 +591,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         )
 
         Enum.each(pending.joined, &Player.matchmaking_notify_cancelled(&1, :party_user_left))
+        Party.matchmaking_notify_cancel(party_id)
         state = %{state | pending_parties: Map.delete(state.pending_parties, party_id)}
         {:noreply, state}
     end
@@ -631,6 +632,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
         for p_id when p_id != player_id <- to_remove.player_ids do
           Player.matchmaking_notify_cancelled(p_id, :party_user_left)
         end
+
+        if to_remove.party_id, do: Party.matchmaking_notify_cancel(to_remove.party_id)
 
         {:ok, %{state | members: new_members, monitors: monitors}}
 

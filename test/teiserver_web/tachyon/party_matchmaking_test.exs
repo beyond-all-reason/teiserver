@@ -155,6 +155,24 @@ defmodule TeiserverWeb.Tachyon.PartyMatchmakingTest do
              Tachyon.invite_to_party!(m1.client, invited.user.id)
   end
 
+  test "can invite again after a member left matchmaking" do
+    {_party_id, [m1, m2], _invited} = setup_party(2, 0)
+    [q1] = [setup_queue(2)]
+
+    invited = setup_client()
+
+    assert %{"status" => "success"} =
+             Tachyon.join_queues!(m1.client, [%{id: q1.id, version: q1.version}])
+
+    assert %{"commandId" => "matchmaking/queuesJoined"} = Tachyon.recv_message!(m2.client)
+
+    assert %{"status" => "success"} = Tachyon.leave_queues!(m1.client)
+    assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(m2.client)
+    assert %{"commandId" => "matchmaking/cancelled"} = Tachyon.recv_message!(m1.client)
+
+    assert %{"status" => "success"} = Tachyon.invite_to_party!(m1.client, invited.user.id)
+  end
+
   test "leave matchmaking when creating a party" do
     founder = setup_client()
     [q1] = [setup_queue(2)]
