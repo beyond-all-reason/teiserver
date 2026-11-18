@@ -460,11 +460,11 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <:item title="Last login">
         {@user.last_login && Calendar.strftime(@user.last_login, "%Y-%m-%d %H:%M:%S")}
       </:item>
-      <:item title="Last logout">
-        {@user.last_logout && Calendar.strftime(@user.last_logout, "%Y-%m-%d %H:%M:%S")}
-      </:item>
       <:item title="Last played">
         {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Last logout">
+        {@user.last_logout && Calendar.strftime(@user.last_logout, "%Y-%m-%d %H:%M:%S")}
       </:item>
       <:item title="Player time">{DateHelper.minutes_to_str(@user_stats["player_minutes"])}</:item>
       <:item title="Spectator time">
