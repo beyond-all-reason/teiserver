@@ -2173,6 +2173,33 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(user2), sink_pid)
     end
+
+    test "moderator kickbans immediately without vote, even without boss" do
+      %{id: id, creator_id: creator_id, users: [target | _rest]} = setup_full_lobby([3, 3])
+
+      SessionRegistry.register(target.id, nil)
+      {:ok, _details} = Lobby.join_ally_team(id, target.id, 0)
+
+      drain_msg_queue()
+      :ok = Lobby.kickban(id, creator_id, target.id, nil, caller_mod?: true)
+
+      assert_receive {:"$gen_cast", {:lobby, {:left, ^id, :kicked}}}
+      refute_receive {:lobby, ^id, {:updated, %{current_vote: _vote_update}}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      refute is_map_key(details.players, target.id)
+    end
+
+    test "moderator cannot be kicked by another moderator" do
+      %{id: id, creator_id: creator_id, users: [target | _rest]} = setup_full_lobby([3, 3])
+      {:ok, _details} = Lobby.join_ally_team(id, target.id, 0)
+
+      {:error, :cannot_kick_moderator} =
+        Lobby.kickban(id, creator_id, target.id, nil, caller_mod?: true, target_mod?: true)
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert is_map_key(details.players, target.id)
+    end
   end
 
   # note: [test lobby battle]

@@ -9,6 +9,7 @@ defmodule Teiserver.Player.Session do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Helpers.BoundedQueue, as: BQ
   alias Teiserver.Helpers.MonitorCollection, as: MC
@@ -1094,7 +1095,16 @@ defmodule Teiserver.Player.Session do
       do: {:reply, {:error, :not_in_lobby}, state}
 
   def handle_call({:lobby, {:kickban, target_id, ban_until}}, _from, %PT.Data{} = state) do
-    result = TachyonLobby.kickban(state.lobby.id, state.user.id, target_id, ban_until)
+    caller_mod = AuthLib.allow?(state.user, "Moderator")
+    target_user = Account.get_user_by_id(target_id)
+    target_mod = AuthLib.allow?(target_user, "Moderator")
+
+    result =
+      TachyonLobby.kickban(state.lobby.id, state.user.id, target_id, ban_until,
+        caller_mod?: caller_mod,
+        target_mod?: target_mod
+      )
+
     {:reply, result, state}
   end
 

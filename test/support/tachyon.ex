@@ -27,8 +27,8 @@ defmodule Teiserver.Support.Tachyon do
     end
   end
 
-  def create_user do
-    user = GeneralTestLib.make_user(%{"roles" => ["Verified"]})
+  def create_user(roles \\ ["Verified"]) do
+    user = GeneralTestLib.make_user(%{"roles" => roles})
     set_ratings(user, 17)
     user
   end
@@ -84,11 +84,13 @@ defmodule Teiserver.Support.Tachyon do
 
   def setup_client(_context), do: setup_client()
 
-  def setup_client do
-    user = create_user()
+  def setup_client_with_roles(roles) do
+    user = create_user(roles)
     %{client: client, token: token} = connect(user)
     {:ok, user: user, client: client, token: token}
   end
+
+  def setup_client, do: setup_client_with_roles(["Verified"])
 
   # for when you only need an oauth app
   def setup_app(_context) do
