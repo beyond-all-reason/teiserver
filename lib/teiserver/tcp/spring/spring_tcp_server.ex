@@ -453,8 +453,7 @@ defmodule Teiserver.SpringTcpServer do
       new_state = SpringOut.reply(:disconnect, "Logged out", nil, state)
       {:stop, :normal, new_state}
     else
-      username = Account.get_username_by_id(msg.userid)
-      new_state = user_logged_out(msg.userid, username, state)
+      new_state = user_logged_out(msg.userid, msg.username, state)
       {:noreply, new_state}
     end
   end
