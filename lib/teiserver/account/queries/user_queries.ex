@@ -88,19 +88,6 @@ defmodule Teiserver.Account.UserQueries do
       where: users.email == ^value or users.name == ^value
   end
 
-  # Exact match on name or email, optionally also on former emails.
-  # Value is {term, opts}, see `former_email_dynamic/3` for the options.
-  def _where(query, :name_or_email_with_former, {value, _opts}) when value in ["", nil],
-    do: query
-
-  def _where(query, :name_or_email_with_former, {value, opts}) do
-    former = former_email_dynamic(value, :exact, opts)
-
-    condition = dynamic([users], users.email == ^value or users.name == ^value or ^former)
-
-    from users in query, where: ^condition
-  end
-
   def _where(query, :name_like, name) do
     uname = "%" <> name <> "%"
 
@@ -428,96 +415,13 @@ defmodule Teiserver.Account.UserQueries do
     uemail = "%" <> search_term <> "%"
 
     from users in query,
-      where: ilike(users.email, ^uemail)
-  end
-
-  @doc """
-  Like `where_email_like/2` but can also match against former emails.
-
-  Options:
-    * `:all_former` - match any email in `previous_emails`
-    * `:recent` - match the most recent former email, if the email was changed
-      within the last 30 days
-  """
-  @spec where_email_like(t(), String.t(), keyword()) :: t()
-  def where_email_like(query, "", _opts), do: query
-
-  def where_email_like(query, search_term, opts) do
-    former = former_email_dynamic(search_term, :like, opts)
-
-    condition = dynamic([users], ilike(users.email, ^("%" <> search_term <> "%")) or ^former)
-
-    from users in query, where: ^condition
-  end
-
-  @doc "Like `where_name_or_email_like/2` but can also match against former emails, see `where_email_like/3`."
-  @spec where_name_or_email_like(t(), String.t(), keyword()) :: t()
-  def where_name_or_email_like(query, "", _opts), do: query
-
-  def where_name_or_email_like(query, raw_search_term, opts) do
-    search_term = "%" <> raw_search_term <> "%"
-    former = former_email_dynamic(raw_search_term, :like, opts)
-
-    condition =
-      dynamic(
-        [users],
-        ilike(users.email, ^search_term) or ilike(users.name, ^search_term) or ^former
-      )
-
-    from users in query, where: ^condition
-  end
-
-  @recent_email_change_days 30
-
-  @spec former_email_dynamic(String.t(), :like | :exact, keyword()) :: Ecto.Query.dynamic_expr()
-  defp former_email_dynamic(term, mode, opts) do
-    cond do
-      Keyword.get(opts, :all_former, false) ->
-        case mode do
-          :like ->
-            like = "%" <> term <> "%"
-
-            dynamic(
-              [users],
-              fragment(
-                "EXISTS (SELECT 1 FROM unnest(?) AS e WHERE e ILIKE ?)",
-                users.previous_emails,
-                ^like
-              )
-            )
-
-          :exact ->
-            dynamic([users], fragment("? = ANY(?)", ^term, users.previous_emails))
-        end
-
-      Keyword.get(opts, :recent, false) ->
-        cutoff =
-          DateTime.utc_now()
-          |> DateTime.add(-@recent_email_change_days * 86_400, :second)
-          |> DateTime.truncate(:second)
-
-        # previous_emails is stored newest first, postgres arrays are 1-indexed
-        case mode do
-          :like ->
-            like = "%" <> term <> "%"
-
-            dynamic(
-              [users],
-              users.email_last_changed_at >= ^cutoff and
-                ilike(fragment("(?)[1]", users.previous_emails), ^like)
-            )
-
-          :exact ->
-            dynamic(
-              [users],
-              users.email_last_changed_at >= ^cutoff and
-                fragment("(?)[1] = ?", users.previous_emails, ^term)
-            )
-        end
-
-      true ->
-        dynamic(false)
-    end
+      where:
+        ilike(users.email, ^uemail) or
+          fragment(
+            "EXISTS (SELECT 1 FROM unnest(?) e WHERE e ILIKE ?)",
+            users.previous_emails,
+            ^uemail
+          )
   end
 
   @spec where_name_or_email_lower(t(), String.t()) :: t()
@@ -539,7 +443,12 @@ defmodule Teiserver.Account.UserQueries do
     from users in query,
       where:
         ilike(users.email, ^search_term) or
-          ilike(users.name, ^search_term)
+          ilike(users.name, ^search_term) or
+          fragment(
+            "EXISTS (SELECT 1 FROM unnest(?) e WHERE e ILIKE ?)",
+            users.previous_emails,
+            ^search_term
+          )
   end
 
   # Logged in after

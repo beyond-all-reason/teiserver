@@ -82,13 +82,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       |> MapSet.new()
 
     contains_update_keys? =
-      MapSet.new([
-        "order_by",
-        "page_size",
-        "restriction",
-        "email_recently_changed",
-        "all_former_emails"
-      ])
+      MapSet.new(["order_by", "page_size", "restriction"])
       |> MapSet.intersection(diff_keys)
       |> Enum.empty?()
       |> Kernel.not()
@@ -153,22 +147,12 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> assign(search: params, search_changed?: false)
   end
 
-  # Both options default to enabled when absent from the params
-  defp former_email_opts(search) do
-    [
-      recent: search["email_recently_changed"] not in [false, "false"],
-      all_former: search["all_former_emails"] not in [false, "false"]
-    ]
-  end
-
   defp convert_search_params(params) do
     %{
       # User entity
       "name" => params["name"],
       "email" => params["email"],
       "name_or_email" => params["name_or_email"],
-      "email_recently_changed" => params["email_recently_changed"] || "true",
-      "all_former_emails" => params["all_former_emails"] || "true",
       "role" => params["role"],
       "last_login" => params["last_login"],
       "without_role" => params["without_role"],
@@ -199,8 +183,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
-    |> UserQueries.where_email_like(search["email"] || "", former_email_opts(search))
-    |> UserQueries.where_name_or_email_like(name_or_email, former_email_opts(search))
+    |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_name_or_email_like(name_or_email)
     |> UserQueries.where_logged_in_after(last_login)
     |> UserQueries.where_has_role(search["role"] || "")
     |> UserQueries.where_not_has_role(search["without_role"] || "")

@@ -70,19 +70,6 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
 
         <div class="m-2">
           <.input_tw
-            type="checkbox"
-            field={@form[:email_recently_changed]}
-            label="Email recently changed (last 30 days)"
-          />
-          <.input_tw
-            type="checkbox"
-            field={@form[:all_former_emails]}
-            label="All former emails"
-          />
-        </div>
-
-        <div class="m-2">
-          <.input_tw
             type="text"
             field={@form[:role]}
             label="Role"

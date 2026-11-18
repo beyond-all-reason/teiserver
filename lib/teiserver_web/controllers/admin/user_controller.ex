@@ -98,14 +98,6 @@ defmodule TeiserverWeb.Admin.UserController do
     page = params["page"]
     limit = params["limit"]
 
-    # The search form posts everything nested under "search"
-    name_or_email = (params["search"]["name"] || "") |> String.trim()
-
-    former_opts = [
-      recent: params["search"]["email_recently_changed"] != "false",
-      all_former: params["search"]["all_former_emails"] != "false"
-    ]
-
     id_list =
       if params["search"]["previous_names"] != nil and params["search"]["previous_names"] != "" do
         Account.list_user_stats(
@@ -122,7 +114,7 @@ defmodule TeiserverWeb.Admin.UserController do
     users =
       (Account.list_users(
          search: [
-           name_or_email_with_former: {name_or_email, former_opts},
+           name_or_email: Map.get(params, "name", "") |> String.trim(),
            has_role: params["search"]["role"],
            ip: params["search"]["ip"],
            lobby_client: params["search"]["lobby_client"],
@@ -141,7 +133,7 @@ defmodule TeiserverWeb.Admin.UserController do
     total_users =
       Account.count_users(
         search: [
-          name_or_email_with_former: {name_or_email, former_opts},
+          name_or_email: Map.get(params, "name", "") |> String.trim(),
           has_role: params["search"]["role"],
           ip: params["search"]["ip"],
           lobby_client: params["search"]["lobby_client"],

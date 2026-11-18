@@ -8,7 +8,6 @@
   });
 </script>
 
-<% search_params = if is_map(@params["search"]), do: @params["search"], else: %{} %>
 <% search_col_class = "col-md-4 col-lg-3 col-xl-2 col-xxl-1 my-2" %>
 
 <div class="search-row pt-3">
@@ -32,31 +31,10 @@
           type="text"
           name="search[name]"
           id="search_name"
-          value={search_params["name"]}
+          value={@params["name"]}
           placeholder=""
           class="form-control"
         />
-      </div>
-
-      <div class={search_col_class}>
-        <input type="hidden" name="search[email_recently_changed]" value="false" />
-        <label>
-          <input
-            type="checkbox"
-            name="search[email_recently_changed]"
-            value="true"
-            checked={search_params["email_recently_changed"] != "false"}
-          /> Email recently changed (30 days)
-        </label>
-        <input type="hidden" name="search[all_former_emails]" value="false" />
-        <label>
-          <input
-            type="checkbox"
-            name="search[all_former_emails]"
-            value="true"
-            checked={search_params["all_former_emails"] != "false"}
-          /> All former emails
-        </label>
       </div>
 
       <div class={search_col_class}>
