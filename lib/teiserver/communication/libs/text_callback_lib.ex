@@ -108,24 +108,9 @@ defmodule Teiserver.Communication.TextCallbackLib do
     query
   end
 
-  # def _preload_things(query) do
-  #   from text_callbacks in query,
-  #     left_join: things in assoc(text_callbacks, :things),
-  #     preload: [things: things]
-  # end
-
-  @spec build_text_callback_cache() :: :ok
-  def build_text_callback_cache do
-    Communication.list_text_callbacks(limit: :infinity)
-    |> Enum.each(fn text_callback ->
-      Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
-    end)
-  end
-
   @spec update_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
-  def update_text_callback_cache({:ok, text_callback} = args) do
-    Teiserver.store_put(:text_callback_store, text_callback.id, text_callback)
+  def update_text_callback_cache({:ok, _text_callback} = args) do
     CommandLib.re_cache_discord_command("text")
     refresh_discord_text_command()
 
@@ -136,8 +121,7 @@ defmodule Teiserver.Communication.TextCallbackLib do
 
   @spec delete_text_callback_cache({:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}) ::
           {:ok, TextCallback.t()} | {:error, Ecto.Changeset.t()}
-  def delete_text_callback_cache({:ok, text_callback} = args) do
-    Teiserver.store_delete(:text_callback_store, text_callback.id)
+  def delete_text_callback_cache({:ok, _text_callback} = args) do
     refresh_discord_text_command()
 
     args
