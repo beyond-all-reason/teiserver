@@ -116,7 +116,7 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       task = Task.async(fn -> Battle.add_player(battle_id, 12345, "latecomer", "pw") end)
       assert_receive {:add_player, cb_state, _}
       Session.async_reply(autohost_pid, cb_state, :ok)
-      {:ok, _} = Task.await(task)
+      {:ok, _connection} = Task.await(task)
 
       assert %{role: :spectator} = participants(battle_id)[12345]
     end
