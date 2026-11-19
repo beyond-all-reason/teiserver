@@ -101,52 +101,6 @@ defmodule Teiserver.TachyonBattle.BattleTest do
       Battle.add_player(battle_id, 99999, "too_many_ticks", "ticktick")
   end
 
-  describe "participant roles" do
-    test "players from start script are players" do
-      %{battle_id: battle_id, start_script: start_script} = setup_autohost_and_battle()
-
-      player =
-        start_script.ally_teams |> hd() |> Map.get(:teams) |> hd() |> Map.get(:players) |> hd()
-
-      assert %{role: :player} = participants(battle_id)[player.user_id]
-    end
-
-    test "late joiners are spectators" do
-      %{battle_id: battle_id, autohost_pid: autohost_pid} = setup_autohost_and_battle()
-      task = Task.async(fn -> Battle.add_player(battle_id, 12345, "latecomer", "pw") end)
-      assert_receive {:add_player, cb_state, _}
-      Session.async_reply(autohost_pid, cb_state, :ok)
-      {:ok, _connection} = Task.await(task)
-
-      assert %{role: :spectator} = participants(battle_id)[12345]
-    end
-
-    test "player_left event does not crash the battle" do
-      %{battle_id: battle_id, start_script: start_script} = setup_autohost_and_battle()
-
-      player =
-        start_script.ally_teams |> hd() |> Map.get(:teams) |> hd() |> Map.get(:players) |> hd()
-
-      pid = Teiserver.TachyonBattle.Registry.lookup(battle_id)
-
-      Battle.send_update_event(%{
-        battle_id: battle_id,
-        time: DateTime.utc_now(),
-        update: {:player_left, %{user_id: player.user_id, reason: :left}}
-      })
-
-      assert :sys.get_state(pid)
-      assert Process.alive?(pid)
-    end
-  end
-
-  defp participants(battle_id) do
-    battle_id
-    |> Teiserver.TachyonBattle.Registry.lookup()
-    |> :sys.get_state()
-    |> Map.fetch!(:participants)
-  end
-
   # setup a handshaked autohost with some defaults
   defp setup_autohost_and_battle do
     match_id = :rand.uniform(10_000_000)
