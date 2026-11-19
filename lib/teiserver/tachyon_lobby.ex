@@ -189,8 +189,7 @@ defmodule Teiserver.TachyonLobby do
           id(),
           User.id(),
           target_id :: User.id(),
-          ban_until :: DateTime.t() | nil,
-          opts :: keyword()
+          ban_until :: DateTime.t() | nil
         ) ::
           :ok
           | {:error,
@@ -199,7 +198,7 @@ defmodule Teiserver.TachyonLobby do
              | :unauthorized
              | :cannot_kick_moderator
              | term()}
-  defdelegate kickban(lobby_id, user_id, target_id, ban_until \\ nil, opts \\ []), to: Lobby
+  defdelegate kickban(lobby_id, user_id, target_id, ban_until \\ nil), to: Lobby
 
   @doc """
   Creates a lobby_log.

@@ -23,6 +23,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # It also handles update events without having to dispatch them manually on a case by
   # case basis.
 
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Autohost
@@ -240,8 +242,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
           LT.Types.id(),
           User.id(),
           target_id :: User.id(),
-          ban_until :: DateTime.t() | nil,
-          opts :: keyword()
+          ban_until :: DateTime.t() | nil
         ) ::
           :ok
           | {:error,
@@ -250,9 +251,12 @@ defmodule Teiserver.TachyonLobby.Lobby do
              | :unauthorized
              | :cannot_kick_moderator
              | term()}
-  def kickban(lobby_id, user_id, target_id, ban_until \\ nil, opts \\ []) do
-    caller_mod = Keyword.get(opts, :caller_mod?, false)
-    target_mod = Keyword.get(opts, :target_mod?, false)
+  def kickban(lobby_id, user_id, target_id, ban_until \\ nil) do
+    caller = Account.get_user_by_id(user_id)
+    target = Account.get_user_by_id(target_id)
+
+    caller_mod = AuthLib.allow?(caller, "Moderator")
+    target_mod = AuthLib.allow?(target, "Moderator")
     call_lobby(lobby_id, {:kickban, user_id, target_id, ban_until, caller_mod, target_mod})
   end
 
@@ -950,7 +954,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:keep_state, data, [{:reply, from, {:error, :cannot_kick_moderator}}]}
 
       caller_mod ->
-        data = apply_kickban(data, user_id, target_id, ban_until)
+        data =
+          process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}],
+            caller_id: user_id
+          ).data
+
         {:keep_state, data, [{:reply, from, :ok}]}
 
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
@@ -964,7 +972,11 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:keep_state, data, [{:reply, from, :ok}]}
 
       true ->
-        data = apply_kickban(data, user_id, target_id, ban_until)
+        data =
+          process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}],
+            caller_id: user_id
+          ).data
+
         {:keep_state, data, [{:reply, from, :ok}]}
     end
   end
@@ -1819,12 +1831,5 @@ defmodule Teiserver.TachyonLobby.Lobby do
     if non_abstaining > 0 and yes / non_abstaining >= majority,
       do: {:ended, :passed},
       else: {:ended, :failed}
-  end
-
-  @spec apply_kickban(LT.Data.t(), User.id(), User.id(), DateTime.t() | nil) :: LT.Data.t()
-  defp apply_kickban(data, user_id, target_id, ban_until) do
-    process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}],
-      caller_id: user_id
-    ).data
   end
 end
