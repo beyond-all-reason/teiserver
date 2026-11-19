@@ -34,7 +34,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
     default_rate = Config.get_site_config_cache("system.Login rate")
-    rate_limiter = BurstyRateLimiter.per_second(default_rate) |> BurstyRateLimiter.set_empty()
+    rate = if is_integer(default_rate) and default_rate > 0, do: default_rate, else: 1
+    rate_limiter = BurstyRateLimiter.per_second(rate) |> BurstyRateLimiter.set_empty()
 
     state = %{
       tick_timer_ref: timer_ref,
@@ -75,8 +76,14 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.call(__MODULE__, {:reset_rate_limiter, rl})
   end
 
-  @spec reset_rate_limiter(rate :: non_neg_integer(), should_fill? :: boolean()) :: :ok
-  def reset_rate_limiter(rate, should_fill? \\ false) when is_number(rate) do
+  @spec reset_rate_limiter(rate :: number(), should_fill? :: boolean()) ::
+          :ok | {:error, :invalid_rate}
+  def reset_rate_limiter(rate, should_fill? \\ false)
+
+  def reset_rate_limiter(rate, _should_fill?) when is_number(rate) and rate <= 0,
+    do: {:error, :invalid_rate}
+
+  def reset_rate_limiter(rate, should_fill?) when is_number(rate) do
     rl = BurstyRateLimiter.per_second(rate)
 
     rl =

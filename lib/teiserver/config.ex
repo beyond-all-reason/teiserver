@@ -3,6 +3,7 @@ defmodule Teiserver.Config do
   The Config context.
   """
 
+  alias Ecto.Changeset
   alias Teiserver.Account.User
   alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
@@ -317,8 +318,25 @@ defmodule Teiserver.Config do
     Repo.one(query)
   end
 
-  @spec update_site_config(String.t(), term()) :: :ok
-  def update_site_config(key, value) do
+  @spec update_site_config(String.t(), term()) :: :ok | {:error, Changeset.t()}
+  def update_site_config("system.Login rate" = key, value) do
+    case value |> to_string() |> String.trim() |> Integer.parse() do
+      {rate, ""} when rate > 0 ->
+        do_update_site_config(key, rate)
+
+      _other ->
+        changeset =
+          %SiteConfig{}
+          |> SiteConfig.changeset(%{key: key, value: to_string(value)})
+          |> Changeset.add_error(:value, "must be a positive integer")
+
+        {:error, changeset}
+    end
+  end
+
+  def update_site_config(key, value), do: do_update_site_config(key, value)
+
+  defp do_update_site_config(key, value) do
     query =
       from site_config in SiteConfig,
         where: site_config.key == ^key,
