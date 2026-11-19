@@ -26,8 +26,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   require Logger
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-
   @spec do_start() :: :ok
   def do_start do
     # Start the supervisor server
@@ -419,9 +417,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         match_id = Battle.get_match_id_from_userid(userid)
 
         if match_id do
-          game_time = int_parse(game_time)
-          handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
-          check_for_griefing(username, event_type_name, game_time, match_id)
+          case game_time |> String.trim() |> Integer.parse() do
+            {time, ""} ->
+              handle_match_simple_event(username, userid, match_id, event_type_name, time)
+              check_for_griefing(username, event_type_name, time, match_id)
+
+            _other ->
+              Logger.warning("match-event: Invalid game time '#{game_time}'")
+          end
         else
           Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
@@ -447,16 +450,20 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         match_id = Battle.get_match_id_from_userid(userid)
 
         if match_id do
-          game_time = int_parse(game_time)
+          case game_time |> String.trim() |> Integer.parse() do
+            {time, ""} ->
+              handle_match_complex_event(
+                username,
+                userid,
+                match_id,
+                event_type_name,
+                time,
+                json_data
+              )
 
-          handle_match_complex_event(
-            username,
-            userid,
-            match_id,
-            event_type_name,
-            game_time,
-            json_data
-          )
+            _other ->
+              Logger.warning("complex-match-event: Invalid game time '#{game_time}'")
+          end
         else
           Logger.warning("match-event: Cannot get match_id of userid of #{username}")
         end
@@ -536,12 +543,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         host = Client.get_client_by_id(from_id)
         user = Account.get_user_by_name(username)
 
-        if host == nil do
-          Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
-
-          # Optionally, handle the case here, such as by
-          # sending a message back to the user or taking
-          # other corrective actions. Just returning {:noreply, state} for now.
+        if host == nil or user == nil do
+          Logger.warning("No host or user found for from_id: #{from_id} for message #{to}:#{msg}")
           {:noreply, state}
         else
           case to do
