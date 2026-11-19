@@ -12,7 +12,20 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
   def get_multi_series_maps_chart_types, do: @multi_series_maps_types
 
   @doc """
-    Returns an atom representing a chart type, defaults to `:line` if provided value is anything beside a valid [ApeCharts chart types](https://apexcharts.com/docs/chart-types/).
+    Returns an atom representing a chart type. Supported types:
+        `:area`,
+        `:bar`,
+        `:pie`,
+        `:donut`,
+        `:radialBar`,
+        `:heatmap`,
+        `:radar`,
+        `:rangeBar`,
+        `:funnel`,
+        `:pyramid`,
+        `:gauge`,
+        `:line`.
+        If provided type is not supported, returns `:line`.
   """
   @spec get_atom(String.t()) :: atom()
   def get_atom(type) do
@@ -59,7 +72,7 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
     Generates a `%LiveCharts.Chart{}` for `LiveCharts.chart/1`.
     Expects `series` as a list of numbers.
     Supported types: `:pie`, `:donut`, `:radialBar`, `:gauge`.
-
+    If provided type is not supported, returns `:pie`.
     ## Examples:
       iex: series = [30, 40, 50, 60, 40, 10, 25]
       iex: labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -109,7 +122,7 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
     Generates a `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
     Expects `series` as a map  with `:name` and `:data` keys.
     Supported types: `:funnel`, `:pyramid`.
-
+   If provided type is not supported, returns `:funnel`.
     [Funnel type docs](https://apexcharts.com/docs/chart-types/funnel-chart/).
 
 
@@ -165,7 +178,7 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
     Expects `series` as a list of maps with `:name` and `:data` keys.
     Lists provided in `data` are allowed to vary in length.
     Supported types: `:line`, `:area`, `:bar`, `:radar`, `:heatmap`
-
+   If provided type is not supported, returns `:line`.
   ## Examples:
       iex: series = [%{name: "Accepted", data: [30, 40, 50, 60, 40, 10, 25]},%{name: "Rejected", data: [0, 4, 0, 2, 12, 5, 0]},%{name: "Postponed", data: [3, 6 ,0, 0, 2, 4, 2]}]
       iex: labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
