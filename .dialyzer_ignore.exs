@@ -106,7 +106,7 @@
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_lobby_event_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/telemetry/complex_lobby_event_controller.ex", :call},
+  {"lib/teiserver_web/controllers/telemetry/complex_lobby_egrowth_repovent_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_match_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/complex_match_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_server_event_controller.ex", :no_return},
@@ -137,7 +137,6 @@
   # Added with OTP-28 migration
   {"test/support/teiserver_test_lib.ex", :call},
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :call_without_opaque},
-  {"lib/teiserver/account/reports/growth_report.ex", :invalid_contract},
   {"lib/teiserver/account/servers/login_throttle_server.ex", :contract_with_opaque},
   {"lib/teiserver/autohost/session.ex", :contract_with_opaque},
   {"lib/teiserver/battle.ex", :invalid_contract},
