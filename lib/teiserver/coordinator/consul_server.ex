@@ -1197,41 +1197,45 @@ defmodule Teiserver.Coordinator.ConsulServer do
     if get_player_count(state) < get_max_player_count(state) do
       [userid | _rest] = get_queue(state)
 
-      existing = Client.get_client_by_id(userid)
-
-      new_client =
-        Map.merge(existing, %{
-          player: true,
-          ready: false,
-          unready_at: System.system_time(:millisecond)
-        })
-
-      case request_user_change_status(new_client, existing, state) do
-        {true, allowed_client} ->
-          # Sometimes people get added and SPADS thinks they need to go, this delay might help
-          :timer.sleep(100)
-
-          ChatLib.sayprivateex(
-            state.coordinator_id,
-            userid,
-            "#{new_client.name} You were at the front of the queue, you are now a player.",
-            state.lobby_id
-          )
-
-          if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
-            if Config.get_user_config_cache(userid, "teiserver.Notify - Exited the queue") do
-              Communication.send_discord_dm(
-                userid,
-                "You have reached the front of the queue and are now a player."
-              )
-            end
-          end
-
+      case Client.get_client_by_id(userid) do
+        nil ->
           send(self(), {:dequeue_user, userid})
-          Client.update(allowed_client, :client_updated_battlestatus)
 
-        {false, _client} ->
-          :ok
+        existing ->
+          new_client =
+            Map.merge(existing, %{
+              player: true,
+              ready: false,
+              unready_at: System.system_time(:millisecond)
+            })
+
+          case request_user_change_status(new_client, existing, state) do
+            {true, allowed_client} ->
+              # Sometimes people get added and SPADS thinks they need to go, this delay might help
+              :timer.sleep(100)
+
+              ChatLib.sayprivateex(
+                state.coordinator_id,
+                userid,
+                "#{new_client.name} You were at the front of the queue, you are now a player.",
+                state.lobby_id
+              )
+
+              if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
+                if Config.get_user_config_cache(userid, "teiserver.Notify - Exited the queue") do
+                  Communication.send_discord_dm(
+                    userid,
+                    "You have reached the front of the queue and are now a player."
+                  )
+                end
+              end
+
+              send(self(), {:dequeue_user, userid})
+              Client.update(allowed_client, :client_updated_battlestatus)
+
+            {false, _client} ->
+              :ok
+          end
       end
     end
   end
@@ -1442,15 +1446,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
     join_queue =
       state.join_queue
       |> Enum.filter(fn userid ->
-        client = Client.get_client_by_id(userid) || %{player: false}
-        client.player == false
+        case Client.get_client_by_id(userid) do
+          %{player: false} -> true
+          _other -> false
+        end
       end)
 
     low_priority_join_queue =
       state.low_priority_join_queue
       |> Enum.filter(fn userid ->
-        client = Client.get_client_by_id(userid) || %{player: false}
-        client.player == false
+        case Client.get_client_by_id(userid) do
+          %{player: false} -> true
+          _other -> false
+        end
       end)
 
     %{state | join_queue: join_queue, low_priority_join_queue: low_priority_join_queue}
