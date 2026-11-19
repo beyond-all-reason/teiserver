@@ -281,7 +281,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           Enum.member?(lobby.players, userid) and now - seen_at > min_diff_ms
         end)
         |> Enum.filter(fn {userid, _seen_at} ->
-          Client.get_client_by_id(userid).player
+          case Client.get_client_by_id(userid) do
+            %{player: true} -> true
+            _other -> false
+          end
         end)
         |> Enum.map(fn {userid, seen_at} ->
           seconds_ago = ((now - seen_at) / 1000) |> round()
