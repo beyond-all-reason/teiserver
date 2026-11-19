@@ -178,15 +178,20 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
       _other_message ->
-        user = Account.get_user_by_id(userid)
-        Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
+        case Account.get_user_by_id(userid) do
+          nil ->
+            :ok
 
-        if not Auth.is_bot?(user) do
-          Chat.send_direct_message(
-            state.userid,
-            userid,
-            "I don't currently handle messages, sorry #{user.name}"
-          )
+          user ->
+            Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
+
+            if not Auth.is_bot?(user) do
+              Chat.send_direct_message(
+                state.userid,
+                userid,
+                "I don't currently handle messages, sorry #{user.name}"
+              )
+            end
         end
     end
 
