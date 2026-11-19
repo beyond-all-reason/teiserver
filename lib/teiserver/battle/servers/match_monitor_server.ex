@@ -50,20 +50,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
-  @impl GenServer
-  def handle_call(:client_state, _from, state) do
-    {:reply, state.client, state}
-  end
-
-  @impl GenServer
-  def handle_cast({:update_client, new_client}, state) do
-    {:noreply, %{state | client: new_client}}
-  end
-
-  def handle_cast({:merge_client, partial_client}, state) do
-    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
-  end
-
   # Direct/Room messaging
   @impl GenServer
   def handle_info(:begin, state) do
@@ -265,19 +251,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
 
-    {:ok, user, client} = Login.internal_client_login(account.id)
+    {:ok, user, _client} = Login.internal_client_login(account.id)
 
     rooms = ["autohosts"]
-
-    state = %{
-      ip: "127.0.0.1",
-      userid: user.id,
-      username: user.name,
-      lobby_host: false,
-      user: user,
-      rooms: rooms,
-      client: client
-    }
 
     rooms
     |> Enum.each(fn room_name ->
@@ -288,7 +264,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
-    state
+    %{userid: user.id}
   end
 
   @spec get_match_monitor_account() :: User.t() | map()
