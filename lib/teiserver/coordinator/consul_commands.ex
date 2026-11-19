@@ -1304,7 +1304,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.each(fn player_id ->
       client = Account.get_client_by_id(player_id)
 
-      if client.ready == false and client.player == true do
+      if client != nil and client.ready == false and client.player == true do
         Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
       end
@@ -1388,7 +1388,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.each(fn player_id ->
       client = Client.get_client_by_id(player_id)
 
-      if client.ready == false and client.player == true do
+      if client != nil and client.ready == false and client.player == true do
         Lobby.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
       end
@@ -1415,7 +1415,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     lobby.players
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-    |> Enum.filter(fn client -> client.player == true end)
+    |> Enum.filter(fn client -> client != nil and client.player == true end)
     |> Enum.each(fn client ->
       Lobby.say(client.userid, "!y", state.lobby_id)
     end)
