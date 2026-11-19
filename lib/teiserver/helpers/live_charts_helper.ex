@@ -122,7 +122,7 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
     Generates a `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
     Expects `series` as a map  with `:name` and `:data` keys.
     Supported types: `:funnel`, `:pyramid`.
-   If provided type is not supported, returns `:funnel`.
+    If provided type is not supported, returns `:funnel`.
     [Funnel type docs](https://apexcharts.com/docs/chart-types/funnel-chart/).
 
 
@@ -177,8 +177,8 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
     Generates a `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
     Expects `series` as a list of maps with `:name` and `:data` keys.
     Lists provided in `data` are allowed to vary in length.
-    Supported types: `:line`, `:area`, `:bar`, `:radar`, `:heatmap`
-   If provided type is not supported, returns `:line`.
+    Supported types: `:line`, `:area`, `:bar`, `:radar`, `:heatmap`.
+    If provided type is not supported, returns `:line`.
   ## Examples:
       iex: series = [%{name: "Accepted", data: [30, 40, 50, 60, 40, 10, 25]},%{name: "Rejected", data: [0, 4, 0, 2, 12, 5, 0]},%{name: "Postponed", data: [3, 6 ,0, 0, 2, 4, 2]}]
       iex: labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
