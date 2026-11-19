@@ -297,19 +297,31 @@ defmodule Teiserver.Coordinator.ConsulServer do
         old_lobby = Lobby.get_lobby(state.lobby_id)
 
         new_lobby =
-          if client.lobby_id == state.lobby_id or client.lobby_id == nil do
-            # If the first splitter is still in this lobby, move them to a new one
-            # with the same engine version as the starting lobby
-            Lobby.find_empty_lobby(fn a ->
-              a.engine_version == old_lobby.engine_version and
-                a.passworded == false
-            end)
-          else
-            %{id: client.lobby_id}
+          cond do
+            client == nil ->
+              nil
+
+            client.lobby_id == state.lobby_id or client.lobby_id == nil ->
+              # If the first splitter is still in this lobby, move them to a new one
+              # with the same engine version as the starting lobby
+              Lobby.find_empty_lobby(fn a ->
+                a.engine_version == old_lobby.engine_version and
+                  a.passworded == false
+              end)
+
+            true ->
+              %{id: client.lobby_id}
           end
 
         # If the first splitter is still in this lobby, move them to a new one
         cond do
+          client == nil ->
+            ChatLib.sayex(
+              state.coordinator_id,
+              "Split failed, split leader disconnected",
+              state.lobby_id
+            )
+
           Enum.empty?(players_to_move) ->
             ChatLib.sayex(
               state.coordinator_id,
