@@ -69,10 +69,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   def handle_command(cmd, state) do
     cond do
       Enum.member?(@forward_to_consul, cmd.command) ->
-        client = Client.get_client_by_id(cmd.senderid)
+        case Client.get_client_by_id(cmd.senderid) do
+          %{lobby_id: lobby_id} when not is_nil(lobby_id) ->
+            Coordinator.send_consul(lobby_id, cmd)
 
-        if client.lobby_id do
-          Coordinator.send_consul(client.lobby_id, cmd)
+          _other ->
+            :ok
         end
 
         state
@@ -454,11 +456,13 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           :ok
 
         target_id ->
-          client = Account.get_client_by_id(target_id)
+          case Account.get_client_by_id(target_id) do
+            %{party_id: party_id} when not is_nil(party_id) ->
+              Account.leave_party(party_id, target_id)
+              Account.move_client_to_party(target_id, nil)
 
-          if client.party_id do
-            Account.leave_party(client.party_id, target_id)
-            Account.move_client_to_party(target_id, nil)
+            _other ->
+              :ok
           end
       end
     end)
