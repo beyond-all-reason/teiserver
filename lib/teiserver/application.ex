@@ -165,10 +165,13 @@ defmodule Teiserver.Application do
     start_result = Supervisor.start_link(children, opts)
 
     # If the server seems to not start up we can check the info log to see
-    # if this is present, we don't want it appearing in our tests though
-    # TODO: Replace this with something having less of a code-smell
-    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
-      Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
+    # if this is present. Tests silence it via the logger level in config/test.exs
+    case start_result do
+      {:ok, _pid} ->
+        Logger.info("Teiserver.Supervisor started")
+
+      {:error, reason} ->
+        Logger.error("Teiserver.Supervisor failed to start: #{Kernel.inspect(reason)}")
     end
 
     startup_sub_functions(start_result)
