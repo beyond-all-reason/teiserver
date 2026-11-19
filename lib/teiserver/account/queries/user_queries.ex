@@ -415,13 +415,27 @@ defmodule Teiserver.Account.UserQueries do
     uemail = "%" <> search_term <> "%"
 
     from users in query,
-      where:
-        ilike(users.email, ^uemail) or
-          fragment(
-            "EXISTS (SELECT 1 FROM unnest(?) e WHERE e ILIKE ?)",
-            users.previous_emails,
-            ^uemail
-          )
+      where: ilike(users.email, ^uemail)
+  end
+
+  @spec where_previous_email_like(t(), String.t()) :: t()
+  def where_previous_email_like(query, ""), do: query
+
+  def where_previous_email_like(query, search_term) do
+    pattern = "%" <> search_term <> "%"
+
+    from users in query,
+      where: array_any_ilike(users.previous_emails, ^pattern)
+  end
+
+  @spec where_email_or_previous_email_like(t(), String.t()) :: t()
+  def where_email_or_previous_email_like(query, ""), do: query
+
+  def where_email_or_previous_email_like(query, search_term) do
+    pattern = "%" <> search_term <> "%"
+
+    from users in query,
+      where: ilike(users.email, ^pattern) or array_any_ilike(users.previous_emails, ^pattern)
   end
 
   @spec where_name_or_email_lower(t(), String.t()) :: t()
@@ -444,11 +458,7 @@ defmodule Teiserver.Account.UserQueries do
       where:
         ilike(users.email, ^search_term) or
           ilike(users.name, ^search_term) or
-          fragment(
-            "EXISTS (SELECT 1 FROM unnest(?) e WHERE e ILIKE ?)",
-            users.previous_emails,
-            ^search_term
-          )
+          array_any_ilike(users.previous_emails, ^search_term)
   end
 
   # Logged in after

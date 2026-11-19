@@ -35,6 +35,23 @@ defmodule Teiserver.Helper.QueryHelpers do
     end
   end
 
+  # True if any element of the `array` column matches the ILIKE `pattern`.
+  #
+  # Postgres has no ILIKE operator for arrays, and `= ANY(...)` only does an
+  # exact, case-sensitive match. To keep the same partial, case-insensitive
+  # matching as `ilike/2` on a plain column, we expand the array into rows with
+  # `unnest` and check whether any of them matches. `SELECT 1` is just a
+  # placeholder: EXISTS only cares whether a row is returned, not its value.
+  defmacro array_any_ilike(array, pattern) do
+    quote do
+      fragment(
+        "EXISTS (SELECT 1 FROM unnest(?) AS e WHERE e ILIKE ?)",
+        unquote(array),
+        unquote(pattern)
+      )
+    end
+  end
+
   defmacro array_overlap_a_in_b(a, b) do
     quote do
       fragment("? \\?| ?", unquote(a), unquote(b))
