@@ -195,8 +195,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         if UserLib.new_account?(user_id) do
           # TODO: Log moderation automated action against account for audit
           Telemetry.log_simple_match_event(user_id, match_id, "newuserliftingcomms", game_time)
-          client = Account.get_client_by_id(user_id)
-          Coordinator.send_to_host(client.lobby_id, "!kickban #{client.name}")
+
+          case Account.get_client_by_id(user_id) do
+            %{lobby_id: lobby_id} ->
+              Coordinator.send_to_host(lobby_id, "!kickban #{username}")
+
+            _other ->
+              :ok
+          end
         end
 
       _other_event ->
