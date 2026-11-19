@@ -1,0 +1,88 @@
+<OAuthApplicationComponents.section_menu active="show" scope={@scope}>
+  <OAuthApplicationComponents.quick_search />
+</OAuthApplicationComponents.section_menu>
+
+<.header>
+  OAuth application: {@oauth_application.name}
+  <:actions>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      patch={~p"/admin/oauth_applications/#{@oauth_application}/show/edit"}
+      phx-click={JS.push_focus()}
+      class="btn btn-primary btn-sm"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+    <.link
+      :if={allow?(@scope, "Admin")}
+      phx-click="delete-oauth-application"
+      data-confirm="Are you sure you want to delete this oauth application?"
+      class="btn btn-error btn-sm"
+    >
+      <Fontawesome.icon icon="trash" style="regular" /> Delete
+    </.link>
+  </:actions>
+</.header>
+
+<div :if={@client_secret} class="bg-error rounded-md p-4 m-4 font-bold">
+  Client secret, this will be shown once only! <pre id="client-secret">{@client_secret}</pre>
+</div>
+
+<div class="flex">
+  <div class="flex-1">
+    <h3 class="font-bold text-lg">Application</h3>
+    <.list>
+      <:item title="ID">{@oauth_application.id}</:item>
+      <:item title="Client ID (UID)">{@oauth_application.uid}</:item>
+      <:item title="Owner">
+        {@oauth_application.owner.name} ({@oauth_application.owner.email})
+      </:item>
+      <:item title="Description">{@oauth_application.description}</:item>
+      <:item title="Scopes">
+        <span
+          :for={scope <- @oauth_application.scopes}
+          class="badge badge-soft badge-primary mx-1"
+        >
+          {scope}
+        </span>
+      </:item>
+      <:item title="Client secret?">
+        <%= if is_nil(@oauth_application.secret) do %>
+          Unset (public client)
+        <% else %>
+          Set <Fontawesome.icon icon="check" style="regular" />
+        <% end %>
+      </:item>
+      <:item title="Redirect URIs">
+        <div :for={uri <- @oauth_application.redirect_uris} class="">{uri}</div>
+      </:item>
+    </.list>
+  </div>
+  <div class="flex-1">
+    <h3 class="font-bold text-lg">Stats</h3>
+    <.list>
+      <:item title="Authorization code">{@stats.code_count}</:item>
+      <:item title="Authentication token">{@stats.token_count}</:item>
+      <:item title="Client credentials">{@stats.credential_count}</:item>
+    </.list>
+  </div>
+</div>
+
+<.back href={~p"/admin/oauth_applications"}>Back to OAuth applications</.back>
+
+<.modal
+  :if={@live_action == :edit and allow?(@scope, "Admin")}
+  id="oauth_application-modal"
+  show
+  on_cancel={JS.patch(~p"/admin/oauth_applications/#{@oauth_application}")}
+>
+  <.live_component
+    module={FormComponent}
+    id={@oauth_application.id}
+    title={@page_title}
+    action={@live_action}
+    oauth_application={@oauth_application}
+    patch={~p"/admin/oauth_applications/#{@oauth_application}"}
+    scope={@scope}
+  />
+</.modal>
