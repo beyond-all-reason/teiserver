@@ -1537,24 +1537,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "bstatus", senderid: senderid}, state) do
-    balancer_state = Coordinator.call_balancer(state.lobby_id, :report_state)
+    case Coordinator.call_balancer(state.lobby_id, :report_state) do
+      nil ->
+        Coordinator.send_to_user(senderid, "Balancer unavailable")
 
-    values =
-      balancer_state
-      |> Enum.map(fn {k, v} ->
-        "#{k}: #{v}"
-      end)
-      |> Enum.sort(&<=/2)
+      balancer_state ->
+        values =
+          balancer_state
+          |> Enum.map(fn {k, v} ->
+            "#{k}: #{v}"
+          end)
+          |> Enum.sort(&<=/2)
 
-    status_msg =
-      [
-        "#{@splitter} Balancer status #{@splitter}",
-        values
-      ]
-      |> List.flatten()
-      |> Enum.filter(fn s -> s != nil end)
+        status_msg =
+          [
+            "#{@splitter} Balancer status #{@splitter}",
+            values
+          ]
+          |> List.flatten()
+          |> Enum.filter(fn s -> s != nil end)
 
-    Coordinator.send_to_user(senderid, status_msg)
+        Coordinator.send_to_user(senderid, status_msg)
+    end
+
     state
   end
 
