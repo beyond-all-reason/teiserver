@@ -1,8 +1,6 @@
 [
   # This started after inverting a condition in an `if/else` statement. It's hard to fix with all the other ignored warnings here.
   {"lib/teiserver/account.ex"},
-  {"lib/teiserver/account/reports/growth_report.ex", :no_return},
-  {"lib/teiserver/account/reports/growth_report.ex", :call},
   {"lib/teiserver/account/servers/party_server.ex", :no_return},
   {"lib/teiserver/account/servers/party_server.ex", :call},
   {"lib/teiserver/battle.ex", :call},
