@@ -56,10 +56,30 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
   end
 
   @doc """
-   Generates single series `%LiveCharts.Chart{}` for `LiveCharts.chart/1`.
-    Expects `series` as a list of numbers:
-    [1,2,3,4,5],
-    Defaults to `:pie` chart type if provided `type` is not a single series type.
+    Generates a `%LiveCharts.Chart{}` for `LiveCharts.chart/1`.
+    Expects `series` as a list of numbers.
+    Supported types: `:pie`, `:donut`, `:radialBar`, `:gauge`.
+
+    ## Examples:
+      iex: series = [30, 40, 50, 60, 40, 10, 25]
+      iex: labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      iex: Teiserver.Helpers.LiveChartsHelper.generate_single_series_chart(series, label, :donut, "Minutes Jogging")
+
+      {:ok,
+      %LiveCharts.Chart{
+        id: "Minutes Jogging donut",
+        type: :donut,
+        series: [30, 40, 50, 60, 40, 10, 25],
+        options: %{
+          title: %{text: "Minutes Jogging", style: %{}, align: "center"},
+          labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+            "Saturday", "Sunday"],
+          chart: %{width: 500},
+          legend: %{position: "bottom", show: true}
+        },
+        adapter: LiveCharts.Adapter.ApexCharts
+      }}
+
   """
   @spec generate_single_series_chart(list(number()), list(String.t()), atom(), String.t()) ::
           {:ok, Chart.t()} | {:error, String.t()}
@@ -86,16 +106,37 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
   end
 
   @doc """
-    Generates a single series map `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
-      Expects `series` as a map:
-    %{name: "Some name", data: [1,2,3,4,5]}.
-    Defaults to `:funnel` chart type if provided `type` is not a single series map type.
+    Generates a `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
+    Expects `series` as a map  with `:name` and `:data` keys.
+    Supported types: `:funnel`, `:pyramid`.
+
     [Funnel type docs](https://apexcharts.com/docs/chart-types/funnel-chart/).
 
+
+  ## Examples:
+
+      iex: series = %{name: "Income", data: [5,10,15,20]}
+      iex: labels = ["week 1", "week 2", "week 3", "week 4"]
+      iex: Teiserver.Helpers.LiveChartsHelper.generate_proportional_stage_chart(series, labels, :funnel, "Income")
+
+      {:ok,
+      %LiveCharts.Chart{
+        id: "Income funnel",
+        type: :funnel,
+        series: [%{data: [5, 10, 15, 20], name: "Currency"}],
+        options: %{
+          title: %{text: "Income", align: "center"},
+          legend: %{position: "bottom", show: true},
+          xaxis: %{categories: ["week 1", "week 2", "week 3", "week 4"]}
+        },
+        adapter: LiveCharts.Adapter.ApexCharts
+      }}
+
+
   """
-  @spec generate_single_series_maps_chart(map(), list(String.t()), atom(), String.t()) ::
+  @spec generate_proportional_stage_chart(map(), list(String.t()), atom(), String.t()) ::
           {:ok, Chart.t()} | {:error, String.t()}
-  def generate_single_series_maps_chart(series, labels, type, title)
+  def generate_proportional_stage_chart(series, labels, type, title)
       when is_atom(type) do
     type =
       if type in @single_series_maps_types do
@@ -106,10 +147,10 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
 
     cond do
       not Map.has_key?(series, :name) ->
-        {:error, "series map must contain :name ield"}
+        {:error, "series map must contain :name field"}
 
       not Map.has_key?(series, :data) ->
-        {:error, "series map must contain :data ield"}
+        {:error, "series map must contain :data field"}
 
       not Enum.all?(series.data, &is_number/1) ->
         {:error, "data field must contain numbers"}
@@ -120,13 +161,38 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
   end
 
   @doc """
-    Generates a multi series map `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
-      Expects `series` as a list of maps:
-    `[%{name: "Some name", data: [1,2,3,4,5]}, %{name: "Some other name, data: [6,7,8,9,0]}]`.
+    Generates a `%LiveChars.Chart{}` for `LiveCharts.chart/1`.
+    Expects `series` as a list of maps with `:name` and `:data` keys.
     Lists provided in `data` are allowed to vary in length.
-    Defaults to `:line` chart type if provided `type` is not a multi series map type.
+    Supported types: `:line`, `:area`, `:bar`, `:radar`, `:heatmap`
+
+  ## Examples:
+      iex: series = [%{name: "Accepted", data: [30, 40, 50, 60, 40, 10, 25]},%{name: "Rejected", data: [0, 4, 0, 2, 12, 5, 0]},%{name: "Postponed", data: [3, 6 ,0, 0, 2, 4, 2]}]
+      iex: labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+      iex: Teiserver.Helpers.LiveChartsHelper.generate_multi_series_maps_chart(series, labels, :bar, "Inquiries")
+
+      {:ok,
+      %LiveCharts.Chart{
+        id: "Inquiries bar",
+        type: :bar,
+        series: [
+          %{data: [30, 40, 50, 60, 40, 10, 25], name: "Accepted"},
+          %{data: [0, 4, 0, 2, 12, 5, 0], name: "Rejected"},
+          %{data: [3, 6, 0, 0, 2, 4, 2], name: "Postponed"}
+        ],
+        options: %{
+          title: %{text: "Inquiries", align: "center"},
+          legend: %{position: "bottom", show: true},
+          xaxis: %{
+            categories: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+              "Saturday", "Sunday"]
+          }
+        },
+        adapter: LiveCharts.Adapter.ApexCharts
+      }}
+
   """
-  @spec generate_multi_series_maps_chart(list(number()), list(String.t()), atom(), String.t()) ::
+  @spec generate_multi_series_maps_chart(list(map()), list(String.t()), atom(), String.t()) ::
           {:ok, Chart.t()} | {:error, String.t()}
   def generate_multi_series_maps_chart(series, labels, type, title)
       when is_atom(type) do

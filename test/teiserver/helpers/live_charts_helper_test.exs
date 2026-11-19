@@ -62,7 +62,7 @@ defmodule Teiserver.Helpers.LiveChartsHelperTest do
     assert chart.type == :pie
   end
 
-  describe "generate_single_series_maps_chart" do
+  describe "generate_proportional_stage_chart" do
     test "generates a `%LiveCharts.Chart{}` struct for given series, labels, chart type and title",
          %{labels: labels, single_series: single_series} do
       chart_type = :funnel
@@ -70,7 +70,7 @@ defmodule Teiserver.Helpers.LiveChartsHelperTest do
       series = %{name: "Currency", data: single_series}
 
       {:ok, chart} =
-        LiveChartsHelper.generate_single_series_maps_chart(series, labels, chart_type, title)
+        LiveChartsHelper.generate_proportional_stage_chart(series, labels, chart_type, title)
 
       assert %Chart{} = chart
       assert chart.id == "Daily Income funnel"
@@ -86,7 +86,7 @@ defmodule Teiserver.Helpers.LiveChartsHelperTest do
       series = %{name: "Currency", data: ["a", 2, :atom, []]}
 
       {:error, "data field must contain numbers"} =
-        LiveChartsHelper.generate_single_series_maps_chart(series, labels, chart_type, title)
+        LiveChartsHelper.generate_proportional_stage_chart(series, labels, chart_type, title)
     end
 
     test "when provided with chart type that is not a single series maps chart type, defaults to :funnel",
@@ -99,7 +99,7 @@ defmodule Teiserver.Helpers.LiveChartsHelperTest do
       series = %{name: "Currency", data: single_series}
 
       {:ok, chart} =
-        LiveChartsHelper.generate_single_series_maps_chart(series, labels, chart_type, title)
+        LiveChartsHelper.generate_proportional_stage_chart(series, labels, chart_type, title)
 
       assert chart.type == :funnel
     end
