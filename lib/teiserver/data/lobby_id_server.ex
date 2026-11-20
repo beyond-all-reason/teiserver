@@ -10,7 +10,7 @@ defmodule Teiserver.LobbyIdServer do
   @max_id 16_777_216
   @restart_gap 1_000
 
-  @spec get_next_id() :: 1..unquote(@max_id) | {:error, :no_pid}
+  @spec get_next_id() :: pos_integer() | {:error, :no_pid}
   def get_next_id do
     GenServer.call(__MODULE__, :next_id)
   catch

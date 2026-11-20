@@ -61,11 +61,11 @@ defmodule Teiserver.Lobby do
       ) do
     case LobbyIdServer.get_next_id() do
       {:error, :no_pid} -> {:error, "Lobby ID server unavailable. Please retry."}
-      id when is_integer(id) -> build_lobby(lobby, id)
+      id when is_integer(id) -> Map.put(lobby, :id, id) |> build_lobby()
     end
   end
 
-  defp build_lobby(lobby, id) do
+  defp build_lobby(lobby) do
     passworded = Map.get(lobby, :password) != nil
 
     # Needs to be supplied a map with:
@@ -113,7 +113,7 @@ defmodule Teiserver.Lobby do
         in_progress: false,
         started_at: nil
       },
-      Map.put(lobby, :id, id)
+      lobby
     )
   end
 
