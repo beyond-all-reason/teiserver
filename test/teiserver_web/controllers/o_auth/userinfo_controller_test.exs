@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.OAuth.UserinfoControllerTest do
   alias Phoenix.ConnTest
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.BotFixtures
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
@@ -9,7 +9,7 @@ defmodule TeiserverWeb.OAuth.UserinfoControllerTest do
   @info_scopes ["profile", "email", "groups"]
 
   defp setup_app(_context) do
-    {:ok, admin_user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
+    {:ok, admin_user} = AuthLib.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
 
     {:ok, app} =
       OAuth.create_application(%{
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.OAuth.UserinfoControllerTest do
 
   defp setup_conn(_context) do
     conn = ConnTest.build_conn()
-    {:ok, user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Verified", "Moderator"])
+    {:ok, user} = AuthLib.add_roles(TeiserverTestLib.new_user().id, ["Verified", "Moderator"])
     {:ok, conn: conn, user: user}
   end
 

@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.TOTPLib
@@ -178,7 +177,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
           # And potentially remove their smurfer role
           if smurf_count == 0 do
-            Auth.remove_roles(origin_user_id, ["Smurfer"])
+            AuthLib.remove_roles(origin_user_id, ["Smurfer"])
           end
 
           Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})

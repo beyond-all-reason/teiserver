@@ -1,5 +1,5 @@
 defmodule Teiserver.Data.Battle.ChatLibTest do
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Battle
   alias Teiserver.Lobby
   alias Teiserver.Lobby.ChatLib
@@ -10,7 +10,7 @@ defmodule Teiserver.Data.Battle.ChatLibTest do
   @tag :needs_attention
   test "test lobby chat as bot" do
     bot_user = new_user()
-    {:ok, bot_user} = Auth.add_roles(bot_user.id, ["Bot"])
+    {:ok, bot_user} = AuthLib.add_roles(bot_user.id, ["Bot"])
     real_user = new_user()
 
     lobby =

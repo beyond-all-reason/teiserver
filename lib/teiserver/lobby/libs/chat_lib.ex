@@ -2,7 +2,7 @@ defmodule Teiserver.Lobby.ChatLib do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Chat
@@ -67,7 +67,7 @@ defmodule Teiserver.Lobby.ChatLib do
     msg = trim_message(msg)
     user = Account.get_user(userid)
 
-    bot? = Auth.is_bot?(user)
+    bot? = AuthLib.is_bot?(user)
 
     if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
@@ -128,7 +128,7 @@ defmodule Teiserver.Lobby.ChatLib do
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = Account.get_user(userid)
-    bot? = Auth.is_bot?(user)
+    bot? = AuthLib.is_bot?(user)
 
     if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
@@ -199,7 +199,7 @@ defmodule Teiserver.Lobby.ChatLib do
         String.starts_with?(msg, "!") and Account.restricted?(sender, ["Host commands"]) ->
           false
 
-        Auth.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg) ->
+        AuthLib.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg) ->
           false
 
         Enum.member?(
@@ -243,7 +243,7 @@ defmodule Teiserver.Lobby.ChatLib do
   @spec persist_message(User.t(), String.t(), T.lobby_id(), atom) :: any
   def persist_message(%User{} = user, msg, lobby_id, type) do
     lobby = Lobby.get_lobby(lobby_id)
-    bot? = Auth.is_bot?(user)
+    bot? = AuthLib.is_bot?(user)
 
     persist =
       cond do

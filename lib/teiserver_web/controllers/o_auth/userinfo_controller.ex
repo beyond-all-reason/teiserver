@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.OAuth.UserinfoController do
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
 
   use TeiserverWeb, :controller
 
@@ -39,7 +39,7 @@ defmodule TeiserverWeb.OAuth.UserinfoController do
   defp add_claims(claims, %{owner: owner}, "email") when owner != nil do
     claims
     |> Map.put(:email, owner.email)
-    |> Map.put(:email_verified, Auth.verified?(owner))
+    |> Map.put(:email_verified, AuthLib.verified?(owner))
   end
 
   defp add_claims(claims, _token, "email"), do: claims

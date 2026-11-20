@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
   @moduledoc false
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
 
   @spec help(User.t(), boolean(), String.t()) :: String.t()
@@ -241,8 +241,8 @@ Multiple locks can be engaged at the same time
   defp can_use?(%User{} = user, host, group) do
     case group do
       :everybody -> true
-      :host -> Auth.admin?(user) or Auth.moderator?(user) or host
-      :moderator -> Auth.admin?(user) or Auth.moderator?(user)
+      :host -> AuthLib.admin?(user) or AuthLib.moderator?(user) or host
+      :moderator -> AuthLib.admin?(user) or AuthLib.moderator?(user)
       _other -> false
     end
   end

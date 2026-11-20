@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.BitParse
   alias Teiserver.TeiserverTestLib
 
@@ -39,7 +39,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
 
       user.id
       |> Account.get_user!()
-      |> Auth.add_roles(["Admin"])
+      |> AuthLib.add_roles(["Admin"])
 
       Account.recache_user(user)
 
@@ -54,7 +54,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsSyncTest do
 
     test "$modme/$unmodme", %{socket: socket} = ctx do
       mod = TeiserverTestLib.new_user()
-      Auth.add_roles(mod.id, ["Moderator"])
+      AuthLib.add_roles(mod.id, ["Moderator"])
       %{socket: mod_socket} = TeiserverTestLib.auth_setup(ctx, mod)
       [_adduser, status] = TeiserverTestLib._recv_until(socket) |> String.split("\n", trim: true)
       ["CLIENTSTATUS", mod_name, str_status] = String.split(status)

@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringBattleHostTest do
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
@@ -20,7 +20,7 @@ defmodule Teiserver.SpringBattleHostTest do
     %{socket: socket, user: user} = auth_setup(context)
 
     # Only bots can host lobbies
-    Auth.add_roles(user.id, ["Bot"])
+    AuthLib.add_roles(user.id, ["Bot"])
 
     {:ok, socket: socket, user: user}
   end

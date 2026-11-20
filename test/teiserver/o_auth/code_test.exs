@@ -1,7 +1,7 @@
 defmodule Teiserver.OAuth.CodeTest do
   alias Plug.Conn
   alias Plug.Test
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Token
   alias Teiserver.OAuthFixtures
@@ -292,7 +292,7 @@ defmodule Teiserver.OAuth.CodeTest do
   end
 
   test "check scopes against user permissions", %{user: user} do
-    {:ok, admin_user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
+    {:ok, admin_user} = AuthLib.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
 
     {:ok, app} =
       OAuth.create_application(%{

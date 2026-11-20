@@ -3,7 +3,7 @@ defmodule Teiserver.Room do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Chat
   alias Teiserver.Chat.RoomRegistry
@@ -55,7 +55,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      Auth.admin?(user) or Auth.moderator?(user) == true ->
+      AuthLib.admin?(user) or AuthLib.moderator?(user) == true ->
         true
 
       true ->
@@ -128,7 +128,7 @@ defmodule Teiserver.Room do
   end
 
   def send_message(%User{} = user, room_name, msg) do
-    bot? = Auth.is_bot?(user)
+    bot? = AuthLib.is_bot?(user)
 
     if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
@@ -154,7 +154,7 @@ defmodule Teiserver.Room do
   @spec send_message_ex(User.id(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
     user = Account.get_user(from_id)
-    bot? = Auth.is_bot?(user)
+    bot? = AuthLib.is_bot?(user)
 
     if not bot? and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
