@@ -1,78 +1,46 @@
 defmodule Teiserver.LobbyIdServer do
   @moduledoc """
-  Used as a singleton to create lobby_ids and ensure we increment the counter
-  each time across the cluster.
+  Allocates legacy lobby IDs in the range Chobby can represent exactly.
   """
+  alias Teiserver.Lobby.LobbyLib
+
   use GenServer
 
-  @spec start_lobby_id_server() :: :ok | {:failure, String.t()}
-  def start_lobby_id_server do
-    case get_server_pid() do
-      nil ->
-        {:ok, _coordinator_pid} =
-          DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-            __MODULE__,
-            name: __MODULE__, data: %{}
-          })
+  # Chobby uses single-precision floats for battle IDs.
+  @max_id 16_777_216
+  @restart_gap 1_000
 
-        :ok
-
-      _pid ->
-        {:failure, "Already started"}
-    end
-  end
-
-  @spec get_next_id() :: {:error, :no_pid} | non_neg_integer()
+  @spec get_next_id() :: 1..unquote(@max_id) | {:error, :no_pid}
   def get_next_id do
-    case get_server_pid() do
-      nil -> {:error, :no_pid}
-      pid -> GenServer.call(pid, :next_id)
-    end
+    GenServer.call(__MODULE__, :next_id)
+  catch
+    :exit, {reason, {GenServer, :call, _args}}
+    when reason in [:noproc, :normal, :shutdown, :killed] ->
+      {:error, :no_pid}
   end
 
-  @spec set_next_id(non_neg_integer()) :: :ok | {:error, :no_pid}
-  def set_next_id(next_id) do
-    case get_server_pid() do
-      nil -> {:error, :no_pid}
-      pid -> GenServer.cast(pid, {:set_id, next_id})
-    end
+  @spec start_link(list()) :: GenServer.on_start()
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @spec get_server_pid() :: pid() | nil
-  defp get_server_pid do
-    case Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
-      [{pid, _data}] ->
-        pid
-
-      _not_found ->
-        nil
-    end
-  end
-
-  @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, [], [])
-  end
-
-  def handle_call(:next_id, _from, state) do
-    {:reply, state.next_id, %{state | next_id: state.next_id + 1}}
-  end
-
-  def handle_cast({:set_id, next_id}, state) do
-    {:noreply, %{state | next_id: next_id}}
-  end
-
-  @spec init(map()) :: {:ok, map()}
+  @impl GenServer
   def init(_opts) do
-    Registry.register(
-      Teiserver.ServerRegistry,
-      "LobbyIdServer",
-      :lobby_id_server
-    )
-
-    {:ok,
-     %{
-       next_id: 1
-     }}
+    case LobbyLib.list_lobby_ids() do
+      [] -> {:ok, 1}
+      ids -> {:ok, wrap(Enum.max(ids) + @restart_gap)}
+    end
   end
+
+  @impl GenServer
+  def handle_call(:next_id, _from, next_id) do
+    id = find_free_id(next_id)
+    {:reply, id, wrap(id + 1)}
+  end
+
+  defp find_free_id(id) do
+    if LobbyLib.lobby_exists?(id), do: find_free_id(wrap(id + 1)), else: id
+  end
+
+  defp wrap(id), do: Integer.mod(id - 1, @max_id) + 1
 end

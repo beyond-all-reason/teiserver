@@ -651,19 +651,16 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @spec start_link(list()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts[:data], [])
+    lobby_id = opts[:data].lobby.id
+
+    GenServer.start_link(__MODULE__, opts[:data],
+      name: {:via, Registry, {Teiserver.LobbyRegistry, lobby_id, lobby_id}}
+    )
   end
 
   @impl GenServer
   @spec init(map()) :: {:ok, map()}
   def init(%{lobby: %{id: id}} = data) do
-    # Update the queue pids cache to point to this process
-    Registry.register(
-      Teiserver.LobbyRegistry,
-      id,
-      id
-    )
-
     Logger.metadata(request_id: "LobbyServer##{id}")
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Teiserver.PubSub, "teiserver_server")

@@ -116,6 +116,7 @@ defmodule Teiserver.Application do
 
         # Lobbies
         Teiserver.Lobby.Cache,
+        Teiserver.LobbyIdServer,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
