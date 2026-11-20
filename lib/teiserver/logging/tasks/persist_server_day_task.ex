@@ -335,8 +335,14 @@ defmodule Teiserver.Logging.Tasks.PersistServerDayTask do
       )
       |> Enum.count()
 
-    # TODO: Calculate number of battles that took place
-    battles = 0
+    # Number of battles that started during the day
+    battles =
+      Battle.count_matches(
+        search: [
+          started_after: DateHelper.to_datetime(date),
+          started_before: DateHelper.to_datetime(tomorrow)
+        ]
+      )
 
     # Calculate peak users across the day
     peak_user_counts =
