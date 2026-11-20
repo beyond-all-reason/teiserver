@@ -626,7 +626,7 @@ defmodule Teiserver.TeiserverConfigs do
       default: "Role",
       permissions: ["Admin"],
       description: "The value used to assign rank icons at login",
-      opts: [choices: ["Leaderboard rating", "Rating value", "Playtime", "Role"]]
+      opts: [choices: ["Leaderboard rating", "Playtime", "Role"]]
     })
 
     add_site_config_type(%{
