@@ -7,6 +7,14 @@
     <.button class="btn btn-sm btn-primary btn-soft">Old UI</.button>
   </.link>
 
+  <TeiserverWeb.ViewAsComponents.button
+    :if={@user}
+    actor={@real_user || @current_user}
+    target={@user}
+    viewing_as?={@real_user != nil}
+    style={:daisy}
+  />
+
   <.link
     navigate={~p"/moderation/users/#{@user_id}/new/note"}
     phx-click={JS.push_focus()}

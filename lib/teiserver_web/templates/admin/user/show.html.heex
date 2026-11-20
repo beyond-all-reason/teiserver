@@ -19,6 +19,13 @@
   on the Teiserver repo so we can ensure it's not missed.
 </div>
 
+<TeiserverWeb.ViewAsComponents.button
+  actor={@conn.assigns[:real_user] || @current_user}
+  target={@user}
+  viewing_as?={@conn.assigns[:real_user] != nil}
+  style={:bootstrap}
+/>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
