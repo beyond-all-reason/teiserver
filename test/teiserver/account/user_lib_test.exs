@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.UserLibTest do
   @moduledoc false
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Account.UserLib
   alias Teiserver.AccountFixtures
@@ -222,7 +222,7 @@ defmodule Teiserver.Account.UserLibTest do
     setup [:smurf_users]
 
     test "valid link", %{moderator: moderator, origin: origin, smurf: smurf} do
-      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
+      {:ok, %User{} = moderator} = AuthLib.add_roles(moderator.id, ["Moderator"])
 
       result = UserLib.mark_user_as_smurf_of(moderator, %{smurf: smurf, origin: origin})
       assert result == :ok
@@ -247,7 +247,7 @@ defmodule Teiserver.Account.UserLibTest do
 
     test "circular link", %{moderator: moderator, origin: origin, smurf: smurf} do
       # If A is a smurf of B, B cannot be made a smurf of A
-      {:ok, %User{} = moderator} = Auth.add_roles(moderator.id, ["Moderator"])
+      {:ok, %User{} = moderator} = AuthLib.add_roles(moderator.id, ["Moderator"])
 
       {:ok, origin} = Account.update_user_smurf(origin, %{smurf_of_id: smurf.id})
 

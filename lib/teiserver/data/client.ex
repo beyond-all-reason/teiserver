@@ -3,7 +3,7 @@ defmodule Teiserver.Client do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.ClientLib
   alias Teiserver.Account.User
@@ -92,8 +92,8 @@ defmodule Teiserver.Client do
         name: user.name,
         tcp_pid: self(),
         rank: stats["rank"] || 0,
-        moderator: Auth.moderator?(user) or Auth.is_event_organizer?(user),
-        bot: Auth.is_bot?(user),
+        moderator: AuthLib.moderator?(user) or AuthLib.is_event_organizer?(user),
+        bot: AuthLib.is_bot?(user),
         away: false,
         in_game: false,
         ip: ip || stats["last_ip"],

@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Client
   alias Teiserver.Config
@@ -140,16 +140,16 @@ defmodule Teiserver.Coordinator.AutomodServer do
       user == nil ->
         "No user"
 
-      Auth.is_bot?(user) ->
+      AuthLib.is_bot?(user) ->
         "Bot account"
 
-      Auth.moderator?(user) ->
+      AuthLib.moderator?(user) ->
         "Moderator account"
 
-      Auth.contributor?(user) ->
+      AuthLib.contributor?(user) ->
         "Developer account"
 
-      Auth.trusted?(user) ->
+      AuthLib.trusted?(user) ->
         "Trusted account"
 
       true ->

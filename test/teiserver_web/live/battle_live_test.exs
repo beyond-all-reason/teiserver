@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Live.BattleTest do
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Lobby
   alias Teiserver.TeiserverTestLib
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       {:ok, server_context} = TeiserverTestLib.start_spring_server()
       # Lets create a battle
       %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup(server_context)
-      Auth.add_roles(host_user.id, ["Bot"])
+      AuthLib.add_roles(host_user.id, ["Bot"])
 
       _send_raw(
         host_socket,

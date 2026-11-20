@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationControllerTest do
       GeneralTestLib.conn_setup(TeiserverTestLib.admin_permissions())
       |> TeiserverTestLib.conn_setup()
 
-    Auth.add_roles(ctx[:user], ["Admin"])
+    AuthLib.add_roles(ctx[:user], ["Admin"])
     {:ok, ctx}
   end
 

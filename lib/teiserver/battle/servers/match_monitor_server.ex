@@ -5,7 +5,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.Login
   alias Teiserver.Account.User
@@ -214,7 +214,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         :ok
 
       user ->
-        if Auth.is_bot?(from_id) do
+        if AuthLib.is_bot?(from_id) do
           stats = %{
             "hardware:cpuinfo" => contents["CPU"] || "Null CPU",
             "hardware:gpuinfo" => contents["GPU"] || "Null GPU",
@@ -385,7 +385,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # We don't want non-bot users messaging this bot, if they do we
   # drop their message and kick the user
   defp acceptable_source?(user_id) do
-    if Auth.is_bot?(user_id) do
+    if AuthLib.is_bot?(user_id) do
       true
     else
       Client.disconnect(user_id, "Abuse")
@@ -396,7 +396,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # DMs
   defp handle_direct_message(from_id, "broken_connection " <> username, _state) do
-    if Auth.is_bot?(from_id) or Auth.admin?(from_id) or Auth.moderator?(from_id) do
+    if AuthLib.is_bot?(from_id) or AuthLib.admin?(from_id) or AuthLib.moderator?(from_id) do
       user = Account.get_user_by_name(username)
 
       if user do
@@ -415,7 +415,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     with [_all, username, event_type_name, game_time] <- regex_result,
          userid <- Account.get_userid_from_name(username) do
-      if userid && Auth.is_bot?(from_id) do
+      if userid && AuthLib.is_bot?(from_id) do
         match_id = Battle.get_match_id_from_userid(userid)
 
         if match_id do
@@ -443,7 +443,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     with [_all, username, event_type_name, game_time, base64data] <- regex_result,
          {:ok, json_data} <- base64_and_json(base64data),
          userid <- Account.get_userid_from_name(username) do
-      if userid && Auth.is_bot?(from_id) do
+      if userid && AuthLib.is_bot?(from_id) do
         match_id = Battle.get_match_id_from_userid(userid)
 
         if match_id do

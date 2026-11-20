@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   alias ExULID.ULID
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RelationshipLib
   alias Teiserver.Account.User
   alias Teiserver.Battle
@@ -133,7 +133,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     # Moderator info regarding relationships
     player_status =
-      if Auth.moderator?(senderid) do
+      if AuthLib.moderator?(senderid) do
         player_ids = Battle.list_lobby_players(state.lobby_id)
 
         blocks =
@@ -444,7 +444,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     if balance do
       admin_or_moderator_messages =
-        if Auth.moderator?(senderid) do
+        if AuthLib.moderator?(senderid) do
           time_taken =
             cond do
               balance.time_taken < 1000 ->
@@ -642,7 +642,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> String.downcase()
       |> String.trim()
 
-    is_moderator = Auth.moderator?(senderid)
+    is_moderator = AuthLib.moderator?(senderid)
 
     allowed_choices = BalanceLib.get_allowed_algorithms(is_moderator)
 
@@ -1197,7 +1197,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              Auth.contributor?(userid)
+              AuthLib.contributor?(userid)
             end,
             fn %{userid: userid} ->
               userid
@@ -1208,7 +1208,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           all_possible_clients
           |> Enum.group_by(
             fn %{userid: userid} ->
-              Auth.admin?(userid)
+              AuthLib.admin?(userid)
             end,
             fn %{userid: userid} ->
               userid

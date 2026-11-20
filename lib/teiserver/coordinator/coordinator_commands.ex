@@ -3,7 +3,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Chat
@@ -44,11 +43,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         true
 
       # Allow all commands for Admins
-      Auth.admin?(senderid) ->
+      AuthLib.admin?(senderid) ->
         true
 
       # Allow all except Admin only commands for moderators
-      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
+      AuthLib.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
@@ -258,7 +257,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         ]
 
         mod_parts =
-          if Auth.moderator?(sender) do
+          if AuthLib.moderator?(sender) do
             # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
             # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
             # rank_time = Login.rank_time(user.id)
@@ -358,7 +357,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         )
 
       user ->
-        if Auth.admin?(user) or Auth.moderator?(user) do
+        if AuthLib.admin?(user) or AuthLib.moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot mute this user.")
         else
           case Account.ignore_user(senderid, user.id) do
@@ -517,7 +516,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "modme", senderid: sender_id} = _cmd, state) do
-    if Auth.moderator?(sender_id) do
+    if AuthLib.moderator?(sender_id) do
       Client.set_moderator_bit(sender_id, true)
     end
 

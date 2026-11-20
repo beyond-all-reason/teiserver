@@ -6,7 +6,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Login
   alias Teiserver.Account.RecacheUserStatsTask
@@ -185,7 +184,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           user ->
             Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
 
-            if not Auth.is_bot?(user) do
+            if not AuthLib.is_bot?(user) do
               Chat.send_direct_message(
                 state.userid,
                 userid,

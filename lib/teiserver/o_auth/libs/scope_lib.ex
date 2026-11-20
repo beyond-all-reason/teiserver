@@ -4,7 +4,7 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
   """
 
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Bot.Bot
 
   @spec allowed_scopes() :: [String.t()]
@@ -49,9 +49,9 @@ defmodule Teiserver.OAuth.Libs.ScopeLib do
   def scope_allowed?(scope, _user) when scope in ["tachyon.lobby", "profile", "email", "groups"],
     do: true
 
-  def scope_allowed?("admin.map", user), do: Auth.admin?(user)
-  def scope_allowed?("admin.engine", user), do: Auth.admin?(user)
-  def scope_allowed?("admin.user", user), do: Auth.admin?(user)
+  def scope_allowed?("admin.map", user), do: AuthLib.admin?(user)
+  def scope_allowed?("admin.engine", user), do: AuthLib.admin?(user)
+  def scope_allowed?("admin.user", user), do: AuthLib.admin?(user)
   def scope_allowed?(_scope, _user), do: false
 
   @doc """

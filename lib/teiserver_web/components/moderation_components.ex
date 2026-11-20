@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Moderation.ModerationComponents do
   @moduledoc false
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
 
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Moderation.ModerationComponents do
 
   def action_warning(assigns) do
     ~H"""
-    <div :if={Auth.vip?(@user)} class="alert alert-info">
+    <div :if={AuthLib.vip?(@user)} class="alert alert-info">
       This user has VIP or Contributor credentials. Please check with senior moderators and/or community management if any additional communication needs to take place around this action.
     </div>
     """

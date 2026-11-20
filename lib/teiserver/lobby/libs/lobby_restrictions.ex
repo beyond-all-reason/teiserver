@@ -4,7 +4,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
   """
 
   alias Teiserver.Account
-  alias Teiserver.Account.Auth
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Battle.MatchLib
@@ -144,7 +144,7 @@ defmodule Teiserver.Lobby.LobbyRestrictions do
     # When using Role method for ranks,
     # contributors auto pass since their ranks are not defined
     # on playtime. To be fixed separately.
-    method == "Role" && Auth.contributor?(user)
+    method == "Role" && AuthLib.contributor?(user)
   end
 
   @spec check_rank_to_play(any(), any()) :: :ok | {:error, iodata()}
