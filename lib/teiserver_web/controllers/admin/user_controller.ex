@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Admin.UserController do
   action_fallback TeiserverWeb.Controllers.BodyguardFallback
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Auth,
+    policy: Teiserver.Account.UserPolicy,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
