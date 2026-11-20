@@ -83,3 +83,10 @@ config :teiserver, Teiserver.Mailer,
   contact_address: "info@testsite.co.uk"
 
 config :teiserver, TeiserverWeb.Monitoring, port: 4401
+
+# Drop the startup marker (logged at error level on purpose in production)
+# from test output
+config :logger, :default_handler,
+  filters: [
+    teiserver_startup: {&:logger_filters.domain/2, {:stop, :sub, [:elixir, :teiserver_startup]}}
+  ]
