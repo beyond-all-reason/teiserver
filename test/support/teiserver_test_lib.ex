@@ -375,7 +375,13 @@ defmodule Teiserver.TeiserverTestLib do
       |> Lobby.create_lobby()
       |> Lobby.add_lobby()
 
-    lobby.id
+    lobby_id = lobby.id
+
+    on_exit(fn ->
+      if Lobby.get_lobby(lobby_id), do: Lobby.close_lobby(lobby_id)
+    end)
+
+    lobby_id
   end
 
   @spec make_battle(map()) :: map()
