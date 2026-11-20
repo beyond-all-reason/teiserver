@@ -181,7 +181,7 @@ defmodule Teiserver.Support.Tachyon do
       connection_options: [
         extra_headers: [
           {"authorization", "Bearer #{token.value}"},
-          {"sec-websocket-protocol", "v0.tachyon"}
+          {"sec-websocket-protocol", "v1.tachyon"}
         ]
       ]
     ]
