@@ -777,8 +777,6 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
-    # TODO: the `lobby/update` has very similar logic. There should be a way
-    # to combine the parsing
     create_data = %PT.LobbyStartParams{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],
