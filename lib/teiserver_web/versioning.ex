@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Tachyon.Versioning do
   # Server supported major Tachyon versions.
   # Only major versions are listed because the minor ones are optional additional extensions
   # that the server has to accept even if it doesn't support them.
-  @server_supported_versions [1]
+  @server_supported_versions [0]
 
   @subprotocol_regex ~r/^v(\d+)(?:\.(\d+))?\.tachyon$/
 
