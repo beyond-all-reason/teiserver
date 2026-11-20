@@ -50,7 +50,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
       conn =
         conn
         |> put_req_header("authorization", "Bearer #{token.value}")
-        |> put_req_header("sec-websocket-protocol", "v1.tachyon")
+        |> put_req_header("sec-websocket-protocol", "v0.tachyon")
         |> get(~p"/tachyon")
 
       assert conn.status == 400
@@ -138,7 +138,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
         connection_options: [
           extra_headers: [
             {"authorization", "Bearer #{token.value}"},
-            {"sec-websocket-protocol", "v1.tachyon"}
+            {"sec-websocket-protocol", "v0.tachyon"}
           ]
         ]
       ]
@@ -169,7 +169,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
           extra_headers: [
             {"authorization", "Bearer #{token.value}"},
             {"sec-websocket-protocol", "something-else"},
-            {"sec-websocket-protocol", "v1.tachyon"}
+            {"sec-websocket-protocol", "v0.tachyon"}
           ]
         ]
       ]
@@ -195,7 +195,7 @@ defmodule TeiserverWeb.TachyonControllerTest do
   defp valid_tachyon_conn(conn, %Teiserver.OAuth.Token{} = token) do
     conn
     |> put_req_header("authorization", "Bearer #{token.value}")
-    |> put_req_header("sec-websocket-protocol", "v1.tachyon")
+    |> put_req_header("sec-websocket-protocol", "v0.tachyon")
   end
 
   defp tachyon_url do

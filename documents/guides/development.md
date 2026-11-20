@@ -72,8 +72,8 @@ For example: sending `PING` should receive `PONG`.
 You should first have a oauth token available, connecting for example with
 [websocat](https://github.com/vi/websocat):
 
-- Plaintext: `websocat -H="Sec-WebSocket-Protocol: v1.tachyon" -H="Authorization: Bearer <token>" ws://localhost:4000/tachyon`
-- SSL: `websocat -k -H="Sec-WebSocket-Protocol: v1.tachyon" -H="Authorization: Bearer <token>" wss://localhost:8888/tachyon`
+- Plaintext: `websocat -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" ws://localhost:4000/tachyon`
+- SSL: `websocat -k -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" wss://localhost:8888/tachyon`
 
 ### Multi-node (Pure IEX)
 
