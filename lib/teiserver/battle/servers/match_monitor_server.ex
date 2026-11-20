@@ -66,21 +66,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Direct/Room messaging
   @impl GenServer
-  def handle_info(:begin, _state) do
-    state =
-      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
-           true do
-        pid = self()
-
-        spawn(fn ->
-          :timer.sleep(1000)
-          send(pid, :begin)
-        end)
-      else
-        do_begin()
-      end
-
-    {:noreply, state}
+  def handle_info(:begin, state) do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+         true do
+      Process.send_after(self(), :begin, 1_000)
+      {:noreply, state}
+    else
+      {:noreply, do_begin()}
+    end
   end
 
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
