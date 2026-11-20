@@ -36,9 +36,6 @@ defmodule TeiserverWeb.Report.ReportController do
         "ban_evasion" ->
           Teiserver.Account.BanEvasionReport
 
-        "growth" ->
-          Teiserver.Account.GrowthReport
-
         "week_on_week" ->
           Teiserver.Account.WeekOnWeekReport
 

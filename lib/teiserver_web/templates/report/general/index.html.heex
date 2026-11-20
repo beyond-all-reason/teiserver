@@ -89,16 +89,6 @@
     </.menu_card>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.GrowthReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.GrowthReport.icon()}
-      url={~p"/teiserver/reports/show/growth"}
-    >
-      Growth
-    </.menu_card>
-  <% end %>
-
   <%= if allow?(@current_user, Teiserver.Account.WeekOnWeekReport.permissions()) do %>
     <.menu_card
       size={:small}
