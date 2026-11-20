@@ -2173,6 +2173,53 @@ defmodule Teiserver.TachyonLobby.LobbyTest do
 
       {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(user2), sink_pid)
     end
+
+    test "moderator kickbans immediately without vote, even without boss" do
+      %{id: id, users: [target | _rest]} = setup_full_lobby([3, 3])
+
+      SessionRegistry.register(target.id, nil)
+      {:ok, _details} = Lobby.join_ally_team(id, target.id, 0)
+
+      moderator = AccountFixtures.user_fixture(%{roles: ["Moderator"]})
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(moderator), self())
+
+      :ok = Lobby.kickban(id, moderator.id, target.id)
+
+      assert_receive {:"$gen_cast", {:lobby, {:left, ^id, :kicked}}}
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert details.current_vote == nil
+      refute is_map_key(details.players, target.id)
+    end
+
+    test "moderator cannot be kicked by a regular player" do
+      %{id: id, creator_id: creator_id} = setup_full_lobby([3, 3])
+
+      moderator = AccountFixtures.user_fixture(%{roles: ["Moderator"]})
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(moderator), self())
+      {:ok, _details} = Lobby.join_ally_team(id, moderator.id, 0)
+
+      {:error, :cannot_kick_moderator} = Lobby.kickban(id, creator_id, moderator.id)
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert is_map_key(details.players, moderator.id)
+    end
+
+    test "moderator cannot be kicked by another moderator" do
+      %{id: id} = setup_full_lobby([3, 3])
+
+      caller = AccountFixtures.user_fixture(%{roles: ["Moderator"]})
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(caller), self())
+
+      target = AccountFixtures.user_fixture(%{roles: ["Moderator"]})
+      {:ok, _lobby_pid, _details} = Lobby.join(id, mk_player(target), self())
+      {:ok, _details} = Lobby.join_ally_team(id, target.id, 0)
+
+      {:error, :cannot_kick_moderator} = Lobby.kickban(id, caller.id, target.id)
+
+      {:ok, details} = LobbyProcess.get_details(id)
+      assert is_map_key(details.players, target.id)
+    end
   end
 
   # note: [test lobby battle]

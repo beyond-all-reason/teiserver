@@ -23,6 +23,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # It also handles update events without having to dispatch them manually on a case by
   # case basis.
 
+  alias Teiserver.Account
+  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Autohost
@@ -236,10 +238,26 @@ defmodule Teiserver.TachyonLobby.Lobby do
     call_lobby(lobby_id, {:send_message, from_id, msg_content})
   end
 
-  @spec kickban(LT.Types.id(), User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
-          :ok | {:error, :invalid_lobby | :not_in_lobby | :unauthorized | term()}
+  @spec kickban(
+          LT.Types.id(),
+          User.id(),
+          target_id :: User.id(),
+          ban_until :: DateTime.t() | nil
+        ) ::
+          :ok
+          | {:error,
+             :invalid_lobby
+             | :not_in_lobby
+             | :unauthorized
+             | :cannot_kick_moderator
+             | term()}
   def kickban(lobby_id, user_id, target_id, ban_until \\ nil) do
-    call_lobby(lobby_id, {:kickban, user_id, target_id, ban_until})
+    caller = Account.get_user_by_id(user_id)
+    target = Account.get_user_by_id(target_id)
+
+    caller_mod = AuthLib.allow?(caller, "Moderator")
+    target_mod = AuthLib.allow?(target, "Moderator")
+    call_lobby(lobby_id, {:kickban, user_id, target_id, ban_until, caller_mod, target_mod})
   end
 
   @doc """
@@ -909,7 +927,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
-        {:kickban, user_id, _target_id, _ban_until},
+        {:kickban, user_id, _target_id, _ban_until, _caller_mod, _target_mod},
         _state,
         %LT.Data{} = data
       )
@@ -918,7 +936,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
-        {:kickban, _user_id, target_id, _ban_until},
+        {:kickban, _user_id, target_id, _ban_until, _caller_mod, _target_mod},
         _state,
         %LT.Data{} = data
       )
@@ -927,11 +945,22 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   def handle_event(
         {:call, from},
-        {:kickban, user_id, target_id, ban_until},
+        {:kickban, user_id, target_id, ban_until, caller_mod, target_mod},
         _state,
         %LT.Data{} = data
       ) do
     cond do
+      target_mod ->
+        {:keep_state, data, [{:reply, from, {:error, :cannot_kick_moderator}}]}
+
+      caller_mod ->
+        data =
+          process_events(data, [%Events.Kickban{user_id: target_id, ban_until: ban_until}],
+            caller_id: user_id
+          ).data
+
+        {:keep_state, data, [{:reply, from, :ok}]}
+
       not Enum.empty?(data.bosses) and not MapSet.member?(data.bosses, user_id) ->
         {:keep_state, data, [{:reply, from, {:error, :not_boss}}]}
 
