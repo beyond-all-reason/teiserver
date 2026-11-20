@@ -5,7 +5,6 @@ defmodule Teiserver.Startup do
   alias Teiserver.Battle
   alias Teiserver.Coordinator
   alias Teiserver.Coordinator.AutomodServer
-  alias Teiserver.LobbyIdServer
   alias Teiserver.Telemetry
 
   use TeiserverWeb, :startup
@@ -15,8 +14,6 @@ defmodule Teiserver.Startup do
   @spec startup :: :ok
   def startup do
     start_time = System.system_time(:millisecond)
-
-    LobbyIdServer.start_lobby_id_server()
 
     if Application.get_env(:teiserver, Teiserver)[:enable_match_monitor] do
       spawn(fn ->

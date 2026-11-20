@@ -164,14 +164,16 @@ defmodule Teiserver.Lobby.LobbyLib do
   def create_new_lobby(data) do
     data = convert_lobby_string_map_to_atom_map(data)
 
-    case validate_new_lobby(data) do
-      {:error, reason} ->
-        {:error, reason}
+    with true <- validate_new_lobby(data) do
+      open_lobby(data)
+    end
+  end
 
-      true ->
-        lobby = do_create_new_lobby(data)
-
-        {:ok, lobby}
+  @spec open_lobby(map()) :: {:ok, T.lobby()} | {:error, String.t()}
+  def open_lobby(data) do
+    with %{} = lobby <- Lobby.create_lobby(data),
+         %{} = opened <- add_lobby(lobby) do
+      {:ok, opened}
     end
   end
 
@@ -193,13 +195,6 @@ defmodule Teiserver.Lobby.LobbyLib do
       true ->
         true
     end
-  end
-
-  @spec do_create_new_lobby(map) :: T.lobby()
-  defp do_create_new_lobby(data) do
-    data
-    |> Lobby.create_lobby()
-    |> add_lobby()
   end
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
@@ -376,40 +371,38 @@ defmodule Teiserver.Lobby.LobbyLib do
     get_lobby(id).players
   end
 
-  @spec add_lobby(T.lobby()) :: T.lobby()
+  @spec add_lobby(T.lobby()) :: T.lobby() | {:error, String.t()}
   def add_lobby(%{founder_id: _founder_id} = lobby) do
-    Lobby.start_battle_lobby_throttle(lobby.id)
-    start_lobby_server(lobby)
+    with pid when is_pid(pid) <- start_lobby_server(lobby) do
+      Lobby.start_battle_lobby_throttle(lobby.id)
 
-    _consul_pid = Coordinator.start_consul(lobby.id)
-    _balance_pid = Coordinator.start_balancer(lobby.id)
+      _consul_pid = Coordinator.start_consul(lobby.id)
+      _balance_pid = Coordinator.start_balancer(lobby.id)
 
-    :ok =
-      PubSub.broadcast(
-        Teiserver.PubSub,
-        "teiserver_global_lobby_updates",
-        %{
-          channel: "teiserver_global_lobby_updates",
-          event: :opened,
-          lobby: lobby
-        }
-      )
+      :ok =
+        PubSub.broadcast(
+          Teiserver.PubSub,
+          "teiserver_global_lobby_updates",
+          %{
+            channel: "teiserver_global_lobby_updates",
+            event: :opened,
+            lobby: lobby
+          }
+        )
 
-    lobby
+      lobby
+    end
   end
 
-  @spec start_lobby_server(T.lobby()) :: pid()
+  @spec start_lobby_server(T.lobby()) :: pid() | {:error, String.t()}
   def start_lobby_server(lobby) do
-    {:ok, server_pid} =
-      DynamicSupervisor.start_child(Teiserver.LobbySupervisor, {
-        LobbyServer,
-        name: "lobby_#{lobby.id}",
-        data: %{
-          lobby: lobby
-        }
-      })
-
-    server_pid
+    case DynamicSupervisor.start_child(
+           Teiserver.LobbySupervisor,
+           {LobbyServer, data: %{lobby: lobby}}
+         ) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, _pid}} -> {:error, "Lobby ID already in use. Please retry."}
+    end
   end
 
   @spec lobby_exists?(T.lobby_id()) :: boolean()

@@ -884,7 +884,7 @@ defmodule Teiserver.Protocols.SpringIn do
           else
             password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-            lobby =
+            lobby_attrs =
               %{
                 founder_id: state.userid,
                 founder_name: state.username,
@@ -904,10 +904,11 @@ defmodule Teiserver.Protocols.SpringIn do
                 game_name: game_name,
                 ip: client.ip
               }
-              |> Lobby.create_lobby()
-              |> Lobby.add_lobby()
 
-            {:success, lobby}
+            case LobbyLib.open_lobby(lobby_attrs) do
+              {:ok, lobby} -> {:success, lobby}
+              {:error, reason} -> {:failure, reason}
+            end
           end
 
         nil ->
