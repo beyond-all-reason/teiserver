@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Account.SessionLive.UserLogin do
     form = to_form(%{"email" => email}, as: "user")
 
     {:ok, assign(socket, form: form, can_register: Account.can_register_with_web?()),
-    temporary_assigns: [form: form]}
+     temporary_assigns: [form: form]}
   end
 
   @impl LiveView
