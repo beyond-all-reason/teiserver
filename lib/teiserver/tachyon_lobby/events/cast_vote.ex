@@ -34,7 +34,12 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.CastVot
     data =
       put_in(agg.data, [Access.key!(:current_vote), Access.key!(:voters), ev.user_id], ev.ballot)
 
-    agg = %{agg | data: data}
+    agg =
+      %{agg | data: data}
+      |> LT.Aggregate.add_log("vote_cast", %{
+        user_id: ev.user_id,
+        details: %{ballot: ev.ballot, vote_id: ev.vote.id}
+      })
 
     case Lobby.vote_result(agg.data.current_vote) do
       :undecided ->

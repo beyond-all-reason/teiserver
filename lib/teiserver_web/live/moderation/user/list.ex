@@ -3,6 +3,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserQueries
   alias Teiserver.Account.UserStatQueries
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Repo
   alias TeiserverWeb.ModerationLive.UserComponents
@@ -26,6 +27,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> init_search_params(params)
     |> get_users()
     |> get_user_count()
+    |> generate_cmd_palette_commands()
     |> ok()
   end
 
@@ -106,6 +108,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> assign(search: new_search, search_changed?: false, page: 0)
     |> get_user_count()
     |> get_users()
+    |> generate_cmd_palette_commands()
     |> noreply()
   end
 
@@ -114,6 +117,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> init_search_params(%{})
     |> get_user_count()
     |> get_users()
+    |> generate_cmd_palette_commands()
     |> noreply()
   end
 
@@ -148,7 +152,9 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       # User entity
       "name" => params["name"],
       "email" => params["email"],
+      "name_or_email" => params["name_or_email"],
       "role" => params["role"],
+      "last_login" => params["last_login"],
       "without_role" => params["without_role"],
       "restriction" => params["restriction"] || "",
 
@@ -160,6 +166,10 @@ defmodule TeiserverWeb.ModerationLive.User.List do
       "screen" => params["screen"],
       "ip" => params["ip"],
 
+      # Custom UserStat data
+      "custom_key" => params["custom_key"],
+      "custom_value" => params["custom_value"],
+
       # Metadata
       "order_by" => params["order_by"] || "Newest first",
       "page_size" => min(maybe_to_integer(params["page_size"]), @max_page_size)
@@ -167,9 +177,15 @@ defmodule TeiserverWeb.ModerationLive.User.List do
   end
 
   defp user_query(%Socket{assigns: %{search: search}} = _socket) do
+    last_login = DateHelper.parse_ymd(search["last_login"]) || ""
+
+    name_or_email = (search["name_or_email"] || "") |> String.trim()
+
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
     |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_name_or_email_like(name_or_email)
+    |> UserQueries.where_logged_in_after(last_login)
     |> UserQueries.where_has_role(search["role"] || "")
     |> UserQueries.where_not_has_role(search["without_role"] || "")
     |> UserQueries.where_has_restriction(search["restriction"] || "")
@@ -178,6 +194,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     |> UserStatQueries.where_data_equal("hardware:raminfo", search["ram"])
     |> UserStatQueries.where_data_equal("hardware:gpuinfo", search["gpu"])
     |> UserStatQueries.where_data_equal("hardware:displaymax", search["screen"])
+    |> UserStatQueries.where_data_equal(search["custom_key"], search["custom_value"])
     |> UserStatQueries.where_data_like("last_ip", search["ip"])
 
     # TODO: Possible extra filters to add
@@ -192,11 +209,12 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     try_exact_search? =
       Enum.any?([
         search["name"] && search["name"] != "",
-        search["email"] && search["email"] != ""
+        search["email"] && search["email"] != "",
+        search["name_or_email"] && search["name_or_email"] != ""
       ])
 
     exact_user_by_id =
-      case Integer.parse(search["name"] || "") do
+      case Integer.parse(search["name"] || search["name_or_email"] || "") do
         {id, _rem} ->
           UserQueries.users()
           |> UserQueries.where_id(id)
@@ -213,6 +231,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         UserQueries.users()
         |> UserQueries.where_name_lower(search["name"] || "")
         |> UserQueries.where_email_lower(search["email"] || "")
+        |> UserQueries.where_name_or_email_lower(search["name_or_email"] || "")
         |> UserQueries.load_user_stat()
         |> QueryHelpers.limit_query(1)
         |> Repo.one()
@@ -267,17 +286,8 @@ defmodule TeiserverWeb.ModerationLive.User.List do
         })
       end)
 
-    if Enum.count(users) == 1 do
-      user = hd(users)
-
-      socket
-      |> redirect(to: ~p"/moderation/users/#{user.id}")
-    else
-      socket
-      |> assign(users: users)
-
-      # |> stream(:users, users, reset: true)
-    end
+    socket
+    |> assign(users: users, exact_matches: exact_matches)
   end
 
   defp get_user_count(%Socket{assigns: assigns} = socket) do
@@ -298,13 +308,38 @@ defmodule TeiserverWeb.ModerationLive.User.List do
     page_count = :math.ceil(user_count / assigns.search["page_size"]) |> round()
 
     socket
-    |> assign(user_count: user_count)
-    |> assign(page_count: page_count)
+    |> assign(user_count: user_count, page_count: page_count)
   end
 
   defp maybe_load_user_stat(query, %{skip_user_stat?: true}), do: query
 
   defp maybe_load_user_stat(query, _any) do
     UserQueries.load_user_stat(query)
+  end
+
+  defp generate_cmd_palette_commands(%Socket{assigns: assigns} = socket) do
+    first_user =
+      if Enum.empty?(assigns.exact_matches) do
+        Enum.at(assigns.users, 0)
+      else
+        Enum.at(assigns.exact_matches, 0)
+      end
+
+    extra_commands =
+      if is_nil(first_user) do
+        []
+      else
+        [
+          %{
+            id: "goto:first_user",
+            cmd: :goto,
+            label: "View user: #{first_user.name}",
+            path: ~p"/moderation/users/#{first_user.id}"
+          }
+        ]
+      end
+
+    socket
+    |> assign(extra_commands: extra_commands)
   end
 end

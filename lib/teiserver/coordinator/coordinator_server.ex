@@ -160,19 +160,38 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
     case converted_message do
       ^warning_response ->
-        Client.clear_awaiting_warn_ack(userid)
-        Chat.send_direct_message(state.userid, userid, "Thank you")
+        case Moderation.expire_warning_reminders(userid) do
+          {:ok, _resolved_actions} ->
+            Client.clear_awaiting_warn_ack(userid)
+            Chat.send_direct_message(state.userid, userid, "Thank you")
+
+          {:error, changeset} ->
+            Logger.error(
+              "Failed to resolve warnings on acknowledgement for user #{userid}: #{inspect(changeset.errors)}"
+            )
+
+            Chat.send_direct_message(
+              state.userid,
+              userid,
+              "Something went wrong, please open a bug report."
+            )
+        end
 
       _other_message ->
-        user = Account.get_user_by_id(userid)
-        Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
+        case Account.get_user_by_id(userid) do
+          nil ->
+            :ok
 
-        if not Auth.is_bot?(user) do
-          Chat.send_direct_message(
-            state.userid,
-            userid,
-            "I don't currently handle messages, sorry #{user.name}"
-          )
+          user ->
+            Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
+
+            if not Auth.is_bot?(user) do
+              Chat.send_direct_message(
+                state.userid,
+                userid,
+                "I don't currently handle messages, sorry #{user.name}"
+              )
+            end
         end
     end
 
@@ -260,10 +279,15 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           end)
           |> Enum.map(fn action ->
             expires =
-              if action.expires do
-                ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
-              else
-                ""
+              cond do
+                action.restrictions == ["Warning reminder"] ->
+                  ""
+
+                action.expires ->
+                  ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
+
+                true ->
+                  ""
               end
 
             " - #{action.reason}#{expires}"
@@ -299,7 +323,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
                 acknowledge_prompt =
                   Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
 
-                msg ++ [@dispute_string, acknowledge_prompt]
+                msg ++ @dispute_string ++ [acknowledge_prompt]
 
               true ->
                 msg ++ @dispute_string

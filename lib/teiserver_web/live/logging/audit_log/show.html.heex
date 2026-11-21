@@ -12,17 +12,9 @@
     <a
       :if={allow?(@scope, "Moderator")}
       href={~p"/moderation/users/#{@audit_log.user_id}"}
-      class="btn btn-primary btn-soft btn-xs"
+      class="btn btn-primary btn-soft btn-sm ml-4"
     >
-      <Fontawesome.icon icon="link" style="regular" /> Moderator view
-    </a>
-
-    <a
-      :if={allow?(@scope, "Admin")}
-      href={~p"/teiserver/admin/user/#{@audit_log.user_id}"}
-      class="btn btn-warning btn-soft btn-xs"
-    >
-      <Fontawesome.icon icon="link" style="regular" /> Admin view
+      <Fontawesome.icon icon="link" style="regular" /> View user
     </a>
   </:item>
   <:item title="Timestamp">

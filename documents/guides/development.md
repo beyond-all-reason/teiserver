@@ -75,6 +75,10 @@ You should first have a oauth token available, connecting for example with
 - Plaintext: `websocat -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" ws://localhost:4000/tachyon`
 - SSL: `websocat -k -H="Sec-WebSocket-Protocol: v0.tachyon" -H="Authorization: Bearer <token>" wss://localhost:8888/tachyon`
 
+### Multi-node (Pure IEX)
+
+For more information, see the [clustering guide](clustering.md).
+
 ## Configuration
 
 Most of the configuration takes place in [config/config.exs](config/config.exs),
@@ -123,7 +127,7 @@ When running locally it's likely you won't want to connect the server to an emai
 Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
 
 ```elixir
-user = Teiserver.Repo.get_by(Teiserver.Account.User, email: "root@localhost")
+user = Teiserver.Repo.get_by(Teiserver.Account.User, email: "root@teiserver.local")
 Teiserver.Account.update_user(user, %{"password" => "password"})
 ```
 
@@ -187,6 +191,16 @@ mix teiserver.gen_token --user CheerfulBeigeKarganeth --app generic_lobby
 ```
 
 which generates an access token valid for 24h. These help a lot when attempting to manually test the API.
+
+You can use
+
+```bash
+./scripts/update_tachyon_schema.sh <major_version> [ref] [schemas]
+```
+to download the JSON shemas from the Tachyon repository and put them in `priv/tachyon/v<major_version>/schema`, replacing existing files.
+- `major_version` is the Tachyon protocol version the schemas are for
+- `ref` is the branch, tag or commit of the Tachyon repository, defaults to `master`
+- `schema` are the schemas to update, e.g. autohost or clan, defaults to all of them
 
 ### Spring protocol
 

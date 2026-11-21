@@ -3,6 +3,8 @@ defmodule Teiserver.Account.UserCacheLib do
 
   alias Teiserver.Account
   alias Teiserver.Account.User
+  alias Teiserver.Account.UserQueries
+  alias Teiserver.Repo
 
   import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
 
@@ -60,27 +62,22 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_user_by_email(""), do: nil
 
   def get_user_by_email(email) do
-    id =
-      Teiserver.cache_get_or_store(:users_lookup_id_with_email, cachename(email), fn ->
-        user =
-          Account.query_user(
-            search: [
-              email_lower: email
-            ],
-            select: [:id]
-          )
+    case Teiserver.cache_get(:users_lookup_id_with_email, cachename(email)) do
+      id when not is_nil(id) ->
+        get_user_by_id(id)
+
+      nil ->
+        user = Account.query_user(search: [email_lower: email])
 
         case user do
+          %User{} ->
+            recache_user(user)
+            get_user_by_id(user.id)
+
           nil ->
             nil
-
-          %{id: id} ->
-            recache_user(id)
-            id
         end
-      end)
-
-    get_user_by_id(id)
+    end
   end
 
   @doc """
@@ -115,24 +112,23 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_userid_by_discord_id(nil), do: nil
 
   def get_userid_by_discord_id(discord_id) do
-    Teiserver.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
-      user =
-        Account.query_user(
-          search: [
-            discord_id: discord_id
-          ],
-          select: [:id]
-        )
+    case Teiserver.cache_get(:users_lookup_id_with_discord_id, discord_id) do
+      id when not is_nil(id) ->
+        id
 
-      case user do
-        nil ->
-          nil
+      nil ->
+        user =
+          Account.query_user(search: [discord_id: discord_id])
 
-        %{id: id} ->
-          recache_user(id)
-          id
-      end
-    end)
+        case user do
+          %User{} ->
+            recache_user(user)
+            user.id
+
+          nil ->
+            nil
+        end
+    end
   end
 
   @spec get_user_by_discord_id(integer() | String.t() | nil) :: User.t() | nil
@@ -146,6 +142,44 @@ defmodule Teiserver.Account.UserCacheLib do
   def get_user_by_discord_id(discord_id) do
     discord_id
     |> get_userid_by_discord_id()
+    |> get_user_by_id()
+  end
+
+  def get_userid_by_steam_id(nil), do: nil
+
+  def get_userid_by_steam_id(steam_id) do
+    case Teiserver.cache_get(:users_lookup_id_with_steam_id, steam_id) do
+      nil ->
+        user =
+          UserQueries.users()
+          |> UserQueries.where_steam_id(steam_id)
+          |> Repo.one()
+
+        case user do
+          nil ->
+            nil
+
+          %User{} = user ->
+            recache_user(user)
+            user.id
+        end
+
+      id ->
+        id
+    end
+  end
+
+  @spec get_user_by_steam_id(integer() | String.t() | nil) :: User.t() | nil
+  def get_user_by_steam_id(nil), do: nil
+  def get_user_by_steam_id(""), do: nil
+
+  def get_user_by_steam_id(steam_id) when is_binary(steam_id) do
+    int_parse(steam_id) |> get_user_by_steam_id()
+  end
+
+  def get_user_by_steam_id(steam_id) do
+    steam_id
+    |> get_userid_by_steam_id()
     |> get_user_by_id()
   end
 
@@ -171,7 +205,11 @@ defmodule Teiserver.Account.UserCacheLib do
     Teiserver.cache_put(:users_lookup_id_with_email, cachename(user.email), id)
 
     if user.discord_id do
-      Teiserver.cache_put(:users_lookup_id_with_discord, user.discord_id, id)
+      Teiserver.cache_put(:users_lookup_id_with_discord_id, user.discord_id, id)
+    end
+
+    if user.steam_id do
+      Teiserver.cache_put(:users_lookup_id_with_steam_id, user.steam_id, id)
     end
 
     user
@@ -191,7 +229,11 @@ defmodule Teiserver.Account.UserCacheLib do
     Teiserver.cache_delete(:users_lookup_id_with_email, cachename(old_user.email))
 
     if old_user.discord_id do
-      Teiserver.cache_delete(:users_lookup_id_with_discord, old_user.discord_id)
+      Teiserver.cache_delete(:users_lookup_id_with_discord_id, old_user.discord_id)
+    end
+
+    if old_user.steam_id do
+      Teiserver.cache_delete(:users_lookup_id_with_steam_id, old_user.steam_id)
     end
 
     result
@@ -209,7 +251,11 @@ defmodule Teiserver.Account.UserCacheLib do
       Teiserver.cache_delete(:users_lookup_id_with_email, cachename(user.email))
 
       if user.discord_id do
-        Teiserver.cache_delete(:users_lookup_id_with_discord, user.discord_id)
+        Teiserver.cache_delete(:users_lookup_id_with_discord_id, user.discord_id)
+      end
+
+      if user.steam_id do
+        Teiserver.cache_delete(:users_lookup_id_with_steam_id, user.steam_id)
       end
 
       :ok

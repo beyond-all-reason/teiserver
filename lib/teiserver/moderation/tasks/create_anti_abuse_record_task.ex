@@ -70,16 +70,16 @@ defmodule Teiserver.Moderation.CreateAntiAbuseRecordTask do
 
     # To allow us to retrieve the encryption_key we will encrypt it once for every identifier
     # we have, we need to make keys from each of the identifiers for the encryption process
-    email_key = key_from_string(user.email)
+    email_key = user.email && key_from_string(user.email)
     discord_key = user.discord_id && key_from_string(to_string(user.discord_id))
     steam_key = user.steam_id && key_from_string(to_string(user.steam_id))
 
     hashes = %{
-      email: Base.encode64(email_key),
+      email: email_key && Base.encode64(email_key),
       discord_id: discord_key && Base.encode64(discord_key),
       steam_id: steam_key && Base.encode64(steam_key),
       decrypt_keys: %{
-        email: aes_encrypt(encryption_key, email_key),
+        email: email_key && aes_encrypt(encryption_key, email_key),
         discord_id: discord_key && aes_encrypt(encryption_key, discord_key),
         steam_id: steam_key && aes_encrypt(encryption_key, steam_key)
       },

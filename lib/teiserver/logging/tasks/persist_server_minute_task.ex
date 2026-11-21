@@ -28,7 +28,7 @@ defmodule Teiserver.Logging.Tasks.PersistServerMinuteTask do
 
   defp perform_telemetry_persist(timestamp) do
     data =
-      Telemetry.get_totals_and_reset()
+      (Telemetry.get_totals_and_reset() || %{})
       |> Map.drop([:cycle])
 
     if Communication.use_discord?() do

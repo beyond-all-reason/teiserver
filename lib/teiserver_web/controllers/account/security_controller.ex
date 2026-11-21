@@ -11,9 +11,6 @@ defmodule TeiserverWeb.Account.SecurityController do
 
   require Logger
 
-  plug(:add_breadcrumb, name: "Account", url: "/teiserver/account")
-  plug(:add_breadcrumb, name: "Security", url: "/teiserver/account/security")
-
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
     sub_menu_active: "account"
@@ -117,7 +114,6 @@ defmodule TeiserverWeb.Account.SecurityController do
     show_mfa_warning = AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles)
 
     conn
-    |> add_breadcrumb(name: "totp", url: conn.request_path)
     |> assign(:user, user)
     |> assign(:show_mfa_warning, show_mfa_warning)
     |> render("totp.html")
@@ -139,7 +135,6 @@ defmodule TeiserverWeb.Account.SecurityController do
          |> Base.encode64())
 
     conn
-    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)
     |> assign(:user, user)
     |> assign(:otpauth_uri, otpauth_uri)
@@ -200,7 +195,6 @@ defmodule TeiserverWeb.Account.SecurityController do
          |> Base.encode64())
 
     conn
-    |> add_breadcrumb(name: "edit_totp", url: conn.request_path)
     |> assign(:changeset, changeset)
     |> assign(:user, user)
     |> assign(:otpauth_uri, otpauth_uri)
@@ -214,7 +208,6 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     if AuthLib.need_to_mfa_refresh?(user.id) do
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/totp/disable")
       |> render("mfa_refresh.html")
@@ -222,7 +215,6 @@ defmodule TeiserverWeb.Account.SecurityController do
       Account.disable_totp(user.id)
 
       conn
-      |> add_breadcrumb(name: "totp", url: conn.request_path)
       |> assign(:totp_status, :inactive)
       |> assign(:user, user)
       |> render("totp.html")
@@ -235,7 +227,6 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     if AuthLib.need_to_mfa_refresh?(user.id) do
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/edit_password")
       |> render("mfa_refresh.html")
@@ -243,7 +234,6 @@ defmodule TeiserverWeb.Account.SecurityController do
       changeset = Account.change_user(user)
 
       conn
-      |> add_breadcrumb(name: "Password", url: conn.request_path)
       |> assign(:changeset, changeset)
       |> assign(:user, user)
       |> render("edit_password.html")
@@ -256,7 +246,6 @@ defmodule TeiserverWeb.Account.SecurityController do
 
     if AuthLib.need_to_mfa_refresh?(user.id) do
       conn
-      |> add_breadcrumb(name: "Details", url: conn.request_path)
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/edit_password")
       |> render("mfa_refresh.html")

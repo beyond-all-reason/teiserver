@@ -3,10 +3,12 @@ defmodule Teiserver.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  alias LibclusterPostgres.Strategy, as: LibclusterStrategy
   alias Phoenix.PubSub
   alias Teiserver.Helper.ObanLogger
   alias Teiserver.Logging
   alias Teiserver.Plugins
+  alias Teiserver.Repo
   alias Teiserver.Startup
   alias TeiserverWeb.Endpoint
   alias TeiserverWeb.Monitoring.Router, as: MonitoringRouter
@@ -41,15 +43,13 @@ defmodule Teiserver.Application do
         {Teiserver.General.CacheClusterServer, name: Teiserver.General.CacheClusterServer},
         {Oban, Application.get_env(:teiserver, Oban, [])},
 
+        # libcluster
+        {Cluster.Supervisor, libcluster_topology()},
+
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
-
-        concache_sup(:lists),
-        concache_sup(:codes),
         concache_sup(:config_user_cache),
         concache_sup(:account_friend_cache),
-        concache_sup(:account_incoming_friend_request_cache),
-        concache_sup(:account_outgoing_friend_request_cache),
         concache_sup(:account_follow_cache),
         concache_sup(:account_ignore_cache),
         concache_sup(:account_avoid_cache),
@@ -64,6 +64,10 @@ defmodule Teiserver.Application do
         Teiserver.Bridge.DiscordCacheSupervisor,
         concache_sup(:application_temp_cache),
         Teiserver.General.RateLimit,
+
+        # For when we want a short lived secret to use between pages
+        # secrets will be cleared after 5 seconds
+        concache_sup(:secrets, global_ttl: 5_000),
 
         # Teiserver stuff
         # Global/singleton registries
@@ -98,7 +102,8 @@ defmodule Teiserver.Application do
         # Caches
         concache_perm_sup(:users_lookup_id_with_name),
         concache_perm_sup(:users_lookup_id_with_email),
-        concache_perm_sup(:users_lookup_id_with_discord),
+        concache_perm_sup(:users_lookup_id_with_discord_id),
+        concache_perm_sup(:users_lookup_id_with_steam_id),
         concache_perm_sup(:users_by_id),
         concache_sup(:teiserver_login_count, global_ttl: 10_000),
         concache_sup(:teiserver_user_stat_cache),
@@ -115,6 +120,7 @@ defmodule Teiserver.Application do
 
         # Lobbies
         Teiserver.Lobby.Cache,
+        Teiserver.LobbyIdServer,
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
         {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
@@ -138,7 +144,6 @@ defmodule Teiserver.Application do
         # level to control access and scrape stuff
         {Bandit,
          scheme: :http, plug: TeiserverWeb.Monitoring.Router, port: MonitoringRouter.port()},
-        Teiserver.Communication.Cache,
 
         # Start the endpoint after the rest of the systems are up
         TeiserverWeb.Endpoint,
@@ -244,5 +249,16 @@ defmodule Teiserver.Application do
   def spring_server_listener_child(listener_opts, ref, :tls) when is_list(listener_opts) do
     listener_opts = Map.new(listener_opts)
     :ranch.child_spec(ref, :ranch_ssl, listener_opts, Teiserver.SpringTcpServer, [])
+  end
+
+  defp libcluster_topology do
+    [
+      [
+        app: [
+          strategy: LibclusterStrategy,
+          config: Repo.config()
+        ]
+      ]
+    ]
   end
 end

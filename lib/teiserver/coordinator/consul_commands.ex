@@ -281,7 +281,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           Enum.member?(lobby.players, userid) and now - seen_at > min_diff_ms
         end)
         |> Enum.filter(fn {userid, _seen_at} ->
-          Client.get_client_by_id(userid).player
+          case Client.get_client_by_id(userid) do
+            %{player: true} -> true
+            _other -> false
+          end
         end)
         |> Enum.map(fn {userid, seen_at} ->
           seconds_ago = ((now - seen_at) / 1000) |> round()
@@ -1537,24 +1540,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "bstatus", senderid: senderid}, state) do
-    balancer_state = Coordinator.call_balancer(state.lobby_id, :report_state)
+    case Coordinator.call_balancer(state.lobby_id, :report_state) do
+      nil ->
+        Coordinator.send_to_user(senderid, "Balancer unavailable")
 
-    values =
-      balancer_state
-      |> Enum.map(fn {k, v} ->
-        "#{k}: #{v}"
-      end)
-      |> Enum.sort(&<=/2)
+      balancer_state ->
+        values =
+          balancer_state
+          |> Enum.map(fn {k, v} ->
+            "#{k}: #{v}"
+          end)
+          |> Enum.sort(&<=/2)
 
-    status_msg =
-      [
-        "#{@splitter} Balancer status #{@splitter}",
-        values
-      ]
-      |> List.flatten()
-      |> Enum.filter(fn s -> s != nil end)
+        status_msg =
+          [
+            "#{@splitter} Balancer status #{@splitter}",
+            values
+          ]
+          |> List.flatten()
+          |> Enum.filter(fn s -> s != nil end)
 
-    Coordinator.send_to_user(senderid, status_msg)
+        Coordinator.send_to_user(senderid, status_msg)
+    end
+
     state
   end
 

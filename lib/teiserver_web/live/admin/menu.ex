@@ -21,7 +21,7 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@current_user, ~w(Server Engine))}
+        :if={allow?(@scope, "Technician")}
         icon={Teiserver.Telemetry.TelemetryLib.icon()}
         url={~p"/telemetry"}
       >
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.AdminLive.Menu do
       <.menu_page_link
         :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.OAuth.ApplicationLib.icon()}
-        url={~p"/teiserver/admin/oauth_application"}
+        url={~p"/admin/oauth_applications"}
       >
         OAuth applications
       </.menu_page_link>
@@ -85,9 +85,9 @@ defmodule TeiserverWeb.AdminLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        :if={allow_any?(@scope, ~w(Server))}
+        :if={allow_any?(@scope, ~w(Admin))}
         icon={Teiserver.Config.SiteConfigLib.icon()}
-        url={~p"/teiserver/admin/site"}
+        url={~p"/admin/site_config"}
       >
         Site config
       </.menu_page_link>
@@ -100,6 +100,30 @@ defmodule TeiserverWeb.AdminLive.Menu do
         url={~p"/admin/tools/mfa_usage"}
       >
         MFA Usage
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@scope, ~w(Admin))}
+        icon="fa-envelope"
+        url={~p"/admin/tools/blog_activity"}
+      >
+        Blog activity
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@scope, ~w(Admin))}
+        icon="fa-people-group"
+        url={~p"/admin/tools/population_report"}
+      >
+        Population Report
+      </.menu_page_link>
+
+      <.menu_page_link
+        :if={allow_any?(@scope, ~w(Admin))}
+        icon="fa-campground"
+        url={~p"/admin/tools/retention_report"}
+      >
+        Retention Report
       </.menu_page_link>
     </div>
 

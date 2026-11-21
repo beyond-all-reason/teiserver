@@ -1,0 +1,34 @@
+<SiteConfigComponents.section_menu active="show" scope={@scope} />
+
+<.header>
+  {@config_type.label} - {@value}
+  <:actions>
+    <.link
+      patch={~p"/admin/site_config/#{@key}/edit"}
+      phx-click={JS.push_focus()}
+      class="btn btn-primary btn-sm"
+    >
+      <Fontawesome.icon icon="wrench" style="regular" /> Edit
+    </.link>
+  </:actions>
+</.header>
+{@config_type.description}
+
+<div class="mt-4">
+  <.table
+    id="audit_logs-table"
+    rows={@audit_logs}
+    table_class="table-sm table-hover"
+  >
+    <:col :let={audit_log} label="Date">
+      {Calendar.strftime(audit_log.inserted_at, "%Y-%m-%d %H:%M:%S")}
+    </:col>
+    <:col :let={audit_log} label="Old value">{audit_log.details["old_value"]}</:col>
+    <:col :let={audit_log} label="New value">{audit_log.details["new_value"]}</:col>
+    <:col :let={audit_log} label="User">{audit_log.user_id && audit_log.user.name}</:col>
+    <:col :let={audit_log} label="Action">{audit_log.action}</:col>
+    <:col :let={audit_log} label="Key">{audit_log.details["key"]}</:col>
+  </.table>
+</div>
+
+<.back href={~p"/admin/site_config"}>Back to Site configs</.back>

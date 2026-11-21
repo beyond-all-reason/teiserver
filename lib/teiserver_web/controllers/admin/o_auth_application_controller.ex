@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     action: {Phoenix.Controller, :action_name},
     user: {AuthLib, :current_user}
 
-  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Admin", url: "/admin"
   plug :add_breadcrumb, name: "OAuth Applications", url: "/teiserver/admin/oauth_application"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()

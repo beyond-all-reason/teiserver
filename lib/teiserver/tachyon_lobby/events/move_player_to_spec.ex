@@ -43,7 +43,9 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.MovePla
 
     overview_changes = Map.put(agg.overview_changes, :player_count, map_size(data.players))
 
-    new_aggregate = %{agg | data: data, changes: changes, overview_changes: overview_changes}
+    new_aggregate =
+      %{agg | data: data, changes: changes, overview_changes: overview_changes}
+      |> LT.Aggregate.add_log("join_spectators", %{user_id: ev.user_id})
 
     Enum.reduce(
       [%Events.RepackPlayers{}, %Events.FillFromJoinQueue{}],

@@ -16,8 +16,7 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   @create_attrs %{
     reason: "some name",
     restrictions: %{"Login" => "Login"},
-    expires: "1 day",
-    score_modifier: "10000"
+    expires: "1 day"
   }
   @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
   @invalid_attrs %{reason: nil, restrictions: %{}}

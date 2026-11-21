@@ -4,6 +4,8 @@ defmodule Teiserver.TachyonBattle.Battle do
   alias Teiserver.Autohost
   alias Teiserver.Autohost.Types, as: AT
   alias Teiserver.Battle
+  alias Teiserver.Battle.Match
+  alias Teiserver.Messaging
   alias Teiserver.Player
   alias Teiserver.TachyonBattle.Registry
   alias Teiserver.TachyonBattle.Types, as: T
@@ -19,7 +21,7 @@ defmodule Teiserver.TachyonBattle.Battle do
 
   @type state :: %{
           id: T.id(),
-          match_id: T.match_id(),
+          match_id: Match.id(),
           autohost_id: Autohost.id(),
           autohost_pid: pid(),
           autohost_timeout: timeout(),
@@ -37,7 +39,8 @@ defmodule Teiserver.TachyonBattle.Battle do
           participants: %{
             User.id() => %{
               name: String.t(),
-              password: String.t()
+              password: String.t(),
+              role: :player | :spectator
             }
           },
 
@@ -134,14 +137,14 @@ defmodule Teiserver.TachyonBattle.Battle do
           team <- at.teams,
           p <- Map.get(team, :players, []),
           into: %{} do
-        {p.user_id, %{name: p.name, password: p.password}}
+        {p.user_id, %{name: p.name, password: p.password, role: :player}}
       end
 
     # currently, the lobby will automatically add specs to the game at start.
     # if this changes, we should also update this bit
     specs =
       for spec <- Map.get(start_script, :spectators, []), into: %{} do
-        {spec.user_id, %{name: spec.name, password: spec.password}}
+        {spec.user_id, %{name: spec.name, password: spec.password, role: :spectator}}
       end
 
     state = %{
@@ -239,7 +242,16 @@ defmodule Teiserver.TachyonBattle.Battle do
         case Autohost.add_player(pid, data) do
           :ok ->
             resp = state |> Map.take([:ips, :port]) |> Map.put(:password, password)
-            state = put_in(state, [:participants, user_id], %{name: name, password: password})
+
+            # Players are all known from the start script, so anybody added
+            # later (late joiner) can only be a spectator.
+            state =
+              put_in(state, [:participants, user_id], %{
+                name: name,
+                password: password,
+                role: :spectator
+              })
+
             {:reply, {:ok, resp}, state}
 
           {:error, err} ->
@@ -287,13 +299,18 @@ defmodule Teiserver.TachyonBattle.Battle do
 
         {:stop, :normal, %{state | battle_state: :shutting_down}}
 
-      {:player_chat_broadcast, %{destination: :all, message: "!stop"}} ->
-        if state.autohost_pid != nil do
+      {:player_chat_dm, %{message: message, user_id: from_id, to_user_id: to_id}} ->
+        Messaging.persist_battle_message(message, :player, state.match_id, from_id, to_id)
+        {:noreply, state}
+
+      {:player_chat_broadcast, %{destination: destination, message: message, user_id: user_id}} ->
+        Messaging.persist_battle_message(message, destination, state.match_id, user_id)
+
+        if destination == :all and message == "!stop" and state.autohost_pid != nil do
           Autohost.kill_battle(state.autohost_pid, state.id)
-          {:noreply, state}
-        else
-          {:noreply, state}
         end
+
+        {:noreply, state}
 
       _other ->
         {:noreply, state}
@@ -346,13 +363,8 @@ defmodule Teiserver.TachyonBattle.Battle do
         }
       end
 
-    player_ids = MapSet.new(players, & &1.user_id)
-
-    # All participants who are not players are considered spectators
-    # An issue to change the way we track spectators - https://github.com/beyond-all-reason/teiserver/issues/1534
     spectators =
-      for {id, %{name: name}} <- state.participants,
-          not MapSet.member?(player_ids, id),
+      for {id, %{role: :spectator, name: name}} <- state.participants,
           do: %{user_id: id, name: name}
 
     battle_ended_data = %{

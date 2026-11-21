@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.Moderation.ToolsLive.GDPRRestore do
-  alias Teiserver.Account.GDPRAnonymiseTask
+  alias Teiserver.Account.GDPRPseudoAnonymiseTask
   alias Teiserver.Account.User
   alias Teiserver.AccountFixtures
   alias Teiserver.Helpers.GeneralTestLib
@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Moderation.ToolsLive.GDPRRestore do
     })
     |> Repo.update()
 
-    GDPRAnonymiseTask.perform(%{})
+    GDPRPseudoAnonymiseTask.perform(%{})
 
     # Send back the non-anonymised user
     user

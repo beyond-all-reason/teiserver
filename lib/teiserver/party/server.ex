@@ -14,8 +14,6 @@ defmodule Teiserver.Party.Server do
   alias Teiserver.Party.Types, as: PT
   alias Teiserver.Player
 
-  require Logger
-
   @behaviour :gen_statem
 
   @default_call_timeout 5000
@@ -425,6 +423,8 @@ defmodule Teiserver.Party.Server do
             {:party, data.id, from_id},
             :erlang.monotonic_time(:micro_seconds)
           )
+
+        Messaging.persist_party_message(msg)
 
         for id <- Map.keys(data.members), id != from_id do
           Messaging.send(msg, {:player, id})

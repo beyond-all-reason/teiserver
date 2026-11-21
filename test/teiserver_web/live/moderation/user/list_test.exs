@@ -37,15 +37,6 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
     # We have no "no records" test for this page as there will always
     # be at least one user, the one viewing it.
 
-    test "jump when only one user", %{conn: conn} do
-      # Need too add user fixtures to prevent it jumping
-      user = AccountFixtures.user_fixture(%{name: "MyUniqueTestUser"})
-
-      {:error, {:redirect, %{to: path}}} = live(conn, ~p"/moderation/users?name=MyUniqueTestUser")
-
-      assert path == ~p"/moderation/users/#{user.id}"
-    end
-
     test "with records", %{conn: conn} do
       AccountFixtures.user_fixture()
       AccountFixtures.user_fixture()
@@ -70,7 +61,9 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
                "HW",
                "IP",
                "Roles",
-               "Registered"
+               "Last login",
+               "Registered",
+               "Actions"
              ]
 
       # There will always be at least 5 users at this stage but it's possible
@@ -122,6 +115,19 @@ defmodule TeiserverWeb.Moderation.UserLive.ListTest do
         |> table_to_map()
 
       assert Enum.count(table.rows) == 2
+
+      # Searching for non-existent user returns an empty list
+      live
+      |> form("#user-search-form")
+      |> render_submit(%{"name" => "some_non-existent_string"})
+
+      {:ok, table} =
+        live
+        |> element("table")
+        |> render()
+        |> table_to_map()
+
+      assert Enum.empty?(table.rows)
 
       # Remove that filter
       live

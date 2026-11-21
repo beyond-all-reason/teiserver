@@ -22,6 +22,7 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateA
   alias Teiserver.TachyonLobby.Events.UpdateAllyTeamConfig
   alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias Teiserver.TachyonLobby.Types.Bot
 
   def apply_event(%UpdateAllyTeamConfig{} = ev, %LT.Aggregate{} = agg) do
     spec_ids =
@@ -38,7 +39,7 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateA
       end)
       |> Enum.reject(&is_nil/1)
 
-    {bot_ids, player_ids} = Enum.split_with(spec_ids, &Lobby.bot_id?/1)
+    {bot_ids, player_ids} = Enum.split_with(spec_ids, &Bot.bot_id?/1)
 
     position_offset =
       case Lobby.get_first_player_in_join_queue(agg.data.spectators) do

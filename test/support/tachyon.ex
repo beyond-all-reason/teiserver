@@ -12,6 +12,7 @@ defmodule Teiserver.Support.Tachyon do
   alias Teiserver.Support.Polling
   alias Teiserver.Tachyon
   alias Teiserver.Tachyon.Schema
+  alias TeiserverWeb.Tachyon.Versioning
   alias WebsocketSyncClient, as: WSC
 
   def tachyon_case_setup(tags) do
@@ -257,16 +258,17 @@ defmodule Teiserver.Support.Tachyon do
 
   def recv_message(client, opts \\ []) do
     opts = Keyword.put_new(opts, :timeout, 300)
+    latest_major_version = Versioning.server_supported_versions() |> List.last()
 
     case WSC.recv(client, opts) do
       {:ok, {:text, resp}} ->
         with decoded <- Jason.decode!(resp),
              {:ok, cmd_id, message_type, _msg_id} <-
                Schema.parse_envelope(decoded),
-             :ok <- Schema.parse_message(cmd_id, message_type, decoded) do
+             :ok <- Schema.parse_message(latest_major_version, cmd_id, message_type, decoded) do
           {:ok, decoded}
         else
-          {:error, %JsonXema.ValidationError{} = err} ->
+          {:error, %JSV.ValidationError{} = err} ->
             resp |> Jason.decode!() |> IO.inspect(label: "schema validation failed on")
             {:error, err}
 

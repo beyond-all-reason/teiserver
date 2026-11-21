@@ -453,8 +453,7 @@ defmodule Teiserver.SpringTcpServer do
       new_state = SpringOut.reply(:disconnect, "Logged out", nil, state)
       {:stop, :normal, new_state}
     else
-      username = Account.get_username_by_id(msg.userid)
-      new_state = user_logged_out(msg.userid, username, state)
+      new_state = user_logged_out(msg.userid, msg.username, state)
       {:noreply, new_state}
     end
   end
@@ -1234,6 +1233,11 @@ defmodule Teiserver.SpringTcpServer do
   #       %{state | known_users: new_known}
   #   end
   # end
+
+  @spec can_use_tls?() :: boolean()
+  def can_use_tls? do
+    Application.get_env(:teiserver, Teiserver.SpringTcpServer)[:listeners][:tls] != nil
+  end
 
   # Example of how gen-smtp handles upgrading the connection
   # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720

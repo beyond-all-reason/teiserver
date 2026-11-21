@@ -42,9 +42,14 @@ defmodule Teiserver.Matchmaking.QueueRegistry do
   @spec list() :: [{QueueServer.id(), QueueServer.queue()}]
   def list do
     Registry.select(__MODULE__, [{{:"$1", :_, :"$2"}, [], [{{:"$1", :"$2"}}]}])
+  rescue
+    # if for some reason the registry isn't up
+    ArgumentError -> []
   end
 
   def update_value(id, callback) do
     Registry.update_value(__MODULE__, id, callback)
   end
+
+  def unregister(id), do: Registry.unregister(__MODULE__, id)
 end

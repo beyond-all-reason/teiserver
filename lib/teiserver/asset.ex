@@ -20,7 +20,7 @@ defmodule Teiserver.Asset do
   defdelegate get_map(spring_name), to: MapQueries
 
   @spec get_maps_for_queue(Teiserver.Matchmaking.queue_id()) :: [Asset.Map.t()] | nil
-  defdelegate get_maps_for_queue(spring_name), to: MapQueries
+  defdelegate get_maps_for_queue(queue_id), to: MapQueries
 
   @spec get_all_maps() :: [Asset.Map.t()]
   defdelegate get_all_maps(), to: MapQueries
@@ -33,20 +33,28 @@ defmodule Teiserver.Asset do
           | {:error, :bad_request}
           | {:error, {String.t(), Ecto.Changeset.t()}}
   def update_maps(map_attrs) do
-    Repo.transaction(fn ->
-      n = delete_all_maps()
+    res =
+      Repo.transaction(fn ->
+        n = delete_all_maps()
 
-      case create_maps(map_attrs) do
-        {:ok, maps} ->
-          %{
-            deleted_count: n,
-            created_count: Enum.count(maps)
-          }
+        case create_maps(map_attrs) do
+          {:ok, maps} ->
+            %{
+              deleted_count: n,
+              created_count: Enum.count(maps)
+            }
 
-        {:error, opname, changeset, _changes_so_far} ->
-          Repo.rollback({opname, changeset})
-      end
-    end)
+          {:error, opname, changeset, _changes_so_far} ->
+            Repo.rollback({opname, changeset})
+        end
+      end)
+
+    case res do
+      {:ok, _result} -> Matchmaking.refresh_all_assets()
+      _other -> nil
+    end
+
+    res
   end
 
   @type startbox :: MapLib.startbox()
@@ -109,7 +117,7 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _engine} -> Matchmaking.restart_queues()
+      {:ok, _engine} -> Matchmaking.refresh_all_assets()
       _other -> nil
     end
 
@@ -168,7 +176,7 @@ defmodule Teiserver.Asset do
       end)
 
     case res do
-      {:ok, _game} -> Matchmaking.restart_queues()
+      {:ok, _game} -> Matchmaking.refresh_all_assets()
       _other -> nil
     end
 

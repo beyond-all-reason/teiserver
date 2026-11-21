@@ -87,12 +87,12 @@ defmodule Teiserver.Moderation.ActionLib do
 
   def _search(query, :in_restrictions, restrictions) do
     from actions in query,
-      where: ^restrictions in actions.restrictions
+      where: array_overlap_a_in_b(actions.restrictions, ^List.wrap(restrictions))
   end
 
-  def _search(query, :not_in_restrictions, restrictions) when is_list(restrictions) do
+  def _search(query, :not_in_restrictions, restrictions) do
     from actions in query,
-      where: not array_overlap_a_in_b(actions.restrictions, ^restrictions)
+      where: not array_overlap_a_in_b(actions.restrictions, ^List.wrap(restrictions))
   end
 
   def _search(query, :expiry, "All"), do: query
@@ -204,10 +204,15 @@ defmodule Teiserver.Moderation.ActionLib do
 
     if action do
       until =
-        if action.expires do
-          "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
-        else
-          "**Permanent**"
+        cond do
+          action.restrictions == ["Warning reminder"] ->
+            []
+
+          action.expires ->
+            "**Until:** " <> DateHelper.date_to_discord_str(action.expires)
+
+          true ->
+            "**Permanent**"
         end
 
       restriction_list = action.restrictions |> Enum.join(", ")

@@ -46,6 +46,9 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateB
         :remove -> put_in(changes.bosses[ev.appointee_id], nil)
       end
 
+    event_type = if ev.action == :add, do: "boss_add", else: "boss_remove"
+
     %{agg | data: data, changes: changes}
+    |> LT.Aggregate.add_log(event_type, %{target_id: ev.appointee_id})
   end
 end

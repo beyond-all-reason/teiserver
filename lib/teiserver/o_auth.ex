@@ -47,6 +47,9 @@ defmodule Teiserver.OAuth do
   @type option :: {:now, DateTime.t()}
   @type options :: [option]
 
+  @spec get_application_by_id(Application.id()) :: Application.t() | nil
+  defdelegate get_application_by_id(uid), to: ApplicationQueries
+
   @spec get_application_by_uid(Application.app_id()) :: Application.t() | nil
   defdelegate get_application_by_uid(uid), to: ApplicationQueries
 
@@ -176,11 +179,12 @@ defmodule Teiserver.OAuth do
 
   @spec create_token(
           User.t() | Bot.t(),
-          %{
-            :id => integer(),
-            :scopes => Application.scopes(),
-            optional(:original_scopes) => Application.scopes()
-          },
+          Application.t()
+          | %{
+              :id => integer(),
+              :scopes => Application.scopes(),
+              optional(:original_scopes) => Application.scopes()
+            },
           create_refresh: boolean() | options(),
           scopes: Application.scopes()
         ) ::

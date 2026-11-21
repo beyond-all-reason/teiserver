@@ -21,6 +21,13 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.RemoveP
 
   def apply_event(%RemovePlayerFromLobby{} = ev, %LT.Aggregate{} = agg) do
     agg =
+      case agg.data.players[ev.player_id] do
+        %LT.Bot{} -> LT.Aggregate.add_log(agg, "bot_remove", %{details: %{bot_id: ev.player_id}})
+        %LT.Player{} -> LT.Aggregate.add_log(agg, "lobby_leave", %{user_id: ev.player_id})
+        nil -> agg
+      end
+
+    agg =
       Enum.reduce(
         [
           %Events.CancelKickVote{user_id: ev.player_id},

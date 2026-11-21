@@ -275,6 +275,15 @@ defmodule Teiserver.Helper.DateHelper do
     end
   end
 
+  @doc """
+  Formats a number of minutes as "X hours, Y minutes". `nil` is treated as 0.
+  """
+  @spec minutes_to_str(number() | nil) :: String.t()
+  def minutes_to_str(minutes) do
+    minutes = trunc(minutes || 0)
+    "#{div(minutes, 60)} hours, #{rem(minutes, 60)} minutes"
+  end
+
   def duration_to_str_short(nil), do: nil
 
   def duration_to_str_short(seconds) do
@@ -315,15 +324,6 @@ defmodule Teiserver.Helper.DateHelper do
     |> Enum.join("")
   end
 
-  def make_date_series(:days, start_date, end_date) do
-    start = %{start_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-    last = %{end_date | hour: 0, minute: 0, second: 0, microsecond: {0, 0}}
-
-    start
-    |> Stream.iterate(&DateTime.shift(&1, day: 1))
-    |> Stream.take_while(&(compare(&1, last) == :lt))
-  end
-
   @doc """
   Returns true if a > b
   """
@@ -358,7 +358,8 @@ defmodule Teiserver.Helper.DateHelper do
 
   # --- Date/DateTime helpers replacing Timex functions ---
 
-  @spec to_datetime(Date.t()) :: DateTime.t()
+  @spec to_datetime(Date.t() | DateTime.t()) :: DateTime.t()
+  def to_datetime(%DateTime{} = datetime), do: datetime
   def to_datetime(%Date{} = date), do: DateTime.new!(date, ~T[00:00:00], "Etc/UTC")
 
   defp to_utc_datetime(%DateTime{} = dt), do: dt

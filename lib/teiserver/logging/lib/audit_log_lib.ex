@@ -15,7 +15,12 @@ defmodule Teiserver.Logging.AuditLogLib do
 
   @spec list_audit_types :: [String.t()]
   def list_audit_types do
-    query = from logs in AuditLog, as: :audit_log, distinct: :action, select: [:action]
+    query =
+      from logs in AuditLog,
+        as: :audit_log,
+        distinct: :action,
+        select: [:action],
+        order_by: [asc: :action]
 
     Repo.all(query)
     |> Enum.map(& &1.action)

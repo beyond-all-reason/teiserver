@@ -30,5 +30,6 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.AddSpec
       |> put_in([:spectators, ev.spec.id], Map.take(ev.spec, [:join_queue_position]))
 
     %{agg | data: data, changes: changes}
+    |> LT.Aggregate.add_log("lobby_join", %{user_id: ev.spec.id})
   end
 end

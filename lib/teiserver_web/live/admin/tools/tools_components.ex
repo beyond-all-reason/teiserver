@@ -48,6 +48,30 @@ defmodule TeiserverWeb.AdminLive.ToolsComponents do
           MFA Usage
         </.section_menu_link>
 
+        <.section_menu_link
+          icon="fa-envelope"
+          url={~p"/admin/tools/blog_activity"}
+          active={@active == "blog_activity"}
+        >
+          Blog activity
+        </.section_menu_link>
+
+        <.section_menu_link
+          icon="fa-people-group"
+          url={~p"/admin/tools/population_report"}
+          active={@active == "population_report"}
+        >
+          Population Report
+        </.section_menu_link>
+
+        <.section_menu_link
+          icon="fa-campground"
+          url={~p"/admin/tools/retention_report"}
+          active={@active == "retention_report"}
+        >
+          Retention Report
+        </.section_menu_link>
+
         {render_slot(@extra_links)}
       </ul>
 

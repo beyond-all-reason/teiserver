@@ -132,13 +132,16 @@ config :teiserver, Teiserver,
     battle_match_unrated: 365,
     account_unverified: 14,
     lobby_chat: 90,
+    party_chat: 90,
+    battle_chat: 90,
     room_chat: 90,
-    battle_minimum_seconds: 120,
     direct_messages: 365,
+    battle_minimum_seconds: 120,
     linked_audit_logs: 365,
     unlinked_audit_logs: 365,
     unverified_users: 14,
-    previous_emails: 14
+    previous_emails: 14,
+    lobby_logs: 90
   },
   require_mfa_for_privileged_roles: true
 
@@ -208,7 +211,7 @@ config :teiserver, Oban,
 
        # Every day at 6am
        {"0 6 * * *", Teiserver.Account.DataExpiryTask},
-       {"0 6 * * *", Teiserver.Account.GDPRAnonymiseTask},
+       {"0 6 * * *", Teiserver.Account.GDPRPseudoAnonymiseTask},
 
        # Every day at 8am
        {"0 8 * * *", Teiserver.Admin.DailyCleanupTask},
@@ -252,8 +255,6 @@ config :teiserver, Oban,
 
 config :teiserver, :time_zone_database, Tzdata.TimeZoneDatabase
 
-config :xema, loader: Teiserver.Tachyon.SchemaLoader
-
 config :peep, :bucket_calculator, Teiserver.Monitoring.Buckets
 config :prom_ex, :storage_adapter, Teiserver.Monitoring.StripedPeep
 
@@ -266,6 +267,11 @@ config :teiserver, Teiserver.PromEx,
   metrics_server: :disabled
 
 config :teiserver, Teiserver.IpCheck, client_module: Teiserver.IpCheck.Api
+
+config :teiserver, Teiserver.Steam,
+  api_key: nil,
+  app_id: nil,
+  identity: nil
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

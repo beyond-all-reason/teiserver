@@ -51,7 +51,8 @@ defmodule TeiserverWeb.ConnCase do
     on_exit(&TeiserverTestLib.clear_all_con_caches/0)
 
     if !tags[:async] do
-      Sandbox.mode(Teiserver.Repo, {:shared, self()})
+      pid = Sandbox.start_owner!(Teiserver.Repo, shared: not tags[:async])
+      on_exit(fn -> Sandbox.stop_owner(pid) end)
 
       :ok =
         Supervisor.terminate_child(Teiserver.Supervisor, Config.SiteConfigTypes.Cache)

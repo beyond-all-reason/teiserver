@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.API.Admin.AssetController do
-  alias JsonXema.ValidationError
   alias Teiserver.Asset
   alias TeiserverWeb.Plugs.OAuthAuthenticatedPlug
   use TeiserverWeb, :controller
@@ -19,8 +18,8 @@ defmodule TeiserverWeb.API.Admin.AssetController do
         |> put_status(:bad_request)
         |> render(:map_updated_error)
 
-      {:error, %ValidationError{} = err} ->
-        reason = ValidationError.format_error(err.reason)
+      {:error, %JSV.ValidationError{} = err} ->
+        reason = inspect(err)
         conn |> put_status(:bad_request) |> assign(:reason, reason) |> render(:error)
     end
   end
@@ -29,7 +28,7 @@ defmodule TeiserverWeb.API.Admin.AssetController do
   defp validate_input(input) do
     # the whole endpoint should rarely be used, so we don't care *at all* about
     # performance of recompiling the schema every time
-    %{
+    schema = %{
       "type" => "object",
       "required" => ["maps"],
       "properties" => %{
@@ -57,8 +56,11 @@ defmodule TeiserverWeb.API.Admin.AssetController do
         }
       }
     }
-    |> JsonXema.new()
-    |> JsonXema.validate(input)
+
+    case JSV.validate(input, JSV.build!(schema)) do
+      {:ok, _data} -> :ok
+      {:error, err} -> {:error, err}
+    end
   end
 
   # bit cursed, not sure if there's a better way

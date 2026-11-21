@@ -15,12 +15,14 @@ defmodule Teiserver.Autohost.TachyonHandler do
   alias Teiserver.Tachyon.Schema
   alias Teiserver.Tachyon.Transport
   alias Teiserver.TachyonBattle
+  alias TeiserverWeb.Tachyon.Versioning
 
   require Logger
   @behaviour Handler
 
   @type state :: %{
           autohost: Bot.t(),
+          version: Versioning.version(),
           session_pid: pid(),
           state: :handshaking | :connected
         }
@@ -50,7 +52,11 @@ defmodule Teiserver.Autohost.TachyonHandler do
     end
   catch
     # in case the connection is terminating midway
-    :exit, {:normal, _details} -> :ok
+    :exit, {:normal, _details} ->
+      :ok
+
+    :exit, {{:shutdown, reason}, _mfa} when reason in [:peer_closed, :local_closed] ->
+      :ok
   end
 
   @doc """
@@ -76,7 +82,7 @@ defmodule Teiserver.Autohost.TachyonHandler do
   @impl Handler
   def connect(conn) do
     autohost = conn.assigns[:token].bot
-    {:ok, %{autohost: autohost, state: :handshaking}}
+    {:ok, %{autohost: autohost, version: conn.assigns.tachyon_version, state: :handshaking}}
   end
 
   @impl Handler

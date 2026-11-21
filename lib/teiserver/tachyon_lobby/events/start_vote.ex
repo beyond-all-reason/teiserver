@@ -27,5 +27,6 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.StartVo
     ]
 
     %{agg | data: data, changes: changes, side_effects: side_effects}
+    |> LT.Aggregate.add_log("vote_start", %{user_id: vote.initiator, details: %{vote_id: vote.id}})
   end
 end

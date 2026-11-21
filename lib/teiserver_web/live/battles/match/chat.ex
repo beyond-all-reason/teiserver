@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Battle.MatchLive.Chat do
       |> String.trim()
 
     messages =
-      Chat.list_lobby_messages(
+      Chat.list_spring_lobby_messages(
         search: [
           match_id: match_id,
           user_id_in: user_id_list,

@@ -7,7 +7,8 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar_tw"
 import LiveCharts from "live_charts"
 import CommandPalette from "./hooks/command_palette"
-
+import ServerClock
+ from "./hooks/server_clock"
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
@@ -15,10 +16,18 @@ const liveSocket = new LiveSocket("/live", Socket, {
   // your other hooks...
   // e.g. SomeCustomHook,
   CommandPalette,
-
+  ServerClock,
+  
   // Expand LiveCharts hooks at the end
   ...LiveCharts.Hooks,
   }
+})
+
+// Copy the data-copy value of an element to the clipboard, triggered with
+// phx-click={JS.dispatch("phx:copy")}
+window.addEventListener("phx:copy", event => {
+  const text = event.target.dataset.copy
+  if (text) navigator.clipboard.writeText(text)
 })
 
 // Show progress bar on live navigation and form submits

@@ -46,7 +46,11 @@ defmodule Teiserver.EmailHelper do
     end
   end
 
-  def send_password_reset(user, code \\ nil) do
+  def send_password_reset(user, code \\ nil)
+
+  def send_password_reset(%{email: nil}, _code), do: {:error, :no_email}
+
+  def send_password_reset(user, code) do
     {code, email} = password_reset(user, code)
     response = Mailer.deliver(email, response: true)
 

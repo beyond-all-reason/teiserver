@@ -13,7 +13,7 @@ There are several ways to install SPADS, but the recommended method when using T
 
 
 ## Create a bot account to be used by SPADS
-Run Teiserver locally, login as root@localhost and go to 
+Run Teiserver locally, login as root@teiserver.local and go to 
 http://localhost:4000/teiserver/admin/user
 
 A spad user is a user with the `Bot` role. The task `teiserver.fakedata` creates some by default with names like spads001 thru spads010. Their password is all `password`.

@@ -32,7 +32,6 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Actions", url: "/teiserver/actions"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -191,10 +190,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         |> render("new_select.html")
 
       user ->
-        changeset =
-          Moderation.change_action(%Action{
-            score_modifier: 0
-          })
+        changeset = Moderation.change_action(%Action{})
 
         reports =
           Moderation.list_reports(
@@ -441,7 +437,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     end
 
     action_map =
-      Map.take(action, ~w(target_id reason restrictions score_modifier expires hidden)a)
+      Map.take(action, ~w(target_id reason restrictions expires hidden)a)
 
     add_audit_log(conn, "Moderation:Action deleted", %{action: action_map})
     RefreshUserRestrictionsTask.refresh_user(action.target_id)

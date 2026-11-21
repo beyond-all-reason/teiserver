@@ -5,6 +5,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   alias Teiserver.Account.User
   alias Teiserver.Account.UserStat
   alias Teiserver.Client
+  alias Teiserver.Helper.DateHelper
   alias Teiserver.Moderation.ActionLib
 
   use TeiserverWeb, :component
@@ -102,6 +103,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           />
         </div>
 
+        <div class="m-2">
+          <.input_tw
+            type="date"
+            field={@form[:last_login]}
+            label="Logged in on/after"
+          />
+        </div>
+
         <div :if={@search_mode == "advanced"} class="m-2">
           <.input_tw
             type="text"
@@ -147,6 +156,22 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
             type="text"
             field={@form[:ip]}
             label="IP (contains)"
+          />
+        </div>
+
+        <div :if={@search_mode == "advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:custom_key]}
+            label="Custom data key"
+          />
+        </div>
+
+        <div :if={@search_mode == "advanced"} class="m-2">
+          <.input_tw
+            type="text"
+            field={@form[:custom_value]}
+            label="Custom data value"
           />
         </div>
 
@@ -238,6 +263,15 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
           active={@active == "show"}
         >
           Show
+        </.section_menu_link>
+
+        <.section_menu_link
+          :if={@active == "relationships"}
+          icon="fa-users"
+          url="#"
+          active={true}
+        >
+          Relationships
         </.section_menu_link>
 
         <.section_menu_link
@@ -403,14 +437,22 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   <UserComponents.show_details user={@user} />
   """
   attr :user, User
+  attr :user_stats, :map, default: %{}
 
   def show_details(assigns) do
     ~H"""
     <.list>
       <:item title="Name">{@user.name}</:item>
       <:item title="Email">{@user.email}</:item>
+      <:item :if={@user.discord_id} title="Discord ID"><pre>{@user.discord_id}</pre></:item>
+      <:item :if={@user.steam_id} title="Steam ID"><pre>{@user.steam_id}</pre></:item>
       <:item title="Roles">
         <div :for={role <- @user.roles} class="badge badge-soft badge-primary mx-1">{role}</div>
+      </:item>
+      <:item title="Restrictions">
+        <div :for={restriction <- @user.restrictions} class="badge badge-soft badge-error mx-1">
+          {restriction}
+        </div>
       </:item>
       <:item title="Registered">
         {@user.inserted_at && Calendar.strftime(@user.inserted_at, "%Y-%m-%d %H:%M:%S")}
@@ -420,6 +462,13 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </:item>
       <:item title="Last played">
         {@user.last_played && Calendar.strftime(@user.last_played, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Last logout">
+        {@user.last_logout && Calendar.strftime(@user.last_logout, "%Y-%m-%d %H:%M:%S")}
+      </:item>
+      <:item title="Player time">{DateHelper.minutes_to_str(@user_stats["player_minutes"])}</:item>
+      <:item title="Spectator time">
+        {DateHelper.minutes_to_str(@user_stats["spectator_minutes"])}
       </:item>
     </.list>
     """
@@ -515,6 +564,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
   attr :user, User
   attr :client, Client
   attr :scope, Scope
+  attr :has_active_mfa?, :boolean
 
   def show_actions(assigns) do
     ~H"""
@@ -525,7 +575,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         phx-click={JS.push_focus()}
       >
         <.button class="m-1 btn btn-primary btn-soft">
-          <Fontawesome.icon icon={Teiserver.Chat.LobbyMessageLib.icon()} style="solid" /> Chat
+          <Fontawesome.icon icon={Teiserver.Chat.SpringLobbyMessageLib.icon()} style="solid" /> Chat
         </.button>
       </.link>
 
@@ -539,7 +589,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/teiserver/admin/users/relationships/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/relationships"}
         phx-click={JS.push_focus()}
       >
         <.button class="m-1 btn btn-primary btn-soft">
@@ -566,10 +616,10 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </.link>
 
       <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
+        navigate={~p"/moderation/users/#{@user.id}/smurf_search"}
         phx-click={JS.push_focus()}
       >
-        <.button class="m-1 btn btn-primary btn-soft btn-disabled">
+        <.button class="m-1 btn btn-primary btn-soft">
           <Fontawesome.icon icon="fa-face-angry" style="solid" /> Smurf search
         </.button>
       </.link>
@@ -616,24 +666,24 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         <Fontawesome.icon icon="fa-sync" style="solid" /> Refresh user
       </.button>
 
-      <.link
+      <span
         navigate={~p"/moderation/users/#{@user.id}"}
-        phx-click={JS.push_focus()}
+        phx-click="send-password-reset-email"
+        data-confirm="Are you sure you want to send a password reset email?"
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
+        <.button class="m-1 btn btn-primary">
           <Fontawesome.icon icon="fa-shield-alt" style="solid" /> Send password reset email
         </.button>
-      </.link>
+      </span>
 
-      <.link
-        href={~p"/teiserver/admin/users/cancel_smurf_mark/#{@user.id}"}
-        method="delete"
-        phx-click={JS.push_focus()}
+      <span
+        phx-click="cancel-smurf-mark"
+        data-confirm="Are you sure you want to clear the smurf link?"
       >
         <.button class={["m-1 btn btn-primary", is_nil(assigns[:user].smurf_of_id) && " btn-disabled"]}>
           <Fontawesome.icon icon="fa-link-slash" style="solid" /> Clear smurf link
         </.button>
-      </.link>
+      </span>
 
       <.link
         navigate={~p"/moderation/ban/new_with_user?teiserver_user=#{@user.id}"}
@@ -653,14 +703,14 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
         </.button>
       </.link>
 
-      <.link
-        navigate={~p"/moderation/users/#{@user.id}"}
-        phx-click={JS.push_focus()}
+      <span
+        phx-click="disable-mfa"
+        data-confirm="Are you sure you want to disable this user's MFA?"
       >
-        <.button class="m-1 btn btn-primary btn-disabled">
-          <Fontawesome.icon icon="fa-broom" style="solid" /> Reset MFA
+        <.button class={["m-1 btn btn-primary ", not @has_active_mfa? && "btn-disabled"]}>
+          <Fontawesome.icon icon="fa-broom" style="solid" /> Deactivate MFA
         </.button>
-      </.link>
+      </span>
 
       <.link
         navigate={~p"/moderation/users/#{@user.id}/smurf_link"}
@@ -764,7 +814,7 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       <.input_tw
         type="text"
         value=""
-        name="name"
+        name="name_or_email"
         placeholder="Search by id/username"
         class="input input-sm"
         fieldset?={false}

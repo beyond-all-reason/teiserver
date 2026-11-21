@@ -17,13 +17,13 @@ defmodule TeiserverWeb.Account.SetupController do
         |> redirect(to: "/")
 
       true ->
-        users = Account.list_users(search: [email: "root@localhost"])
+        users = Account.list_users(search: [email: "root@teiserver.local"])
 
         if users == [] do
           {:ok, _user} =
             Account.create_user(%{
               name: "root",
-              email: "root@localhost",
+              email: "root@teiserver.local",
               password: Account.spring_md5_password(true_key),
               permissions: ["Server", "Admin"],
               roles: ["Server", "Admin"],
@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Account.SetupController do
           conn
           |> put_flash(
             :success,
-            "User created with email root@localhost and the password #{true_key}."
+            "User created with email root@teiserver.local and the password #{true_key}."
           )
           |> redirect(to: "/")
         else

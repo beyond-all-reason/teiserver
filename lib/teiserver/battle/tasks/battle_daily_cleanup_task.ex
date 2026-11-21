@@ -144,7 +144,7 @@ defmodule Teiserver.Battle.Tasks.CleanupTask do
     # Match specific things we want to delete
     SQL.query!(
       Repo,
-      "DELETE FROM teiserver_lobby_messages WHERE match_id = ANY($1)",
+      "DELETE FROM spring_lobby_messages WHERE match_id = ANY($1)",
       [ids]
     )
 

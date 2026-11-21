@@ -91,7 +91,6 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, :ensure_authenticated}
       ] do
       live "/", Menu, :index
-      live "/palette", Palette, :show
     end
   end
 
@@ -104,7 +103,7 @@ defmodule TeiserverWeb.Router do
         {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "account"}}},
         {UserAuthentication, :ensure_authenticated}
       ] do
-      live "/gdpr-self-service", Manage.GDPRAnonymise
+      live "/gdpr-self-service", Manage.GDPRPseudoAnonymise
     end
   end
 
@@ -581,14 +580,17 @@ defmodule TeiserverWeb.Router do
       ] do
       live "/users", User.List, :list
 
+      live "/users/:id/smurf_search", User.SmurfSearch, :search
+      live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
+      live "/users/:id/set_gdpr_forget", User.SetGDPRForget
+      live "/users/:id/smurf_link", User.SmurfLink, :show
+      live "/users/:id/relationships", User.Relationships, :show
+
       live "/users/:id/edit/name", User.Show, :edit_name
       live "/users/:id/edit/email", User.Show, :edit_email
       live "/users/:id/edit/roles", User.Show, :edit_roles
       live "/users/:id/new/note", User.Show, :new_note
       live "/users/:id/edit/note/:user_note_id", User.Show, :edit_note
-      live "/users/:id/clear_gdpr_forget", User.ClearGDPRForget
-      live "/users/:id/set_gdpr_forget", User.SetGDPRForget
-      live "/users/:id/smurf_link", User.SmurfLink, :show
       live "/users/:id", User.Show, :show
       live "/users/:id/:tab", User.Show, :show
     end
@@ -661,9 +663,20 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Moderator"}}
       ] do
       live "/tools/time_compare", Tools.TimeCompare, :show
+      live "/tools/volume_chart", Tools.ModerationVolumeChart, :show
       live "/tools/gdpr_restore", Tools.GDPRRestoreWarning
       live "/tools/gdpr_restore/perform", Tools.GDPRRestorePerform
       live "/tools/gdpr_restore/success/:user_id", Tools.GDPRRestoreSuccess
+    end
+
+    live_session :lobby_logs,
+      layout: {TeiserverWeb.Layouts, :moderation_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "moderation"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Moderator"}}
+      ] do
+      live "/lobby_logs", LobbyLog.List, :list
     end
   end
 
@@ -673,9 +686,6 @@ defmodule TeiserverWeb.Router do
     # Codes
     resources("/codes", CodeController)
     put("/codes/extend/:id/:hours", CodeController, :extend)
-
-    # Config
-    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
   end
 
   scope "/chat", TeiserverWeb.Communication do
@@ -754,6 +764,9 @@ defmodule TeiserverWeb.Router do
         {UserAuthentication, {:authorise, "Admin"}}
       ] do
       live "/tools/mfa_usage", Tools.MFAUsage, :show
+      live "/tools/blog_activity", Tools.BlogActivity, :show
+      live "/tools/population_report", Tools.PopulationReport, :show
+      live "/tools/retention_report", Tools.RetentionReport, :show
     end
 
     live_session :admin_discord_channels,
@@ -769,6 +782,36 @@ defmodule TeiserverWeb.Router do
 
       live "/discord_channels/:id", DiscordChannel.Show, :show
       live "/discord_channels/:id/show/edit", DiscordChannel.Show, :edit
+    end
+
+    live_session :admin_oauth_applications,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug,
+         {:set, %{site_menu_active: "admin", sensitive_data: true}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/oauth_applications", OAuthApplication.List, :list
+      live "/oauth_applications/new", OAuthApplication.List, :new
+      live "/oauth_applications/:id/edit", OAuthApplication.List, :edit
+
+      live "/oauth_applications/:id", OAuthApplication.Show, :show
+      live "/oauth_applications/:id/show/edit", OAuthApplication.Show, :edit
+      live "/oauth_applications/:id/show/:key", OAuthApplication.Show, :show
+    end
+
+    live_session :admin_site_configs,
+      layout: {TeiserverWeb.Layouts, :admin_tw},
+      on_mount: [
+        {Teiserver.Account.DefaultsPlug, {:set, %{site_menu_active: "admin"}}},
+        {UserAuthentication, :ensure_authenticated},
+        {UserAuthentication, {:authorise, "Admin"}}
+      ] do
+      live "/site_config", SiteConfig.List, :list
+      live "/site_config/:key/edit", SiteConfig.List, :edit
+
+      live "/site_config/:key/history", SiteConfig.Show, :show
     end
   end
 
@@ -803,22 +846,16 @@ defmodule TeiserverWeb.Router do
 
     get("/metrics", GeneralController, :metrics)
 
-    get("/users/reset_password/:id", UserController, :reset_password)
-    get("/users/relationships/:id", UserController, :relationships)
-    put("/users/:id/disable_totp", UserController, :disable_totp)
     get("/users/smurf_search/:id", UserController, :smurf_search)
     post("/users/create_smurf_key/:userid", UserController, :create_smurf_key)
 
     put("/users/mark_as_smurf_of/:smurf_id/:origin_id", UserController, :mark_as_smurf_of)
-    delete("/users/cancel_smurf_mark/:user_id", UserController, :cancel_smurf_mark)
 
     get("/users/smurf_merge_form/:from_id/:to_id", UserController, :smurf_merge_form)
     post("/users/smurf_merge_post/:from_id/:to_id", UserController, :smurf_merge_post)
     delete("/users/delete_smurf_key/:id", UserController, :delete_smurf_key)
     get("/users/search", UserController, :index)
     post("/users/set_stat", UserController, :set_stat)
-    get("/users/data_search", UserController, :data_search)
-    post("/users/data_search", UserController, :data_search)
     post("/users/search", UserController, :search)
     get("/users/applying/:id", UserController, :applying)
     get("/users/ratings_form/:id", UserController, :ratings_form)

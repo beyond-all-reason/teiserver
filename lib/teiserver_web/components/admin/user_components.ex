@@ -54,16 +54,6 @@ defmodule TeiserverWeb.Components.Admin.UserComponents do
           Advanced search
         </.section_menu_button>
 
-        <.section_menu_button
-          :if={allow?(@current_user, "admin")}
-          active={@active == "data_search"}
-          icon="fa-solid fa-print-magnifying-glass"
-          bsname={@colour}
-          url={~p"/teiserver/admin/users/data_search"}
-        >
-          Data search
-        </.section_menu_button>
-
         <%= if @active == "show" do %>
           <.section_menu_button
             active={@active == "show"}

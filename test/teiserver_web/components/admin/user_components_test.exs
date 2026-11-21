@@ -18,7 +18,6 @@ defmodule TeiserverWeb.Components.Admin.UserComponentsTest do
       # The links we expect to see
       assert html =~ "/teiserver/admin/user"
       assert html =~ "/teiserver/admin/client"
-      assert html =~ "/teiserver/admin/users/data_search"
     end
   end
 end

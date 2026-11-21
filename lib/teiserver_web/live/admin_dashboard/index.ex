@@ -35,7 +35,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
-      |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
+      |> add_breadcrumb(name: "Admin", url: "/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/admin/dashboard")
       |> assign(:site_menu_active, "admin")
       |> assign(:view_colour, AdminLib.colours())
@@ -154,14 +154,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @spec update_server_pids(Socket.t()) :: Socket.t()
   defp update_server_pids(socket) do
-    lobby_id_server_pid =
-      case Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
-        [{pid, _value}] -> pid
-        _other -> nil
-      end
-
     server_pids = [
-      {"Lobby ID server", lobby_id_server_pid},
+      {"Lobby ID server", Process.whereis(Teiserver.LobbyIdServer)},
       {"Coordinator", Coordinator.get_coordinator_pid()},
       {"Match Monitor", MatchMonitorServer.get_match_monitor_pid()},
       {"Automod", AutomodServer.get_automod_pid()},

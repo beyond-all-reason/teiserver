@@ -9,10 +9,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
 
   alias Teiserver.Account.User
+  alias Teiserver.Asset
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.Algo
+  alias Teiserver.Matchmaking.Algo.Env
   alias Teiserver.Matchmaking.Member
   alias Teiserver.Matchmaking.PairingRoom
   alias Teiserver.Matchmaking.QueueRegistry
@@ -26,12 +28,12 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type id :: String.t()
 
   # Internal queue statistics (without player_count)
-  @typep internal_stats :: %{
-           total_joined: non_neg_integer(),
-           total_left: non_neg_integer(),
-           total_wait_time_s: non_neg_integer(),
-           total_matched: non_neg_integer()
-         }
+  @type internal_stats :: %{
+          total_joined: non_neg_integer(),
+          total_left: non_neg_integer(),
+          total_wait_time_s: non_neg_integer(),
+          total_matched: non_neg_integer()
+        }
   @typedoc """
   Queue statistics for monitoring (includes player_count)
   """
@@ -59,7 +61,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   @type algo :: {module(), term()}
 
   @typedoc """
-  immutable specification of the queue
+  specification of the queue
   """
   @type queue :: %{
           name: String.t(),
@@ -69,6 +71,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
           algo: algo(),
           engines: [%{version: String.t()}],
           games: [%{spring_game: String.t()}],
+          queue_id_for_maps: id(),
           maps: [Teiserver.Asset.Map.t()],
           version: String.t()
         }
@@ -116,13 +119,11 @@ defmodule Teiserver.Matchmaking.QueueServer do
           required(:name) => String.t(),
           required(:team_size) => pos_integer(),
           required(:team_count) => pos_integer(),
-          required(:engines) => [%{version: String.t()}],
-          required(:games) => [%{spring_game: String.t()}],
-          required(:maps) => [Teiserver.Asset.Map.t()],
+          optional(:queue_id_for_maps) => id(),
           optional(:settings) => settings(),
           optional(:members) => [Member.t()],
           optional(:algo) => :ignore_os | :bruteforce_filter
-        }) :: state()
+        }) :: term()
   def init_state(attrs) do
     alg_module =
       case Map.get(attrs, :algo, :ignore_os) do
@@ -140,10 +141,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         team_count: attrs.team_count,
         algo: {alg_module, alg_state},
         ranked: true,
-        engines: attrs.engines,
-        games: attrs.games,
-        maps: attrs.maps,
-        version: compute_version(attrs.engines, attrs.games, attrs.maps)
+        queue_id_for_maps: Map.get(attrs, :queue_id_for_maps, attrs.id)
       },
       settings: Map.merge(default_settings(), Map.get(attrs, :settings, %{})),
       members: Map.get(attrs, :members, []),
@@ -161,10 +159,6 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
   def via_tuple(queue_id) do
     QueueRegistry.via_tuple(queue_id)
-  end
-
-  def via_tuple(queue_id, queue) do
-    QueueRegistry.via_tuple(queue_id, queue)
   end
 
   @type join_error ::
@@ -245,11 +239,24 @@ defmodule Teiserver.Matchmaking.QueueServer do
     :exit, {:noproc, _details} -> :ok
   end
 
+  @doc """
+  refresh the assets for the given queue. If this results in a new version, that
+  is, something changed, the queue restarts.
+  We don't have (yet?) a mechanism to force player to acknowledge the new assets
+  so we can't guarantee that the players currently in queue have all the new
+  assets.
+  """
+  @spec refresh_assets(id()) :: :ok
+  def refresh_assets(queue_id) do
+    queue_id |> via_tuple() |> GenServer.call(:refresh_assets)
+  catch
+    :exit, {:shutdown, _reason} -> :ok
+    :exit, {:noproc, _details} -> :ok
+  end
+
   @spec start_link(state()) :: GenServer.on_start()
   def start_link(initial_state) do
-    GenServer.start_link(__MODULE__, initial_state,
-      name: via_tuple(initial_state.id, initial_state.queue)
-    )
+    GenServer.start_link(__MODULE__, initial_state, name: via_tuple(initial_state.id))
   end
 
   @doc """
@@ -258,13 +265,29 @@ defmodule Teiserver.Matchmaking.QueueServer do
   """
   def match_players(queue_pid) when is_pid(queue_pid), do: send(queue_pid, :tick)
 
+  @spec get_list_data(id()) :: {:ok, queue()} | {:error, :invalid_queue}
+  def get_list_data(queue_id) do
+    queue_id |> via_tuple() |> GenServer.call(:get_list_data)
+  end
+
   @impl GenServer
   def init(state) do
     Logger.metadata(actor_type: :mm_queue, actor_id: state.id)
 
+    {engines, games, maps} = fetch_assets(state.queue.queue_id_for_maps)
+
     if state.settings.tick_interval_ms != :manual do
       :timer.send_interval(state.settings.tick_interval_ms, :tick)
     end
+
+    state =
+      state
+      |> put_in([:queue, :engines], engines)
+      |> put_in([:queue, :games], games)
+      |> put_in([:queue, :maps], maps)
+      |> put_in([:queue, :version], compute_version(engines, games, maps))
+
+    QueueRegistry.update_value(state.id, fn _old -> state.queue end)
 
     {:ok, state}
   end
@@ -424,8 +447,30 @@ defmodule Teiserver.Matchmaking.QueueServer do
     end
   end
 
+  def handle_call(:refresh_assets, _from, state) do
+    {engines, games, maps} = fetch_assets(state.queue.queue_id_for_maps)
+
+    new_state =
+      state
+      |> put_in([:queue, :engines], engines)
+      |> put_in([:queue, :games], games)
+      |> put_in([:queue, :maps], maps)
+      |> put_in([:queue, :version], compute_version(engines, games, maps))
+
+    if new_state.queue.version == state.queue.version do
+      {:reply, :ok, new_state}
+    else
+      QueueRegistry.unregister(state.id)
+      {:stop, {:shutdown, :asset_changed}, :ok, new_state}
+    end
+  end
+
+  def handle_call(:get_list_data, _from, state) do
+    {:reply, {:ok, state.queue}, state}
+  end
+
   @impl GenServer
-  def handle_info({:DOWN, ref, :process, _object, _reason}, state) do
+  def handle_info({:DOWN, ref, :process, _object, reason}, state) do
     val = MC.get_val(state.monitors, ref)
     state = Map.update!(state, :monitors, &MC.demonitor_by_val(&1, val))
 
@@ -443,7 +488,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
 
       {:room, room_pid, player_ids} ->
         Logger.info(
-          "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}"
+          "pairing room went down #{inspect(room_pid)} with players: #{inspect(player_ids)}, because #{inspect(reason)}"
         )
 
         new_state =
@@ -468,6 +513,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
           state
 
         {:match, matches} ->
+          :telemetry.execute([:matchmaking, :match], %{count: length(matches)}, %{id: state.id})
+
           {pairings, monitors} =
             Enum.reduce(matches, {[], state.monitors}, fn teams, {ts, monitors} ->
               {:ok, pid} =
@@ -477,6 +524,19 @@ defmodule Teiserver.Matchmaking.QueueServer do
                 for team <- teams, member <- team, player_id <- member.player_ids do
                   player_id
                 end
+
+              now = DateTime.utc_now()
+
+              for team <- teams, member <- team do
+                wait_s = DateTime.diff(now, member.joined_at)
+                # to avoid too many metrics, clamp rating by bands of 10
+                rating_bracket = (member.rating.skill |> trunc() |> div(10)) * 10
+
+                :telemetry.execute([:matchmaking, :wait_time], %{wait_s: wait_s}, %{
+                  rating: rating_bracket,
+                  id: state.id
+                })
+              end
 
               monitors = MC.monitor(monitors, pid, {:room, pid, player_ids})
 
@@ -531,6 +591,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
         )
 
         Enum.each(pending.joined, &Player.matchmaking_notify_cancelled(&1, :party_user_left))
+        Party.matchmaking_notify_cancel(party_id)
         state = %{state | pending_parties: Map.delete(state.pending_parties, party_id)}
         {:noreply, state}
     end
@@ -571,6 +632,8 @@ defmodule Teiserver.Matchmaking.QueueServer do
         for p_id when p_id != player_id <- to_remove.player_ids do
           Player.matchmaking_notify_cancelled(p_id, :party_user_left)
         end
+
+        if to_remove.party_id, do: Party.matchmaking_notify_cancel(to_remove.party_id)
 
         {:ok, %{state | members: new_members, monitors: monitors}}
 
@@ -656,7 +719,7 @@ defmodule Teiserver.Matchmaking.QueueServer do
   def match_members(state) do
     {alg_module, alg_state} = state.queue.algo
 
-    apply(alg_module, :get_matches, [state.members, alg_state])
+    apply(alg_module, :get_matches, [state.members, alg_state, Env.default_env()])
   end
 
   defp demonitor_players(player_ids, monitors) do
@@ -684,5 +747,23 @@ defmodule Teiserver.Matchmaking.QueueServer do
     player_count = calculate_player_count(state)
     stats = Map.put(state.stats, :player_count, player_count)
     Matchmaking.broadcast_queue_update(state.id, stats)
+    :telemetry.execute([:matchmaking, :queue_size], %{count: player_count}, %{id: state.id})
+  end
+
+  defp fetch_assets(id_for_maps) do
+    engines =
+      case Asset.get_engine(in_matchmaking: true) do
+        nil -> []
+        e -> [%{version: e.name}]
+      end
+
+    games =
+      case Asset.get_game(in_matchmaking: true) do
+        nil -> []
+        g -> [%{spring_game: g.name}]
+      end
+
+    maps = Asset.get_maps_for_queue(id_for_maps)
+    {engines, games, maps}
   end
 end

@@ -49,26 +49,6 @@
     </.menu_card>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.RetentionReport.icon()}
-      url={~p"/teiserver/reports/show/retention"}
-    >
-      Retention
-    </.menu_card>
-  <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Account.PopulationReport.icon()}
-      url={~p"/teiserver/reports/show/population"}
-    >
-      Population
-    </.menu_card>
-  <% end %>
-
   <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
     <.menu_card
       size={:small}
@@ -144,25 +124,6 @@
       Open Skill
     </.menu_card>
   <% end %>
-
-  <%= if allow?(@current_user, Teiserver.Moderation.ActivityReport.permissions()) do %>
-    <.menu_card
-      size={:small}
-      icon={Teiserver.Moderation.ActivityReport.icon()}
-      url={~p"/teiserver/reports/show/moderation_activity"}
-    >
-      Moderation
-    </.menu_card>
-  <% end %>
-
-  <.menu_card
-    :if={allow?(@current_user, Teiserver.Communication.MicroblogReport.permissions())}
-    icon={Teiserver.Communication.MicroblogReport.icon()}
-    url={~p"/teiserver/reports/show/microblog"}
-    size={:small}
-  >
-    Microblog
-  </.menu_card>
 </div>
 
 <div class="row mt-2">

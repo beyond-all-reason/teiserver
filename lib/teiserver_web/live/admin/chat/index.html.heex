@@ -59,7 +59,7 @@
           <.input
             type="select"
             label="Mode"
-            options={["Lobby", "Room", "Party", "Direct"]}
+            options={["Lobby", "Room", "Direct"]}
             name="mode"
             value={@filters["mode"]}
             phx-change="filter-update"
@@ -133,9 +133,6 @@
                 </td>
                 <td :if={@filters["mode"] == "Room"}>
                   {msg.chat_room}
-                </td>
-                <td :if={@filters["mode"] == "Party"}>
-                  Party
                 </td>
 
                 <td :if={@filters["mode"] == "Direct"}>

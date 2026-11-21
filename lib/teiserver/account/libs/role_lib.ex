@@ -77,6 +77,15 @@ defmodule Teiserver.Account.RoleLib do
 
     # Contributor/Staff
     %Role{
+      name: "Technician",
+      colour: "#4488AA",
+      icon: "fa-solid fa-wrench",
+      contains: [],
+      description: "Can view and download uploaded diagnostic logs.",
+      edit_permission: "Admin",
+      group: :staff
+    },
+    %Role{
       name: "Contributor",
       colour: "#66AA66",
       icon: "fa-solid fa-code-commit",
@@ -149,6 +158,7 @@ defmodule Teiserver.Account.RoleLib do
         "Senior moderator",
         "Moderator",
         "Reviewer",
+        "Technician",
         "Contributor",
         "Overwatch",
         "BAR+",
@@ -168,6 +178,7 @@ defmodule Teiserver.Account.RoleLib do
         "Senior moderator",
         "Moderator",
         "Reviewer",
+        "Technician",
         "Contributor",
         "Overwatch",
         "BAR+",

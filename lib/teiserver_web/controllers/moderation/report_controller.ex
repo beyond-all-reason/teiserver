@@ -285,7 +285,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     conn
     |> assign(:report, report)
     |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Edit: #{report.name}", url: conn.request_path)
+    |> add_breadcrumb(name: "Edit: #{report.id}", url: conn.request_path)
     |> render("edit.html")
   end
 

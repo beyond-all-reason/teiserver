@@ -24,6 +24,7 @@ defmodule Teiserver.Player.TachyonHandler do
   alias Teiserver.Tachyon.Handler
   alias Teiserver.Tachyon.Schema
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias TeiserverWeb.Tachyon.Versioning
 
   require Logger
 
@@ -37,10 +38,12 @@ defmodule Teiserver.Player.TachyonHandler do
   @type state ::
           %{
             user: User.t(),
+            version: Versioning.version(),
             status: :waiting
           }
           | %{
               user: User.t(),
+              version: Versioning.version(),
               status: :admitted,
               sess_monitor: reference(),
               pending_responses: Handler.pending_responses()
@@ -53,7 +56,7 @@ defmodule Teiserver.Player.TachyonHandler do
 
     with addr when is_list(addr) <- :inet.ntoa(conn.remote_ip),
          {:ok, user} <- Login.tachyon_login(user, to_string(addr), lobby_client) do
-      {:ok, %{user: user}}
+      {:ok, %{user: user, version: conn.assigns.tachyon_version}}
     else
       {:error, :einval} ->
         {:error, 404, "Invalid remote address"}
@@ -67,7 +70,7 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   @impl Handler
-  @spec init(%{user: User.t()}) :: Handler.result()
+  @spec init(%{user: User.t(), version: Versioning.version()}) :: Handler.result()
   def init(initial_state) do
     user = initial_state.user
     Logger.metadata(actor_type: :connection, actor_id: to_string(user.id))
@@ -416,7 +419,7 @@ defmodule Teiserver.Player.TachyonHandler do
     case message_target_from_tachyon(msg["data"]["target"]) do
       {:ok, target} ->
         case target do
-          {:player, _user_id} ->
+          {:player, user_id} ->
             msg =
               Messaging.new(
                 msg["data"]["message"],
@@ -425,8 +428,12 @@ defmodule Teiserver.Player.TachyonHandler do
               )
 
             case Messaging.send(msg, target) do
-              :ok -> {:response, state}
-              {:error, :invalid_recipient} -> {:error_response, :invalid_target, state}
+              :ok ->
+                Messaging.persist_direct_message(msg, user_id)
+                {:response, state}
+
+              {:error, :invalid_recipient} ->
+                {:error_response, :invalid_target, state}
             end
 
           :party ->
@@ -770,8 +777,6 @@ defmodule Teiserver.Player.TachyonHandler do
   end
 
   def handle_command("lobby/create", "request", _msg_id, msg, state) do
-    # TODO: the `lobby/update` has very similar logic. There should be a way
-    # to combine the parsing
     create_data = %PT.LobbyStartParams{
       name: msg["data"]["name"],
       map_name: msg["data"]["mapName"],

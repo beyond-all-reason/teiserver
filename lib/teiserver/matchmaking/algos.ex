@@ -4,6 +4,7 @@ defmodule Teiserver.Matchmaking.Algos do
   """
 
   alias Teiserver.Helpers.Combi
+  alias Teiserver.Matchmaking.Algo.Env
   alias Teiserver.Matchmaking.Member
 
   @type state :: term()
@@ -23,7 +24,8 @@ defmodule Teiserver.Matchmaking.Algos do
   """
   @callback get_matches(
               members :: [Member.t()],
-              state :: state()
+              state :: state(),
+              env :: Env.t()
             ) :: :no_match | {:match, [[[Member.t()]]]}
 
   @spec match_members(

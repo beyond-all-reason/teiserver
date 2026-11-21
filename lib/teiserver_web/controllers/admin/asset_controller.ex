@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.AssetController do
     action: {Phoenix.Controller, :action_name},
     user: {Teiserver.Account.AuthLib, :current_user}
 
-  plug :add_breadcrumb, name: "Admin", url: "/teiserver/admin"
+  plug :add_breadcrumb, name: "Admin", url: "/admin"
   plug :add_breadcrumb, name: "Assets", url: "/teiserver/admin/asset"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()

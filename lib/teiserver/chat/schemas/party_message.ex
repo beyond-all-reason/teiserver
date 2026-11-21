@@ -2,9 +2,10 @@ defmodule Teiserver.Chat.PartyMessage do
   @moduledoc false
   use TeiserverWeb, :schema
 
-  typed_schema "teiserver_party_messages" do
+  @primary_key {:id, Ecto.UUID, autogenerate: [version: 7, precision: :monotonic]}
+  typed_schema "party_messages" do
     field :content, :string
-    field :party_id, :string
+    field :party_id, Ecto.UUID
     field :inserted_at, :utc_datetime
     belongs_to :user, Teiserver.Account.User
   end
@@ -24,5 +25,5 @@ defmodule Teiserver.Chat.PartyMessage do
   end
 
   @spec authorize(atom(), Plug.Conn.t(), map()) :: bool()
-  def authorize(_action, conn, _params), do: allow?(conn, "chat")
+  def authorize(_action, conn, _params), do: allow?(conn, "Moderator")
 end

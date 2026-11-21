@@ -85,14 +85,6 @@ bsname = view_colour() %>
                     {error_tag(f, :expires)}
                   </div>
                 </div>
-
-                <div class="col-lg-6">
-                  <div class="form-group my-2">
-                    {label(f, :score_modifier, class: "control-label")}
-                    {text_input(f, :score_modifier, class: "form-control")}
-                    {error_tag(f, :score_modifier)}
-                  </div>
-                </div>
               </div>
 
               <div class="row">
@@ -267,7 +259,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_All_chat').prop('checked', true);
-        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Purposefully passing on consequential information to a game in progress via things like spectator chat (we understand mistakes happen occasionally) is obviously a form of cheating.')
+        $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Passing hidden information (anything the player’s team cannot see with fog of war on) to a player in a game in progress is cheating. This applies to whoever sends it and to a player who asks for it or knowingly uses it.')
         $('#action_expires').val('5 days');
       "
                   >
@@ -306,7 +298,7 @@ bsname = view_colour() %>
                     onclick="
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) C5 - Evading moderation by creating new accounts is not okay. Continued evasion will lead to a permanent ban.');
-        $('#action_expires').val('1 day');
+        $('#action_expires').val('1 year');
       "
                   >
                     Moderation evasion - 1st offense
@@ -338,7 +330,7 @@ bsname = view_colour() %>
                     onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_reason').val('[CoC](<https://www.beyondallreason.info/code-of-conduct>) B5 - Smurf or alt-accounts are not allowed, if you need an exemption or you think there has been an error please use the #open-ticket discord channel to talk to the moderation team. The discord can be accessed at #{discord_link}');
-        $('#action_expires').val('1 day');
+        $('#action_expires').val('1 year');
       "}
                   >
                     Smurfing - 1st offense

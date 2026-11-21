@@ -10,7 +10,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.EmailHelper
   alias Teiserver.Game
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -37,7 +36,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug(:add_breadcrumb, name: "Admin", url: "/teiserver/admin")
+  plug(:add_breadcrumb, name: "Admin", url: "/admin")
   plug(:add_breadcrumb, name: "Users", url: "/teiserver/admin/user")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -157,25 +156,6 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("index.html")
   end
 
-  @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def data_search(conn, params) do
-    users =
-      if params["data_search"] == nil do
-        []
-      else
-        UserLib.list_users_by_data(params["data_search"])
-      end
-
-    user_stats = for user <- users, do: Account.get_user_stat_data(user.id)
-
-    conn
-    |> add_breadcrumb(name: "Data search", url: conn.request_path)
-    |> assign(:params, params["data_search"])
-    |> assign(:data_search, true)
-    |> assign(:users, Enum.zip(users, user_stats))
-    |> render("index.html")
-  end
-
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)
@@ -224,50 +204,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
-  end
-
-  @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def reset_password(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-
-    case UserLib.has_access(user, conn) do
-      {false, :not_found} ->
-        conn
-        |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-
-      {false, :no_access} ->
-        conn
-        |> put_flash(:danger, "Unable to find that user")
-        |> redirect(to: ~p"/teiserver/admin/user")
-
-      {true, _role} ->
-        case EmailHelper.send_password_reset(user) do
-          :ok ->
-            conn
-            |> put_flash(:success, "Password reset email sent to user")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
-
-          {:error, error} ->
-            Logger.error(
-              "Failed to send password reset email to user at #{user.email}: #{inspect(error)}"
-            )
-
-            conn
-            |> put_flash(:error, "Oops, something went wrong resetting the password")
-            |> redirect(to: ~p"/teiserver/admin/user/#{user}")
-        end
-    end
-  end
-
-  @spec disable_totp(Plug.Conn.t(), map()) :: Plug.Conn.t()
-  def disable_totp(conn, %{"id" => id}) do
-    user = Account.get_user(id)
-    TOTPLib.disable_totp(user.id)
-
-    conn
-    |> put_flash(:info, "Disabled MFA for #{user.name}")
-    |> redirect(to: ~p"/teiserver/admin/user/#{user}")
   end
 
   @spec ratings(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -604,12 +540,12 @@ defmodule TeiserverWeb.Admin.UserController do
       {:ok, _smurf_key} ->
         conn
         |> put_flash(:info, "Key added successfully.")
-        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
+        |> redirect(to: ~p"/moderation/users/smurf_search/#{userid}")
 
       {:error, %Ecto.Changeset{} = _changeset} ->
         conn
         |> put_flash(:info, "Unable to add that key")
-        |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{userid}")
+        |> redirect(to: ~p"/moderation/users/smurf_search/#{userid}")
     end
   end
 
@@ -622,7 +558,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       conn
       |> put_flash(:success, "Key deleted")
-      |> redirect(to: ~p"/teiserver/admin/users/smurf_search/#{key.user_id}")
+      |> redirect(to: ~p"/moderation/users/smurf_search/#{key.user_id}")
     else
       conn
       |> put_flash(:info, "Unable to find that key")
@@ -645,61 +581,12 @@ defmodule TeiserverWeb.Admin.UserController do
       :ok ->
         conn
         |> put_flash(:success, "Applied the changes")
-        |> redirect(to: ~p"/teiserver/admin/user/#{smurf_user.id}")
+        |> redirect(to: ~p"/moderation/users/#{smurf_user.id}")
 
       {:error, reason} ->
         conn
         |> put_flash(:danger, "Marking failed: #{reason}")
-        |> redirect(to: ~p"/teiserver/admin/user")
-    end
-  end
-
-  @spec cancel_smurf_mark(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def cancel_smurf_mark(conn, %{"user_id" => id}) do
-    user = Account.get_user!(id)
-    origin_user_id = user.smurf_of_id
-
-    case UserLib.has_access(user, conn) do
-      {true, _role} ->
-        case Account.update_user_smurf(user, %{smurf_of_id: nil}) do
-          {:ok, user} ->
-            add_audit_log(conn, "Moderation:Cancel smurf mark", %{
-              smurf_userid: user.id,
-              origin_id: user.smurf_of_id
-            })
-
-            # Now we update stats for the origin
-            smurf_count =
-              Account.list_users(
-                search: [
-                  smurf_of: origin_user_id
-                ],
-                select: [:id]
-              )
-              |> Enum.count()
-
-            # And give the origin the smurfer role
-            if smurf_count == 0 do
-              Auth.remove_roles(origin_user_id, ["Smurfer"])
-            end
-
-            # If we call this URL without the person being a smurf it can cause
-            # an error, this is a temporary fix and will be resolved as a priority.
-            origin_user_id &&
-              Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
-
-            conn
-            |> put_flash(:info, "Smurf link broken.")
-            |> redirect(to: ~p"/moderation/users/#{user.id}")
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "edit.html", user: user, changeset: changeset)
-        end
-
-      _no_access ->
-        conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: ~p"/teiserver/admin/user")
+        |> redirect(to: ~p"/moderation/users")
     end
   end
 
@@ -762,41 +649,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:danger, "Unable to access at least one of these users")
         |> redirect(to: ~p"/teiserver/admin/user")
     end
-  end
-
-  @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def relationships(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-    id = user.id
-
-    relationships = %{
-      friends: Account.list_friend_ids_of_user(id),
-      friend_requests: Account.list_incoming_friend_requests_of_userid(id),
-      followed: Account.list_userids_followed_by_userid(id),
-      ignored: Account.list_userids_ignored_by_userid(id),
-      avoided: Account.list_userids_avoided_by_userid(id),
-      avoiding: Account.list_userids_avoiding_this_userid(id),
-      blocked: Account.list_userids_blocked_by_userid(id),
-      blocking: Account.list_userids_blocking_this_userid(id)
-    }
-
-    user_ids =
-      relationships
-      |> Map.values()
-      |> List.flatten()
-      |> Enum.uniq()
-
-    lookup =
-      Account.list_users(search: [id_in: user_ids], limit: :infinity)
-      |> Map.new(fn u -> {u.id, u} end)
-
-    conn
-    |> assign(:user, user)
-    |> assign(:lookup, lookup)
-    |> assign(:relationships, relationships)
-    |> add_breadcrumb(name: "Show: #{user.name}", url: ~p"/teiserver/admin/user/#{id}")
-    |> add_breadcrumb(name: "Relationships", url: conn.request_path)
-    |> render("relationships.html")
   end
 
   @spec set_stat(Plug.Conn.t(), map) :: Plug.Conn.t()

@@ -60,6 +60,14 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
+        :if={allow?(@scope, "Technician")}
+        icon={Teiserver.Telemetry.TelemetryLib.icon()}
+        url={~p"/telemetry"}
+      >
+        Telemetry
+      </.menu_page_link>
+
+      <.menu_page_link
         :if={allow?(@scope, "Contributor")}
         icon={StylingHelper.icon(:summary)}
         url={~p"/teiserver/reports"}
@@ -68,7 +76,7 @@ defmodule TeiserverWeb.GeneralLive.Menu do
       </.menu_page_link>
 
       <.menu_page_link
-        icon={Teiserver.Chat.RoomMessageLib.icon()}
+        icon={Teiserver.Chat.SpringRoomMessageLib.icon()}
         url={~p"/chat"}
       >
         Chat
@@ -98,13 +106,6 @@ defmodule TeiserverWeb.GeneralLive.Menu do
         url={~p"/account/relationship"}
       >
         Relationships
-      </.menu_page_link>
-
-      <.menu_page_link
-        icon="list"
-        url={~p"/palette"}
-      >
-        Cmd Palette test
       </.menu_page_link>
     </div>
 

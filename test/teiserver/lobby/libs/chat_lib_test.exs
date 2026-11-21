@@ -1,5 +1,5 @@
 defmodule Teiserver.Lobby.Libs.ChatLibTest do
-  alias Teiserver.Chat.LobbyMessage
+  alias Teiserver.Chat.SpringLobbyMessage
   alias Teiserver.Coordinator.CoordinatorServer
   alias Teiserver.Lobby.ChatLib
   alias Teiserver.TeiserverTestLib
@@ -15,7 +15,7 @@ defmodule Teiserver.Lobby.Libs.ChatLibTest do
     test "persists a system message" do
       lobby_id = TeiserverTestLib.make_lobby(%{name: "ExplainCommandTestText"})
       {:ok, msg} = ChatLib.persist_system_message("Test system message", lobby_id)
-      assert match?(%LobbyMessage{content: "system: Test system message"}, msg)
+      assert match?(%SpringLobbyMessage{content: "system: Test system message"}, msg)
     end
   end
 end

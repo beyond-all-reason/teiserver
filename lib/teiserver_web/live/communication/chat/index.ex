@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Communication.ChatLive.Index do
   alias Teiserver.Account
   alias Teiserver.Chat
-  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Chat.SpringLobbyMessageLib
   alias Teiserver.Coordinator
+
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
@@ -10,7 +11,7 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
     socket =
       socket
       |> assign(:site_menu_active, "chat")
-      |> assign(:view_colour, LobbyMessageLib.colours())
+      |> assign(:view_colour, SpringLobbyMessageLib.colours())
       |> assign(:messages, [])
       |> assign(:usernames, %{})
       |> add_breadcrumb(name: "Chat", url: "/chat")
@@ -105,11 +106,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
 
     messages =
       case mode do
-        nil ->
-          []
-
         "Lobby" ->
-          Chat.list_lobby_messages(
+          Chat.list_spring_lobby_messages(
             search: [
               term: filters["term"],
               user_id: userid,
@@ -132,17 +130,8 @@ defmodule TeiserverWeb.Communication.ChatLive.Index do
             order_by: filters["order"]
           )
 
-        "Party" ->
-          Chat.list_party_messages(
-            search: [
-              term: filters["term"],
-              user_id: userid,
-              inserted_after: inserted_after,
-              user_id_not_in: excluded_ids
-            ],
-            limit: 100,
-            order_by: filters["order"]
-          )
+        _other ->
+          []
       end
 
     extra_usernames =

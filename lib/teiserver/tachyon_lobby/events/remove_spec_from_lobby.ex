@@ -20,6 +20,8 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.RemoveS
   alias Teiserver.TachyonLobby.Types, as: LT
 
   def apply_event(%RemoveSpecFromLobby{} = ev, %LT.Aggregate{} = agg) do
+    agg = LT.Aggregate.add_log(agg, "lobby_leave", %{user_id: ev.user_id})
+
     agg =
       Enum.reduce(
         [

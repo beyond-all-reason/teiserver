@@ -8,6 +8,8 @@ defmodule Teiserver.TachyonLobby do
   alias Teiserver.Cluster
   alias Teiserver.Helpers.PubSubHelper
   alias Teiserver.Lobby.LobbyLib
+  alias Teiserver.Moderation.LobbyLog
+  alias Teiserver.Repo
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Lobby
   alias Teiserver.TachyonLobby.Registry
@@ -134,8 +136,9 @@ defmodule Teiserver.TachyonLobby do
               ),
               to: Lobby
 
-  @spec remove_bot(id(), bot_id :: String.t()) :: :ok | {:error, :invalid_bot_id | term()}
-  defdelegate remove_bot(lobby_id, bot_id), to: Lobby
+  @spec remove_bot(id(), User.id(), bot_id :: String.t()) ::
+          :ok | {:error, :invalid_bot_id | term()}
+  defdelegate remove_bot(lobby_id, user_id, bot_id), to: Lobby
 
   @type bot_update_data :: Lobby.bot_update_data()
   @spec update_bot(id(), bot_update_data()) :: :ok | {:error, reason :: :invalid_bot_id | term()}
@@ -182,7 +185,36 @@ defmodule Teiserver.TachyonLobby do
           :ok | {:error, :invalid_lobby | :not_in_lobby | :no_boss_allowed | :not_a_boss}
   defdelegate unboss(lobby_id, user_id, boss_id), to: Lobby
 
-  @spec kickban(id(), User.id(), target_id :: User.id(), ban_until :: DateTime.t() | nil) ::
-          :ok | {:error, :invalid_lobby | :not_in_lobby | :unauthorized | term()}
+  @spec kickban(
+          id(),
+          User.id(),
+          target_id :: User.id(),
+          ban_until :: DateTime.t() | nil
+        ) ::
+          :ok
+          | {:error,
+             :invalid_lobby
+             | :not_in_lobby
+             | :unauthorized
+             | :cannot_kick_moderator
+             | term()}
   defdelegate kickban(lobby_id, user_id, target_id, ban_until \\ nil), to: Lobby
+
+  @doc """
+  Creates a lobby_log.
+
+  ## Examples
+
+      iex> create_lobby_log(%{field: value})
+      {:ok, %LobbyLog{}}
+
+      iex> create_lobby_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_lobby_log(attrs \\ %{}) do
+    %LobbyLog{}
+    |> LobbyLog.changeset(attrs)
+    |> Repo.insert()
+  end
 end

@@ -10,7 +10,7 @@ defmodule Teiserver.Cluster do
   This uses rendez-vous hashing to split the nodes
   """
   @spec split_nodes(term(), [node()] | nil) :: {node(), [node()]}
-  def split_nodes(routing_key, nodes \\ [Node.self() | Node.list()]) do
+  def split_nodes(routing_key, nodes \\ get_nodes()) do
     [primary | replicas] = Enum.sort_by(nodes, fn node -> :erlang.phash2({node, routing_key}) end)
 
     {primary, replicas}
@@ -29,6 +29,20 @@ defmodule Teiserver.Cluster do
     else
       :erpc.call(primary, m, f, a, timeout)
     end
+  end
+
+  @doc """
+  returns a list of node name in the cluster
+
+  This is most likely a placeholder function. Down the road, we'll likely want
+  to have some kind of application logic on top of erlang cluster methods
+  so the list of nodes is (strongly?) consistent across all nodes.
+  We may also want to return more than just the node names and wrap that
+  into a struct?
+  But for now, let's start simple
+  """
+  def get_nodes do
+    [Node.self() | Node.list()]
   end
 
   @doc """

@@ -13,7 +13,8 @@ config :teiserver, Teiserver.Repo,
   queue_interval: 100_000,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 20,
-  timeout: 300_000
+  timeout: 300_000,
+  use_sql_sandbox?: true
 
 config :teiserver, Teiserver.SpringTcpServer,
   # Don't start listeners at startup, we'll start manually

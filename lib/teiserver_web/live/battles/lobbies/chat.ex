@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Chat
-  alias Teiserver.Chat.LobbyMessage
+  alias Teiserver.Chat.SpringLobbyMessage
   alias Teiserver.Client
   alias Teiserver.Coordinator
   alias Teiserver.Lobby
@@ -28,7 +28,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
     socket =
       socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/battle/lobbies")
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, Lobby.colours())
@@ -72,7 +71,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
 
         messages =
-          Chat.list_lobby_messages(
+          Chat.list_spring_lobby_messages(
             search: [
               match_id: lobby.match_id
             ],
@@ -315,8 +314,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   defp new_message_changeset do
-    %LobbyMessage{}
-    |> LobbyMessage.changeset(%{
+    %SpringLobbyMessage{}
+    |> SpringLobbyMessage.changeset(%{
       "match_id" => 1,
       "user_id" => 1,
       "inserted_at" => DateTime.utc_now(),

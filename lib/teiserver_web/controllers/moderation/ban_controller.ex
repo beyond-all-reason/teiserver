@@ -27,7 +27,6 @@ defmodule TeiserverWeb.Moderation.BanController do
 
   plug TeiserverWeb.Plugs.PaginationParams
 
-  plug :add_breadcrumb, name: "Moderation", url: "/teiserver"
   plug :add_breadcrumb, name: "Bans", url: "/teiserver/bans"
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
@@ -202,7 +201,6 @@ defmodule TeiserverWeb.Moderation.BanController do
             target_id: ban.source_id,
             reason: ban.reason,
             restrictions: ["Login"],
-            score_modifier: 0,
             expires: DateTime.shift(DateTime.utc_now(), year: 1000)
           })
 

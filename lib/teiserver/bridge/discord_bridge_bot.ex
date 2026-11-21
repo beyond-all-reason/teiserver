@@ -7,6 +7,7 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
   alias Nostrum.Api.ApplicationCommand
   alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Bridge.CommandLib
+  alias Teiserver.Bridge.Commands.PostCommand
   alias Teiserver.Communication
   alias Teiserver.Moderation
 
@@ -52,7 +53,20 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
     :ignore
   end
 
-  def handle_event({:INTERACTION_CREATE, %{data: data} = interaction, _ws}) do
+  def handle_event(
+        {:INTERACTION_CREATE, %{type: 3, data: %{custom_id: custom_id}} = interaction, _ws}
+      ) do
+    case custom_id do
+      "post_confirm" ->
+        PostCommand.post(interaction)
+
+      "post_cancel" ->
+        Communication.respond_to_interaction(interaction, %{type: 6})
+        Communication.edit_interaction_response(interaction, %{components: []})
+    end
+  end
+
+  def handle_event({:INTERACTION_CREATE, %{type: 2, data: data} = interaction, _ws}) do
     options_map =
       if data.options do
         data.options
@@ -105,21 +119,6 @@ defmodule Teiserver.Bridge.DiscordBridgeBot do
 
     {:ok, %{id: cmd_id}} = ApplicationCommand.create_guild_command(guild_id, command)
     ApplicationCommand.delete_guild_command(guild_id, cmd_id)
-  end
-
-  @spec new_dm_channel(atom | %{:recipients => any, optional(any) => any}) :: :ok
-  def new_dm_channel(dm_channel) do
-    case dm_channel.recipients do
-      [recipient] ->
-        Teiserver.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
-        Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
-        nil
-
-      _other ->
-        nil
-    end
-
-    :ok
   end
 
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any

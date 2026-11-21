@@ -1,12 +1,15 @@
 defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
+  alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
   alias Teiserver.Account.UserNote
   alias Teiserver.Account.UserNoteQueries
   alias Teiserver.Account.UserQueries
+  alias Teiserver.EmailHelper
   alias Teiserver.Helper.QueryHelpers
   alias Teiserver.Logging.AuditLogQueries
   alias Teiserver.Moderation.RefreshUserRestrictionsTask
@@ -17,6 +20,8 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   alias TeiserverWeb.ModerationLive.UserComponents
 
   use TeiserverWeb, :live_view
+
+  require Logger
 
   import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
 
@@ -55,6 +60,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         page_title: "User details: #{user.name}",
         user_id: id,
         has_active_mfa?: has_active_mfa?(user.id),
+        has_mfa_role?: AuthLib.contains_mfa_role?(user.roles),
         role_data: RoleLib.grouped_role_data()
       )
       |> switch_tab(tab1, "1")
@@ -66,7 +72,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
       if user do
         add_audit_log(socket.assigns.scope, "User access attempt", %{
           user_id: user && user.id,
-          page: "gdpr_restore/perform"
+          page: "moderation/users/#{user.id}"
         })
       end
 
@@ -100,7 +106,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   def handle_event("refresh-user", _params, %Socket{} = socket) do
     %{user: user} = socket.assigns
 
-    ConCache.put(:teiserver_login_count, user.id, 0)
+    Teiserver.cache_put(:teiserver_login_count, user.id, 0)
     RefreshUserRestrictionsTask.refresh_user(user.id)
 
     socket
@@ -145,16 +151,136 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         |> put_flash(:error, "Unable to delete user note")
         |> noreply()
     end
+  end
 
-    socket
-    |> noreply()
+  def handle_event(
+        "cancel-smurf-mark",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+    origin_user_id = user.smurf_of_id
+
+    result =
+      Repo.transact(fn ->
+        with true <- origin_user_id != nil,
+             {:ok, _user_note} <- Account.update_user_smurf(user, %{smurf_of_id: nil}),
+             %{} <-
+               add_audit_log(scope, "Moderation:Cancel smurf mark", %{
+                 smurf_userid: user.id,
+                 origin_id: origin_user_id
+               }) do
+          # Now we update stats for the origin
+          smurf_count =
+            UserQueries.users()
+            |> UserQueries.where_smurf_of(origin_user_id)
+            |> QueryHelpers.count()
+
+          # And potentially remove their smurfer role
+          if smurf_count == 0 do
+            Auth.remove_roles(origin_user_id, ["Smurfer"])
+          end
+
+          Account.update_user_stat(origin_user_id, %{"smurf_count" => smurf_count})
+
+          {:ok, :success}
+        else
+          _error -> {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+        |> put_flash(:success, "Smurf link cleared")
+        |> switch_tab("notes", nil)
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to clear smurf link")
+        |> noreply()
+    end
+  end
+
+  def handle_event(
+        "disable-mfa",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+
+    result =
+      Repo.transact(fn ->
+        with :ok <- TOTPLib.disable_totp(user.id),
+             %{} <-
+               add_audit_log(scope, "Disable MFA", %{
+                 user_id: user.id
+               }) do
+          {:ok, :success}
+        else
+          _error -> {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> redirect(to: ~p"/moderation/users/#{user.id}")
+        |> put_flash(:success, "User MFA disabled")
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to disable user MFA")
+        |> noreply()
+    end
+  end
+
+  def handle_event(
+        "send-password-reset-email",
+        _params,
+        %Socket{assigns: assigns} = socket
+      ) do
+    %{scope: scope, user: user} = assigns
+
+    result =
+      Repo.transact(fn ->
+        with :ok <- EmailHelper.send_password_reset(user),
+             %{} <-
+               add_audit_log(scope, "Sent password reset email", %{
+                 user_id: user.id
+               }) do
+          {:ok, :success}
+        else
+          error ->
+            Logger.error(
+              "Failed to send password reset email to user at #{user.email}: #{inspect(error)}"
+            )
+
+            {:error, :error}
+        end
+      end)
+
+    case result do
+      {:ok, :success} ->
+        socket
+        |> put_flash(:success, "Password reset email sent")
+        |> noreply()
+
+      {:error, _error} ->
+        socket
+        |> put_flash(:error, "Unable to send password reset email")
+        |> noreply()
+    end
   end
 
   defp set_user_alerts(%Socket{assigns: %{user: nil}} = socket), do: socket
 
-  defp set_user_alerts(%Socket{assigns: %{user: user}} = socket) do
+  defp set_user_alerts(%Socket{assigns: %{user: user, has_mfa_role?: has_mfa_role?}} = socket) do
     mfa_warning? =
-      AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
+      AuthLib.mfa_required?() and has_mfa_role? and
         not has_active_mfa?(user.id)
 
     restriction_alert =

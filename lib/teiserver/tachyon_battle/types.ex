@@ -6,7 +6,6 @@ defmodule Teiserver.TachyonBattle.Types do
   alias Teiserver.Account.User
 
   @type id :: String.t()
-  @type match_id :: non_neg_integer()
   @type add_player_data :: %{
           battle_id: id(),
           user_id: User.id(),

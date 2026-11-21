@@ -27,12 +27,6 @@ defmodule TeiserverWeb.Report.ReportController do
         "verified" ->
           Teiserver.Account.VerifiedReport
 
-        "retention" ->
-          Teiserver.Account.RetentionReport
-
-        "population" ->
-          Teiserver.Account.PopulationReport
-
         "new_user_funnel" ->
           Teiserver.Account.NewUserFunnelReport
 
@@ -53,13 +47,6 @@ defmodule TeiserverWeb.Report.ReportController do
 
         "open_skill" ->
           Teiserver.Account.OpenSkillReport
-
-        "microblog" ->
-          Teiserver.Communication.MicroblogReport
-
-        # Moderation
-        "moderation_activity" ->
-          Teiserver.Moderation.ActivityReport
 
         _other ->
           raise "No handler for name of '#{name}'"

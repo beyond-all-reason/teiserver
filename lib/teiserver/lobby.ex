@@ -51,7 +51,7 @@ defmodule Teiserver.Lobby do
     )
   end
 
-  @spec create_lobby(map()) :: T.lobby()
+  @spec create_lobby(map()) :: T.lobby() | {:error, String.t()}
   def create_lobby(
         %{
           founder_id: _founder_id,
@@ -59,14 +59,19 @@ defmodule Teiserver.Lobby do
           name: _name
         } = lobby
       ) do
+    case LobbyIdServer.get_next_id() do
+      {:error, :no_pid} -> {:error, "Lobby ID server unavailable. Please retry."}
+      id when is_integer(id) -> Map.put(lobby, :id, id) |> build_lobby()
+    end
+  end
+
+  defp build_lobby(lobby) do
     passworded = Map.get(lobby, :password) != nil
 
     # Needs to be supplied a map with:
     # ip, port, engine_version, map_hash, map_name, game_name, hash_code
     Map.merge(
       %{
-        id: LobbyIdServer.get_next_id(),
-
         # Expected to be overridden
         ip: nil,
         port: nil,
@@ -133,7 +138,7 @@ defmodule Teiserver.Lobby do
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyLib
   defdelegate disable_live_lobby_feature(disabled?), to: LobbyLib
 
-  @spec create_new_lobby(map) :: T.lobby() | {:error, String.t()}
+  @spec create_new_lobby(map) :: {:ok, T.lobby()} | {:error, String.t()}
   defdelegate create_new_lobby(data), to: LobbyLib
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()

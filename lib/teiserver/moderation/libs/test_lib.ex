@@ -29,7 +29,6 @@ defmodule Teiserver.Moderation.ModerationTestLib do
         target_id: GeneralTestLib.make_user().id,
         reason: "Reason",
         restrictions: ["Login"],
-        score_modifier: 1000,
         expires: DateTime.shift(DateTime.utc_now(), day: 5)
       }
       |> Map.merge(attrs)

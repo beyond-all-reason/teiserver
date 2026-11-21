@@ -1,0 +1,51 @@
+<UserComponents.section_menu active="relationships" user={@user} scope={@scope}>
+  <UserComponents.quick_search />
+</UserComponents.section_menu>
+
+<div
+  :if={assigns[:relationships]}
+  class="grid grid-flow-row-dense sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-8 4xl:grid-cols-8"
+>
+  <%= for {relationship_type, title} <- [
+        {:friends, "Friends"},
+        {:ignored, "Ignores"},
+        {:avoided, "Avoids"},
+        {:blocked, "Blocks"},
+        {:friend_requests, "Friend requests"},
+        {:followed, "Follows"},
+        {:avoiding, "Avoided by"},
+        {:blocking, "Blocked by"}
+      ] do %>
+    <div class="flex-1 mb-8">
+      <h4>{title} ({Enum.count(@relationships[relationship_type])})</h4>
+      <table class="table table-zebra table-sm">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for userid <- @relationships[relationship_type] do %>
+            <% user = @lookup[userid] %>
+            <%= if user do %>
+              <tr>
+                <td>
+                  {user.name}
+                </td>
+                <td>
+                  <a
+                    href={~p"/moderation/users/#{user.id}"}
+                    class="btn btn-secondary btn-xs"
+                  >
+                    Show
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

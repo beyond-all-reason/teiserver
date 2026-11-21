@@ -3,9 +3,17 @@ defmodule Teiserver.Support.LobbyHelpers do
   Utilities to construct lobbies with some sane defaults
   """
 
+  alias Teiserver.AccountFixtures
   alias Teiserver.TachyonLobby.Types, as: LT
 
-  def mk_start_params(teams, user_id \\ "1234") do
+  def mk_start_params(teams, user_id \\ nil) do
+    user_id =
+      if user_id == nil do
+        AccountFixtures.user_fixture().id
+      else
+        user_id
+      end
+
     %LT.StartParams{
       creator_data: %{id: user_id, name: "name-#{user_id}"},
       creator_pid: self(),

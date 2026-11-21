@@ -4,7 +4,7 @@ defmodule TeiserverWeb.OAuth.CodeView do
 
   use TeiserverWeb, :view
 
-  def token(%{token: token}) do
+  def token(%{token: token} = assigns) do
     expires_in = DateTime.diff(token.expires_at, DateTime.utc_now(), :second)
 
     %{
@@ -12,6 +12,8 @@ defmodule TeiserverWeb.OAuth.CodeView do
       expires_in: expires_in,
       token_type: "Bearer"
     }
+    # Only set for token exchanges (RFC 8693)
+    |> Map.merge(Map.take(assigns, [:issued_token_type, :scope]))
     |> then(fn res ->
       case Map.get(token, :refresh_token) do
         nil -> res
@@ -39,7 +41,8 @@ defmodule TeiserverWeb.OAuth.CodeView do
       grant_types_supported: [
         "authorization_code",
         "refresh_token",
-        "client_credentials"
+        "client_credentials",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
       ],
       code_challenge_methods_supported: ["S256"],
       response_types_supported: ["code", "token"],
