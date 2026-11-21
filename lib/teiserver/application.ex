@@ -164,19 +164,12 @@ defmodule Teiserver.Application do
     opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    # Deliberately logged at error level, even on success, so that the startup
-    # marker shows up in the error log and separates pre and post restart entries.
-    # The success case carries the :teiserver_startup domain so config/test.exs can
-    # drop it from test output; a failed start is always logged.
-    case start_result do
-      {:ok, _pid} ->
-        # credo:disable-for-next-line Credo.Check.Warning.MissedMetadataKeyInLoggerConfig
-        Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}",
-          domain: [:teiserver_startup]
-        )
-
-      {:error, _reason} ->
-        Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
+    # Deliberately logged at error level, even on success, so the startup marker
+    # shows up in the error log and makes it easy to tell pre and post
+    # deploy/restart entries apart. It is skipped in test mode so it doesn't
+    # clutter the test output and distract from the relevant test errors.
+    if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
+      Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
     end
 
     startup_sub_functions(start_result)
