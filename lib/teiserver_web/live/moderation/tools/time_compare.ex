@@ -153,9 +153,8 @@ defmodule TeiserverWeb.ModerationLive.Tools.TimeCompare do
 
         # (Optional) Other library and adapter-specific options.
         options: %{
-          xaxis: %{
-            categories: times
-          }
+          xaxis: %{categories: times},
+          yaxis: %{min: 0, max: 4, tickAmount: 4, decimalsInFloat: 0}
         },
 
         # (Optional) set the adapter to use for the chart. If not set, uses
