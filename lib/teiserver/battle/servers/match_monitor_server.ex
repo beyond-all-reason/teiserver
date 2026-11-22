@@ -50,18 +50,21 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Teiserver.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
-  # Direct/Room messaging
   @impl GenServer
-  def handle_info(:begin, state) do
-    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
+  def handle_continue(:begin, state) do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
          true do
-      Process.send_after(self(), :begin, 1_000)
-      {:noreply, state}
-    else
       {:noreply, do_begin()}
+    else
+      Process.send_after(self(), :retry_begin, 1_000)
+      {:noreply, state}
     end
   end
 
+  @impl GenServer
+  def handle_info(:retry_begin, state), do: {:noreply, state, {:continue, :begin}}
+
+  # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
@@ -303,10 +306,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @impl GenServer
-  @spec init(map()) :: {:ok, map()}
+  @spec init(map()) :: {:ok, map(), {:continue, :begin}}
   def init(_opts) do
     Process.flag(:trap_exit, true)
-    send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
 
     Registry.register(
@@ -315,7 +317,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       :match_monitor
     )
 
-    {:ok, %{}}
+    {:ok, %{}, {:continue, :begin}}
   end
 
   @impl GenServer
