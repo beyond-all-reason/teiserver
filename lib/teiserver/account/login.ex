@@ -488,10 +488,6 @@ defmodule Teiserver.Account.Login do
     |> max(7)
   end
 
-  # This legacy site-config option never had a rank calculation. Use the default
-  # method so existing saved values do not prevent users or internal clients logging in.
-  def calculate_rank(userid, "Rating value"), do: calculate_rank(userid, "Role")
-
   def calculate_rank(userid, "Role") do
     ingame_hours = rank_time(userid)
 
