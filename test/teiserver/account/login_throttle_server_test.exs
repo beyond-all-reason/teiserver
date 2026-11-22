@@ -4,6 +4,8 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Config
+  alias Teiserver.Support.Polling
   use Teiserver.DataCase, async: false
 
   import Teiserver.TeiserverTestLib,
@@ -97,6 +99,60 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
     assert_receive {:login_accepted, id}, 5
     assert user2.id == id
+  end
+
+  test "a zero login rate pauses the queue until a positive rate is set" do
+    key = "system.Login rate"
+    on_exit(fn -> Teiserver.cache_delete(:config_site_cache, key) end)
+    assert :ok = Config.update_site_config(key, "0")
+    assert {:ok, _pid} = LoginThrottleServer.restart()
+    assert :ok = LoginThrottleServer.set_tick_period(:infinity)
+    set_capacity(1)
+    %{id: id} = new_user()
+    refute LoginThrottleServer.attempt_login(self(), id)
+
+    assert :ok = LoginThrottleServer.reset_rate_limiter(0, true)
+    LoginThrottleServer.tick()
+    assert LoginThrottleServer.get_queue_length() == 1
+    refute_received {:login_accepted, ^id}
+
+    for invalid <- ["-1", "1.5", "unknown", ""] do
+      assert {:error, _changeset} = Config.update_site_config(key, invalid)
+    end
+
+    # The general integer caster treats an empty legacy value as zero.
+    assert_raise ArgumentError, fn -> Config.cast_site_config_value(key, "") end
+    assert Config.get_site_config(key).value == "0"
+    assert_raise FunctionClauseError, fn -> LoginThrottleServer.reset_rate_limiter(-1) end
+    assert :ok = Config.update_site_config(key, "2")
+    LoginThrottleServer.set_tick_period(10)
+    assert_receive {:login_accepted, ^id}, 1_000
+  end
+
+  test "a client that disconnects during a pause releases its place in the queue" do
+    set_capacity(1)
+    LoginThrottleServer.reset_rate_limiter(0)
+    waiting = oneshot_pid()
+    refute LoginThrottleServer.attempt_login(waiting.pid, new_user().id)
+    %{id: id} = new_user()
+    refute LoginThrottleServer.attempt_login(self(), id)
+
+    LoginThrottleServer.tick()
+    assert LoginThrottleServer.get_queue_length() == 2
+    send(waiting.pid, :leave)
+    Task.await(waiting)
+
+    Polling.poll_until(
+      fn ->
+        LoginThrottleServer.tick()
+        LoginThrottleServer.get_queue_length()
+      end,
+      &(&1 == 1)
+    )
+
+    LoginThrottleServer.reset_rate_limiter(1, true)
+    LoginThrottleServer.tick()
+    assert_receive {:login_accepted, ^id}
   end
 
   test "respect rate limiter" do

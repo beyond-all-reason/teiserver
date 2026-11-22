@@ -110,7 +110,8 @@ defmodule TeiserverWeb.AdminLive.SiteConfig.FormComponent do
         |> noreply()
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        form = to_form(%{"value" => value}, errors: changeset.errors)
+        {:noreply, assign(socket, form: form)}
     end
   end
 

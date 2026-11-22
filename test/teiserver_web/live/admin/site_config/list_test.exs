@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Admin.SiteConfigLive.ListTest do
+  alias Teiserver.Account
   alias Teiserver.Helper.StringHelper
   alias Teiserver.Helpers.GeneralTestLib
 
-  use TeiserverWeb.ConnCase, async: true
+  use TeiserverWeb.ConnCase, async: false
 
   @key "teiserver.Default player limit"
   @safe_key StringHelper.safe_name(@key)
@@ -62,6 +63,27 @@ defmodule TeiserverWeb.Admin.SiteConfigLive.ListTest do
 
   describe "changing data" do
     setup [:auth]
+
+    test "an admin can correct an invalid login rate in the same form", %{conn: conn} do
+      key = "system.Login rate"
+      previous_rate = Config.get_site_config_cache(key)
+      on_exit(fn -> Account.reset_login_rate_limiter(previous_rate) end)
+
+      {:ok, live, _html} = live(conn, ~p"/admin/site_config/#{key}/edit")
+
+      assert live
+             |> form("#site_config-form", value: "-1")
+             |> render_submit() =~ "must be a non-negative integer"
+
+      assert Config.get_site_config_cache(key) == previous_rate
+
+      live
+      |> form("#site_config-form", value: "0")
+      |> render_submit()
+
+      assert_patch(live, ~p"/admin/site_config")
+      assert Config.get_site_config(key).value == "0"
+    end
 
     test "updates site_config in listing", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/admin/site_config")

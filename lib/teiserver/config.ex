@@ -321,14 +321,14 @@ defmodule Teiserver.Config do
   @spec update_site_config(String.t(), term()) :: :ok | {:error, Changeset.t()}
   def update_site_config("system.Login rate" = key, value) do
     case value |> to_string() |> String.trim() |> Integer.parse() do
-      {rate, ""} when rate > 0 ->
+      {rate, ""} when rate >= 0 ->
         do_update_site_config(key, rate)
 
       _other ->
         changeset =
           %SiteConfig{}
           |> SiteConfig.changeset(%{key: key, value: to_string(value)})
-          |> Changeset.add_error(:value, "must be a positive integer")
+          |> Changeset.add_error(:value, "must be a non-negative integer")
 
         {:error, changeset}
     end
@@ -476,6 +476,10 @@ defmodule Teiserver.Config do
   end
 
   @spec cast_site_config_value(String.t(), any) :: any
+  def cast_site_config_value("system.Login rate", value) do
+    value |> to_string() |> String.trim() |> String.to_integer()
+  end
+
   def cast_site_config_value(type_key, value) do
     type = get_site_config_type(type_key)
 

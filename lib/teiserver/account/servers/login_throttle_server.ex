@@ -34,8 +34,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
     default_rate = Config.get_site_config_cache("system.Login rate")
-    rate = if is_integer(default_rate) and default_rate > 0, do: default_rate, else: 1
-    rate_limiter = BurstyRateLimiter.per_second(rate) |> BurstyRateLimiter.set_empty()
+    rate_limiter = default_rate |> login_rate_limiter() |> BurstyRateLimiter.set_empty()
 
     state = %{
       tick_timer_ref: timer_ref,
@@ -76,15 +75,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.call(__MODULE__, {:reset_rate_limiter, rl})
   end
 
-  @spec reset_rate_limiter(rate :: number(), should_fill? :: boolean()) ::
-          :ok | {:error, :invalid_rate}
-  def reset_rate_limiter(rate, should_fill? \\ false)
-
-  def reset_rate_limiter(rate, _should_fill?) when is_number(rate) and rate <= 0,
-    do: {:error, :invalid_rate}
-
-  def reset_rate_limiter(rate, should_fill?) when is_number(rate) do
-    rl = BurstyRateLimiter.per_second(rate)
+  @spec reset_rate_limiter(non_neg_integer(), boolean()) :: :ok
+  def reset_rate_limiter(rate, should_fill? \\ false) when is_integer(rate) and rate >= 0 do
+    rl = login_rate_limiter(rate)
 
     rl =
       if should_fill?, do: BurstyRateLimiter.set_full(rl), else: BurstyRateLimiter.set_empty(rl)
@@ -197,6 +190,13 @@ defmodule Teiserver.Account.LoginThrottleServer do
     |> Map.update!(:monitors, &MapSet.put(&1, pid))
   end
 
+  # A zero-capacity bucket cannot issue a permit, even after a refill.
+  defp login_rate_limiter(0),
+    do: BurstyRateLimiter.per_second(1) |> BurstyRateLimiter.with_burst(0)
+
+  defp login_rate_limiter(rate) when is_integer(rate) and rate > 0,
+    do: BurstyRateLimiter.per_second(rate)
+
   defp dequeue_users(n, state) when n <= 0, do: state
 
   defp dequeue_users(n, state) do
@@ -205,7 +205,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
         state
 
       {{:value, member}, rest} ->
-        Process.demonitor(member.mon_ref)
         member_still_connected? = MapSet.member?(state.monitors, member.pid)
 
         new_state =
@@ -216,6 +215,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         if member_still_connected? do
           case BurstyRateLimiter.try_acquire(state.rate_limiter) do
             {:ok, rl} ->
+              Process.demonitor(member.mon_ref, [:flush])
               new_state = Map.replace!(new_state, :rate_limiter, rl)
               send(member.pid, {:login_accepted, member.user_id})
               dequeue_users(n - 1, new_state)
