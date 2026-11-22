@@ -1,6 +1,6 @@
 defmodule Teiserver.SpringAuthTest do
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
   alias Teiserver.BitParse
@@ -265,7 +265,7 @@ CLIENTS test_room #{user.name}\n"
     hash = "-1540855590"
 
     # Give user Bot role so they can manage battle
-    AuthLib.add_roles(user1.id, ["Bot"])
+    Auth.add_roles(user1.id, ["Bot"])
 
     _send_raw(
       socket1,
@@ -547,7 +547,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG You do not have permission to execute that command\n"
 
     # Give mod access, recache the user
-    AuthLib.add_roles(user.id, ["Moderator"])
+    Auth.add_roles(user.id, ["Moderator"])
     :timer.sleep(100)
 
     _send_raw(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
@@ -610,7 +610,7 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    AuthLib.add_roles(user.id, ["Moderator"])
+    Auth.add_roles(user.id, ["Moderator"])
     :timer.sleep(500)
     _recv_until(socket)
 
@@ -629,7 +629,7 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket)
     assert reply == :timeout
 
-    AuthLib.add_roles(user.id, ["Moderator"])
+    Auth.add_roles(user.id, ["Moderator"])
     :timer.sleep(500)
     _recv_until(socket)
 
@@ -657,7 +657,7 @@ CLIENTS test_room #{user.name}\n"
   # end
 
   test "CREATEBOTACCOUNT", %{user: user, socket: socket} do
-    AuthLib.add_roles(user.id, ["Moderator"])
+    Auth.add_roles(user.id, ["Moderator"])
     :timer.sleep(500)
     _recv_until(socket)
 

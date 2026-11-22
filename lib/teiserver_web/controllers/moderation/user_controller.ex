@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Moderation.UserController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Account.UserPolicy,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
   )
 
   plug(:add_breadcrumb, name: "Moderation", url: "/moderation")

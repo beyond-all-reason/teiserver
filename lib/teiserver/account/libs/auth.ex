@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.AuthLib do
+defmodule Teiserver.Account.Auth do
   @moduledoc """
   Module with functions for working with authorisation/permission checks
   """

@@ -24,7 +24,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
   # case basis.
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Asset
   alias Teiserver.Autohost
@@ -255,8 +255,8 @@ defmodule Teiserver.TachyonLobby.Lobby do
     caller = Account.get_user_by_id(user_id)
     target = Account.get_user_by_id(target_id)
 
-    caller_mod = AuthLib.allow?(caller, "Moderator")
-    target_mod = AuthLib.allow?(target, "Moderator")
+    caller_mod = Auth.allow?(caller, "Moderator")
+    target_mod = Auth.allow?(target, "Moderator")
     call_lobby(lobby_id, {:kickban, user_id, target_id, ban_until, caller_mod, target_mod})
   end
 

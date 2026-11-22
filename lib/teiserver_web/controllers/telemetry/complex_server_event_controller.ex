@@ -15,7 +15,7 @@ defmodule TeiserverWeb.Telemetry.ComplexServerEventController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Auth.Server,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(:add_breadcrumb, name: "Telemetry", url: "/telemetry")
 

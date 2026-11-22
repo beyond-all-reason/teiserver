@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Login
   alias Teiserver.Account.User
   alias Teiserver.Battle
@@ -640,7 +640,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = Account.get_user_by_id(userid)
 
     cond do
-      AuthLib.admin?(user) or AuthLib.moderator?(user) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         :ok
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
@@ -705,7 +705,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.downcase()
 
     is_boss = Enum.member?(state.host_bosses, userid)
-    is_admin_or_moderator = AuthLib.admin?(userid) or AuthLib.moderator?(userid)
+    is_admin_or_moderator = Auth.admin?(userid) or Auth.moderator?(userid)
 
     # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
@@ -908,7 +908,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       not Enum.empty?(client.queues) ->
         false
 
-      AuthLib.admin?(user) or AuthLib.moderator?(user) ->
+      Auth.admin?(user) or Auth.moderator?(user) ->
         true
 
       state.ranked == false and
@@ -996,7 +996,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false,
          "Awaiting acknowledgement of your warning - check chat from @Coordinator and follow instructions there. Pay attention to spelling."}
 
-      AuthLib.admin?(userid) or AuthLib.moderator?(userid) ->
+      Auth.admin?(userid) or Auth.moderator?(userid) ->
         {true, :override_approve}
 
       ban_state == :banned ->
@@ -1051,7 +1051,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     is_host = senderid == state.host_id
     is_boss = Enum.member?(state.host_bosses, senderid)
-    is_admin = AuthLib.admin?(senderid)
+    is_admin = Auth.admin?(senderid)
 
     cond do
       client == nil ->
@@ -1068,7 +1068,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all except Admin only commands for moderators
-      AuthLib.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->

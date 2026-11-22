@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.AuthTest do
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.AccountFixtures
 
   use Teiserver.DataCase, async: false
@@ -21,8 +21,8 @@ defmodule Teiserver.Account.AuthTest do
 
   describe "MFA functions" do
     test "allow?/2 - no MFA present", %{user: user} do
-      refute AuthLib.has_active_mfa?(user.id)
-      refute AuthLib.allow?(user, "Server")
+      refute Auth.has_active_mfa?(user.id)
+      refute Auth.allow?(user, "Server")
     end
 
     test "allow?/2 - bots are exempt" do
@@ -32,14 +32,14 @@ defmodule Teiserver.Account.AuthTest do
           permissions: ["Server", "Bot"]
         })
 
-      refute AuthLib.has_active_mfa?(user.id)
-      assert AuthLib.allow?(user, "Server")
+      refute Auth.has_active_mfa?(user.id)
+      assert Auth.allow?(user, "Server")
     end
 
     test "allow?/2 - MFA present", %{user: user} do
       Account.set_secret(user.id, "secret")
-      assert AuthLib.has_active_mfa?(user.id)
-      assert AuthLib.allow?(user, "Server")
+      assert Auth.has_active_mfa?(user.id)
+      assert Auth.allow?(user, "Server")
     end
   end
 end

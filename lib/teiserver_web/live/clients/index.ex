@@ -2,7 +2,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Phoenix.PubSub
   alias Teiserver
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserLib
   alias Teiserver.Client
 
@@ -157,7 +157,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   defp limited_user(user) do
     %{
       id: user.id,
-      bot: AuthLib.is_bot?(user),
+      bot: Auth.is_bot?(user),
       chobby_hash: Account.get_user_stat_data(user.id)["chobby_hash"]
     }
   end

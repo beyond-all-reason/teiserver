@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Telemetry.InfologController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Telemetry.Infolog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug TeiserverWeb.Plugs.PaginationParams
 

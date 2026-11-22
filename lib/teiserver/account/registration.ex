@@ -2,7 +2,7 @@ defmodule Teiserver.Account.Registration do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.EmailHelper
   alias Teiserver.Geoip
@@ -131,7 +131,7 @@ defmodule Teiserver.Account.Registration do
     existing_bot = Account.get_user_by_name(bot_name)
 
     cond do
-      AuthLib.moderator?(bot_host_id) == false ->
+      Auth.moderator?(bot_host_id) == false ->
         {:error, "no permission"}
 
       existing_bot != nil ->

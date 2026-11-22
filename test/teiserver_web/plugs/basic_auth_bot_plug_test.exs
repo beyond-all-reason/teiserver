@@ -1,5 +1,5 @@
 defmodule TeiserverWeb.BasicAuthBotPlugTest do
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Plugs.BasicAuthBotPlug
 
   use TeiserverWeb.ConnCase, async: false
@@ -45,7 +45,7 @@ defmodule TeiserverWeb.BasicAuthBotPlugTest do
 
   test "invalid password", %{conn: conn} do
     user = TeiserverTestLib.new_user()
-    AuthLib.add_roles(user.id, ["Bot"])
+    Auth.add_roles(user.id, ["Bot"])
     conn = put_auth_header(conn, user.name, "not the correct password")
     %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
     assert resp.status == 401
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.BasicAuthBotPlugTest do
 
   test "happy path", %{conn: conn} do
     user = TeiserverTestLib.new_user()
-    AuthLib.add_roles(user.id, ["Bot"])
+    Auth.add_roles(user.id, ["Bot"])
     conn = put_auth_header(conn, user.name, "password")
     %Plug.Conn{} = resp = BasicAuthBotPlug.call(conn, %{})
     assert resp.status != 401

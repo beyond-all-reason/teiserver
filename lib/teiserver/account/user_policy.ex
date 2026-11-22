@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.UserPolicy do
   @moduledoc false
 
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2]
 
   @behaviour Bodyguard.Policy
 

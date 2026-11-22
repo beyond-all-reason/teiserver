@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.BanController do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Logging
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ActionLib
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Moderation.BanController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Ban,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Account.SecurityController do
   alias Ecto.UUID
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.TOTP
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Logging
@@ -111,7 +111,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    show_mfa_warning = AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles)
+    show_mfa_warning = Auth.mfa_required?() and Auth.contains_mfa_role?(user.roles)
 
     conn
     |> assign(:user, user)
@@ -206,7 +206,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def disable_totp(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    if AuthLib.need_to_mfa_refresh?(user.id) do
+    if Auth.need_to_mfa_refresh?(user.id) do
       conn
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/totp/disable")
@@ -225,7 +225,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def edit_password(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    if AuthLib.need_to_mfa_refresh?(user.id) do
+    if Auth.need_to_mfa_refresh?(user.id) do
       conn
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/edit_password")
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Account.SecurityController do
   def update_password(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    if AuthLib.need_to_mfa_refresh?(user.id) do
+    if Auth.need_to_mfa_refresh?(user.id) do
       conn
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/security/edit_password")

@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Logging.MatchLogController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
   plug(:add_breadcrumb, name: "Match metrics", url: "/teiserver/reports/match/day_metrics")

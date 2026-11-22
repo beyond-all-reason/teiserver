@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Account.RegistrationControllerTest do
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Config
 
   use TeiserverWeb.ConnCase
@@ -106,7 +106,7 @@ defmodule TeiserverWeb.Account.RegistrationControllerTest do
       user =
         Account.query_user(search: [email_lower: attrs.email])
 
-      assert AuthLib.verified?(user)
+      assert Auth.verified?(user)
     end
   end
 

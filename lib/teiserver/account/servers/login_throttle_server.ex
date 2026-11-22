@@ -6,7 +6,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   """
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Helpers.BurstyRateLimiter
@@ -228,7 +228,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   # there aren't many of these users, so allowing them doesn't have a big impact
   @spec categorise_user(User.id()) :: atom
   defp categorise_user(userid) do
-    if AuthLib.has_any_role?(userid, ["Bot", "Contributor", "VIP", "BAR+"]) do
+    if Auth.has_any_role?(userid, ["Bot", "Contributor", "VIP", "BAR+"]) do
       :instant
     else
       :standard

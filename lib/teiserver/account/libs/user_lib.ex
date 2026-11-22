@@ -3,7 +3,7 @@ defmodule Teiserver.Account.UserLib do
 
   alias Ecto.Changeset
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Login
   alias Teiserver.Account.Registration
   alias Teiserver.Account.RoleLib
@@ -475,7 +475,7 @@ defmodule Teiserver.Account.UserLib do
 
     cond do
       # VIPs ignore time based rename restrictions
-      AuthLib.vip?(user_id) -> false
+      Auth.vip?(user_id) -> false
       # Can't rename more than 2 times in 5 days
       since_rename_two < 60 * 60 * 24 * 5 -> true
       # Can't rename more than 3 times in 30 days
@@ -630,7 +630,7 @@ defmodule Teiserver.Account.UserLib do
         {:error, "Invalid credentials"}
 
       user ->
-        if AuthLib.can_login?(user) do
+        if Auth.can_login?(user) do
           authenticate_user(conn, user, plain_text_password)
         else
           :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
@@ -784,7 +784,7 @@ defmodule Teiserver.Account.UserLib do
       Repo.transact(fn ->
         with {:ok, _updated_user} <-
                update_user_smurf(smurf, %{smurf_of_id: actual_origin_id}),
-             {:ok, %User{}} <- AuthLib.add_roles(origin.id, ["Smurfer"]) do
+             {:ok, %User{}} <- Auth.add_roles(origin.id, ["Smurfer"]) do
           add_audit_log(
             moderator_id,
             nil,

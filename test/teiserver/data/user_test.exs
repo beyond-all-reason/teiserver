@@ -1,6 +1,6 @@
 defmodule Teiserver.Data.UserTest do
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Registration
   alias Teiserver.Account.UserLib
   alias Teiserver.TeiserverTestLib
@@ -13,7 +13,7 @@ defmodule Teiserver.Data.UserTest do
 
     # This is our base user that will create other users
     base_user = TeiserverTestLib.new_user("twobot_test_base")
-    {:ok, base_user} = AuthLib.add_roles(base_user.id, ["Server", "Moderator"])
+    {:ok, base_user} = Auth.add_roles(base_user.id, ["Server", "Moderator"])
 
     user1 = Registration.register_bot("twobot_test_base[01]", base_user.id)
     user2 = Registration.register_bot("twobot_test_base[02]", base_user.id)

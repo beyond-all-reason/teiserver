@@ -1,7 +1,7 @@
 defmodule Teiserver.Admin.AdminLib do
   @moduledoc false
 
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   use TeiserverWeb, :library
 
   @spec colours :: atom
@@ -11,5 +11,5 @@ defmodule Teiserver.Admin.AdminLib do
   def icon, do: "fa-user-circle"
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_action, conn, _params), do: AuthLib.allow?(conn, "Admin")
+  def authorize(_action, conn, _params), do: Auth.allow?(conn, "Admin")
 end

@@ -3,7 +3,7 @@ defmodule Teiserver.Account.Login do
 
   alias Argon2
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
@@ -106,10 +106,10 @@ defmodule Teiserver.Account.Login do
 
             {:error, @smurf_string}
 
-          not AuthLib.is_bot?(user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0 0", nil], lobby_hash) == true and not AuthLib.is_bot?(user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           Account.restricted?(user, ["Permanently banned"]) ->
@@ -126,7 +126,7 @@ defmodule Teiserver.Account.Login do
 
             {:error, @suspended_string}
 
-          not AuthLib.verified?(user) ->
+          not Auth.verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -153,7 +153,7 @@ defmodule Teiserver.Account.Login do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              AuthLib.is_bot?(user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -163,7 +163,7 @@ defmodule Teiserver.Account.Login do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not AuthLib.has_any_role?(user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
@@ -195,14 +195,14 @@ defmodule Teiserver.Account.Login do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          not AuthLib.is_bot?(user) and login_flood_check(user.id) == :block ->
+          not Auth.is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0 0", nil], lobby_hash) == true and not AuthLib.is_bot?(user) ->
+          Enum.member?(["", "0 0", nil], lobby_hash) == true and not Auth.is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Rate limited?
-          AuthLib.can_login?(user) == false ->
+          Auth.can_login?(user) == false ->
             :telemetry.execute([:tachyon, :login, :error], %{count: 1}, %{
               reason: :rate_limited,
               user_id: user.id
@@ -232,7 +232,7 @@ defmodule Teiserver.Account.Login do
 
             {:error, @suspended_string}
 
-          not AuthLib.verified?(user) ->
+          not Auth.verified?(user) ->
             # Log them in to save some details we'd not otherwise get
             do_login(user, ip, lobby, lobby_hash)
 
@@ -259,7 +259,7 @@ defmodule Teiserver.Account.Login do
 
             # Okay, we're good, what's capacity looking like?
             cond do
-              AuthLib.is_bot?(user) ->
+              Auth.is_bot?(user) ->
                 do_login(user, ip, lobby, lobby_hash)
 
               Config.get_site_config_cache("system.Use login throttle") ->
@@ -269,7 +269,7 @@ defmodule Teiserver.Account.Login do
                   {:error, "Queued", user.id, lobby, lobby_hash}
                 end
 
-              not AuthLib.has_any_role?(user, ["VIP", "Contributor"]) and
+              not Auth.has_any_role?(user, ["VIP", "Contributor"]) and
                   server_capacity() <= 0 ->
                 {:error, "The server is currently full, please try again in a minute or two."}
 
@@ -317,7 +317,7 @@ defmodule Teiserver.Account.Login do
 
         {:error, @suspended_string}
 
-      not AuthLib.verified?(user) ->
+      not Auth.verified?(user) ->
         # Log them in to save some details we'd not otherwise get
         do_login(user, ip, lobby_client, lobby_hash)
 
@@ -352,7 +352,7 @@ defmodule Teiserver.Account.Login do
   def do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
     ip = Map.get(stats, "ip_override", ip)
-    bot? = AuthLib.is_bot?(user.id)
+    bot? = Auth.is_bot?(user.id)
 
     # If they don't want a flag shown, don't show it, otherwise
     # check for an override before trying geoip
@@ -418,7 +418,7 @@ defmodule Teiserver.Account.Login do
         Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
           "??"
 
-        AuthLib.allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
+        Auth.allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
           stats["bar_plus.flag"]
 
         stats["country_override"] != nil ->
@@ -493,10 +493,10 @@ defmodule Teiserver.Account.Login do
     # Thresholds should match what is on the website:
     # https://www.beyondallreason.info/guide/rating-and-lobby-balance#rank-icons
     cond do
-      AuthLib.has_any_role?(userid, ["Tournament winner"]) ->
+      Auth.has_any_role?(userid, ["Tournament winner"]) ->
         7
 
-      AuthLib.contributor?(userid) and
+      Auth.contributor?(userid) and
           !Account.hide_contributor_rank?(userid) ->
         6
 

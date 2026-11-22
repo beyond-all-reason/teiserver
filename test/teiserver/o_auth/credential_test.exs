@@ -1,5 +1,5 @@
 defmodule Teiserver.OAuth.CredentialTest do
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Bot
   alias Teiserver.OAuth
   alias Teiserver.OAuthFixtures
@@ -12,7 +12,7 @@ defmodule Teiserver.OAuth.CredentialTest do
   end
 
   defp setup_app(_context) do
-    {:ok, user} = AuthLib.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
+    {:ok, user} = Auth.add_roles(TeiserverTestLib.new_user().id, ["Admin"])
 
     {:ok, app} =
       OAuth.create_application(%{

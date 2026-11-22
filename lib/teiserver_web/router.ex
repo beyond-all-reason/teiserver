@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Router do
       fallback: TeiserverWeb.Controllers.BodyguardFallback,
       policy: Teiserver.Logging.LiveLib,
       action: :live,
-      user: {Teiserver.Account.AuthLib, :current_user}
+      user: {Teiserver.Account.Auth, :current_user}
   end
 
   pipeline :browser do

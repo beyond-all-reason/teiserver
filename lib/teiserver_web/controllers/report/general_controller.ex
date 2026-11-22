@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Report.GeneralController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
 

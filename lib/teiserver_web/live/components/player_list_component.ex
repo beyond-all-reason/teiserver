@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Components.PlayerListComponent do
   @moduledoc false
   use TeiserverWeb, :live_component
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2]
 
   @impl Phoenix.LiveComponent
   def update_many(list_of_assigns) do

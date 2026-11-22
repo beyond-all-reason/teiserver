@@ -15,8 +15,8 @@
         </h3>
 
         <ul>
-          <li>Bot: {Teiserver.Account.AuthLib.is_bot?(@user)}</li>
-          <li>Moderator: {Teiserver.Account.AuthLib.moderator?(@user)}</li>
+          <li>Bot: {Teiserver.Account.Auth.is_bot?(@user)}</li>
+          <li>Moderator: {Teiserver.Account.Auth.moderator?(@user)}</li>
           <li>
             Battle:
             <%= if @client != nil and @client.lobby_id != nil do %>

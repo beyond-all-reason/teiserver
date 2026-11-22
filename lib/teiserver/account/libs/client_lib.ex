@@ -2,7 +2,7 @@ defmodule Teiserver.Account.ClientLib do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Battle
   alias Teiserver.Data.Types, as: T
@@ -295,8 +295,8 @@ defmodule Teiserver.Account.ClientLib do
       | userid: user.id,
         name: user.name,
         rank: stats["rank"] || 0,
-        moderator: AuthLib.moderator?(user),
-        bot: AuthLib.is_bot?(user),
+        moderator: Auth.moderator?(user),
+        bot: Auth.is_bot?(user),
         ip: stats["last_ip"],
         country: stats["country"],
         lobby_client: stats["lobby_client"]

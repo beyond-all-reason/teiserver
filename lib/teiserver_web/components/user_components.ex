@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.UserComponents do
   @moduledoc false
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.RecentlyUsedCache
   alias Teiserver.Moderation.ActionLib
 
@@ -45,7 +45,7 @@ defmodule TeiserverWeb.UserComponents do
         if(Enum.member?(restrictions, "Warning reminder"),
           do: {"warning", ActionLib.action_icon("Warn")}
         ),
-        if(AuthLib.trusted?(user), do: {"", "fa-solid fa-check"}),
+        if(Auth.trusted?(user), do: {"", "fa-solid fa-check"}),
         if(not Enum.member?(user.roles, "Verified"),
           do: {"info", "fa-solid fa-user-secret"}
         )

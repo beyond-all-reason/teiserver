@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.UserController do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.TOTPLib
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Admin.UserController do
     policy: Teiserver.Account.UserPolicy,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
   )
 
   plug TeiserverWeb.Plugs.PaginationParams

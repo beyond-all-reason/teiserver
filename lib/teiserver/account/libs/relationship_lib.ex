@@ -3,7 +3,7 @@ defmodule Teiserver.Account.RelationshipLib do
   alias Ecto.Adapters.SQL
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   alias Teiserver.Config
   alias Teiserver.Repo
@@ -342,8 +342,8 @@ defmodule Teiserver.Account.RelationshipLib do
   def profile_view_permissions(viewer, profile_user, relationship, friend, friendship_request) do
     [
       if(profile_user.id == viewer.id, do: :self),
-      if(AuthLib.allow?(viewer, "Moderator"), do: :moderator),
-      if(AuthLib.allow?(viewer, "BAR+"), do: :bar_plus),
+      if(Auth.allow?(viewer, "Moderator"), do: :moderator),
+      if(Auth.allow?(viewer, "BAR+"), do: :bar_plus),
       if(friend, do: :friend),
       if(friendship_request && friendship_request.from_user_id == viewer.id, do: :request_sent),
       if(friendship_request && friendship_request.from_user_id == profile_user,

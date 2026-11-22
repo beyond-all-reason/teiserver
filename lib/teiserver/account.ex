@@ -4,7 +4,7 @@ defmodule Teiserver.Account do
   alias Phoenix.PubSub
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.BadgeType
   alias Teiserver.Account.BadgeTypeLib
   alias Teiserver.Account.ClientLib
@@ -2337,7 +2337,7 @@ defmodule Teiserver.Account do
   def verify_user(%User{} = user) do
     delete_user_stat_keys(user.id, ~w(verification_code))
 
-    AuthLib.add_roles(user, ["Verified"])
+    Auth.add_roles(user, ["Verified"])
   end
 
   def verify_user(userid) when is_integer(userid) do

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Chat
   alias Teiserver.Chat.SpringLobbyMessage
@@ -54,12 +54,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       lobby == nil ->
         index_redirect(socket)
 
-      (lobby.locked or lobby.passworded) and not AuthLib.moderator?(current_user) ->
+      (lobby.locked or lobby.passworded) and not Auth.moderator?(current_user) ->
         index_redirect(socket)
 
       true ->
         allowed_to_send =
-          AuthLib.moderator?(current_user.id) and
+          Auth.moderator?(current_user.id) and
             not Account.has_mute?(current_user)
 
         :timer.send_interval(10_000, :tick)
@@ -274,7 +274,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
          assigns: %{current_user: current_user}
        }) do
     cond do
-      AuthLib.moderator?(current_user) -> true
+      Auth.moderator?(current_user) -> true
       String.starts_with?(msg, "s:") -> false
       String.starts_with?(msg, "a:") -> false
       true -> true
@@ -283,7 +283,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   defp allow_send_message?(msg, current_user) do
     cond do
-      AuthLib.moderator?(current_user) -> true
+      Auth.moderator?(current_user) -> true
       String.starts_with?(msg, "g:") -> false
       String.starts_with?(msg, "s:") -> false
       String.starts_with?(msg, "a:") -> false

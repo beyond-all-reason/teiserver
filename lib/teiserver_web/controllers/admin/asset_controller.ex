@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.AssetController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug :add_breadcrumb, name: "Admin", url: "/admin"
   plug :add_breadcrumb, name: "Assets", url: "/teiserver/admin/asset"

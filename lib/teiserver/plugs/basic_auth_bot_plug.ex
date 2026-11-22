@@ -2,7 +2,7 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.User
   import Plug.Conn
 
@@ -13,7 +13,7 @@ defmodule Teiserver.Plugs.BasicAuthBotPlug do
          {:ok, decoded} <- Base.decode64(encoded),
          [username, password] <- String.split(decoded, ":", parts: 2),
          %User{} = user <- Account.get_user_by_name(username),
-         true <- AuthLib.is_bot?(user),
+         true <- Auth.is_bot?(user),
          true <- Account.verify_plain_password(password, user.password) do
       conn
     else

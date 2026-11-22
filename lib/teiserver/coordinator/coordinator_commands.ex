@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias ExULID.ULID
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Chat
   alias Teiserver.Client
@@ -43,11 +43,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         true
 
       # Allow all commands for Admins
-      AuthLib.admin?(senderid) ->
+      Auth.admin?(senderid) ->
         true
 
       # Allow all except Admin only commands for moderators
-      AuthLib.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
+      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
         true
 
       not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
@@ -257,7 +257,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         ]
 
         mod_parts =
-          if AuthLib.moderator?(sender) do
+          if Auth.moderator?(sender) do
             # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
             # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
             # rank_time = Login.rank_time(user.id)
@@ -357,7 +357,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         )
 
       user ->
-        if AuthLib.admin?(user) or AuthLib.moderator?(user) do
+        if Auth.admin?(user) or Auth.moderator?(user) do
           Coordinator.send_to_user(senderid, "You cannot mute this user.")
         else
           case Account.ignore_user(senderid, user.id) do
@@ -477,14 +477,14 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     {allowed?, reason} =
       cond do
-        not AuthLib.mfa_required?() ->
+        not Auth.mfa_required?() ->
           {true, nil}
 
-        AuthLib.has_active_mfa?(senderid) ->
+        Auth.has_active_mfa?(senderid) ->
           {false,
            "You have MFA activated and cannot use one time links, please manually login to the site at https://#{host}"}
 
-        AuthLib.contains_mfa_role?(sender.roles) ->
+        Auth.contains_mfa_role?(sender.roles) ->
           {false,
            "Your role contains one or more privileged roles, you will need to manually login to the site at https://#{host}"}
 
@@ -516,7 +516,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "modme", senderid: sender_id} = _cmd, state) do
-    if AuthLib.moderator?(sender_id) do
+    if Auth.moderator?(sender_id) do
       Client.set_moderator_bit(sender_id, true)
     end
 

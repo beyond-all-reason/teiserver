@@ -3,7 +3,7 @@ defmodule Teiserver.Chat do
 
   alias Phoenix.PubSub
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Battle
   alias Teiserver.Chat.BattleMessage
   alias Teiserver.Chat.DirectMessage
@@ -513,8 +513,8 @@ defmodule Teiserver.Chat do
   def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
     msg_str = Enum.join(message_parts, "\n")
 
-    sender_bot? = AuthLib.is_bot?(sender_id)
-    recipient_bot? = AuthLib.is_bot?(to_id)
+    sender_bot? = Auth.is_bot?(sender_id)
+    recipient_bot? = Auth.is_bot?(to_id)
 
     allowed =
       cond do

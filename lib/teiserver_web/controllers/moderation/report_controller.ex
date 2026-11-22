@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Account.UserLib
   alias Teiserver.Moderation
@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Report,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",
