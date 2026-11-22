@@ -3,10 +3,21 @@ defmodule Teiserver.Helpers.BurstyRateLimiterTest do
 
   use ExUnit.Case, async: true
 
-  test "must provide positive max_permits" do
-    assert_raise ArgumentError, fn ->
-      BRL.new(0, 1)
+  test "capacity must be a non-negative integer" do
+    for capacity <- [-1, 0.0, 0.5, 1.5, "2"] do
+      assert_raise ArgumentError, fn -> BRL.new(capacity, 1) end
     end
+  end
+
+  test "zero capacity cannot grant a permit, even after a refill" do
+    for rl <- [BRL.new(0, 1, 0, 0), BRL.per_second(0, 0), BRL.per_minute(0, 0)] do
+      assert BRL.try_acquire(rl, 1, 60_000) == {:error, :request_too_big}
+    end
+  end
+
+  test "a zero rate stays paused when burst capacity is increased" do
+    rl = BRL.per_second(0, 0) |> BRL.with_burst(2)
+    assert BRL.try_acquire(rl, 1, 60_000) == {:error, :request_too_big}
   end
 
   test "per_second burst rate" do

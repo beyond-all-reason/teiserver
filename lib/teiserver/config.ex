@@ -318,6 +318,7 @@ defmodule Teiserver.Config do
     Repo.one(query)
   end
 
+  # TODO: Allow each site config to declare its own validation.
   @spec update_site_config(String.t(), term()) :: :ok | {:error, Changeset.t()}
   def update_site_config("system.Login rate" = key, value) do
     case value |> to_string() |> String.trim() |> Integer.parse() do
@@ -475,6 +476,7 @@ defmodule Teiserver.Config do
     end
   end
 
+  # An empty stored login rate is invalid. The general integer caster would turn it into a pause.
   @spec cast_site_config_value(String.t(), any) :: any
   def cast_site_config_value("system.Login rate", value) do
     value |> to_string() |> String.trim() |> String.to_integer()

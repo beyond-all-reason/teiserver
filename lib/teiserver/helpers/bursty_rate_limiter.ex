@@ -23,7 +23,7 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
   @type t :: %__MODULE__{
           max_permits: non_neg_integer(),
           stored_permits: number(),
-          replenish_interval_ms: ms(),
+          replenish_interval_ms: number() | :infinity,
           last_granted_ts: ms()
         }
 
@@ -38,9 +38,10 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
         stored_permits \\ nil,
         now \\ :erlang.monotonic_time(:millisecond)
       ) do
-    if max_permits < 1,
-      do:
-        raise(%ArgumentError{message: "max_permit must be at least 1 per ms, got #{max_permits}"})
+    unless is_integer(max_permits) and max_permits >= 0 do
+      raise ArgumentError,
+            "max_permits must be a non-negative integer, got #{inspect(max_permits)}"
+    end
 
     stored_permits = if is_nil(stored_permits), do: max_permits, else: stored_permits
 
@@ -55,11 +56,11 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
   @doc """
   create a rate limiter that replenish `max_burst` permit per seconds.
   It holds `max_burst` permit in total.
-  So `per_second(2)` would allow 2 requests per seconds
+  So `per_second(2)` would allow 2 requests per seconds. A zero rate denies all requests.
   """
   @spec per_second(non_neg_integer(), ms()) :: t()
   def per_second(max_burst, now \\ :erlang.monotonic_time(:millisecond)) do
-    new(max_burst, 1_000 / max_burst, max_burst, now)
+    per_period(max_burst, 1_000, now)
   end
 
   @doc """
@@ -71,8 +72,13 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
   """
   @spec per_minute(non_neg_integer(), ms()) :: t()
   def per_minute(max_burst, now \\ :erlang.monotonic_time(:millisecond)) do
-    new(max_burst, 60_000 / max_burst, max_burst, now)
+    per_period(max_burst, 60_000, now)
   end
+
+  defp per_period(0, _period_ms, now), do: new(0, :infinity, 0, now)
+
+  defp per_period(max_burst, period_ms, now),
+    do: new(max_burst, period_ms / max_burst, max_burst, now)
 
   def set_full(%__MODULE__{} = rl), do: %{rl | stored_permits: rl.max_permits}
   def set_empty(%__MODULE__{} = rl), do: %{rl | stored_permits: 0}
@@ -90,7 +96,7 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
   """
   @spec try_acquire(t(), non_neg_integer(), ms()) :: acquire_result()
   def try_acquire(%__MODULE__{} = rl, n \\ 1, now \\ :erlang.monotonic_time(:millisecond)) do
-    if n > rl.max_permits do
+    if n > rl.max_permits or rl.replenish_interval_ms == :infinity do
       {:error, :request_too_big}
     else
       available_permits =

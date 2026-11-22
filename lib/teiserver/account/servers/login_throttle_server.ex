@@ -34,7 +34,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
     Logger.metadata(actor_id: "LoginThrottleServer")
     {:ok, timer_ref} = :timer.send_interval(@default_tick_period, :tick)
     default_rate = Config.get_site_config_cache("system.Login rate")
-    rate_limiter = default_rate |> login_rate_limiter() |> BurstyRateLimiter.set_empty()
+    rate_limiter = BurstyRateLimiter.per_second(default_rate) |> BurstyRateLimiter.set_empty()
 
     state = %{
       tick_timer_ref: timer_ref,
@@ -75,9 +75,9 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.call(__MODULE__, {:reset_rate_limiter, rl})
   end
 
-  @spec reset_rate_limiter(non_neg_integer(), boolean()) :: :ok
+  @spec reset_rate_limiter(rate :: non_neg_integer(), should_fill? :: boolean()) :: :ok
   def reset_rate_limiter(rate, should_fill? \\ false) when is_integer(rate) and rate >= 0 do
-    rl = login_rate_limiter(rate)
+    rl = BurstyRateLimiter.per_second(rate)
 
     rl =
       if should_fill?, do: BurstyRateLimiter.set_full(rl), else: BurstyRateLimiter.set_empty(rl)
@@ -189,13 +189,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
     |> Map.update!(:queue, &:queue.in(member, &1))
     |> Map.update!(:monitors, &MapSet.put(&1, pid))
   end
-
-  # A zero-capacity bucket cannot issue a permit, even after a refill.
-  defp login_rate_limiter(0),
-    do: BurstyRateLimiter.per_second(1) |> BurstyRateLimiter.with_burst(0)
-
-  defp login_rate_limiter(rate) when is_integer(rate) and rate > 0,
-    do: BurstyRateLimiter.per_second(rate)
 
   defp dequeue_users(n, state) when n <= 0, do: state
 
