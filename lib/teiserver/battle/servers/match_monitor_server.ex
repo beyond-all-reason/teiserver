@@ -364,6 +364,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
+  defp parse_game_time(raw_time) do
+    case raw_time |> String.trim() |> Integer.parse() do
+      {time, ""} -> {:ok, time}
+      _other -> :error
+    end
+  end
+
   defp base64_and_json(raw_string) do
     case Base.url_decode64(raw_string) do
       {:ok, json_str} ->
@@ -414,19 +421,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     with [_all, username, event_type_name, game_time] <- regex_result,
          userid <- Account.get_userid_from_name(username) do
       if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          case game_time |> String.trim() |> Integer.parse() do
-            {time, ""} ->
-              handle_match_simple_event(username, userid, match_id, event_type_name, time)
-              check_for_griefing(username, event_type_name, time, match_id)
-
-            _other ->
-              Logger.warning("match-event: Invalid game time '#{game_time}'")
-          end
+        with match_id when not is_nil(match_id) <- Battle.get_match_id_from_userid(userid),
+             {:ok, time} <- parse_game_time(game_time) do
+          handle_match_simple_event(username, userid, match_id, event_type_name, time)
+          check_for_griefing(username, event_type_name, time, match_id)
         else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          nil -> Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          :error -> Logger.warning("match-event: Invalid game time '#{game_time}'")
         end
       else
         Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
@@ -447,25 +448,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
          {:ok, json_data} <- base64_and_json(base64data),
          userid <- Account.get_userid_from_name(username) do
       if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          case game_time |> String.trim() |> Integer.parse() do
-            {time, ""} ->
-              handle_match_complex_event(
-                username,
-                userid,
-                match_id,
-                event_type_name,
-                time,
-                json_data
-              )
-
-            _other ->
-              Logger.warning("complex-match-event: Invalid game time '#{game_time}'")
-          end
+        with match_id when not is_nil(match_id) <- Battle.get_match_id_from_userid(userid),
+             {:ok, time} <- parse_game_time(game_time) do
+          handle_match_complex_event(
+            username,
+            userid,
+            match_id,
+            event_type_name,
+            time,
+            json_data
+          )
         else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          nil -> Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          :error -> Logger.warning("complex-match-event: Invalid game time '#{game_time}'")
         end
       else
         Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
