@@ -165,9 +165,10 @@ defmodule Teiserver.Application do
     opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    # If the server seems to not start up we can check the info log to see
-    # if this is present, we don't want it appearing in our tests though
-    # TODO: Replace this with something having less of a code-smell
+    # Deliberately logged at error level, even on success, so the startup marker
+    # shows up in the error log and makes it easy to tell pre and post
+    # deploy/restart entries apart. It is skipped in test mode so it doesn't
+    # clutter the test output and distract from the relevant test errors.
     if not Application.get_env(:teiserver, Teiserver)[:test_mode] do
       Logger.error("Teiserver.Supervisor start result: #{Kernel.inspect(start_result)}")
     end
