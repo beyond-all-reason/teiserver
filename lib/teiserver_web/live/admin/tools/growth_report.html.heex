@@ -6,89 +6,72 @@
 <.header>
   Growth report
 </.header>
-<div class="mx-auto max-w-[1080px] flex flex-col">
-  <.simple_form
-    :if={@connected?}
-    for={@render_form}
-    id="render_form"
-    phx-change="update_render"
-  >
-    <div class="flex-col flex my-2">
-      <div class="md:flex-row flex-col flex">
-        <div class="flex-1 m-2">
-          <.input_tw
-            field={@render_form[:columns]}
-            type="select"
-            label="Columns:"
-            options={@cols_options}
-          />
-        </div>
 
-        <div class="flex-1 m-2">
-          <.input_tw
-            field={@render_form[:chart_type]}
-            type="select"
-            options={@chart_types}
-            label="Chart type:"
-          />
-        </div>
-      </div>
-    </div>
-  </.simple_form>
+<.simple_form
+  :if={@connected?}
+  for={@render_form}
+  id="render_form"
+  phx-change="update_render"
+>
+  <div class="m-2">
+    <.input_tw
+      field={@render_form[:chart_type]}
+      type="select"
+      options={@chart_types}
+      label="Chart type:"
+    />
+  </div>
+</.simple_form>
 
-  <.simple_form
-    :if={@connected?}
-    for={@data_form}
-    id="data_form"
-    phx-change="update_data"
-  >
-    <div class="flex-col flex my-2">
-      <div class="md:flex-row flex-col flex">
-        <div class="flex-1 m-2">
-          <.input_tw
-            field={@data_form[:time_unit]}
-            type="select"
-            label="Time unit:"
-            options={@time_units}
-          />
-        </div>
-        <div class="flex-1 m-2">
-          <.input_tw
-            field={@data_form[:log_count]}
-            type="text"
-            inputmode="numeric"
-            label="Log count:"
-          />
-        </div>
-      </div>
-      <div class="flex-1 m-2 self-center">
-        <%= if @data_form.source.valid? do %>
-          <.button type="button" phx-click="fetch">
-            UPDATE
-          </.button>
-        <% else %>
-          <.button type="button" disabled={true}>
-            UPDATE
-          </.button>
-        <% end %>
-      </div>
+<.simple_form
+  :if={@connected?}
+  for={@data_form}
+  id="data_form"
+  phx-change="update_data"
+  phx-submit="fetch"
+>
+  <div class="flex md:flex-row flex-col">
+    <div class="flex-1 m-2">
+      <.input_tw
+        field={@data_form[:time_unit]}
+        type="select"
+        label="Time unit:"
+        options={@time_units}
+      />
     </div>
-  </.simple_form>
-</div>
-<div class={"grid mt-20 max-w-[80%] #{calc_cols(@render_form)} gap-4 mx-auto"}>
-  <%= if @connected? do %>
-    <%= Enum.map(@chart_series, fn %{title: title, series: series} -> %>
-      <%= case LiveChartsHelper.generate_multi_series_maps_chart(series, @date_keys, LiveChartsHelper.get_atom(@render_form[:chart_type].value), title) do %>
-        <% {:ok, chart} -> %>
+    <div class="flex-1 m-2">
+      <.input_tw
+        field={@data_form[:log_count]}
+        type="text"
+        inputmode="numeric"
+        label="Log count:"
+      />
+    </div>
+  </div>
+  <div class="float-right">
+    <.button type="button" phx-click="reset-search" class="btn-reset-form">
+      <Fontawesome.icon icon="rotate-left" /> Reset
+    </.button>
+    <button disabled={!@data_form.source.valid?} class="btn btn-primary">
+      <Fontawesome.icon icon="search" /> Update results
+    </button>
+  </div>
+</.simple_form>
+
+<div class="grid mt-20 max-w-full 3xl:grid-cols-3 xl:grid-cols-2 grid-cols-1 gap-4 mx-auto">
+  <%= if @connected? and @charts do %>
+    <%= Enum.map(@charts, fn {atom, chart} -> %>
+      <%= case atom do %>
+        <% :ok -> %>
           <div
-            id={"apexcharts-container #{title}"}
-            class="apexchart-container"
-            phx-hook="ApexChartsGridResize"
+            id={"apexcharts-container #{chart.id}"}
+            class="apexchart-container min-w-0"
           >
             <LiveCharts.chart chart={chart} />
           </div>
-        <% {:error, reason} -> %>
-          <div>{reason}</div>
+        <% :error -> %>
+         
+          <div>{chart}</div>
       <% end %>
     <% end) %>
   <% end %>

@@ -15,35 +15,36 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
     "Quarter",
     "Year"
   ]
-  @cols_options [1, 2, 4, 6]
+
   @chart_types LiveChartsHelper.get_multi_series_maps_chart_types()
   @data_form_types %{time_unit: :string, log_count: :integer}
-  @render_form_types %{columns: :integer, chart_type: :string}
+  @render_form_types %{chart_type: :string}
   @impl LiveView
   def mount(_params, _session, socket) do
     {:ok,
      socket
      |> assign(
-       chart_series: [],
-       chart_types: @chart_types,
-       cols_options: @cols_options
+       charts: nil,
+       page_title: "Growth report"
      )}
   end
 
   @impl LiveView
   def handle_params(_params, _uri, socket) when is_connected?(socket) do
-    data_form =
-      {%{}, @data_form_types}
-      |> validate_data(prep_data_params())
-      |> to_form(as: :data_form)
-
-    render_form =
-      {%{}, @render_form_types}
-      |> validate_render(prep_render_params())
-      |> to_form(as: :render_form)
+    {data_form, render_form} = prep_initial()
 
     {date_keys, chart_series} =
       GrowthReport.build_series(data_form[:time_unit].value, data_form[:log_count].value)
+
+    charts =
+      Enum.map(chart_series, fn %{title: title, series: series} ->
+        LiveChartsHelper.generate_multi_series_maps_chart(
+          series,
+          date_keys,
+          LiveChartsHelper.to_chart_type(render_form[:chart_type].value),
+          title
+        )
+      end)
 
     {:noreply,
      socket
@@ -53,8 +54,7 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
        render_form: render_form,
        time_units: @time_units,
        chart_types: @chart_types,
-       chart_series: chart_series,
-       date_keys: date_keys
+       charts: charts
      )}
   end
 
@@ -90,7 +90,7 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
   end
 
   def handle_event("fetch", _params, socket) do
-    data_form = socket.assigns.data_form
+    %{data_form: data_form, render_form: render_form} = socket.assigns
 
     if data_form.source.valid? do
       time_unit = get_field(data_form.source, :time_unit)
@@ -99,11 +99,25 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
       {date_keys, chart_series} =
         GrowthReport.build_series(time_unit, log_count)
 
-      IO.inspect(chart_series)
-      {:noreply, socket |> assign(chart_series: chart_series, date_keys: date_keys)}
+      charts =
+        Enum.map(chart_series, fn %{title: title, series: series} ->
+          LiveChartsHelper.generate_multi_series_maps_chart(
+            series,
+            date_keys,
+            LiveChartsHelper.to_chart_type(render_form[:chart_type].value),
+            title
+          )
+        end)
+
+      {:noreply, socket |> assign(charts: charts)}
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("reset-search", _unsigned_params, socket) do
+    {data_form, render_form} = prep_initial()
+    {:noreply, socket |> assign(data_form: data_form, render_form: render_form)}
   end
 
   defp prep_data_params do
@@ -114,7 +128,21 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
   end
 
   defp prep_render_params do
-    %{"columns" => 1, "chart_type" => "line"}
+    %{"chart_type" => "line"}
+  end
+
+  defp prep_initial() do
+    data_form =
+      {%{}, @data_form_types}
+      |> validate_data(prep_data_params())
+      |> to_form(as: :data_form)
+
+    render_form =
+      {%{}, @render_form_types}
+      |> validate_render(prep_render_params())
+      |> to_form(as: :render_form)
+
+    {data_form, render_form}
   end
 
   defp validate_data(form, attrs) do
@@ -128,30 +156,9 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
 
   defp validate_render(form, attrs) do
     form
-    |> cast(attrs, [:columns, :chart_type])
-    |> validate_required([:columns, :chart_type])
-    |> validate_number(:columns, greater_than: 0)
-    |> validate_inclusion(:columns, @cols_options)
+    |> cast(attrs, [:chart_type])
+    |> validate_required([:chart_type])
+    |> validate_inclusion(:chart_type, Enum.map(@chart_types, &Atom.to_string/1))
     |> Map.put(:action, :validate)
-  end
-
-  defp calc_cols(form) do
-    if is_nil(form[:columns]) do
-      "grid-cols-1"
-    else
-      case form[:columns].value do
-        2 ->
-          "grid-cols-2"
-
-        4 ->
-          "grid-cols-4"
-
-        6 ->
-          "grid-cols-6"
-
-        _columns ->
-          "grid-cols-1"
-      end
-    end
   end
 end
