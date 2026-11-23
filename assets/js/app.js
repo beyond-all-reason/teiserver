@@ -9,7 +9,6 @@ import LiveCharts from "live_charts"
 import CommandPalette from "./hooks/command_palette"
 import ServerClock
  from "./hooks/server_clock"
- import ApexChartsGridResize from "./hooks/apexcharts_grid_resize"
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
@@ -18,7 +17,6 @@ const liveSocket = new LiveSocket("/live", Socket, {
   // e.g. SomeCustomHook,
   CommandPalette,
   ServerClock,
-  ApexChartsGridResize,
 
   // Expand LiveCharts hooks at the end
   ...LiveCharts.Hooks,
