@@ -26,8 +26,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   require Logger
 
-  import Teiserver.Helper.NumberHelper, only: [int_parse: 1]
-
   @spec do_start() :: :ok
   def do_start do
     # Start the supervisor server
@@ -366,6 +364,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
+  defp parse_game_time(raw_time) do
+    case raw_time |> String.trim() |> Integer.parse() do
+      {time, ""} -> {:ok, time}
+      _other -> :error
+    end
+  end
+
   defp base64_and_json(raw_string) do
     case Base.url_decode64(raw_string) do
       {:ok, json_str} ->
@@ -416,14 +421,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     with [_all, username, event_type_name, game_time] <- regex_result,
          userid <- Account.get_userid_from_name(username) do
       if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          game_time = int_parse(game_time)
-          handle_match_simple_event(username, userid, match_id, event_type_name, game_time)
-          check_for_griefing(username, event_type_name, game_time, match_id)
+        with match_id when not is_nil(match_id) <- Battle.get_match_id_from_userid(userid),
+             {:ok, time} <- parse_game_time(game_time) do
+          handle_match_simple_event(username, userid, match_id, event_type_name, time)
+          check_for_griefing(username, event_type_name, time, match_id)
         else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          nil -> Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          :error -> Logger.warning("match-event: Invalid game time '#{game_time}'")
         end
       else
         Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
@@ -444,21 +448,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
          {:ok, json_data} <- base64_and_json(base64data),
          userid <- Account.get_userid_from_name(username) do
       if userid && Auth.is_bot?(from_id) do
-        match_id = Battle.get_match_id_from_userid(userid)
-
-        if match_id do
-          game_time = int_parse(game_time)
-
+        with match_id when not is_nil(match_id) <- Battle.get_match_id_from_userid(userid),
+             {:ok, time} <- parse_game_time(game_time) do
           handle_match_complex_event(
             username,
             userid,
             match_id,
             event_type_name,
-            game_time,
+            time,
             json_data
           )
         else
-          Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          nil -> Logger.warning("match-event: Cannot get match_id of userid of #{username}")
+          :error -> Logger.warning("complex-match-event: Invalid game time '#{game_time}'")
         end
       else
         Logger.warning("match-event: Cannot get userid of #{username} or is not a bot")
@@ -536,12 +538,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         host = Client.get_client_by_id(from_id)
         user = Account.get_user_by_name(username)
 
-        if host == nil do
-          Logger.error("No host found for from_id: #{from_id} for message #{to}:#{msg}")
-
-          # Optionally, handle the case here, such as by
-          # sending a message back to the user or taking
-          # other corrective actions. Just returning {:noreply, state} for now.
+        if host == nil or user == nil do
+          Logger.warning("No host or user found for from_id: #{from_id} for message #{to}:#{msg}")
           {:noreply, state}
         else
           case to do
