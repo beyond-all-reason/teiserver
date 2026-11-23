@@ -245,19 +245,6 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
         options: %{
           title: %{text: title, align: "center"},
           labels: labels,
-          chart: %{
-            height: 500
-          },
-          plotOptions: %{
-            radialBar: %{
-              dataLabels: %{
-                total: %{
-                  show: true,
-                  label: "Total"
-                }
-              }
-            }
-          },
           legend: show_legend()
         },
         adapter: LiveCharts.Adapter.ApexCharts
@@ -275,9 +262,6 @@ defmodule Teiserver.Helpers.LiveChartsHelper do
         options: %{
           title: %{text: title, align: "center", style: %{}},
           labels: labels,
-          chart: %{
-            width: 500
-          },
           legend: show_legend()
         },
         adapter: LiveCharts.Adapter.ApexCharts
