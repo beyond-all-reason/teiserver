@@ -137,20 +137,8 @@ defmodule Teiserver.Account.GrowthReport do
   defp get_server_logs(time_unit, limit) do
     logs =
       case time_unit do
-        "Year" ->
-          Logging.list_server_year_logs(
-            order: "Newest first",
-            limit: limit
-          )
-
-        "Quarter" ->
-          Logging.list_server_quarter_logs(
-            order: "Newest first",
-            limit: limit
-          )
-
-        "Month" ->
-          Logging.list_server_month_logs(
+        "Day" ->
+          Logging.list_server_day_logs(
             order: "Newest first",
             limit: limit
           )
@@ -161,8 +149,20 @@ defmodule Teiserver.Account.GrowthReport do
             limit: limit
           )
 
-        _time_unit ->
-          Logging.list_server_day_logs(
+        "Month" ->
+          Logging.list_server_month_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Quarter" ->
+          Logging.list_server_quarter_logs(
+            order: "Newest first",
+            limit: limit
+          )
+
+        "Year" ->
+          Logging.list_server_year_logs(
             order: "Newest first",
             limit: limit
           )
