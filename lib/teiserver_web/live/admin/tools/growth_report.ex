@@ -131,7 +131,7 @@ defmodule TeiserverWeb.AdminLive.Tools.GrowthReport do
     %{"chart_type" => "line"}
   end
 
-  defp prep_initial() do
+  defp prep_initial do
     data_form =
       {%{}, @data_form_types}
       |> validate_data(prep_data_params())
