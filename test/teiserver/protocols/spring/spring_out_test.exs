@@ -40,11 +40,12 @@ defmodule Teiserver.SpringOutTest do
     TeiserverTestLib.start_coordinator!()
     user = state.user
 
+    # Note is optional but still results in warning message showing
     {:ok, _action} =
       Moderation.create_action(%{
         target_id: user.id,
         reason: "First reason\nSecond reason",
-        restrictions: ["Warning reminder"],
+        restrictions: ["Note", "Warning reminder"],
         expires: DateTime.shift(DateTime.utc_now(), day: 1)
       })
 

@@ -273,6 +273,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           |> Enum.filter(fn action ->
             cond do
               Enum.member?(action.restrictions, "Bridging") -> false
+              Enum.member?(action.restrictions, "Warning reminder") -> true
               Enum.member?(action.restrictions, "Note") -> false
               true -> true
             end
@@ -280,7 +281,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           |> Enum.map(fn action ->
             expires =
               cond do
-                action.restrictions == ["Warning reminder"] ->
+                action.restrictions -- ["Note"] == ["Warning reminder"] ->
                   ""
 
                 action.expires ->
