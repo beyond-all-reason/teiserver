@@ -73,7 +73,7 @@
       />
 
       <UserComponents.show_extra_data
-        :if={@tab1 == "extra_data" and allow?(@scope, "Admin")}
+        :if={@tab1 == "extra_data"}
         user_stats={@user_stats}
         user={@user}
       />
@@ -112,7 +112,7 @@
       />
 
       <UserComponents.show_extra_data
-        :if={@tab2 == "extra_data" and allow?(@scope, "Admin")}
+        :if={@tab2 == "extra_data"}
         user_stats={@user_stats}
         user={@user}
       />

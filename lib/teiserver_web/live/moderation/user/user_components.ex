@@ -399,7 +399,6 @@ defmodule TeiserverWeb.ModerationLive.UserComponents do
       </a>
 
       <a
-        :if={allow?(@scope, "Admin")}
         role="tab"
         class={["tab", @tab == "extra_data" && "tab-active"]}
         phx-click="switch-tab"
