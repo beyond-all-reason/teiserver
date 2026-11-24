@@ -1057,9 +1057,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client == nil ->
         false
 
-      # Enum.member?(@handled_by_lobby, cmd.command) ->
-      #   false
-
       Enum.member?(@always_allow, cmd.command) ->
         true
 
