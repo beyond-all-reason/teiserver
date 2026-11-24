@@ -454,10 +454,24 @@ defmodule Teiserver.TeiserverConfigs do
     })
   end
 
+  # A login can borrow one permit, so the next wait can span two refill intervals.
+  @min_login_rate 2_000 / Float.max_finite()
   defp validate_login_rate(value) do
-    case value |> to_string() |> String.trim() |> Float.parse() do
-      {rate, ""} when rate >= 0 -> {:ok, rate}
-      _other -> {:error, "must be a non-negative number"}
+    input = value |> to_string() |> String.trim()
+
+    case Float.parse(input) do
+      {rate, ""} when rate >= @min_login_rate ->
+        {:ok, rate}
+
+      {rate, ""} when rate >= 0 ->
+        # Float.parse/1 can round a nonzero input to zero. Only an explicit zero pauses logins.
+        case Decimal.parse(input) do
+          {%Decimal{coef: 0}, ""} -> {:ok, 0.0}
+          _other -> {:error, "is too close to zero for the login rate limiter"}
+        end
+
+      _other ->
+        {:error, "must be a non-negative number"}
     end
   end
 

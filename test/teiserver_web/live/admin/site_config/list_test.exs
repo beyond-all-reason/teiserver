@@ -79,15 +79,22 @@ defmodule TeiserverWeb.Admin.SiteConfigLive.ListTest do
              |> form("#site_config-form", value: "-1")
              |> render_submit() =~ "must be a non-negative number"
 
+      for rate <- ["1e-305", "1e-310", "1e-400"] do
+        assert live
+               |> form("#site_config-form", value: rate)
+               |> render_submit() =~ "is too close to zero"
+      end
+
       assert Config.get_site_config_cache(key) == previous_rate
+      assert Config.get_site_config_val(key) == previous_rate
 
       live
-      |> form("#site_config-form", value: "1.5")
+      |> form("#site_config-form", value: "0.0001")
       |> render_submit()
 
       assert_patch(live, ~p"/admin/site_config")
-      assert Config.get_site_config(key).value == "1.5"
-      assert Config.get_site_config_cache(key) == 1.5
+      assert Config.get_site_config_val(key) == 0.0001
+      assert Config.get_site_config_cache(key) == 0.0001
     end
 
     test "updates site_config in listing", %{conn: conn} do

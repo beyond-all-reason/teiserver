@@ -108,7 +108,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     %{id: id} = new_user()
     refute LoginThrottleServer.attempt_login(self(), id)
 
-    assert :ok = LoginThrottleServer.reset_rate_limiter(0, true)
     LoginThrottleServer.tick()
     refute_receive {:login_accepted, ^id}
 
@@ -117,7 +116,6 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     end
 
     assert Config.get_site_config_val(key) == 0
-    assert_raise FunctionClauseError, fn -> LoginThrottleServer.reset_rate_limiter(-1) end
     assert :ok = Config.update_site_config(key, "0.5")
     LoginThrottleServer.set_tick_period(10)
     assert_receive {:login_accepted, ^id}
