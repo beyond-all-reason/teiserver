@@ -9,6 +9,13 @@ defmodule Teiserver.Helpers.BurstyRateLimiterTest do
     end
   end
 
+  test "per-second and per-minute rates must be non-negative numbers" do
+    for rate <- [-1, -0.5, "2"] do
+      assert_raise FunctionClauseError, fn -> BRL.per_second(rate) end
+      assert_raise FunctionClauseError, fn -> BRL.per_minute(rate) end
+    end
+  end
+
   test "fractional rates replenish at the configured interval" do
     for {limiter, interval} <- [
           {BRL.per_second(0.5, 0), 2_000},

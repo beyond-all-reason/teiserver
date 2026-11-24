@@ -76,7 +76,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
   end
 
   @spec reset_rate_limiter(rate :: number(), should_fill? :: boolean()) :: :ok
-  def reset_rate_limiter(rate, should_fill? \\ false) when is_number(rate) and rate >= 0 do
+  def reset_rate_limiter(rate, should_fill? \\ false) do
     rl = BurstyRateLimiter.per_second(rate)
 
     rl =

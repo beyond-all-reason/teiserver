@@ -75,9 +75,8 @@ defmodule Teiserver.Helpers.BurstyRateLimiter do
 
   defp per_period(rate, _period_ms, now) when rate == 0, do: new(0, :infinity, 0, now)
 
-  defp per_period(rate, period_ms, now) do
-    capacity = if rate > 0 and rate < 1, do: 1, else: rate
-    new(capacity, period_ms / rate, nil, now)
+  defp per_period(rate, period_ms, now) when is_number(rate) and rate > 0 do
+    new(max(1, rate), period_ms / rate, nil, now)
   end
 
   def set_full(%__MODULE__{} = rl), do: %{rl | stored_permits: rl.max_permits}
