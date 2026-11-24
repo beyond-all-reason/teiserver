@@ -1051,8 +1051,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(senderid)
 
     # Moderators and above always have boss/host permissions
-    is_host = senderid == state.host_id or Auth.moderator?(senderid)
-    is_boss = Enum.member?(state.host_bosses, senderid) or Auth.moderator?(senderid)
+    is_moderator = Auth.moderator?(senderid)
+    is_host = senderid == state.host_id or is_moderator
+    is_boss = Enum.member?(state.host_bosses, senderid) or is_moderator
 
     cond do
       client == nil ->
@@ -1065,7 +1066,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Auth.admin?(senderid) ->
         true
 
-      Enum.member?(@moderator_commands, cmd.command) and Auth.moderator?(senderid)  ->
+      Enum.member?(@moderator_commands, cmd.command) and is_moderator ->
         true
 
       Enum.member?(@event_organizer_commands, cmd.command) and Auth.is_event_organizer?(senderid) ->

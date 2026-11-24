@@ -1780,13 +1780,37 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(
-        %{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd,
+        %{command: "playerlimit", remaining: value_str, senderid: senderid},
         state
       ) do
+    # Having lots of players in a room can cause thundering-herd events where hundreds
+    # or even thousands of messeags are sent in a very short time period. This can cause
+    # instability and anybody using it is expected to be able to interpret & rectify
+    # the situation themselves.
+    admin_limt = 128
+    non_admin_limit = 32
+
     case Integer.parse(value_str) do
       {new_limit, _rest} ->
-        ConsulServer.say_command(cmd, state)
-        %{state | player_limit: abs(new_limit)}
+        new_limit = abs(new_limit)
+
+        # If the sender is not an admin, we drop to the non-admin limit
+        actual_new_limit =
+          if Auth.admin?(senderid) do
+            min(new_limit, admin_limt)
+          else
+            min(new_limit, non_admin_limit)
+          end
+
+        username = Account.get_username_by_id(senderid)
+
+        ChatLib.say(
+          state.coordinator_id,
+          "#{username} set the total player limit to #{actual_new_limit}",
+          state.lobby_id
+        )
+
+        %{state | player_limit: actual_new_limit}
 
       _parse_error ->
         ChatLib.sayprivateex(
