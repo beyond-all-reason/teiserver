@@ -402,12 +402,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       if client.team_number != nil and client.team_number != client.player_number do
         # The map passed to us doesn't always have the full client so we need to
         # get it to update it properly
-        client = Client.get_client_by_id(userid)
-
-        Client.update(
-          %{client | player_number: client.team_number},
-          :client_updated_battlestatus
-        )
+        if client = Client.get_client_by_id(userid) do
+          Client.update(
+            %{client | player_number: client.team_number},
+            :client_updated_battlestatus
+          )
+        end
       end
     end
 
