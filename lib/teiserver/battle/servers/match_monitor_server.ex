@@ -56,15 +56,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
          true do
       {:noreply, do_begin()}
     else
-      Process.send_after(self(), :retry_begin, 1_000)
-      {:noreply, state}
+      Process.sleep(50)
+      {:noreply, state, {:continue, :begin}}
     end
   end
 
-  @impl GenServer
-  def handle_info(:retry_begin, state), do: {:noreply, state, {:continue, :begin}}
-
   # Direct/Room messaging
+  @impl GenServer
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
