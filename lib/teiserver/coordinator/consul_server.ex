@@ -33,7 +33,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll password?)
   @boss_commands ~w(balancealgorithm gatekeeper welcome-message reset-approval rename minchevlevel maxchevlevel resetchevlevels resetratinglevels minratinglevel maxratinglevel setratinglevels quantum fixids)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec lock unlock makebalance set-config-teaser)
-  @admin_commands ~w(shuffle)
+  @moderator_commands ~w(shuffle)
 
   # @handled_by_lobby ~w(explain)
   @splitter "########################################"
@@ -1049,9 +1049,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
 
-    is_host = senderid == state.host_id
-    is_boss = Enum.member?(state.host_bosses, senderid)
-    is_admin = Auth.admin?(senderid)
+    # Moderators and above always have boss/host permissions
+    is_host = senderid == state.host_id or Auth.moderator?(senderid)
+    is_boss = Enum.member?(state.host_bosses, senderid) or Auth.moderator?(senderid)
 
     cond do
       client == nil ->
@@ -1064,11 +1064,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true
 
       # Allow all commands for Admins
-      is_admin ->
+      Auth.admin?(senderid) ->
         true
 
-      # Allow all except Admin only commands for moderators
-      Auth.moderator?(senderid) and not Enum.member?(@admin_commands, cmd.command) ->
+      Enum.member?(@moderator_commands, cmd.command) and Auth.moderator?(senderid)  ->
         true
 
       Enum.member?(@host_commands, cmd.command) and is_host ->
