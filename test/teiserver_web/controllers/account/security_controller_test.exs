@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Account.SecurityControllerTest do
   alias Phoenix.Flash
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Helpers.GeneralTestLib
   alias Teiserver.Logging.LoggingTestLib
@@ -99,7 +99,7 @@ defmodule TeiserverWeb.Account.SecurityControllerTest do
       })
 
       assert %DateTime{} = TOTPLib.get_last_used(user.id)
-      refute AuthLib.need_to_mfa_refresh?(user.id)
+      refute Auth.need_to_mfa_refresh?(user.id)
     end
   end
 

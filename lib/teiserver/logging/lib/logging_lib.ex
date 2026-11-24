@@ -1,7 +1,7 @@
 defmodule Teiserver.Logging.LoggingLib do
   @moduledoc false
 
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: atom
@@ -16,5 +16,5 @@ defmodule Teiserver.Logging.LoggingLib do
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
-  def authorize(_data, conn, _action), do: AuthLib.allow?(conn, "Admin")
+  def authorize(_data, conn, _action), do: Auth.allow?(conn, "Admin")
 end

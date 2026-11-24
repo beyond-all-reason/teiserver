@@ -1,13 +1,13 @@
 defmodule TeiserverWeb.GeneralLive.Menu do
   @moduledoc false
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
 
   use TeiserverWeb, :live_view
 
   @impl Phoenix.LiveView
   def mount(_params, _session, %Socket{assigns: %{current_user: user}} = socket) do
     mfa_warning? =
-      AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
+      Auth.mfa_required?() and Auth.contains_mfa_role?(user.roles) and
         not has_active_mfa?(user.id)
 
     socket

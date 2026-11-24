@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
   alias Ecto.Changeset
   alias Plug.Conn
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.OAuth
   alias Teiserver.OAuth.Application
   alias Teiserver.OAuth.ApplicationQueries
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.OAuthApplicationController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Admin,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
 
   plug :add_breadcrumb, name: "Admin", url: "/admin"
   plug :add_breadcrumb, name: "OAuth Applications", url: "/teiserver/admin/oauth_application"

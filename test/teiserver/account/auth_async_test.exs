@@ -1,9 +1,9 @@
 defmodule Teiserver.Account.AuthAsyncTest do
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
 
   use Teiserver.DataCase, async: true
 
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2]
 
   describe "role permissions" do
     test "Server Role" do
@@ -65,7 +65,7 @@ defmodule Teiserver.Account.AuthAsyncTest do
       refute allow?(user, "Admin")
       refute allow?(user, "Contributor")
 
-      assert "Technician" in AuthLib.mfa_roles()
+      assert "Technician" in Auth.mfa_roles()
     end
   end
 end

@@ -41,7 +41,7 @@ defmodule TeiserverWeb do
 
       alias Bodyguard.Plug.Authorize
 
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       unquote(verified_routes())
 
@@ -75,7 +75,7 @@ defmodule TeiserverWeb do
       import TeiserverWeb.ErrorHelpers
       use Gettext, backend: TeiserverWeb.Gettext
 
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       import Teiserver.Helper.NumberHelper,
         only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
@@ -122,7 +122,7 @@ defmodule TeiserverWeb do
       alias Teiserver.Helper.QueryHelpers
       alias Teiserver.Repo
 
-      import Teiserver.Account.AuthLib,
+      import Teiserver.Account.Auth,
         only: [
           allow?: 2,
           allow_any?: 2,
@@ -166,7 +166,7 @@ defmodule TeiserverWeb do
       alias Teiserver.Repo
 
       import Teiserver.Logging.Helpers, only: [add_audit_log: 3]
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       defguard is_connected?(socket) when socket.transport_pid != nil
       def ok(socket), do: {:ok, socket}
@@ -184,7 +184,7 @@ defmodule TeiserverWeb do
       alias Phoenix.LiveView.Socket
 
       alias Teiserver.Helper.StylingHelper
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
 
       unquote(verified_routes())
     end
@@ -206,7 +206,7 @@ defmodule TeiserverWeb do
       alias Ecto.Multi
 
       import Teiserver.Helper.QueryHelpers
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
       alias Teiserver.Data.Types, as: T
       alias Teiserver.Helper.StylingHelper
     end
@@ -216,7 +216,7 @@ defmodule TeiserverWeb do
     quote do
       alias Teiserver.Data.Types, as: T
       alias Teiserver.Repo
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
       alias Teiserver.Helper.QueryHelpers
       alias Teiserver.Helper.StylingHelper
     end
@@ -237,7 +237,7 @@ defmodule TeiserverWeb do
 
   def startup do
     quote do
-      import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
+      import Teiserver.Account.Auth, only: [add_permission_set: 3]
 
       import Teiserver.Config, only: [add_site_config_type: 1]
     end
@@ -247,7 +247,7 @@ defmodule TeiserverWeb do
     quote do
       use TypedEctoSchema
       import Ecto.Changeset
-      import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
+      import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2, has_active_mfa?: 1]
       import Teiserver.Helper.SchemaHelper
     end
   end

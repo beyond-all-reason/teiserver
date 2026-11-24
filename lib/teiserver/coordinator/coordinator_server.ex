@@ -7,7 +7,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Phoenix.PubSub
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.Login
   alias Teiserver.Account.RecacheUserStatsTask
   alias Teiserver.Account.User
@@ -241,8 +240,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       mfa_warning? =
-        AuthLib.mfa_required?() and AuthLib.contains_mfa_role?(user.roles) and
-          not AuthLib.has_active_mfa?(user.id)
+        Auth.mfa_required?() and Auth.contains_mfa_role?(user.roles) and
+          not Auth.has_active_mfa?(user.id)
 
       if mfa_warning? do
         host = Application.get_env(:teiserver, TeiserverWeb.Endpoint)[:url][:host]

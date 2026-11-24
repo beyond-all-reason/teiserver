@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.UserLib
   alias Teiserver.Bridge.DiscordBridgeBot
   alias Teiserver.Communication
@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Action,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "moderation",

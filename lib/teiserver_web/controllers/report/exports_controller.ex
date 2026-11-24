@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Report.ExportsController do
   alias Teiserver.Account
   alias Teiserver.Game
   use TeiserverWeb, :controller
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Report.ExportsController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Telemetry.Infolog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
   plug(:add_breadcrumb, name: "Exports", url: "/teiserver/reports/exports")

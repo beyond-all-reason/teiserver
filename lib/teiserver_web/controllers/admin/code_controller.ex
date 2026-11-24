@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.CodeController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Account.Code,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "teiservercentral_admin",

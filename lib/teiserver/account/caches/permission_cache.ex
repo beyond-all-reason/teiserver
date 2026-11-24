@@ -9,7 +9,7 @@ defmodule Teiserver.Account.PermissionCache do
 
   use Supervisor
 
-  import Teiserver.Account.AuthLib, only: [add_permission_set: 3]
+  import Teiserver.Account.Auth, only: [add_permission_set: 3]
 
   def start_link(opts) do
     with {:ok, sup} <- Supervisor.start_link(__MODULE__, :ok, opts),

@@ -4,7 +4,7 @@ defmodule Teiserver.AccountFixtures do
   entities via the `Teiserver.Microblog` context.
   """
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Helper.StringHelper
 
   @doc """
@@ -14,7 +14,7 @@ defmodule Teiserver.AccountFixtures do
     permissions =
       attrs
       |> Map.get(:permissions, [])
-      |> AuthLib.split_permissions()
+      |> Auth.split_permissions()
 
     name = StringHelper.random_name(15)
 

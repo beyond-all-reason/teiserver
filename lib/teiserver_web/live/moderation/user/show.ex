@@ -2,7 +2,6 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
   @moduledoc false
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.TOTPLib
   alias Teiserver.Account.UserLib
@@ -60,7 +59,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
         page_title: "User details: #{user.name}",
         user_id: id,
         has_active_mfa?: has_active_mfa?(user.id),
-        has_mfa_role?: AuthLib.contains_mfa_role?(user.roles),
+        has_mfa_role?: Auth.contains_mfa_role?(user.roles),
         role_data: RoleLib.grouped_role_data()
       )
       |> switch_tab(tab1, "1")
@@ -280,7 +279,7 @@ defmodule TeiserverWeb.ModerationLive.User.Show do
 
   defp set_user_alerts(%Socket{assigns: %{user: user, has_mfa_role?: has_mfa_role?}} = socket) do
     mfa_warning? =
-      AuthLib.mfa_required?() and has_mfa_role? and
+      Auth.mfa_required?() and has_mfa_role? and
         not has_active_mfa?(user.id)
 
     restriction_alert =

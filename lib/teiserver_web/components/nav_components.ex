@@ -9,7 +9,7 @@ defmodule TeiserverWeb.NavComponents do
     router: TeiserverWeb.Router,
     statics: TeiserverWeb.static_paths()
 
-  import Teiserver.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2, allow_any?: 2]
   import Phoenix.HTML, only: [raw: 1]
 
   @doc """

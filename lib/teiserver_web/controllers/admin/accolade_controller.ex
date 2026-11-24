@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",

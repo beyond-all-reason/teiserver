@@ -4,7 +4,6 @@ defmodule Teiserver.Account.Login do
   alias Argon2
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CalculateSmurfKeyTask
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.LoginThrottleServer
@@ -419,7 +418,7 @@ defmodule Teiserver.Account.Login do
         Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
           "??"
 
-        AuthLib.allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
+        Auth.allow?(user, "BAR+") and Map.has_key?(stats, "bar_plus.flag") ->
           stats["bar_plus.flag"]
 
         stats["country_override"] != nil ->

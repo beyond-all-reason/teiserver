@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
   alias Teiserver.Account
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.RoleLib
   alias Teiserver.Account.SmurfMergeTask
   alias Teiserver.Account.TOTPLib
@@ -28,10 +27,10 @@ defmodule TeiserverWeb.Admin.UserController do
   action_fallback TeiserverWeb.Controllers.BodyguardFallback
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Auth,
+    policy: Teiserver.Account.UserPolicy,
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     action: {Phoenix.Controller, :action_name},
-    user: {AuthLib, :current_user}
+    user: {Auth, :current_user}
   )
 
   plug TeiserverWeb.Plugs.PaginationParams

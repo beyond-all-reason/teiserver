@@ -4,7 +4,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Account.Auth
-  alias Teiserver.Account.AuthLib
   alias Teiserver.Account.CodeOfConductData
   alias Teiserver.Chat
   alias Teiserver.Client
@@ -478,14 +477,14 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     {allowed?, reason} =
       cond do
-        not AuthLib.mfa_required?() ->
+        not Auth.mfa_required?() ->
           {true, nil}
 
-        AuthLib.has_active_mfa?(senderid) ->
+        Auth.has_active_mfa?(senderid) ->
           {false,
            "You have MFA activated and cannot use one time links, please manually login to the site at https://#{host}"}
 
-        AuthLib.contains_mfa_role?(sender.roles) ->
+        Auth.contains_mfa_role?(sender.roles) ->
           {false,
            "Your role contains one or more privileged roles, you will need to manually login to the site at https://#{host}"}
 

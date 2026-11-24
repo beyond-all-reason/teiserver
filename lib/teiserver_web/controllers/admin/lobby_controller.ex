@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff.Overwatch,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
   )
 
   plug TeiserverWeb.Plugs.PaginationParams

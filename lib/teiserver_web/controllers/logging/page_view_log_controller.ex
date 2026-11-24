@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Logging.PageViewLogController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Logging.PageViewLog,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   @spec index(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def index(conn, params) do

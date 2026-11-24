@@ -15,7 +15,7 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
   - Styling preferences
   """
 
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Scope
 
   use TeiserverWeb, :live_component
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.LiveComponents.CommandPalette do
     all_commands =
       (extra_commands ++ @command_objects)
       |> Enum.filter(fn
-        %{allow: perms} -> AuthLib.allow?(scope, perms)
+        %{allow: perms} -> Auth.allow?(scope, perms)
         _other -> true
       end)
 

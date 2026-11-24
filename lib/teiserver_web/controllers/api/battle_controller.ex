@@ -6,7 +6,7 @@ defmodule TeiserverWeb.API.BattleController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Battle.ApiAuth,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
   )
 
   def create(conn, %{"outcome" => "completed"}) do

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.Report.ReportController do
   use TeiserverWeb, :controller
-  import Teiserver.Account.AuthLib, only: [allow?: 2]
+  import Teiserver.Account.Auth, only: [allow?: 2]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Report.ReportController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
 
   plug(:add_breadcrumb, name: "Reports", url: "/teiserver/reports")
 

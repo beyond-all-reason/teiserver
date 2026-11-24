@@ -1,14 +1,14 @@
 defmodule TeiserverWeb.UserAuthentication do
   @moduledoc """
   The module handling user authentication as part of live sessions.
-  Authorisation takes place in the Auth and AuthLib modules.
+  Authorisation takes place in the Auth module.
   """
 
   alias Phoenix.Component
   alias Phoenix.LiveView
   alias Phoenix.LiveView.Socket
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Account.Guardian
   alias Teiserver.Account.Scope
   alias Teiserver.Account.User
@@ -106,7 +106,7 @@ defmodule TeiserverWeb.UserAuthentication do
   end
 
   def on_mount({:authorise, permissions}, _params, _session, socket) do
-    if AuthLib.allow?(socket.assigns.current_user, permissions) do
+    if Auth.allow?(socket.assigns.current_user, permissions) do
       {:cont, socket}
     else
       socket =
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.UserAuthentication do
   end
 
   def on_mount({:authorise_any, permissions}, _params, _session, socket) do
-    if AuthLib.allow_any?(socket.assigns.current_user, permissions) do
+    if Auth.allow_any?(socket.assigns.current_user, permissions) do
       {:cont, socket}
     else
       socket =

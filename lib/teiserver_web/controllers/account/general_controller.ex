@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   @moduledoc false
 
   alias Teiserver.Account
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Logging.LoggingPlug
 
   use TeiserverWeb, :controller
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   def edit_details(conn, _params) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    if AuthLib.need_to_mfa_refresh?(user.id) do
+    if Auth.need_to_mfa_refresh?(user.id) do
       conn
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/details")
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   def update_details(conn, %{"user" => user_params}) do
     user = Account.get_user!(conn.assigns.current_user.id)
 
-    if AuthLib.need_to_mfa_refresh?(user.id) do
+    if Auth.need_to_mfa_refresh?(user.id) do
       conn
       |> assign(:user, user)
       |> assign(:redirect, ~p"/teiserver/account/details")

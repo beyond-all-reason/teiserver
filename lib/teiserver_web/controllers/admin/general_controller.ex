@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
     fallback: TeiserverWeb.Controllers.BodyguardFallback,
     policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
-    user: {Teiserver.Account.AuthLib, :current_user}
+    user: {Teiserver.Account.Auth, :current_user}
   )
 
   @spec metrics(Plug.Conn.t(), map) :: Plug.Conn.t()

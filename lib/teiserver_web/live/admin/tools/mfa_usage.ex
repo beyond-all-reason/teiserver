@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.AdminLive.Tools.MFAUsage do
   @moduledoc false
   alias Ecto.Adapters.SQL
-  alias Teiserver.Account.AuthLib
+  alias Teiserver.Account.Auth
   alias Teiserver.Helper.DateHelper
   alias Teiserver.Repo
   alias TeiserverWeb.AdminLive.ToolsComponents
@@ -74,7 +74,7 @@ defmodule TeiserverWeb.AdminLive.Tools.MFAUsage do
   end
 
   defp default_role_list do
-    AuthLib.mfa_roles() |> List.delete("Bot")
+    Auth.mfa_roles() |> List.delete("Bot")
   end
 
   defp get_data(%Socket{assigns: %{search: params}} = socket) do
