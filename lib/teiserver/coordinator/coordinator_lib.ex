@@ -114,6 +114,11 @@ Multiple locks can be engaged at the same time
       {"forcespec", ["user"],
        "Moves the user to spectators and bans them from becoming a player.", :host},
 
+      # ---- event_organisers ----
+      {"playerlimit", ["limit"],
+       "Sets a new player limit for this specific host. If you have not been briefed on how to use this command and the risks it entails then do not use it.",
+       :event_organizer},
+
       # ---- :moderators only ----
       {"success", [],
        "Sends a \"!y\" message from every player to the game host to make a vote pass.",
@@ -130,7 +135,6 @@ Multiple locks can be engaged at the same time
       {"specafk", [],
        "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.",
        :moderator},
-      {"playerlimit", ["limit"], "Sets a new player limit for this specific host.", :moderator},
       {"modme", [], "(Re)gain moderator privileges", :moderator},
       {"unmodme", [], "Drops moderator privileges for this session", :moderator}
     ]
@@ -243,6 +247,7 @@ Multiple locks can be engaged at the same time
       :everybody -> true
       :host -> Auth.admin?(user) or Auth.moderator?(user) or host
       :moderator -> Auth.admin?(user) or Auth.moderator?(user)
+      :event_organiser -> Auth.is_event_organizer?(user)
       _other -> false
     end
   end
