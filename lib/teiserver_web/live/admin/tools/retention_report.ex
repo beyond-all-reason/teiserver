@@ -29,10 +29,20 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
       |> validate(prep_params())
 
     form = to_form(changeset, as: :retention_form)
+    start_date = get_field(form.source, :start_date)
+    end_date = get_field(form.source, :end_date)
+    skip0 = form[:skip0].value
+    {chart, user_count} = RetentionReport.build_chart(start_date, end_date, skip0)
 
     {:noreply,
      socket
-     |> assign(connected?: true, form: form, dates: @dates, retention_chart: nil)}
+     |> assign(
+       connected?: true,
+       form: form,
+       dates: @dates,
+       retention_chart: chart,
+       user_count: user_count
+     )}
   end
 
   def handle_params(_params, _uri, socket) do
