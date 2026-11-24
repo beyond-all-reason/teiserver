@@ -93,8 +93,15 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
 
   test "a zero login rate pauses the queue until a positive rate is set" do
     key = "system.Login rate"
-    on_exit(fn -> Teiserver.cache_delete(:config_site_cache, key) end)
+    previous_rate = Config.get_site_config_cache(key)
+
+    on_exit(fn ->
+      Teiserver.cache_delete(:config_site_cache, key)
+      LoginThrottleServer.reset_rate_limiter(previous_rate)
+    end)
+
     assert :ok = Config.update_site_config(key, "0")
+    Teiserver.cache_delete(:config_site_cache, key)
     assert {:ok, _pid} = LoginThrottleServer.restart()
     assert :ok = LoginThrottleServer.set_tick_period(:infinity)
     set_capacity(1)
@@ -105,15 +112,13 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     LoginThrottleServer.tick()
     refute_receive {:login_accepted, ^id}
 
-    for invalid <- ["-1", "1.5", "unknown", ""] do
+    for invalid <- ["-1", "-0.5", "1.5x", "unknown", ""] do
       assert {:error, _changeset} = Config.update_site_config(key, invalid)
     end
 
-    # The general integer caster treats an empty legacy value as zero.
-    assert_raise ArgumentError, fn -> Config.cast_site_config_value(key, "") end
-    assert Config.get_site_config(key).value == "0"
+    assert Config.get_site_config_val(key) == 0
     assert_raise FunctionClauseError, fn -> LoginThrottleServer.reset_rate_limiter(-1) end
-    assert :ok = Config.update_site_config(key, "2")
+    assert :ok = Config.update_site_config(key, "0.5")
     LoginThrottleServer.set_tick_period(10)
     assert_receive {:login_accepted, ^id}
   end

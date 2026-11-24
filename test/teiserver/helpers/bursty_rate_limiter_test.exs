@@ -3,14 +3,27 @@ defmodule Teiserver.Helpers.BurstyRateLimiterTest do
 
   use ExUnit.Case, async: true
 
-  test "capacity must be a non-negative integer" do
-    for capacity <- [-1, 0.0, 0.5, 1.5, "2"] do
+  test "capacity must be a non-negative number" do
+    for capacity <- [-1, -0.5, "2"] do
       assert_raise ArgumentError, fn -> BRL.new(capacity, 1) end
     end
   end
 
+  test "fractional rates replenish at the configured interval" do
+    for {limiter, interval} <- [
+          {BRL.per_second(0.5, 0), 2_000},
+          {BRL.per_minute(0.5, 0), 120_000},
+          {BRL.per_second(1.5, 0), 1_000 / 1.5}
+        ] do
+      limiter = BRL.set_empty(limiter)
+      assert {:error, wait} = BRL.try_acquire(limiter, 1, 0)
+      assert wait == interval
+      assert {:ok, _limiter} = BRL.try_acquire(limiter, 1, ceil(interval))
+    end
+  end
+
   test "zero capacity cannot grant a permit, even after a refill" do
-    for rl <- [BRL.new(0, 1, 0, 0), BRL.per_second(0, 0), BRL.per_minute(0, 0)] do
+    for rl <- [BRL.new(0, 1, 0, 0), BRL.per_second(0, 0), BRL.per_minute(0.0, 0)] do
       assert BRL.try_acquire(rl, 1, 60_000) == {:error, :request_too_big}
     end
   end

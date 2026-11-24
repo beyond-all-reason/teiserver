@@ -318,24 +318,24 @@ defmodule Teiserver.Config do
     Repo.one(query)
   end
 
-  # TODO: Allow each site config to declare its own validation.
   @spec update_site_config(String.t(), term()) :: :ok | {:error, Changeset.t()}
-  def update_site_config("system.Login rate" = key, value) do
-    case value |> to_string() |> String.trim() |> Integer.parse() do
-      {rate, ""} when rate >= 0 ->
-        do_update_site_config(key, rate)
+  def update_site_config(key, value) do
+    case validate_site_config_value(get_site_config_type(key), value) do
+      {:ok, valid_value} ->
+        do_update_site_config(key, valid_value)
 
-      _other ->
+      {:error, message} ->
         changeset =
           %SiteConfig{}
           |> SiteConfig.changeset(%{key: key, value: to_string(value)})
-          |> Changeset.add_error(:value, "must be a non-negative integer")
+          |> Changeset.add_error(:value, message)
 
         {:error, changeset}
     end
   end
 
-  def update_site_config(key, value), do: do_update_site_config(key, value)
+  defp validate_site_config_value(%{validate: validate}, value), do: validate.(value)
+  defp validate_site_config_value(_type, value), do: {:ok, value}
 
   defp do_update_site_config(key, value) do
     query =
@@ -438,6 +438,9 @@ defmodule Teiserver.Config do
     -- Optional --
     label: The name shown to users, defaults to everything after the last full-stop character
 
+    validate: A function that returns `{:ok, value_to_store}` or `{:error, field_error_message}`
+      for a submitted value
+
     update_callback: A function of arity 1 which will be called on an updated value with the new value
   """
   @spec add_site_config_type(map()) :: :ok
@@ -476,12 +479,7 @@ defmodule Teiserver.Config do
     end
   end
 
-  # An empty stored login rate is invalid. The general integer caster would turn it into a pause.
   @spec cast_site_config_value(String.t(), any) :: any
-  def cast_site_config_value("system.Login rate", value) do
-    value |> to_string() |> String.trim() |> String.to_integer()
-  end
-
   def cast_site_config_value(type_key, value) do
     type = get_site_config_type(type_key)
 

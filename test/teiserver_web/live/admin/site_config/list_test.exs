@@ -67,22 +67,27 @@ defmodule TeiserverWeb.Admin.SiteConfigLive.ListTest do
     test "an admin can correct an invalid login rate in the same form", %{conn: conn} do
       key = "system.Login rate"
       previous_rate = Config.get_site_config_cache(key)
-      on_exit(fn -> Account.reset_login_rate_limiter(previous_rate) end)
+
+      on_exit(fn ->
+        Teiserver.cache_delete(:config_site_cache, key)
+        Account.reset_login_rate_limiter(previous_rate)
+      end)
 
       {:ok, live, _html} = live(conn, ~p"/admin/site_config/#{key}/edit")
 
       assert live
              |> form("#site_config-form", value: "-1")
-             |> render_submit() =~ "must be a non-negative integer"
+             |> render_submit() =~ "must be a non-negative number"
 
       assert Config.get_site_config_cache(key) == previous_rate
 
       live
-      |> form("#site_config-form", value: "0")
+      |> form("#site_config-form", value: "1.5")
       |> render_submit()
 
       assert_patch(live, ~p"/admin/site_config")
-      assert Config.get_site_config(key).value == "0"
+      assert Config.get_site_config(key).value == "1.5"
+      assert Config.get_site_config_cache(key) == 1.5
     end
 
     test "updates site_config in listing", %{conn: conn} do
