@@ -183,7 +183,7 @@ defmodule TeiserverWeb.ModerationLive.User.List do
 
     UserQueries.users()
     |> UserQueries.where_name_like(search["name"] || "")
-    |> UserQueries.where_email_like(search["email"] || "")
+    |> UserQueries.where_email_or_previous_email_like(search["email"] || "")
     |> UserQueries.where_name_or_email_like(name_or_email)
     |> UserQueries.where_logged_in_after(last_login)
     |> UserQueries.where_has_role(search["role"] || "")
