@@ -106,7 +106,7 @@
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/complex_client_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_lobby_event_controller.ex", :no_return},
-  {"lib/teiserver_web/controllers/telemetry/complex_lobby_egrowth_repovent_controller.ex", :call},
+  {"lib/teiserver_web/controllers/telemetry/complex_lobby_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_match_event_controller.ex", :no_return},
   {"lib/teiserver_web/controllers/telemetry/complex_match_event_controller.ex", :call},
   {"lib/teiserver_web/controllers/telemetry/complex_server_event_controller.ex", :no_return},
