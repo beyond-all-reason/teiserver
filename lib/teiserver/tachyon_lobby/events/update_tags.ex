@@ -20,7 +20,18 @@ defimpl Teiserver.TachyonLobby.Event, for: Teiserver.TachyonLobby.Events.UpdateT
 
   def apply_event(%UpdateTags{} = ev, %LT.Aggregate{} = agg) do
     data = %{agg.data | tags: Collections.patch_merge(agg.data.tags, ev.changes)}
-    changes = Map.put(agg.changes, :tags, ev.changes)
-    %{agg | data: data, changes: changes}
+
+    changes =
+      Map.update(agg.changes, :tags, ev.changes, &Collections.merge_patches(&1, ev.changes))
+
+    overview_changes =
+      Map.update(
+        agg.overview_changes,
+        :tags,
+        ev.changes,
+        &Collections.merge_patches(&1, ev.changes)
+      )
+
+    %{agg | data: data, changes: changes, overview_changes: overview_changes}
   end
 end

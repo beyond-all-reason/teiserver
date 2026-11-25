@@ -683,8 +683,9 @@ defmodule Teiserver.Support.Tachyon do
     resp
   end
 
-  def subscribe_lobby_list!(client) do
-    :ok = send_request(client, "lobby/subscribeList")
+  def subscribe_lobby_list!(client, filters \\ nil) do
+    data = if filters != nil, do: %{filters: filters}
+    :ok = send_request(client, "lobby/subscribeList", data)
     {:ok, resp} = recv_message(client)
     resp
   end

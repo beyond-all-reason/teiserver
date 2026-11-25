@@ -11,6 +11,7 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.Account
   alias Teiserver.Account.User
   alias Teiserver.Helpers.BoundedQueue, as: BQ
+  alias Teiserver.Helpers.Collections
   alias Teiserver.Helpers.MonitorCollection, as: MC
   alias Teiserver.Matchmaking
   alias Teiserver.Matchmaking.QueueServer
@@ -23,6 +24,7 @@ defmodule Teiserver.Player.Session do
   alias Teiserver.TachyonBattle
   alias Teiserver.TachyonLobby
   alias Teiserver.TachyonLobby.Types, as: LT
+  alias Teiserver.TachyonLobby.Types.ListFilters
 
   # For now, never restart a session. Until some form of state persistence is
   # implemented it's better to just remove the process completely than
@@ -90,7 +92,8 @@ defmodule Teiserver.Player.Session do
       party: %PT.PartyState{},
       battle: nil,
       lobby: nil,
-      lobby_list_subscription: nil
+      lobby_list_subscription: nil,
+      filters: nil
     }
   end
 
@@ -532,9 +535,9 @@ defmodule Teiserver.Player.Session do
     user_id |> via_tuple() |> GenServer.call({:lobby, :join_battle})
   end
 
-  @spec subscribe_lobby_list(User.id()) :: {:ok, %{TachyonLobby.id() => LT.ListOverview.t()}}
-  def subscribe_lobby_list(user_id) do
-    user_id |> via_tuple() |> GenServer.call({:lobby, :subscribe_list})
+  @spec subscribe_lobby_list(User.id(), ListFilters.t()) :: :ok
+  def subscribe_lobby_list(user_id, filters \\ %{}) do
+    user_id |> via_tuple() |> GenServer.call({:lobby, :subscribe_list, filters})
   end
 
   @spec unsubscribe_lobby_list(User.id()) :: :ok
@@ -976,7 +979,7 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
-          |> Map.put(:lobby, %{id: details.id})
+          |> set_lobby(%{id: details.id})
 
         {:reply, {:ok, details}, state}
 
@@ -1008,7 +1011,7 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> Map.update!(:monitors, &MC.monitor(&1, pid, {:lobby, details.id}))
-          |> Map.put(:lobby, %{id: details.id})
+          |> set_lobby(%{id: details.id})
 
         {:reply, {:ok, details}, state}
 
@@ -1131,7 +1134,7 @@ defmodule Teiserver.Player.Session do
         state =
           state
           |> Map.update!(:monitors, &MC.demonitor_by_val(&1, {:lobby, state.lobby.id}, [:flush]))
-          |> Map.replace!(:lobby, nil)
+          |> set_lobby(nil)
 
         {:reply, :ok, state}
 
@@ -1174,24 +1177,54 @@ defmodule Teiserver.Player.Session do
     end
   end
 
-  def handle_call({:lobby, :subscribe_list}, _from, %PT.Data{} = state) do
-    if state.lobby_list_subscription == nil do
-      list = TachyonLobby.subscribe_updates()
+  # New subscription
+  def handle_call({:lobby, :subscribe_list, filters}, _from, %PT.Data{} = state)
+      when state.lobby_list_subscription == nil do
+    lobbies =
+      TachyonLobby.subscribe_updates()
+      |> Map.new(fn {id, %LT.ListOverview{} = overview} ->
+        entry = %{
+          counter: overview.counter,
+          overview: overview,
+          changes: %{},
+          visible?:
+            ListFilters.filter(id, overview, filters, state.user, state.party.current_party)
+        }
 
-      lobbies =
-        Enum.map(list, fn {id, %LT.ListOverview{counter: counter}} ->
-          {id, %{counter: counter, changes: %{}}}
-        end)
-        |> Enum.into(%{})
+        {id, entry}
+      end)
 
-      {:ok, ref} = :timer.seconds(5) |> :timer.send_interval(:flush_lobby_list_updates)
-      subscription_state = %{timer_ref: ref, lobbies: lobbies}
+    {:ok, ref} = :timer.seconds(5) |> :timer.send_interval(:flush_lobby_list_updates)
+    subscription_state = %{timer_ref: ref, lobbies: lobbies}
+    state = %{state | lobby_list_subscription: subscription_state, filters: filters}
 
-      {:reply, {:ok, list}, %{state | lobby_list_subscription: subscription_state}}
-    else
-      list = TachyonLobby.list()
-      {:reply, {:ok, list}, state}
-    end
+    send_lobby_list_reset(state)
+    {:reply, :ok, state}
+  end
+
+  # Filters didn't change
+  def handle_call({:lobby, :subscribe_list, filters}, _from, %PT.Data{} = state)
+      when state.filters == filters,
+      do: {:reply, :ok, state}
+
+  # Exsisting subscriptiuon but with different filters
+  def handle_call({:lobby, :subscribe_list, filters}, _from, %PT.Data{} = state) do
+    lobbies =
+      for {id, entry} <- state.lobby_list_subscription.lobbies,
+          entry.overview != nil,
+          into: %{} do
+        visible? =
+          ListFilters.filter(id, entry.overview, filters, state.user, state.party.current_party)
+
+        # Full new list is set by lobby/listReset so changes are reset
+        {id, %{entry | changes: %{}, visible?: visible?}}
+      end
+
+    state = %{state | filters: filters}
+    state = put_in(state.lobby_list_subscription.lobbies, lobbies)
+
+    send_lobby_list_reset(state)
+    {:reply, :ok, state}
   end
 
   def handle_call({:lobby, :unsubscribe_list}, _from, %PT.Data{} = state) do
@@ -1199,7 +1232,7 @@ defmodule Teiserver.Player.Session do
 
     if state.lobby_list_subscription != nil do
       :timer.cancel(state.lobby_list_subscription.timer_ref)
-      {:reply, :ok, %{state | lobby_list_subscription: nil}}
+      {:reply, :ok, %{state | lobby_list_subscription: nil, filters: nil}}
     else
       {:reply, :ok, state}
     end
@@ -1546,7 +1579,7 @@ defmodule Teiserver.Player.Session do
   def handle_cast({:lobby, {:left, lobby_id, reason}}, %PT.Data{} = state) do
     msg = {:lobby, lobby_id, {:left, reason}}
     send_to_player!(msg, state)
-    {:noreply, %{state | lobby: nil}}
+    {:noreply, set_lobby(state, nil)}
   end
 
   @impl GenServer
@@ -1651,7 +1684,7 @@ defmodule Teiserver.Player.Session do
           nil ->
             Logger.info("Lobby #{lobby_id} went down because #{inspect(reason)}")
             send_to_player!({:lobby, lobby_id, {:left, {:error, "lobby crashed"}}}, state)
-            {:noreply, %{state | lobby: nil}}
+            {:noreply, set_lobby(state, nil)}
 
           pid ->
             monitors = MC.monitor(state.monitors, pid, {:lobby, lobby_id})
@@ -1734,19 +1767,45 @@ defmodule Teiserver.Player.Session do
 
   def handle_info(:flush_lobby_list_updates, %PT.Data{} = state) do
     {lobbies, changes} =
-      Enum.reduce(state.lobby_list_subscription.lobbies, {%{}, %{}}, fn {lobby_id, data},
+      Enum.reduce(state.lobby_list_subscription.lobbies, {%{}, %{}}, fn {lobby_id, entry},
                                                                         {lobbies, changes} ->
-        new_lobbies =
-          if data.changes == nil,
-            do: lobbies,
-            else: Map.put(lobbies, lobby_id, %{counter: data.counter, changes: %{}})
+        cond do
+          # Removed lobby
+          entry.overview == nil ->
+            changes = if entry.visible?, do: Map.put(changes, lobby_id, nil), else: changes
+            {lobbies, changes}
 
-        new_changes =
-          if data.changes == %{},
-            do: changes,
-            else: Map.put(changes, lobby_id, data.changes)
+          entry.changes == %{} ->
+            {Map.put(lobbies, lobby_id, entry), changes}
 
-        {new_lobbies, new_changes}
+          true ->
+            visible? =
+              ListFilters.filter(
+                lobby_id,
+                entry.overview,
+                state.filters,
+                state.user,
+                state.party.current_party
+              )
+
+            # These are only used for filters, clients don't receive them atm
+            client_changes = Map.drop(entry.changes, [:member_count, :ally_team_count])
+
+            changes =
+              case {entry.visible?, visible?} do
+                # The lobby still matches filter
+                {true, true} when client_changes == %{} -> changes
+                {true, true} -> Map.put(changes, lobby_id, client_changes)
+                # The lobby stopped matching
+                {true, false} -> Map.put(changes, lobby_id, nil)
+                # The lobby started matching, everything needs to be sent
+                {false, true} -> Map.put(changes, lobby_id, Map.from_struct(entry.overview))
+                {false, false} -> changes
+              end
+
+            entry = %{entry | changes: %{}, visible?: visible?}
+            {Map.put(lobbies, lobby_id, entry), changes}
+        end
       end)
 
     if changes != %{} do
@@ -1784,32 +1843,81 @@ defmodule Teiserver.Player.Session do
   end
 
   def do_handle_lobby_list_event(ev, %PT.Data{} = state) do
-    state =
+    entry = state.lobby_list_subscription.lobbies[ev.lobby_id]
+
+    new_entry =
       case ev do
         %{event: :add_lobby, overview: %LT.ListOverview{} = overview} ->
-          initial = %{counter: ev.counter, changes: Map.from_struct(overview)}
-          put_in(state.lobby_list_subscription.lobbies[ev.lobby_id], initial)
+          %{
+            counter: ev.counter,
+            overview: overview,
+            changes: Map.from_struct(overview),
+            visible?: entry != nil and entry.visible?
+          }
+
+        # unknown or already removed lobby
+        %{event: :update_lobby} when entry == nil or entry.overview == nil ->
+          entry
 
         %{event: :update_lobby, changes: changes} ->
-          update_in(state.lobby_list_subscription.lobbies[ev.lobby_id], fn data ->
-            %{counter: ev.counter, changes: Map.merge(data.changes, changes)}
-          end)
+          %{
+            entry
+            | counter: ev.counter,
+              overview: merge_overview_changes(entry.overview, changes),
+              changes: merge_pending_changes(entry.changes, changes)
+          }
 
-        %{event: :remove_lobby, lobby_id: lobby_id} ->
-          put_in(state.lobby_list_subscription.lobbies[lobby_id], %{
-            counter: -1,
-            changes: nil
-          })
+        %{event: :remove_lobby} when entry == nil ->
+          nil
+
+        %{event: :remove_lobby} ->
+          %{entry | counter: -1, overview: nil, changes: %{}}
 
         _unknown ->
           raise "Unknow lobby_list event: #{inspect(ev.event)} -- #{inspect(ev)}"
       end
 
+    state =
+      if new_entry == nil,
+        do: state,
+        else: put_in(state.lobby_list_subscription.lobbies[ev.lobby_id], new_entry)
+
     {:noreply, state}
+  end
+
+  # The tags are updated as patches so we have to patch merge them to get the final value
+  defp merge_overview_changes(%LT.ListOverview{} = overview, changes) do
+    Enum.reduce(changes, overview, fn
+      {:tags, tags}, ov -> %{ov | tags: Collections.patch_merge(ov.tags, tags)}
+      {k, v}, ov -> Map.put(ov, k, v)
+    end)
+  end
+
+  defp merge_pending_changes(pending, changes) do
+    Map.merge(pending, changes, fn
+      :tags, old, new -> Collections.merge_patches(old, new)
+      _key, _old, new -> new
+    end)
+  end
+
+  defp send_lobby_list_reset(%PT.Data{} = state) do
+    lobbies =
+      for {id, entry} <- state.lobby_list_subscription.lobbies,
+          entry.visible?,
+          into: %{},
+          do: {id, entry.overview}
+
+    send_to_player!({:lobby_list, {:reset, lobbies}}, state)
   end
 
   defp via_tuple(user_id) do
     SessionRegistry.via_tuple(user_id)
+  end
+
+  @spec set_lobby(PT.Data.t(), %{id: TachyonLobby.id()} | nil) :: PT.Data.t()
+  defp set_lobby(%PT.Data{} = state, lobby) do
+    SessionRegistry.set_lobby_id(state.user.id, get_in(lobby.id))
+    %{state | lobby: lobby}
   end
 
   @spec build_self_state(PT.Data.t()) :: self_state()

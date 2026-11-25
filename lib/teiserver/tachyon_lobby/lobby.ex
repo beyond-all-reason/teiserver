@@ -1061,7 +1061,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       when data.current_battle != nil,
       do: {:keep_state, data, [{:reply, from, {:error, :battle_already_started}}]}
 
-  def handle_event({:call, from}, {:start_battle, _user_id}, _state, %LT.Data{} = data) do
+  def handle_event({:call, from}, {:start_battle, user_id}, _state, %LT.Data{} = data) do
     with autohost_id when autohost_id != nil <- Autohost.find_autohost(),
          {:ok, {battle_id, battle_pid} = battle_data, host_data} <-
            TachyonBattle.start_battle(
@@ -1092,14 +1092,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
       }
 
       data =
-        %{data | current_battle: battle}
-        |> Map.update!(:monitors, &MC.monitor(&1, battle_pid, :current_battle))
-        |> Map.update!(:counter, &(&1 + 1))
-
-      broadcast_update({:update, nil, %{current_battle: data.current_battle}}, data)
-      update_list(data, %{current_battle: %{started_at: now}})
-
-      log_event(data, "battle_start")
+        process_events(data, [%Events.StartBattle{battle: battle}], caller_id: user_id).data
 
       {:keep_state, data, [{:reply, from, :ok}]}
     else
@@ -1141,14 +1134,7 @@ defmodule Teiserver.TachyonLobby.Lobby do
         {:keep_state, aggregate.data, aggregate.actions}
 
       :current_battle ->
-        data =
-          Map.put(data, :current_battle, nil)
-          |> Map.update!(:counter, &(&1 + 1))
-
-        broadcast_update({:update, nil, %{current_battle: nil}}, data)
-        update_list(data, %{current_battle: nil})
-
-        log_event(data, "battle_end")
+        data = process_events(data, [%Events.EndBattle{}]).data
 
         {:keep_state, data}
 
@@ -1234,10 +1220,18 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
   @spec get_overview_from_state(state :: LT.Data.t()) :: LT.ListOverview.t()
   defp get_overview_from_state(%LT.Data{} = state) do
+    player_count = human_player_count(state)
+    member_count = player_count + map_size(state.spectators)
+
+    current_battle =
+      if state.current_battle != nil, do: %{started_at: state.current_battle.started_at}
+
     %LT.ListOverview{
       counter: state.counter,
       name: state.name,
-      player_count: map_size(state.players),
+      player_count: player_count,
+      member_count: member_count,
+      ally_team_count: length(state.ally_team_config),
       max_player_count:
         Enum.sum(
           for at <- state.ally_team_config, team <- at.teams do
@@ -1248,10 +1242,14 @@ defmodule Teiserver.TachyonLobby.Lobby do
       engine_version: state.engine_version,
       game_version: state.game_version,
       boss_enabled?: state.boss_enabled?,
-      current_battle: nil,
+      current_battle: current_battle,
       tags: state.tags
     }
   end
+
+  @spec human_player_count(LT.Data.t()) :: non_neg_integer()
+  defp human_player_count(%LT.Data{} = data),
+    do: Enum.count(data.players, fn {_id, p} -> not LBot.bot_id?(p.id) end)
 
   @spec get_details_from_state(LT.Data.t()) :: LT.Details.t()
   defp get_details_from_state(%LT.Data{} = state) do
@@ -1363,15 +1361,23 @@ defmodule Teiserver.TachyonLobby.Lobby do
 
     final_aggregate = Enum.reduce(events, aggregate, &Event.apply_event/2)
 
-    initial_player_count = Enum.count(data.players, fn {_id, p} -> not LBot.bot_id?(p.id) end)
+    initial_player_count = human_player_count(data)
+    final_player_count = human_player_count(final_aggregate.data)
 
-    final_player_count =
-      Enum.count(final_aggregate.data.players, fn {_id, p} -> not LBot.bot_id?(p.id) end)
+    initial_member_count = initial_player_count + map_size(data.spectators)
+    final_member_count = final_player_count + map_size(final_aggregate.data.spectators)
 
     final_aggregate =
       update_in(final_aggregate, [Access.key!(:overview_changes)], fn changes ->
-        if final_player_count != initial_player_count do
-          Map.put(changes, :player_count, final_player_count)
+        changes =
+          if final_player_count != initial_player_count do
+            Map.put(changes, :player_count, final_player_count)
+          else
+            Map.delete(changes, :player_count)
+          end
+
+        if final_member_count != initial_member_count do
+          Map.put(changes, :member_count, final_member_count)
         else
           changes
         end
@@ -1755,17 +1761,6 @@ defmodule Teiserver.TachyonLobby.Lobby do
       quorum: quorum,
       majority: majority
     }
-  end
-
-  defp update_list(%LT.Data{} = data, changes) do
-    message = %{
-      event: :update_lobby,
-      counter: data.counter,
-      lobby_id: data.id,
-      changes: changes
-    }
-
-    PubSubHelper.broadcast(list_topic(), message)
   end
 
   defp replicate_events(replicas, %LT.Data{} = data, events, opts) do

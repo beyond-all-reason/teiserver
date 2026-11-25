@@ -84,4 +84,24 @@ defmodule Teiserver.Helpers.Collections do
       end
     end)
   end
+
+  @doc """
+  Combine two json merge patches into one. Applying the result with
+  `patch_merge/2` is the same as applying `old` then `new`, except when `old`
+  removes a key and `new` sets it to a map: that map is then merged into the
+  old value instead of replacing it.
+
+  nil values are kept, since in a patch they remove that key.
+
+      iex> old = %{"rated" => nil, "region" => %{"eu" => %{}}}
+      iex> merge_patches(old, %{"region" => %{"na" => %{}}})
+      %{"rated" => nil, "region" => %{"eu" => %{}, "na" => %{}}}
+  """
+  @spec merge_patches(old :: map(), new :: map()) :: map()
+  def merge_patches(old, new) do
+    Map.merge(old, new, fn
+      _key, o, n when is_map(o) and is_map(n) -> merge_patches(o, n)
+      _key, _o, n -> n
+    end)
+  end
 end
