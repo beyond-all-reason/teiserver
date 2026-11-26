@@ -29,10 +29,7 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
       |> validate(prep_params())
 
     form = to_form(changeset, as: :retention_form)
-    start_date = get_field(form.source, :start_date)
-    end_date = get_field(form.source, :end_date)
-    skip0 = form[:skip0].value
-    {chart, user_count} = RetentionReport.build_chart(start_date, end_date, skip0)
+    {chart, user_count} = build_chart(form)
 
     {:noreply,
      socket
@@ -50,7 +47,7 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
   end
 
   @impl LiveView
-  def handle_event("update", %{"retention_form" => retention_form} = _params, socket) do
+  def handle_event("update", %{"retention_form" => retention_form}, socket) do
     changeset =
       {%{}, @form_types}
       |> validate(retention_form)
@@ -63,12 +60,12 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
     form = socket.assigns.form
     {start_date, end_date} = DatePresets.parse(date_range, "", "")
 
-    params = %{
-      form.params
-      | "date_range" => date_range,
+    params =
+      Map.merge(form.params, %{
+        "date_range" => date_range,
         "start_date" => start_date,
         "end_date" => end_date
-    }
+      })
 
     changeset =
       {%{}, @form_types}
@@ -81,10 +78,7 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
     form = socket.assigns.form
 
     if form.source.valid? do
-      start_date = get_field(form.source, :start_date)
-      end_date = get_field(form.source, :end_date)
-      skip0 = form[:skip0].value
-      {chart, user_count} = RetentionReport.build_chart(start_date, end_date, skip0)
+      {chart, user_count} = build_chart(form)
       {:noreply, socket |> assign(user_count: user_count, retention_chart: chart, form: form)}
     else
       {:noreply, socket}
@@ -97,7 +91,10 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
       |> validate(prep_params())
 
     form = to_form(changeset, as: :retention_form)
-    {:noreply, socket |> assign(form: form)}
+
+    {chart, user_count} = build_chart(form)
+
+    {:noreply, socket |> assign(form: form, retention_chart: chart, user_count: user_count)}
   end
 
   defp prep_params do
@@ -121,5 +118,12 @@ defmodule TeiserverWeb.AdminLive.Tools.RetentionReport do
     |> DateValidations.validate_max_range(@range_max)
     |> validate_inclusion(:date_range, @dates)
     |> Map.put(:action, :validate)
+  end
+
+  defp build_chart(form) do
+    start_date = get_field(form.source, :start_date)
+    end_date = get_field(form.source, :end_date)
+    skip0 = form[:skip0].value
+    RetentionReport.build_chart(start_date, end_date, skip0)
   end
 end
