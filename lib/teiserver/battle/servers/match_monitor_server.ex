@@ -49,38 +49,18 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @impl GenServer
-  def handle_call(:client_state, _from, state) do
-    {:reply, state.client, state}
-  end
-
-  @impl GenServer
-  def handle_cast({:update_client, new_client}, state) do
-    {:noreply, %{state | client: new_client}}
-  end
-
-  def handle_cast({:merge_client, partial_client}, state) do
-    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  def handle_continue(:begin, state) do
+    if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") ==
+         true do
+      {:noreply, do_begin()}
+    else
+      Process.sleep(50)
+      {:noreply, state, {:continue, :begin}}
+    end
   end
 
   # Direct/Room messaging
   @impl GenServer
-  def handle_info(:begin, _state) do
-    state =
-      if Teiserver.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") !=
-           true do
-        pid = self()
-
-        spawn(fn ->
-          :timer.sleep(1000)
-          send(pid, :begin)
-        end)
-      else
-        do_begin()
-      end
-
-    {:noreply, state}
-  end
-
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
@@ -276,19 +256,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     account = get_match_monitor_account()
     Teiserver.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
 
-    {:ok, user, client} = Login.internal_client_login(account.id)
+    {:ok, user, _client} = Login.internal_client_login(account.id)
 
     rooms = ["autohosts"]
-
-    state = %{
-      ip: "127.0.0.1",
-      userid: user.id,
-      username: user.name,
-      lobby_host: false,
-      user: user,
-      rooms: rooms,
-      client: client
-    }
 
     rooms
     |> Enum.each(fn room_name ->
@@ -299,7 +269,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "legacy_user_updates:#{user.id}")
 
-    state
+    %{userid: user.id}
   end
 
   @spec get_match_monitor_account() :: User.t() | map()
@@ -338,10 +308,9 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   @impl GenServer
-  @spec init(map()) :: {:ok, map()}
+  @spec init(map()) :: {:ok, map(), {:continue, :begin}}
   def init(_opts) do
     Process.flag(:trap_exit, true)
-    send(self(), :begin)
     Logger.metadata(request_id: "MatchMonitorServer")
 
     Registry.register(
@@ -350,7 +319,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       :match_monitor
     )
 
-    {:ok, %{}}
+    {:ok, %{}, {:continue, :begin}}
   end
 
   @impl GenServer
