@@ -110,7 +110,9 @@ defmodule TeiserverWeb.AdminLive.SiteConfig.FormComponent do
         |> noreply()
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, form: to_form(changeset))}
+        # A changeset form would submit site_config[value]. Keep the flat value field on retry.
+        form = to_form(%{"value" => value}, errors: changeset.errors)
+        {:noreply, assign(socket, form: form)}
     end
   end
 

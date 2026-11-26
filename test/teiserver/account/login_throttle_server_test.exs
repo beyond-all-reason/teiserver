@@ -4,6 +4,7 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
   alias Teiserver.Account
   alias Teiserver.Account.Auth
   alias Teiserver.Account.LoginThrottleServer
+  alias Teiserver.Config
   use Teiserver.DataCase, async: false
 
   import Teiserver.TeiserverTestLib,
@@ -73,30 +74,51 @@ defmodule Teiserver.Account.LoginThrottleServerTest do
     refute_receive {:login_accepted, _}, 5
   end
 
-  test "ignore players that have disconnected" do
+  test "skips a client that disconnects while the login queue is paused" do
     {user1, t1} = {new_user(), oneshot_pid()}
-    user2 = new_user()
-
-    set_capacity(0)
-    assert LoginThrottleServer.attempt_login(t1.pid, user1.id) == false
-    assert LoginThrottleServer.attempt_login(self(), user2.id) == false
-    assert LoginThrottleServer.get_queue_length() == 2
+    %{id: id} = new_user()
 
     set_capacity(1)
-    send(t1.pid, nil)
-    Task.await(t1)
-    # now, t1 is dead
-
-    # members aren't cleaned up when DOWN is received
-    assert LoginThrottleServer.get_queue_length() == 2
-
-    # attempt to alleviate a potential race, where the DOWN message from the
-    # task reach the throttling server too late
-    :timer.sleep(5)
+    LoginThrottleServer.reset_rate_limiter(0)
+    refute LoginThrottleServer.attempt_login(t1.pid, user1.id)
     LoginThrottleServer.tick()
+    refute LoginThrottleServer.attempt_login(self(), id)
 
-    assert_receive {:login_accepted, id}, 5
-    assert user2.id == id
+    Task.shutdown(t1, :brutal_kill)
+
+    LoginThrottleServer.reset_rate_limiter(1, true)
+    LoginThrottleServer.tick()
+    assert_receive {:login_accepted, ^id}
+  end
+
+  test "a zero login rate pauses the queue until a positive rate is set" do
+    key = "system.Login rate"
+    previous_rate = Config.get_site_config_cache(key)
+
+    on_exit(fn ->
+      Teiserver.cache_delete(:config_site_cache, key)
+      LoginThrottleServer.reset_rate_limiter(previous_rate)
+    end)
+
+    assert :ok = Config.update_site_config(key, "0")
+    Teiserver.cache_delete(:config_site_cache, key)
+    assert {:ok, _pid} = LoginThrottleServer.restart()
+    assert :ok = LoginThrottleServer.set_tick_period(:infinity)
+    set_capacity(1)
+    %{id: id} = new_user()
+    refute LoginThrottleServer.attempt_login(self(), id)
+
+    LoginThrottleServer.tick()
+    refute_receive {:login_accepted, ^id}
+
+    for invalid <- ["-1", "-0.5", "1.5x", "unknown", ""] do
+      assert {:error, _changeset} = Config.update_site_config(key, invalid)
+    end
+
+    assert Config.get_site_config_val(key) == 0
+    assert :ok = Config.update_site_config(key, "0.5")
+    LoginThrottleServer.set_tick_period(10)
+    assert_receive {:login_accepted, ^id}
   end
 
   test "respect rate limiter" do

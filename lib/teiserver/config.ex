@@ -3,6 +3,7 @@ defmodule Teiserver.Config do
   The Config context.
   """
 
+  alias Ecto.Changeset
   alias Teiserver.Account.User
   alias Teiserver.Config.SiteConfig
   alias Teiserver.Config.UserConfig
@@ -317,8 +318,26 @@ defmodule Teiserver.Config do
     Repo.one(query)
   end
 
-  @spec update_site_config(String.t(), term()) :: :ok
+  @spec update_site_config(String.t(), term()) :: :ok | {:error, Changeset.t()}
   def update_site_config(key, value) do
+    case validate_site_config_value(get_site_config_type(key), value) do
+      {:ok, valid_value} ->
+        do_update_site_config(key, valid_value)
+
+      {:error, message} ->
+        changeset =
+          %SiteConfig{}
+          |> SiteConfig.changeset(%{key: key, value: to_string(value)})
+          |> Changeset.add_error(:value, message)
+
+        {:error, changeset}
+    end
+  end
+
+  defp validate_site_config_value(%{validate: validate}, value), do: validate.(value)
+  defp validate_site_config_value(_type, value), do: {:ok, value}
+
+  defp do_update_site_config(key, value) do
     query =
       from site_config in SiteConfig,
         where: site_config.key == ^key,
@@ -418,6 +437,9 @@ defmodule Teiserver.Config do
 
     -- Optional --
     label: The name shown to users, defaults to everything after the last full-stop character
+
+    validate: A function that returns `{:ok, value_to_store}` or `{:error, field_error_message}`
+      for a submitted value
 
     update_callback: A function of arity 1 which will be called on an updated value with the new value
   """

@@ -75,8 +75,8 @@ defmodule Teiserver.Account.LoginThrottleServer do
     GenServer.call(__MODULE__, {:reset_rate_limiter, rl})
   end
 
-  @spec reset_rate_limiter(rate :: non_neg_integer(), should_fill? :: boolean()) :: :ok
-  def reset_rate_limiter(rate, should_fill? \\ false) when is_number(rate) do
+  @spec reset_rate_limiter(rate :: number(), should_fill? :: boolean()) :: :ok
+  def reset_rate_limiter(rate, should_fill? \\ false) do
     rl = BurstyRateLimiter.per_second(rate)
 
     rl =
@@ -198,7 +198,6 @@ defmodule Teiserver.Account.LoginThrottleServer do
         state
 
       {{:value, member}, rest} ->
-        Process.demonitor(member.mon_ref)
         member_still_connected? = MapSet.member?(state.monitors, member.pid)
 
         new_state =
@@ -209,6 +208,7 @@ defmodule Teiserver.Account.LoginThrottleServer do
         if member_still_connected? do
           case BurstyRateLimiter.try_acquire(state.rate_limiter) do
             {:ok, rl} ->
+              Process.demonitor(member.mon_ref, [:flush])
               new_state = Map.replace!(new_state, :rate_limiter, rl)
               send(member.pid, {:login_accepted, member.user_id})
               dequeue_users(n - 1, new_state)

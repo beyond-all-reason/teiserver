@@ -434,11 +434,12 @@ defmodule Teiserver.TeiserverConfigs do
     add_site_config_type(%{
       key: "system.Login rate",
       section: "Login",
-      type: "integer",
+      type: "float",
       permissions: ["Admin"],
-      description: "How many user per seconds should be able to log in",
+      description: "Regular logins allowed per second. Set to 0 to pause the queue.",
       default: 2,
       value_label: "",
+      validate: &validate_login_rate/1,
       update_callback: fn rate -> Account.reset_login_rate_limiter(rate) end
     })
 
@@ -451,6 +452,27 @@ defmodule Teiserver.TeiserverConfigs do
       default: "",
       value_label: ""
     })
+  end
+
+  # A login can borrow one permit, so the next wait can span two refill intervals.
+  @min_login_rate 2_000 / Float.max_finite()
+  defp validate_login_rate(value) do
+    input = value |> to_string() |> String.trim()
+
+    case Float.parse(input) do
+      {rate, ""} when rate >= @min_login_rate ->
+        {:ok, rate}
+
+      {rate, ""} when rate >= 0 ->
+        # Float.parse/1 can round a nonzero input to zero. Only an explicit zero pauses logins.
+        case Decimal.parse(input) do
+          {%Decimal{coef: 0}, ""} -> {:ok, 0.0}
+          _other -> {:error, "is too close to zero for the login rate limiter"}
+        end
+
+      _other ->
+        {:error, "must be a non-negative number"}
+    end
   end
 
   defp lobby_configs do
