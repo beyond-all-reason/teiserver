@@ -1,0 +1,78 @@
+<ToolsComponents.section_menu
+  active="growth_report"
+  scope={@scope}
+/>
+
+<.header>
+  Growth report
+</.header>
+
+<.simple_form
+  :if={@connected?}
+  for={@render_form}
+  id="render_form"
+  phx-change="update_render"
+>
+  <div class="m-2">
+    <.input_tw
+      field={@render_form[:chart_type]}
+      type="select"
+      options={@chart_types}
+      label="Chart type:"
+    />
+  </div>
+</.simple_form>
+
+<.simple_form
+  :if={@connected?}
+  for={@data_form}
+  id="data_form"
+  phx-change="update_data"
+  phx-submit="fetch"
+>
+  <div class="flex md:flex-row flex-col">
+    <div class="flex-1 m-2">
+      <.input_tw
+        field={@data_form[:time_unit]}
+        type="select"
+        label="Time unit:"
+        options={@time_units}
+      />
+    </div>
+    <div class="flex-1 m-2">
+      <.input_tw
+        field={@data_form[:log_count]}
+        type="text"
+        inputmode="numeric"
+        label="Log count:"
+      />
+    </div>
+  </div>
+  <div class="float-right">
+    <.button type="button" phx-click="reset-search" class="btn-reset-form">
+      <Fontawesome.icon icon="rotate-left" /> Reset
+    </.button>
+    <button disabled={!@data_form.source.valid?} class="btn btn-primary">
+      <Fontawesome.icon icon="search" /> Update results
+    </button>
+  </div>
+</.simple_form>
+
+<div class="grid mt-20 max-w-full 3xl:grid-cols-3 xl:grid-cols-2 grid-cols-1 gap-4 mx-auto">
+  <%= if @connected? and @charts do %>
+    <%= Enum.map(@charts, fn {atom, chart} -> %>
+      <%= case atom do %>
+        <% :ok -> %>
+          <div
+            id={"apexcharts-container #{chart.id}"}
+            class="apexchart-container min-w-0"
+          >
+            <LiveCharts.chart chart={chart} />
+          </div>
+        <% :error -> %>
+          <div>{chart}</div>
+      <% end %>
+    <% end) %>
+  <% end %>
+</div>
+<.back navigate={~p"/admin"}>Back to Admin</.back>

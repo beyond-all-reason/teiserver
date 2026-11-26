@@ -767,6 +767,7 @@ defmodule TeiserverWeb.Router do
       live "/tools/blog_activity", Tools.BlogActivity, :show
       live "/tools/population_report", Tools.PopulationReport, :show
       live "/tools/retention_report", Tools.RetentionReport, :show
+      live "/tools/growth_report", Tools.GrowthReport, :show
     end
 
     live_session :admin_discord_channels,

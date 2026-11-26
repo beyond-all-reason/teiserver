@@ -1,8 +1,6 @@
 [
   # This started after inverting a condition in an `if/else` statement. It's hard to fix with all the other ignored warnings here.
   {"lib/teiserver/account.ex"},
-  {"lib/teiserver/account/reports/growth_report.ex", :no_return},
-  {"lib/teiserver/account/reports/growth_report.ex", :call},
   {"lib/teiserver/account/servers/party_server.ex", :no_return},
   {"lib/teiserver/account/servers/party_server.ex", :call},
   {"lib/teiserver/battle.ex", :call},
@@ -139,7 +137,6 @@
   # Added with OTP-28 migration
   {"test/support/teiserver_test_lib.ex", :call},
   {"lib/teiserver_web/live/microblog/admin/post/post_form_component.ex", :call_without_opaque},
-  {"lib/teiserver/account/reports/growth_report.ex", :invalid_contract},
   {"lib/teiserver/account/servers/login_throttle_server.ex", :contract_with_opaque},
   {"lib/teiserver/autohost/session.ex", :contract_with_opaque},
   {"lib/teiserver/battle.ex", :invalid_contract},

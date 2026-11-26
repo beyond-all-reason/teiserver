@@ -17,7 +17,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
   // e.g. SomeCustomHook,
   CommandPalette,
   ServerClock,
-  
+
   // Expand LiveCharts hooks at the end
   ...LiveCharts.Hooks,
   }
