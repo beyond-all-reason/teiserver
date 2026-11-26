@@ -8,7 +8,8 @@ config :teiserver, Teiserver,
   site_suffix: "",
   site_description: "",
   site_icon: "fa-solid fa-robot",
-  credit: "Beyond All Reason"
+  credit: "Beyond All Reason",
+  hailstorm: false
 
 # Default configs
 config :teiserver, Teiserver.Config,

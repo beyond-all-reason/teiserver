@@ -44,6 +44,9 @@ config :teiserver,
 default_mfa_requirement =
   Application.get_env(:teiserver, Teiserver)[:require_mfa_for_privileged_roles]
 
+default_hailstorm =
+  Application.get_env(:teiserver, Teiserver)[:default_hailstorm]
+
 config :teiserver, Teiserver,
   game_name: "Beyond All Reason",
   game_name_short: "BAR",
@@ -59,7 +62,8 @@ config :teiserver, Teiserver,
   require_mfa_for_privileged_roles:
     Teiserver.ConfigHelpers.get_env("TEI_MFA_REQUIRED", default_mfa_requirement, :bool),
   user_agreement:
-    "A verification code has been sent to your email address. Please read our terms of service at https://www.beyondallreason.info/privacy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms."
+    "A verification code has been sent to your email address. Please read our terms of service at https://www.beyondallreason.info/privacy and the code of conduct at https://www.beyondallreason.info/code-of-conduct. Then enter your six digit code below if you agree to the terms.",
+  hailstorm: Teiserver.ConfigHelpers.get_env("TEI_HAILSTORM_ENABLED", default_hailstorm, :bool)
 
 repo_env = Application.get_env(:teiserver, Teiserver.Repo)
 

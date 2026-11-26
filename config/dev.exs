@@ -50,7 +50,8 @@ config :teiserver, Teiserver,
   ],
   enable_discord_bridge: false,
   accept_all_emails: true,
-  require_mfa_for_privileged_roles: false
+  require_mfa_for_privileged_roles: false,
+  hailstorm: true
 
 # Watch static and templates for browser reloading.
 config :teiserver, TeiserverWeb.Endpoint,

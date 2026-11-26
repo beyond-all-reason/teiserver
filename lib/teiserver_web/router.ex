@@ -901,4 +901,13 @@ defmodule TeiserverWeb.Router do
     delete("/asset/game/:id", AssetController, :delete_game)
     post("/asset/game/:id/set_matchmaking", AssetController, :set_game_matchmaking)
   end
+
+  # Hailstorm is used for integration testing of Teiserver. It should _never_
+  # be enabled in a production environment.
+  if Application.compile_env(:teiserver, Teiserver)[:hailstorm] do
+    scope "/hailstorm", TeiserverWeb.Hailstorm do
+      pipe_through(:api)
+      post("/create_user", AccountController, :create_user)
+    end
+  end
 end

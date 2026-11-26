@@ -200,31 +200,6 @@ defmodule TeiserverWeb.CoreComponents do
     """
   end
 
-  def oldflash_group(assigns) do
-    ~H"""
-    <div aria-live="polite" aria-atomic="true" class="position-relative h-1">
-      <div class="toast-container top-0 end-0 p-3">
-        <.flash id="flash-info" kind={:info} title="Information" role="alert" flash={@flash} />
-        <.flash id="flash-success" kind={:success} title="Success!" role="alert" flash={@flash} />
-        <.flash id="flash-warning" kind={:warning} title="Warning!" role="alert" flash={@flash} />
-        <.flash id="flash-error" kind={:error} title="Error!" role="alert" flash={@flash} />
-
-        <.flash
-          id="client-error"
-          kind={:error}
-          title={gettext("We can't find the internet")}
-          phx-disconnected={show(".phx-client-error #client-error") |> JS.remove_attribute("hidden")}
-          phx-connected={hide("#client-error") |> JS.set_attribute({"hidden", ""})}
-          hidden
-        >
-          {gettext("Attempting to reconnect")}
-          <%!-- <.icon name="hero-arrow-path" class="ml-1 size-3 motion-safe:animate-spin" /> --%>
-        </.flash>
-      </div>
-    </div>
-    """
-  end
-
   @doc """
   Renders a simple form.
   ## Examples

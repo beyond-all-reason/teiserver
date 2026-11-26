@@ -209,7 +209,9 @@ defmodule Teiserver.Account.RoleLib do
       contains: [],
       badge: false,
       edit_permission: "Server",
-      group: :hidden
+      group: :hidden,
+      description:
+        "A user account which has been pseudo-anonymised as part of a GDPR right to be forgotten request"
     },
     %Role{
       name: "Smurfer",
@@ -218,7 +220,18 @@ defmodule Teiserver.Account.RoleLib do
       contains: [],
       badge: false,
       edit_permission: "Server",
-      group: :hidden
+      group: :hidden,
+      description: "An account which has smurfed."
+    },
+    %Role{
+      name: "Hailstorm",
+      colour: "#000000",
+      icon: "fa-solid fa-question-mark",
+      contains: [],
+      badge: false,
+      edit_permission: "Server",
+      group: :hidden,
+      description: "Used to identify users as part of Hailstorm integration tests"
     }
   ]
 
