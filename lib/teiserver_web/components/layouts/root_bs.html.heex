@@ -44,6 +44,10 @@
     </script>
   </head>
   <body class="container-fluid px-0 d-flex flex-column">
+    <TeiserverWeb.ViewAsComponents.banner
+      real_user={assigns[:real_user]}
+      current_user={assigns[:current_user]}
+    />
     {@inner_content}
   </body>
 </html>
